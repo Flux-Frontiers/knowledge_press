@@ -1,8 +1,16 @@
+[![Version](https://img.shields.io/badge/version-1.23.0-blue.svg)](https://github.com/Flux-Frontiers/knowledge_press/releases)
+[![License: Elastic-2.0](https://img.shields.io/badge/License-Elastic%202.0%20%7C%20app%20proprietary-blue.svg)](LICENSE)
+[![Platforms](https://img.shields.io/badge/platforms-iOS%2026%20%7C%20macOS%2026%20%7C%20web-lightgrey.svg)](app/RUNBOOK.md)
+[![App](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/app.yml/badge.svg)](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/app.yml)
+[![Web](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/web.yml/badge.svg)](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/web.yml)
+
 # The Knowledge Press
 
 The apps that read a [GutenbergKG](https://github.com/Flux-Frontiers/gutenberg_kg)
 corpus. GutenbergKG builds the library, a knowledge graph of public-domain books;
 this repo holds the ways to read it.
+
+*Author: Eric G. Suchanek, PhD -- Flux-Frontiers, Liberty TWP, OH*
 
 | Directory | What it is | License |
 | --- | --- | --- |
@@ -45,3 +53,22 @@ app answering on a phone with the network off.
 This code lived in gutenberg_kg until September 2026 and was split out with
 its history intact. Its commit messages refer to gutenberg_kg pull requests by
 number.
+
+## Citation
+
+If you use The Knowledge Press in your research or project, please cite it:
+
+> Suchanek, E. G. (2026). *The Knowledge Press: Reading a GutenbergKG Corpus* (Version 1.23.0) [Software]. Flux-Frontiers. https://github.com/Flux-Frontiers/knowledge_press
+
+```bibtex
+@software{suchanek_knowledgepress,
+  author    = {Suchanek, Eric G.},
+  title     = {The {Knowledge Press}: Reading a {GutenbergKG} Corpus},
+  version   = {1.23.0},
+  year      = {2026},
+  publisher = {Flux-Frontiers},
+  url       = {https://github.com/Flux-Frontiers/knowledge_press},
+}
+```
+
+The same metadata is in [`CITATION.cff`](CITATION.cff).
