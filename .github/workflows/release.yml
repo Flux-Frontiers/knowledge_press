@@ -1,0 +1,57 @@
+name: Release
+
+# Adapted from doc_kg's release.yml. There is no package to publish here: the
+# app needs a Developer ID to sign (app/RUNBOOK.md section 7), so the release
+# carries the notes and a static build of the web forest. Publishing the
+# GitHub Release is also what makes Zenodo archive it.
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write  # needed to create GitHub Releases and upload assets
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # Nothing derives the version from one source, so a stale file would
+      # otherwise ship silently under the new tag.
+      - name: Check every version site matches the tag
+        run: python3 scripts/check_version.py "${GITHUB_REF_NAME}"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      # The catalog is compiled into the bundle and vite's base is "./", so
+      # the zip serves from any static host or subdirectory as it stands.
+      - name: Build the web forest
+        working-directory: web
+        run: |
+          npm ci
+          npm test
+          npm run build
+          (cd dist && zip -qr "../../knowledge-press-forest-${GITHUB_REF_NAME}.zip" .)
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          ASSET="knowledge-press-forest-${TAG}.zip"
+          if gh release view "$TAG" &>/dev/null; then
+            echo "Release $TAG already exists -- uploading assets only"
+            gh release upload "$TAG" "$ASSET" --clobber
+          else
+            gh release create "$TAG" "$ASSET" \
+              --title "The Knowledge Press $TAG" \
+              --notes-file release-notes.md
+          fi

@@ -1,7 +1,7 @@
 name: App
 
-# ci.yml is entirely Python and never looks at app/. That gap matters more
-# than it looks: app/ios/project.yml and app/macos/project.yml are the source
+# ci.yml runs only the repo-wide hooks and never builds app/. That gap matters
+# more than it looks: app/ios/project.yml and app/macos/project.yml are the source
 # of truth for two Xcode projects whose generated .xcodeproj and Info.plist
 # are gitignored on purpose (a .pbxproj is thousands of lines of UUIDs and
 # absolute paths that conflicts on every parallel edit, and silently absorbs
