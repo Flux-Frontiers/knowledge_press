@@ -21,14 +21,14 @@ name: App
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - "app/**"
       - "!app/**.md"
       - "Makefile"
       - ".github/workflows/app.yml"
   pull_request:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - "app/**"
       - "!app/**.md"
