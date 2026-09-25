@@ -41,7 +41,7 @@ app/
 
 With packs installed the app answers with the network off. Build them with
 `gutenkg export-swift` and `gutenkg export-embedder`, then copy the output into
-Application Support ▸ Corpus — see [docs/ON_DEVICE.md](../docs/ON_DEVICE.md).
+Application Support ▸ Corpus — see [On-device corpus packs](https://github.com/Flux-Frontiers/gutenberg_kg/blob/main/docs/ON_DEVICE.md) in gutenberg_kg.
 With no packs the app falls back to the worker, so nothing breaks before the
 first download.
 

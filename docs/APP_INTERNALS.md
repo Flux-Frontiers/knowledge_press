@@ -15,7 +15,7 @@ written answer — runs on the device.
 **Related:** [`app/RUNBOOK.md`](https://github.com/Flux-Frontiers/gutenberg_kg/blob/main/app/RUNBOOK.md)
 is the ordered checklist for building and installing;
 `analysis/APP_ARCHITECTURE.md` is the design record with its phase table;
-[On-device corpus packs](ON_DEVICE.md) covers the data format.
+[On-device corpus packs](https://github.com/Flux-Frontiers/gutenberg_kg/blob/main/docs/ON_DEVICE.md), in gutenberg_kg, covers the data format.
 
 ---
 
