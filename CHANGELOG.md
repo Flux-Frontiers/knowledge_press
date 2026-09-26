@@ -124,6 +124,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Knowledge Press Forest: blackthorn and fir limbs no longer wander.** Two
+  species reached too short a way for their growth to steer: the blackthorn's
+  limbs coiled into helices and the fir grew a branch back down to its lowest
+  whorl. Blackthorn influence 6 -> 10 and jitter 0.3 -> 0.18, fir influence
+  7 -> 12, mirroring `kgmodule-utils` 0.25.1's `SPECIES`.
 - **Knowledge Press Forest: forest build could hang.** A tree whose crown fit
   nowhere on a grove's candidate spiral was left unplaced, the grove's radius
   became NaN, and packing the groves round the hub looped forever. The spiral

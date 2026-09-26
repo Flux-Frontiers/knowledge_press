@@ -128,6 +128,10 @@ const PINE_HALF: [number, number][] = (() => {
   return out;
 })();
 
+// Habits mirror kg_utils.viz3d.SPECIES (kgmodule-utils). 0.25.1 lengthened the
+// blackthorn's reach (influence 6 -> 10, jitter 0.3 -> 0.18) and the fir's
+// (7 -> 12): too short a reach let limbs random-walk -- the blackthorn's into
+// helices, the fir's back down to its lowest whorl.
 export const SPECIES: Species[] = [
   {
     // English oak: short bole, broad low dome, long gnarled horizontal limbs.
@@ -142,7 +146,7 @@ export const SPECIES: Species[] = [
   {
     // Fir: a narrow cone from near the ground, flat sprays, a fast-tapering stem.
     name: "fir", barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12],
-    habit: { envelope: "cone", whorl: 1, droop: 0.05, leader: 0.92, width: 0.95, clearBole: 0.1, spread: 0.7, lift: -0.3, tropism: 0.3, influence: 7, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
+    habit: { envelope: "cone", whorl: 1, droop: 0.05, leader: 0.92, width: 0.95, clearBole: 0.1, spread: 0.7, lift: -0.3, tropism: 0.3, influence: 12, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
   },
   {
     // London plane: a long clean bole under a tall egg-shaped crown of long, rising limbs.
@@ -152,7 +156,7 @@ export const SPECIES: Species[] = [
   {
     // Blackthorn: a low, dense, twiggy thicket-tree that spreads upward from low down.
     name: "blackthorn", barkAspect: 1, leaf: { shape: "ovate", width: 0.7 }, foliageShift: [0.02, -0.1, -0.1],
-    habit: { envelope: "vase", whorl: 1, droop: 0, leader: 0, width: 1.3, clearBole: 0.12, spread: 1.25, lift: 0.8, tropism: 0.1, influence: 6, step: 0.7, jitter: 0.3, pipeExp: 2.5 },
+    habit: { envelope: "vase", whorl: 1, droop: 0, leader: 0, width: 1.3, clearBole: 0.12, spread: 1.25, lift: 0.8, tropism: 0.1, influence: 10, step: 0.7, jitter: 0.18, pipeExp: 2.5 },
   },
   {
     // Stone pine: a tall bare stem under a flat-topped parasol of tufts.
