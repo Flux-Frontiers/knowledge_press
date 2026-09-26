@@ -1,7 +1,7 @@
 import { BOOKS, type Book } from "./catalog";
 import { growCorpusTree, type CorpusTree } from "./corpusTree";
 import { EXHIBITS, placeExhibits, type Exhibit } from "./exhibits";
-import { GROW_VERSION, emitBark, emitLeaves, growTree, type BarkBuffers, type GrownTree } from "./growTree";
+import { GROW_VERSION, cellKey3, emitBark, emitLeaves, growTree, type BarkBuffers, type GrownTree } from "./growTree";
 import { loopOrder, packAroundHub, sunflower } from "./math";
 import { routeNetwork } from "./routing";
 import { SPECIES, speciesFor } from "./species";
@@ -65,6 +65,8 @@ export type Waypoint = {
 
 /** The hub: a paved plaza around the corpus redwood (the cart collides with its root flare). */
 export const HUB_PLAZA_R = 10;
+/** The ring keeps this far from the hub's centre (inside the nearest grove stops, ~20.6 m out). */
+const HUB_CLEAR = 18;
 /** Bearing of the redwood's plaque from the hub; home looks back along it. */
 export const HUB_PLAQUE_DIR = Math.atan2(4.6, -4.2);
 export const HUB_PLAQUE_DIST = 7.2;
@@ -189,11 +191,11 @@ function shyLayout(grown: GrownTree[], inner: number): { pts: { x: number; z: nu
     return r;
   });
   const order = [...Array(n).keys()].sort((a, b) => reach[b]! - reach[a]! || a - b);
-  const cands = sunflower(n * 80 + 200, inner, 2).pts;
+  let cands = sunflower(n * 80 + 200, inner, 2).pts;
   const placed: { i: number; x: number; z: number }[] = [];
   // Placed wood as flat (x, y, z, padded radius) runs in a 3-D hash grid.
-  const grid = new Map<string, number[]>();
-  const key = (x: number, y: number, z: number) => Math.floor(x / WOOD_CELL) + "," + Math.floor(y / WOOD_CELL) + "," + Math.floor(z / WOOD_CELL);
+  const grid = new Map<number, number[]>();
+  const key = (x: number, y: number, z: number) => cellKey3(Math.floor(x / WOOD_CELL), Math.floor(y / WOOD_CELL), Math.floor(z / WOOD_CELL));
   const pad = (i: number, k: number) => grown[i]!.skeleton.radii[k]! + 0.5 * grown[i]!.step;
   const out: { x: number; z: number }[] = new Array(n);
 
@@ -206,7 +208,7 @@ function shyLayout(grown: GrownTree[], inner: number): { pts: { x: number; z: nu
       const pk = pad(i, k) + CROWN_GAP;
       const gx = Math.floor(x / WOOD_CELL), gy = Math.floor(y / WOOD_CELL), gz = Math.floor(z / WOOD_CELL);
       for (let a = gx - 1; a <= gx + 1; a++) for (let b = gy - 1; b <= gy + 1; b++) for (let c = gz - 1; c <= gz + 1; c++) {
-        const cell = grid.get(a + "," + b + "," + c);
+        const cell = grid.get(cellKey3(a, b, c));
         if (!cell) continue;
         for (let q = 0; q < cell.length; q += 4) {
           if (Math.hypot(x - cell[q]!, y - cell[q + 1]!, z - cell[q + 2]!) < pk + cell[q + 3]!) return true;
@@ -217,7 +219,11 @@ function shyLayout(grown: GrownTree[], inner: number): { pts: { x: number; z: nu
   };
 
   for (const i of order) {
-    for (const c of cands) {
+    // A spiral that runs out before a wide crown fits is extended; it is
+    // prefix-stable, so every tree that already fit keeps its spot.
+    for (let ci = 0; !out[i]; ci++) {
+      if (ci === cands.length) cands = sunflower(cands.length * 2, inner, 2).pts;
+      const c = cands[ci]!;
       if (placed.some((p) => Math.hypot(p.x - c.x, p.z - c.z) < MIN_TRUNK_GAP)) continue;
       const near = placed.filter((p) => Math.hypot(p.x - c.x, p.z - c.z) < reach[i]! + reach[p.i]! + CROWN_GAP);
       if (near.length && woodHits(i, c.x, c.z, near)) continue;
@@ -371,7 +377,8 @@ function buildForest(leafMultiplier: number): Forest {
   const byAngle = groves
     .map((g) => groveApproach(g))
     .sort((a, b) => Math.atan2(a.z, a.x) - Math.atan2(b.z, b.x));
-  const circuit = loopOrder(byAngle, byAngle.map((_, i) => i)).map((i) => byAngle[i]!);
+  // Legs that would cut across the hub are costed as the walk around it.
+  const circuit = loopOrder(byAngle, byAngle.map((_, i) => i), HUB_CLEAR).map((i) => byAngle[i]!);
   // A few spokes, spread around the hub, instead of one to every grove:
   // nearest stops first, each at least SPOKE_SPREAD from the spokes already chosen.
   const SPOKE_SPREAD = Math.PI / 3.2;
@@ -389,6 +396,7 @@ function buildForest(leafMultiplier: number): Forest {
   const corpusTree = growCorpusTree(trees, fir.barkAspect);
   const net = routeNetwork({
     hubR: HUB_PLAZA_R - 1,
+    ringClear: HUB_CLEAR,
     stops: circuit.map((wp) => [wp.x, wp.z] as [number, number]),
     obstacles: [
       ...trees.map((t) => ({ x: t.x, z: t.z, r: t.trunkRadius })),

@@ -53,6 +53,8 @@ export function packAroundHub(radii: number[], hub: number, gap: number): { x: n
   const placed: { x: number; z: number; r: number }[] = [];
   for (let i = 0; i < radii.length; i++) {
     const r = radii[i]!;
+    // A NaN radius never fits anywhere and would spin forever.
+    if (!Number.isFinite(r)) throw new Error(`packAroundHub: radius ${i} is ${r}`);
     const a = i * golden;
     let d = hub + r;
     for (;;) {
@@ -68,14 +70,33 @@ export function packAroundHub(radii: number[], hub: number, gap: number): { x: n
 }
 
 /**
+ * Shortest walk from a to b that stays outside the disc of radius `r` at the
+ * origin: the straight line if it clears the disc, otherwise tangent, arc,
+ * tangent. Points inside the disc are treated as on its edge.
+ */
+export function walkAround(ax: number, az: number, bx: number, bz: number, r: number): number {
+  const dx = bx - ax, dz = bz - az;
+  const len = Math.hypot(dx, dz);
+  const t = clamp(-(ax * dx + az * dz) / (len * len || 1), 0, 1);
+  if (r <= 0 || Math.hypot(ax + dx * t, az + dz * t) >= r) return len;
+  const ra = Math.max(r, Math.hypot(ax, az)), rb = Math.max(r, Math.hypot(bx, bz));
+  const between = Math.abs(Math.atan2(ax * bz - az * bx, ax * bx + az * bz));
+  const arc = Math.max(0, between - Math.acos(r / ra) - Math.acos(r / rb));
+  return Math.sqrt(ra * ra - r * r) + Math.sqrt(rb * rb - r * r) + r * arc;
+}
+
+/**
  * Visiting order for a closed loop through the points: start from `order` and
  * apply 2-opt (reverse any stretch whose reversal shortens the loop) until
- * nothing improves. The result never crosses itself.
+ * nothing improves, alternating with or-opt (move one stop to a better gap).
+ * The result never crosses itself. With `clear`, a leg that
+ * would cut the disc of that radius at the origin costs the walk around it,
+ * so the loop keeps off the hub.
  */
-export function loopOrder(pts: { x: number; z: number }[], order: number[]): number[] {
+export function loopOrder(pts: { x: number; z: number }[], order: number[], clear = 0): number[] {
   const o = [...order];
   const n = o.length;
-  const d = (a: number, b: number) => Math.hypot(pts[o[a]!]!.x - pts[o[b]!]!.x, pts[o[a]!]!.z - pts[o[b]!]!.z);
+  const d = (a: number, b: number) => walkAround(pts[o[a]!]!.x, pts[o[a]!]!.z, pts[o[b]!]!.x, pts[o[b]!]!.z, clear);
   for (let improved = true, guard = 0; improved && guard < 100; guard++) {
     improved = false;
     for (let i = 0; i < n - 1; i++) {
@@ -87,6 +108,22 @@ export function loopOrder(pts: { x: number; z: number }[], order: number[]): num
           improved = true;
         }
       }
+    }
+    // Or-opt: move one stop into a better gap, which no reversal can do.
+    for (let k = 0; k < n && n > 3; k++) {
+      const p = (k - 1 + n) % n, q = (k + 1) % n;
+      const saved = d(p, k) + d(k, q) - d(p, q);
+      let best = -1, gain = 1e-9;
+      for (let i = 0; i < n; i++) {
+        const i2 = (i + 1) % n;
+        if (i === k || i2 === k) continue;
+        const g = saved - (d(i, k) + d(k, i2) - d(i, i2));
+        if (g > gain) { gain = g; best = i; }
+      }
+      if (best < 0) continue;
+      const [v] = o.splice(k, 1);
+      o.splice(best < k ? best + 1 : best, 0, v!);
+      improved = true;
     }
   }
   return o;

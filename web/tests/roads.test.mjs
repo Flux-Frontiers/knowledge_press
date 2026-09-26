@@ -53,7 +53,10 @@ test("compact layout: groves never overlap, trees keep driving room, the hub sta
       assert.ok(d >= 7.5, `${f.trees[i].book.slug} and ${f.trees[j].book.slug} are ${d.toFixed(1)} m apart`);
     }
   }
-  assert.ok(f.worldRadius < 275, `world radius ${f.worldRadius.toFixed(0)} m`);
+  // Species crowns set the groves' size, so this only catches a runaway layout
+  // (301 m with the species habits; the sky dome follows the camera and the
+  // ground, minimap and cart bounds all scale with worldRadius).
+  assert.ok(f.worldRadius < 340, `world radius ${f.worldRadius.toFixed(0)} m`);
 });
 
 test("every road keeps the cart clear of every trunk, the redwood and every exhibit", () => {
@@ -83,4 +86,12 @@ test("home stands clear of the hub plaza's redwood and plaque, facing the redwoo
   for (const t of f.trees) assert.ok(Math.hypot(x - t.x, z - t.z) > t.trunkRadius + 3, `home crowds ${t.book.slug}`);
   const fw = forwardOf(yaw);
   assert.ok((fw.x * -x + fw.z * -z) / d > 0.999, "home faces the redwood");
+});
+
+test("the ring goes round the hub, never across it", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const f = getForest();
+  // A leg between two near stops on opposite sides once ran 7.5 m from the redwood.
+  const minR = Math.min(...f.ringPath.map((p) => Math.hypot(p.x, p.z)));
+  assert.ok(minR >= 17, `ring passes ${minR.toFixed(1)} m from the hub's centre`);
 });
