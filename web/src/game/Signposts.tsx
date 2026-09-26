@@ -190,8 +190,10 @@ export function ExhibitPlaque({ exhibit: e, title, byline, body }: { exhibit: Ex
       onPointerOver={() => { document.body.style.cursor = "pointer"; }}
       onPointerOut={() => { document.body.style.cursor = ""; }}>
       {[-1.25, 1.25].map((px) => (
-        <mesh key={px} position={[px, 0.8, 0]}>
-          <cylinderGeometry args={[0.07, 0.09, 1.6, 6]} />
+        // 1.3 m, not the board's 1.55 m centre: the board tilts back, and a taller
+        // post came out through its face at either end, over the text.
+        <mesh key={px} position={[px, 0.65, 0]}>
+          <cylinderGeometry args={[0.07, 0.09, 1.3, 6]} />
           <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
         </mesh>
       ))}

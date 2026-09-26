@@ -5,6 +5,7 @@ import { HUB_PLAQUE_DIR, HUB_PLAQUE_DIST, type Forest } from "./forest";
 import type { SeasonName } from "./seasons";
 import { makePlaqueTexture } from "./Signposts";
 import { useGame } from "./store";
+import { UplightFixtures, useUplitMaterials } from "./Uplights";
 
 // Redwoods are evergreen: the crown keeps its colour through the year, a touch
 // fresher in spring and frosted in winter.
@@ -88,8 +89,10 @@ function RedwoodPlaque({ forest }: { forest: Forest }) {
       onClick={(e) => { e.stopPropagation(); useGame.getState().openCatalog(null); }}
       onPointerOver={() => pointer(true)} onPointerOut={() => pointer(false)}>
       {[-1.25, 1.25].map((px) => (
-        <mesh key={px} position={[px, 0.8, 0]}>
-          <cylinderGeometry args={[0.07, 0.09, 1.6, 6]} />
+        // 1.3 m, not the board's 1.55 m centre: the board tilts back, and a taller
+        // post came out through its face at either end, over the text.
+        <mesh key={px} position={[px, 0.65, 0]}>
+          <cylinderGeometry args={[0.07, 0.09, 1.3, 6]} />
           <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
         </mesh>
       ))}
@@ -115,6 +118,8 @@ export function CorpusRedwood({ forest, season }: { forest: Forest; season: Seas
     return g;
   }, [c]);
   const barkMat = useMemo(redwoodBark, []);
+  // Floodlit from lamps round the root flare at night (Uplights.tsx), fading up the trunk.
+  useUplitMaterials(useMemo(() => [barkMat], [barkMat]), "#ffe2c0", 1.0, 8);
   // A unit card in the ground plane: x along the spray, z across it.
   const spray = useMemo(() => new PlaneGeometry(1, 1).rotateX(-Math.PI / 2), []);
   const sprayMap = useMemo(sprayTexture, []);
@@ -168,6 +173,7 @@ export function CorpusRedwood({ forest, season }: { forest: Forest; season: Seas
       <instancedMesh ref={ref} args={[spray, sprayMat, Math.max(1, c.foliage.count)]} customDepthMaterial={sprayDepth}
         castShadow={!COARSE_POINTER} receiveShadow={!COARSE_POINTER} />
       <RedwoodPlaque forest={forest} />
+      <UplightFixtures radius={c.baseRadius + 0.5} count={6} pool={3.5} />
     </group>
   );
 }

@@ -4,6 +4,7 @@ import { BackSide, BufferAttribute, BufferGeometry, Group, MeshStandardMaterial 
 import type { Exhibit } from "./exhibits";
 import { ExhibitPlaque } from "./Signposts";
 import { useGame } from "./store";
+import { UplightFixtures, useUplitMaterials } from "./Uplights";
 import { DARRIEUS, HELIX, PLINTH_TOP, SAVONIUS, darrieusBlade, gust, helixBlade, type BladeFrame } from "./windRotors";
 
 /**
@@ -64,6 +65,8 @@ function useWindMaterials() {
     verdigris: new MeshStandardMaterial({ color: "#5f9e8a", metalness: 0.3, roughness: 0.6 }),
   }), []);
   useEffect(() => () => Object.values(m).forEach((x) => x.dispose()), [m]);
+  // Floodlit from the plinth at night (Uplights.tsx); the whole rotor, fading toward the top.
+  useUplitMaterials(useMemo(() => Object.values(m), [m]), "#ffe2b0", 0.9, 9);
   return m;
 }
 
@@ -89,10 +92,11 @@ function useSpinners(x: number, rates: number[]) {
   return (i: number) => (grp: Group | null) => { groups.current[i] = grp; };
 }
 
-/** Stepped plinth up to PLINTH_TOP; the cart collides with its lowest step (exhibit.obstacle). */
+/** Stepped plinth up to PLINTH_TOP; the cart collides with its lowest step (exhibit.obstacle). Lamps stand round its foot. */
 function Plinth({ r, stone }: { r: number; stone: MeshStandardMaterial }) {
   return (
     <>
+      <UplightFixtures radius={r + 0.35} count={3} pool={2.2} />
       <mesh position={[0, 0.25, 0]} material={stone} castShadow receiveShadow>
         <cylinderGeometry args={[r - 0.2, r, 0.5, 8]} />
       </mesh>

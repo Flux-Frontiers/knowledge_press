@@ -51,6 +51,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   them; `scripts/render_moon_phases.py` regenerates it.
 - **Knowledge Press Forest: click the corpus redwood, or its plaque, to browse
   every book.**
+- **Knowledge Press Forest: floodlights at night.** The corpus redwood and the
+  wind sculptures are lit from lamps at their foot as the sky darkens: each
+  glows in its own colour, strongest at the ground and fading with height,
+  with the lamps and a pool of light on the paving (`Uplights.tsx`). It is
+  faked in the materials rather than done with real lights, which three.js
+  would shade on every pixel of the forest; the night frame rate is unchanged.
 - **`make web-kill`** stops every running Vite dev or preview server,
   matched by command line rather than port.
 
@@ -58,7 +64,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Knowledge Press Forest: the "The Press" signpost** on the hub plaza.
 
+### Changed
+
+- **Knowledge Press Forest: the "In the cart" camera is at eye level.** It sits
+  at a standing adult's 1.65 m (was 1.3 m), gazes level instead of slightly
+  down, and uses a 60 degree field of view (was 72), so the horizon, plaques
+  and plinths sit where they would on foot and tall pieces are not stretched
+  at the frame's edges. Tilt up to take in a sculpture or the redwood.
+
 ### Fixed
+
+- **Knowledge Press Forest: plaque posts no longer show through the text.**
+  The lectern posts rose to 1.6 m, past the tilted board's centre, and came
+  out through its face at either end; they now stop at 1.3 m, behind it.
 
 - **Knowledge Press Forest: roads, plazas and bark are no longer black in
   Safari.** WebKit (Safari, and every browser on iOS) renders a texture black
