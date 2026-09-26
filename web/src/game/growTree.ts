@@ -1,4 +1,5 @@
 import { clamp, mulberry32, seedFromKey } from "./math";
+import { envelopeWidth, SPECIES, speciesFor, type Habit } from "./species";
 
 export type Vec3 = { x: number; y: number; z: number };
 
@@ -27,7 +28,7 @@ export type GrownTree = {
 };
 
 /** Bump when caps change so the forest cache rebuilds. */
-export const GROW_VERSION = 10;
+export const GROW_VERSION = 11;
 
 // This file mirrors the Python viz3d (kg_utils.viz3d.organic.colonize and
 // gutenberg_kg.treegeom.grow_tree_geometry) so both front ends grow the same
@@ -43,8 +44,6 @@ const WORLD_SCALE = 1.7 / 4;
 export const MAX_ATTRACTORS = 3000;
 /** colonize(max_iter=800) */
 const MAX_ITER = 800;
-/** colonize(jitter=0.12) */
-const JITTER = 0.12;
 /** grow_tree(tip_radius=0.05), in web units. */
 const TIP_RADIUS = 0.05 * WORLD_SCALE;
 /** Runaway guard only; Python has no node cap and real books stay far below it. */
@@ -52,8 +51,6 @@ const NODE_GUARD = 200_000;
 /** treegeom.LEAF_REFERENCE_COUNT: leaves shrink as (600 / chunks) ** (1/3) beyond it. */
 export const LEAF_REFERENCE_COUNT = 600;
 
-// Pipe-model exponent: parent^e = sum child^e (Leonardo's rule), as pipe_radii.
-const PIPE_EXP = 2;
 // Trunk radius floor as a fraction of height, for very small books.
 const TRUNK_PER_HEIGHT = 0.028;
 // A leaf's stalk base sits within this of a branch node (so it visibly hangs on
@@ -64,31 +61,14 @@ const TWIG_MIN_R = 0.035;
 
 const GOLDEN = Math.PI * (3 - Math.sqrt(5));
 
-export const GENRE_TROPISM: Record<string, Vec3> = {
-  philosophy: { x: 0, y: 0.32, z: 0 },
-  "sacred-texts": { x: 0, y: 0.28, z: 0 },
-  "natural-history": { x: 0, y: 0.22, z: 0 },
-  "science-fiction": { x: 0, y: 0.26, z: 0 },
-  horror: { x: 0, y: 0.06, z: 0 },
-  diaries: { x: 0, y: 0.05, z: 0 },
-  letters: { x: 0, y: 0.05, z: 0 },
-  shakespeare: { x: 0, y: 0.12, z: 0 },
-  drama: { x: 0, y: 0.1, z: 0 },
-  poetry: { x: 0, y: -0.1, z: 0 },
-  "american-literature": { x: 0, y: 0.16, z: 0 },
-  "english-literature": { x: 0, y: 0.18, z: 0 },
-};
-
-const DEFAULT_TROPISM: Vec3 = { x: 0, y: 0.18, z: 0 };
-
-function tropismFor(genre: string): Vec3 {
-  return GENRE_TROPISM[genre] ?? DEFAULT_TROPISM;
-}
-
-/** Place section tips and one crown point per chunk, the way ForestLayout does. */
+/**
+ * Place section tips and one crown point per chunk, the way ForestLayout does,
+ * inside the species' envelope: sections climb from the clear bole to the top
+ * at golden-angle azimuths, each as far out as the envelope is wide there.
+ */
 export function placeCrown(
   nChunks: number,
-  genre: string,
+  habit: Habit,
   slug: string,
 ): { trunkHeight: number; crown: Float32Array; nCrown: number } {
   const rng = mulberry32(seedFromKey(slug + ":crown"));
@@ -100,9 +80,9 @@ export function placeCrown(
   const sectionTips: Vec3[] = [];
   for (let i = 0; i < nSections; i++) {
     const t = nSections === 1 ? 0.5 : i / (nSections - 1);
-    const y = trunkHeight * (0.3 + 0.65 * t);
+    const y = trunkHeight * (habit.clearBole + (0.95 - habit.clearBole) * t);
     const angle = i * GOLDEN;
-    const radius = branchLength * (1 - (y / trunkHeight) * 0.4);
+    const radius = branchLength * habit.width * envelopeWidth(habit.envelope, t);
     sectionTips.push({
       x: radius * Math.cos(angle),
       y,
@@ -120,14 +100,14 @@ export function placeCrown(
     const fl = Math.hypot(facingX, facingZ) || 1;
     const fx = facingX / fl;
     const fz = facingZ / fl;
-    const leafR = 1.15 + Math.sqrt(perSec) * 0.18;
+    const leafR = (1.15 + Math.sqrt(perSec) * 0.18) * habit.spread;
     const take = Math.min(perSec, nLeaf - li);
     for (let k = 0; k < take; k++) {
       const u = rng();
       const v = rng();
       const theta = u * Math.PI * 2;
       const r = leafR * Math.cbrt(v);
-      const up = (rng() * 0.7 + 0.15) * leafR * 0.55;
+      const up = (rng() * 0.7 + 0.15) * leafR * 0.55 * habit.lift;
       const px = Math.cos(theta) * r;
       const pz = Math.sin(theta) * r;
       leaves[li * 3] = tip.x + fx * r * 0.35 + px * 0.7;
@@ -136,7 +116,6 @@ export function placeCrown(
       li++;
     }
   }
-  void genre;
   return { trunkHeight, crown: leaves, nCrown: li };
 }
 
@@ -205,7 +184,7 @@ function crownSpacing(pts: Float32Array, m: number, rng: () => number): number {
  * Nodes are only ever added, so each attractor's nearest node is updated
  * against the new nodes alone: the same answer, O(attractors x nodes) in total.
  */
-function colonize(pts: Float32Array, m: number, trop: Vec3, rng: () => number) {
+function colonize(pts: Float32Array, m: number, habit: Habit, rng: () => number) {
   let minX = Infinity, minY = Infinity, minZ = Infinity, maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
   for (let a = 0; a < m; a++) {
     minX = Math.min(minX, pts[a * 3]!); maxX = Math.max(maxX, pts[a * 3]!);
@@ -213,8 +192,10 @@ function colonize(pts: Float32Array, m: number, trop: Vec3, rng: () => number) {
     minZ = Math.min(minZ, pts[a * 3 + 2]!); maxZ = Math.max(maxZ, pts[a * 3 + 2]!);
   }
   const extent = Math.hypot(maxX - minX, maxY - minY, maxZ - minZ);
-  const step = Math.max(extent / 40, 0.5 * crownSpacing(pts, m, rng));
-  const influence = 12 * step;
+  const step = habit.step * Math.max(extent / 40, 0.5 * crownSpacing(pts, m, rng));
+  const influence = habit.influence * step;
+  const trop: Vec3 = { x: 0, y: habit.tropism, z: 0 };
+  const jitter = habit.jitter;
   const kill = 2 * step;
 
   const nodes: number[] = [0, 0, 0];
@@ -258,7 +239,9 @@ function colonize(pts: Float32Array, m: number, trop: Vec3, rng: () => number) {
   // colonize bridges toward the nearest attractor; the crown's lowest section
   // always sits at golden angle 0, so that leaned every trunk the same way.
   // Here the trunk rises plumb to the crown's base, then growth takes over.
+  // A leader species keeps that trunk climbing plumb up through the crown.
   if (m > 0) bridge(0, 0, minY, 0, step);
+  if (m > 0 && habit.leader > 0) bridge(n() - 1, 0, minY + habit.leader * (maxY - minY), 0, step);
   refresh(1);
 
   const pull = new Map<number, [number, number, number]>();
@@ -293,9 +276,9 @@ function colonize(pts: Float32Array, m: number, trop: Vec3, rng: () => number) {
     const before = n();
     for (const [k, [px, py, pz]] of pull) {
       const pl = Math.max(Math.hypot(px, py, pz), 1e-9);
-      let dx = px / pl + trop.x + JITTER * gauss(rng);
-      let dy = py / pl + trop.y + JITTER * gauss(rng);
-      let dz = pz / pl + trop.z + JITTER * gauss(rng);
+      let dx = px / pl + trop.x + jitter * gauss(rng);
+      let dy = py / pl + trop.y + jitter * gauss(rng);
+      let dz = pz / pl + trop.z + jitter * gauss(rng);
       const dl = Math.hypot(dx, dy, dz);
       if (dl < 1e-9) continue;
       dx /= dl; dy /= dl; dz /= dl;
@@ -327,7 +310,7 @@ const skeletonCache = new Map<string, {
 }>();
 
 /** colonize(max_attractors=3000): grow toward a seeded sample of the crown. */
-function growSkeleton(slug: string, crown: Float32Array, nCrown: number, trop: Vec3) {
+function growSkeleton(slug: string, crown: Float32Array, nCrown: number, habit: Habit) {
   const rng = mulberry32(seedFromKey(slug));
   const m = Math.min(nCrown, MAX_ATTRACTORS);
   let attractors = crown.subarray(0, m * 3);
@@ -340,7 +323,7 @@ function growSkeleton(slug: string, crown: Float32Array, nCrown: number, trop: V
     attractors = new Float32Array(m * 3);
     for (let i = 0; i < m; i++) attractors.set(crown.subarray(idx[i]! * 3, idx[i]! * 3 + 3), i * 3);
   }
-  return { attractors, grown: colonize(attractors, m, trop, rng) };
+  return { attractors, grown: colonize(attractors, m, habit, rng) };
 }
 
 /**
@@ -352,31 +335,35 @@ export function growTree(opts: {
   genre: string;
   nChunks: number;
   tipRadius?: number;
+  /** Index into SPECIES; defaults to the genre's species. */
+  species?: number;
   /** Fraction of the book's chunks that carry a leaf; the skeleton never changes with it. */
   leafScale?: number;
 }): GrownTree {
   const { slug, genre, nChunks } = opts;
   const tipRadius = opts.tipRadius ?? TIP_RADIUS;
-  const trop = tropismFor(genre);
-  const cacheKey = `${slug}|${genre}|${nChunks}|${tipRadius}`;
+  const species = opts.species ?? speciesFor(genre);
+  const habit = SPECIES[species]!.habit;
+  const cacheKey = `${slug}|${species}|${nChunks}|${tipRadius}`;
   const cached = skeletonCache.get(cacheKey);
-  const { trunkHeight, crown, nCrown } = cached?.crownInfo ?? placeCrown(nChunks, genre, slug);
-  const { attractors, grown } = cached ?? growSkeleton(slug, crown, nCrown, trop);
+  const { trunkHeight, crown, nCrown } = cached?.crownInfo ?? placeCrown(nChunks, habit, slug);
+  const { attractors, grown } = cached ?? growSkeleton(slug, crown, nCrown, habit);
   if (!cached) skeletonCache.set(cacheKey, { crownInfo: { trunkHeight, crown, nCrown }, attractors, grown });
   const { nodes, parents, n } = grown;
 
 
   const radii = new Float32Array(n);
   radii.fill(tipRadius);
-  // Pipe model: walk children -> parent. Children have higher indices, so each
+  const pipeExp = habit.pipeExp;
+  // Pipe model, parent^e = sum child^e (e = 2 is Leonardo's rule): walk children -> parent. Children have higher indices, so each
   // node's own radius is final before it is added to its parent.
   const childSum = new Float32Array(n);
   for (let i = n - 1; i >= 1; i--) {
-    if (childSum[i]! > 0) radii[i] = childSum[i]! ** (1 / PIPE_EXP);
+    if (childSum[i]! > 0) radii[i] = childSum[i]! ** (1 / pipeExp);
     const p = parents[i]!;
-    if (p >= 0) childSum[p] += radii[i]! ** PIPE_EXP;
+    if (p >= 0) childSum[p] += radii[i]! ** pipeExp;
   }
-  if (childSum[0]! > 0) radii[0] = childSum[0]! ** (1 / PIPE_EXP);
+  if (childSum[0]! > 0) radii[0] = childSum[0]! ** (1 / pipeExp);
   // Tip count does not grow with the book, so tall trees came out spindly.
   // Thicken toward the floor in proportion to each segment's share of the
   // trunk, so the trunk reaches it and twigs stay nearly unchanged.

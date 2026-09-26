@@ -1,7 +1,7 @@
 /**
- * Genre -> tree species. A species picks the bark texture, the leaf outline
- * and a small shift of the season's foliage colour; the crown's shape still
- * comes from the book's chunks.
+ * Genre -> tree species. A species picks the bark texture, the leaf outline,
+ * a small shift of the season's foliage colour, and its habit: the envelope
+ * the book's chunks are laid out in and how the wood grows toward them.
  */
 export type SpeciesName = "oak" | "chestnut" | "fir" | "plane" | "blackthorn";
 
@@ -15,6 +15,58 @@ export type LeafShape =
   | { shape: "ovate"; width: number }
   | { shape: "outline"; half: [number, number][]; smooth: boolean };
 
+/**
+ * Crown silhouette as a width profile over the crown's height, s in [0, 1]
+ * from its base to its top (after Weber & Penn's crown shapes).
+ */
+export type Envelope = "ellipsoid" | "cone" | "dome" | "ovoid" | "column" | "vase";
+
+/**
+ * A species' growth habit. The book still decides everything that carries
+ * meaning (height, section count, one crown point per chunk); the habit only
+ * decides where in space those points sit and how the wood reaches them.
+ */
+export type Habit = {
+  envelope: Envelope;
+  /** Crown half-width as a multiple of the book's branch length. */
+  width: number;
+  /** Bare trunk below the lowest section, as a fraction of height. */
+  clearBole: number;
+  /**
+   * How far into the crown the trunk rises plumb before growth takes over, as
+   * a fraction of the crown's height: 0 forks at the crown base (oak), near 1
+   * keeps one central leader (fir).
+   */
+  leader: number;
+  /** Chunk cluster radius around each section tip, as a multiple of the default. */
+  spread: number;
+  /** Chunks lift above (+) or hang below (-) their section tip, as a multiple of the default. */
+  lift: number;
+  /** Tropism: the upward pull added to every growth step (colonize). */
+  tropism: number;
+  /** Influence radius in internodes; small makes twiggy, bushy wood, large long straight limbs. */
+  influence: number;
+  /** Internode length as a multiple of the crown-derived default. */
+  step: number;
+  /** Direction noise per growth step: 0.12 is clean, 0.3 gnarled. */
+  jitter: number;
+  /** Pipe-model exponent: 2 is Leonardo's rule, higher tapers faster. */
+  pipeExp: number;
+};
+
+/** Crown half-width at crown height s in [0, 1], as a fraction of the widest. */
+export function envelopeWidth(env: Envelope, s: number): number {
+  const t = Math.min(1, Math.max(0, s));
+  switch (env) {
+    case "ellipsoid": return Math.sqrt(Math.max(0, 1 - (2 * t - 1) ** 2)) * 0.8 + 0.2;
+    case "ovoid": return Math.sqrt(Math.max(0, 1 - ((t - 0.4) / (t < 0.4 ? 0.4 : 0.6)) ** 2)) * 0.8 + 0.2;
+    case "cone": return 1 - 0.92 * t;
+    case "dome": return Math.sqrt(Math.max(0, 1 - t * t)) * 0.8 + 0.2;
+    case "vase": return 0.35 + 0.65 * Math.sin((Math.PI / 2) * Math.min(1, t * 1.25));
+    case "column": return 1 - 0.4 * t;
+  }
+}
+
 export type Species = {
   name: SpeciesName;
   /** Height / width of the bark image (textures/bark/<name>_color.jpg). */
@@ -22,6 +74,7 @@ export type Species = {
   leaf: LeafShape;
   /** HSL offset applied to the season's foliage colours. */
   foliageShift: [h: number, s: number, l: number];
+  habit: Habit;
 };
 
 // English oak: rounded lobes, widest above the middle, small ears at the base.
@@ -54,11 +107,31 @@ const FIR_HALF: [number, number][] = (() => {
 })();
 
 export const SPECIES: Species[] = [
-  { name: "oak", barkAspect: 2, leaf: { shape: "outline", half: OAK_HALF, smooth: true }, foliageShift: [0, 0, 0] },
-  { name: "chestnut", barkAspect: 1, leaf: { shape: "ovate", width: 0.36 }, foliageShift: [0.01, 0.04, -0.03] },
-  { name: "fir", barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12] },
-  { name: "plane", barkAspect: 1, leaf: { shape: "outline", half: PLANE_HALF, smooth: false }, foliageShift: [-0.01, 0.02, 0.05] },
-  { name: "blackthorn", barkAspect: 1, leaf: { shape: "ovate", width: 0.7 }, foliageShift: [0.02, -0.1, -0.1] },
+  {
+    // English oak: short bole, broad low dome, long gnarled horizontal limbs.
+    name: "oak", barkAspect: 2, leaf: { shape: "outline", half: OAK_HALF, smooth: true }, foliageShift: [0, 0, 0],
+    habit: { envelope: "dome", leader: 0, width: 1.55, clearBole: 0.22, spread: 1.1, lift: 0.6, tropism: 0.02, influence: 16, step: 1.1, jitter: 0.24, pipeExp: 2 },
+  },
+  {
+    // Horse chestnut: a full rounded ellipsoid on a medium bole.
+    name: "chestnut", barkAspect: 1, leaf: { shape: "ovate", width: 0.36 }, foliageShift: [0.01, 0.04, -0.03],
+    habit: { envelope: "ellipsoid", leader: 0.15, width: 1.15, clearBole: 0.28, spread: 1, lift: 1, tropism: 0.14, influence: 12, step: 1, jitter: 0.14, pipeExp: 2.2 },
+  },
+  {
+    // Fir: a narrow cone from near the ground, flat sprays, a fast-tapering stem.
+    name: "fir", barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12],
+    habit: { envelope: "cone", leader: 0.92, width: 0.95, clearBole: 0.1, spread: 0.7, lift: -0.3, tropism: 0.3, influence: 7, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
+  },
+  {
+    // London plane: a long clean bole under a tall egg-shaped crown of long, rising limbs.
+    name: "plane", barkAspect: 1, leaf: { shape: "outline", half: PLANE_HALF, smooth: false }, foliageShift: [-0.01, 0.02, 0.05],
+    habit: { envelope: "ovoid", leader: 0.3, width: 1.05, clearBole: 0.38, spread: 1, lift: 1.2, tropism: 0.24, influence: 18, step: 1.15, jitter: 0.1, pipeExp: 2.1 },
+  },
+  {
+    // Blackthorn: a low, dense, twiggy thicket-tree that spreads upward from low down.
+    name: "blackthorn", barkAspect: 1, leaf: { shape: "ovate", width: 0.7 }, foliageShift: [0.02, -0.1, -0.1],
+    habit: { envelope: "vase", leader: 0, width: 1.3, clearBole: 0.12, spread: 1.25, lift: 0.8, tropism: 0.1, influence: 6, step: 0.7, jitter: 0.3, pipeExp: 2.5 },
+  },
 ];
 
 // Leaf instances are scaled 1.12 wide by 1.78 tall (emitLeaves); true-proportion
