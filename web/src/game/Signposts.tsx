@@ -99,10 +99,14 @@ function Signpost({
       onClick={(e) => { e.stopPropagation(); useGame.getState().openCatalog(grove.genre); }}
       onPointerOver={() => { document.body.style.cursor = "pointer"; }}
       onPointerOut={() => { document.body.style.cursor = ""; }}>
-      <mesh position={[0, 1.3, 0]}>
-        <cylinderGeometry args={[0.08, 0.11, 2.6, 6]} />
-        <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
-      </mesh>
+      {[-1.6, 1.6].map((px) => (
+        // A post at each end, clear of the board: one centre post came out
+        // through the back face, over the text as read from behind.
+        <mesh key={px} position={[px, 1.48, 0.07]}>
+          <cylinderGeometry args={[0.08, 0.11, 2.96, 6]} />
+          <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
+        </mesh>
+      ))}
       <mesh position={[0, 2.35, 0.07]}>
         <boxGeometry args={[3.0, 1.05, 0.08]} />
         <meshStandardMaterial
@@ -115,7 +119,7 @@ function Signpost({
         />
       </mesh>
       <mesh position={[0, 2.92, 0.07]}>
-        <boxGeometry args={[2.7, 0.08, 0.16]} />
+        <boxGeometry args={[3.4, 0.08, 0.16]} />
         <meshStandardMaterial color="#3a322c" roughness={0.85} />
       </mesh>
       <mesh position={[0, 3.05, 0.0]}>

@@ -183,6 +183,22 @@ function pullTaut(g: Grid, path: Point[], need: number): Point[] {
   return out;
 }
 
+/**
+ * String-pull until taut. One pull only shortcuts between the grid path's own
+ * points, and only looking ahead, so where A* hugged a road it keeps that
+ * road's corner: a hairpin that swings out and back. Each pass resamples, so
+ * a corner can land partway along a segment, and runs the other way along the
+ * path, so the far end gets to pull too.
+ */
+function taut(g: Grid, path: Point[], need: number): Point[] {
+  let pts = pullTaut(g, path, need);
+  for (let pass = 0; pass < 8; pass++) {
+    const next = pullTaut(g, densify(pts, 1, false).pts.reverse(), need);
+    pts = next.reverse();
+  }
+  return pts;
+}
+
 /** Centripetal Catmull-Rom through pts (open or closed), resampled every ~step metres. */
 export function spline(pts: Point[], step: number, closed: boolean): { pts: Point[]; span: number[] } {
   const n = pts.length;
@@ -264,7 +280,7 @@ export function routeNetwork(opts: {
     const [sx, sz] = stops[i]!;
     const d = Math.hypot(sx, sz) || 1;
     const from: Point = [(sx / d) * hubR, (sz / d) * hubR];
-    const route = finish(g, pullTaut(g, astar(g, from, stops[i]!, need), need), need, false).pts;
+    const route = finish(g, taut(g, astar(g, from, stops[i]!, need), need), need, false).pts;
     markRoad(g, route, need);
     bySpoke.push(route);
   }
@@ -273,10 +289,10 @@ export function routeNetwork(opts: {
   const legPts: Point[] = [];
   const legOf: number[] = [];
   for (let i = 0; i < stops.length; i++) {
-    const taut = pullTaut(g, astar(g, stops[i]!, stops[(i + 1) % stops.length]!, need), need);
-    markRoad(g, taut, need);
+    const leg = taut(g, astar(g, stops[i]!, stops[(i + 1) % stops.length]!, need), need);
+    markRoad(g, leg, need);
     // Drop each leg's last point: it is the next leg's first.
-    for (let k = 0; k < taut.length - 1; k++) { legPts.push(taut[k]!); legOf.push(i); }
+    for (let k = 0; k < leg.length - 1; k++) { legPts.push(leg[k]!); legOf.push(i); }
   }
   const ring = finish(g, legPts, need, true);
   return {

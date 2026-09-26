@@ -19,6 +19,8 @@ type SaveBlob = {
   preferences: Preferences;
 };
 
+const TIME_CYCLE: Record<TimeMode, TimeMode> = { live: "dawn", dawn: "day", day: "dusk", dusk: "night", night: "live" };
+
 function loadSave(): SaveBlob {
   const defaults: SaveBlob = {
     version: SAVE_VERSION,
@@ -48,8 +50,8 @@ function loadSave(): SaveBlob {
           ? parsed.season
           : "summer",
       // Saves from before the clock kept only a day/night flag; night stays night.
-      timeMode: parsed.timeMode === "live" || parsed.timeMode === "day" || parsed.timeMode === "night"
-        ? parsed.timeMode
+      timeMode: typeof parsed.timeMode === "string" && Object.hasOwn(TIME_CYCLE, parsed.timeMode)
+        ? parsed.timeMode as TimeMode
         : parsed.timeOfDay === "night" ? "night" : "live",
       place: parsed.place && Number.isFinite(parsed.place.lat) && Number.isFinite(parsed.place.lon) ? parsed.place : null,
       preferences: readPreferences(parsed.preferences),
@@ -185,8 +187,6 @@ function readSky(mode: TimeMode, place: Place | null, now = new Date()) {
     moonName: moonPhaseName(sky.moonPhase),
   };
 }
-
-const TIME_CYCLE: Record<TimeMode, TimeMode> = { live: "day", day: "night", night: "live" };
 
 export const useGame = create<GameStore>((set, get) => ({
   playing: false,

@@ -1,9 +1,10 @@
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
 import { ACESFilmicToneMapping } from "three";
 import { COARSE_POINTER, PHONE } from "./Environment";
 import type { Forest } from "./forest";
 import { Player } from "./Player";
+import { setScreenshotCapture } from "./screenshot";
 import { Trees } from "./Trees";
 import { World } from "./World";
 import { useGame } from "./store";
@@ -37,6 +38,7 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
       <World forest={forest} season={season} />
       <Trees forest={forest} season={season} query={query} />
       <StatsSampler />
+      <ScreenshotCapture />
       <Player forest={forest} playing={playing} />
     </Canvas>
   );
@@ -58,5 +60,18 @@ function StatsSampler() {
     s.setStats({ tris: gl.info.render.triangles, calls: gl.info.render.calls, fps: acc.current.frames / acc.current.t });
     acc.current = { t: 0, frames: 0 };
   });
+  return null;
+}
+
+/** Lets the HUD's camera button read the view: render a frame and read it back in the same task, before the buffer clears. */
+function ScreenshotCapture() {
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    setScreenshotCapture(() => {
+      gl.render(scene, camera);
+      return gl.domElement.toDataURL("image/png");
+    });
+    return () => setScreenshotCapture(null);
+  }, [gl, scene, camera]);
   return null;
 }
