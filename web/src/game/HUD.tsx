@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookMarked, Compass, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, X } from "lucide-react";
+import { Bell, BellOff, BookMarked, Clock, Compass, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -6,12 +6,24 @@ import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest
 import { QUESTS, questProgress } from "./quests";
 import { SEASON_ORDER, SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
-import { useGame } from "./store";
+import { useGame, type PlaqueText } from "./store";
 
 export function HUD({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
   const setSeason = useGame((s) => s.setSeason);
-  const timeOfDay = useGame((s) => s.timeOfDay);
+  const timeMode = useGame((s) => s.timeMode);
+  const sunEvent = useGame((s) => s.sunEvent);
+  const moonName = useGame((s) => s.moonName);
+  // The sky ticks every few seconds; subscribing re-renders the clock with it.
+  useGame((s) => s.sky);
+  const clock = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const timeLabel = timeMode === "live" ? clock(new Date()) : timeMode === "day" ? "Day" : "Night";
+  const timeTitle =
+    timeMode === "live"
+      ? `Live clock${sunEvent ? ` · ${sunEvent.kind} ${clock(sunEvent.at)}` : ""} · ${moonName} · tap for day`
+      : timeMode === "day"
+        ? "Day · tap for night"
+        : `Night · ${moonName} · tap for the live clock`;
   const toggleTimeOfDay = useGame((s) => s.toggleTimeOfDay);
   const query = useGame((s) => s.query);
   const setQuery = useGame((s) => s.setQuery);
@@ -41,6 +53,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const toggleCircuit = useGame((s) => s.toggleCircuit);
   const catalogOpen = useGame((s) => s.catalogOpen);
   const toggleCatalog = useGame((s) => s.toggleCatalog);
+  const plaque = useGame((s) => s.plaque);
   const silent = useGame((s) => s.preferences.silent);
   const setPreferences = useGame((s) => s.setPreferences);
 
@@ -77,7 +90,7 @@ export function HUD({ forest }: { forest: Forest }) {
           <p className="mt-1 text-xs text-muted">
             {forest.trees.length} trees · {SEASONS[season].label}
             {" · "}
-            {timeOfDay === "day" ? "Day" : "Night"}
+            {timeLabel}
             {travelMode === "circuit" ? " · ring" : ""}
             {progress.done ? ` · ${progress.done}/${progress.total}` : ""}
           </p>
@@ -92,10 +105,12 @@ export function HUD({ forest }: { forest: Forest }) {
             type="button"
             onClick={toggleTimeOfDay}
             className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-            aria-label={timeOfDay === "day" ? "Switch to night" : "Switch to day"}
-            title={timeOfDay === "day" ? "Day · tap for night" : "Night · tap for day"}
+            aria-label={timeTitle}
+            title={timeTitle}
           >
-            {timeOfDay === "day" ? (
+            {timeMode === "live" ? (
+              <Clock className="size-4" strokeWidth={1.75} />
+            ) : timeMode === "day" ? (
               <Sun className="size-4" strokeWidth={1.75} />
             ) : (
               <Moon className="size-4" strokeWidth={1.75} />
@@ -332,6 +347,7 @@ export function HUD({ forest }: { forest: Forest }) {
       {libraryOpen ? <LibraryPanel forest={forest} /> : null}
       {atlasOpen ? <AtlasPanel forest={forest} /> : null}
       {catalogOpen ? <CatalogPanel forest={forest} /> : null}
+      {plaque ? <PlaquePanel plaque={plaque} /> : null}
     </div>
   );
 }
@@ -693,6 +709,37 @@ function CatalogPanel({ forest }: { forest: Forest }) {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** An exhibit's plaque at reading size, in the plaque's own cream, ink and brass (makePlaqueTexture). */
+function PlaquePanel({ plaque }: { plaque: PlaqueText }) {
+  const close = () => useGame.getState().openPlaque(null);
+  return (
+    <div className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-bg/55 p-3 sm:p-6" onClick={close}>
+      <article
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="plaque-title"
+        className="relative max-h-[86vh] w-full max-w-2xl overflow-auto rounded-md border-[6px] border-[#3a322c] bg-[#efe8dc] p-2 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="border-2 border-[#c9a24a] px-6 py-6 sm:px-9 sm:py-8">
+          <button
+            type="button"
+            autoFocus
+            onClick={close}
+            className="absolute top-5 right-5 grid size-11 place-items-center rounded-md text-[#5a4a3a]"
+            aria-label="Close the plaque"
+          >
+            <X className="size-5" strokeWidth={1.75} />
+          </button>
+          <h2 id="plaque-title" className="pr-10 font-display text-3xl font-semibold text-[#1a2030] italic sm:text-4xl">{plaque.title}</h2>
+          <p className="mt-1 text-sm font-semibold tracking-wide text-[#8a6a22]">{plaque.byline}</p>
+          <p className="mt-5 text-base leading-relaxed text-[#2a2a2a] sm:text-lg">{plaque.body}</p>
+        </div>
+      </article>
     </div>
   );
 }

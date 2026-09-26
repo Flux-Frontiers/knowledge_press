@@ -35,7 +35,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const dt = Math.min(delta, 0.1);
     const game = useGame.getState();
     const { preferences, jump } = game;
-    const blocked = !playing || paused || game.libraryOpen || game.atlasOpen || game.catalogOpen || Boolean(document.activeElement?.matches("input, textarea, select, [contenteditable=true]"));
+    const blocked = !playing || paused || game.libraryOpen || game.atlasOpen || game.catalogOpen || Boolean(game.plaque) || Boolean(document.activeElement?.matches("input, textarea, select, [contenteditable=true]"));
     if (blocked) {
       sim.speed = sim.lat = sim.steering = 0;
       if (!wasBlocked.current) resetInput();
@@ -92,10 +92,12 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const f = forwardOf(sim.yaw);
     const inCart = preferences.camera === "cart";
     if (inCart) {
-      // Turtle's-eye: on the back seat, low, looking over the lantern. Rigid, no chase lag.
-      camPos.set(sim.x - f.x * 0.45, sim.y + 1.3, sim.z - f.z * 0.45);
+      // A standing adult's eye level (1.65 m), gazing level over the lantern, so the
+      // horizon, plaques and plinths sit where they would on foot; tilt to look up.
+      // Rigid, no chase lag.
+      camPos.set(sim.x - f.x * 0.45, sim.y + 1.65, sim.z - f.z * 0.45);
       state.camera.position.copy(camPos);
-      lookAt.set(sim.x + f.x * 10, sim.y + 1.15, sim.z + f.z * 10);
+      lookAt.set(sim.x + f.x * 10, sim.y + 1.65, sim.z + f.z * 10);
     } else {
       const follow = preferences.camera === "high" ? 12 : 8.4;
       const height = preferences.camera === "high" ? 10 : 4.5;
@@ -107,7 +109,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current);
     state.camera.lookAt(lookAt);
     const cam = state.camera as PerspectiveCamera;
-    const fovTarget = inCart ? 72 : 58;
+    const fovTarget = inCart ? 60 : 58;
     cam.fov = MathUtils.lerp(cam.fov, fovTarget, 1 - Math.exp(-4 * dt));
     cam.updateProjectionMatrix();
 

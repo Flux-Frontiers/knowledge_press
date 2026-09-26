@@ -28,6 +28,10 @@ export type Exhibit = ExhibitSpec & {
 
 export const EXHIBITS: ExhibitSpec[] = [
   { id: "mysterium", label: "Mysterium Cosmographicum", obstacle: 2.6, treeClearance: 10 },
+  // The wind sculptures (WindSculptures.tsx): narrow plinths, but rotors that need open air.
+  { id: "helix", label: "Helical Rotor", obstacle: 1.8, treeClearance: 8 },
+  { id: "darrieus", label: "Darrieus Rotor", obstacle: 2.0, treeClearance: 8 },
+  { id: "savonius", label: "Savonius Tower", obstacle: 1.8, treeClearance: 8 },
 ];
 
 /** Keep exhibits out from under the redwood's crown and apart from one another. */

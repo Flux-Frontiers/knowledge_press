@@ -1,8 +1,9 @@
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, type ComponentType } from "react";
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
-import { ForestFloor, Sky, Sunlight, useGroundTexture } from "./Environment";
+import { ForestFloor, Sky, Sunlight, textureAnisotropy, useGroundTexture } from "./Environment";
 import { DAY_OVERRIDE } from "./daylight";
+import type { Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./forest";
 import { disc, ribbon, type FlatMesh } from "./roads";
 import { CorpusRedwood } from "./CorpusRedwood";
@@ -12,29 +13,39 @@ import { SEASONS, type SeasonName } from "./seasons";
 import { sim } from "./sim";
 import { useGame } from "./store";
 import { tourAhead, tourState } from "./tour";
+import { DarrieusSculpture, HelixSculpture, SavoniusSculpture } from "./WindSculptures";
 
 const dummy = new Object3D();
+
+const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit }>> = {
+  mysterium: Mysterium,
+  helix: HelixSculpture,
+  darrieus: DarrieusSculpture,
+  savonius: SavoniusSculpture,
+};
 const TRAIL_N = 20;
 
 export function World({ forest, season }: { forest: Forest; season: SeasonName }) {
   const pal = SEASONS[season];
-  const timeOfDay = useGame((s) => s.timeOfDay);
-  const day = timeOfDay === "day";
-  const skyColor = useMemo(
-    () => new Color(day ? DAY_OVERRIDE.sky : pal.sky),
-    [day, pal.sky],
+  // Every colour eases from the season's night palette to the day look as the sun rises (sky.ts).
+  const sky = useGame((s) => s.sky);
+  const t = sky.daylight;
+  const skyColor = useMemo(() => new Color(pal.sky).lerp(new Color(DAY_OVERRIDE.sky), t), [t, pal.sky]);
+  // Sunrise and sunset warm the haze a little.
+  const fogColor = useMemo(
+    () => new Color(pal.fog).lerp(new Color(DAY_OVERRIDE.fog), t).lerp(new Color("#e3a07a"), sky.warmth * 0.45),
+    [t, sky.warmth, pal.fog],
   );
-  const fogColor = day ? DAY_OVERRIDE.fog : pal.fog;
-  const fogDensity = (season === "winter" ? 0.0077 : 0.0105) * (day ? DAY_OVERRIDE.fogDensityScale : 1);
-  const ambientColor = day ? DAY_OVERRIDE.ambient : pal.ambient;
-  const hemiIntensity = 0.78 * (day ? DAY_OVERRIDE.hemiIntensity : 1);
+  const fogDensity = (season === "winter" ? 0.0077 : 0.0105) * (1 + (DAY_OVERRIDE.fogDensityScale - 1) * t);
+  const ambientColor = useMemo(() => new Color(pal.ambient).lerp(new Color(DAY_OVERRIDE.ambient), t), [t, pal.ambient]);
+  const hemiIntensity = 0.78 * (1 + (DAY_OVERRIDE.hemiIntensity - 1) * t);
   const detail = useGame((s) => s.preferences.detail);
   const groundTexture = useGroundTexture();
   const groundColor = useMemo(() => {
-    const c = new Color(pal.ground);
-    if (day) c.offsetHSL(0, -0.08, DAY_OVERRIDE.groundLightness);
-    return c;
-  }, [day, pal.ground]);
+    const night = new Color(pal.ground);
+    const day = night.clone().offsetHSL(0, -0.08, DAY_OVERRIDE.groundLightness);
+    return night.lerp(day, t);
+  }, [t, pal.ground]);
   const selectedGrove = useGame((s) => s.selectedGrove);
   const query = useGame((s) => s.query);
   const searchPick = useGame((s) => s.searchPick);
@@ -45,8 +56,8 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
       <color attach="background" args={[skyColor]} />
       <fogExp2 attach="fog" args={[fogColor, fogDensity]} />
       <hemisphereLight color={ambientColor} groundColor={groundColor} intensity={hemiIntensity} />
-      <Sunlight day={day} detail={detail} />
-      <Sky day={day} season={season} />
+      <Sunlight light={sky.light} detail={detail} />
+      <Sky sky={sky} season={season} />
       <directionalLight position={[-30, 20, -40]} intensity={0.2} color="#8aa0b8" />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
@@ -73,7 +84,10 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
       })}
 
       <CorpusRedwood forest={forest} season={season} />
-      {forest.exhibits.map((e) => (e.id === "mysterium" ? <Mysterium key={e.id} exhibit={e} /> : null))}
+      {forest.exhibits.map((e) => {
+        const View = EXHIBIT_VIEWS[e.id];
+        return View ? <View key={e.id} exhibit={e} /> : null;
+      })}
 
     </>
   );
@@ -95,7 +109,7 @@ function brickMaterial() {
   const load = (map: string, srgb = false) => {
     const tex = loader.load(`textures/road/brick_${map}.jpg`);
     tex.wrapS = tex.wrapT = RepeatWrapping;
-    tex.anisotropy = 8;
+    tex.anisotropy = textureAnisotropy(8);
     if (srgb) tex.colorSpace = SRGBColorSpace;
     return tex;
   };

@@ -1,20 +1,60 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
+import { BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
 import type { Forest } from "./forest";
+import type { SkyState } from "./sky";
 import { mulberry32 } from "./math";
 import type { SeasonName } from "./seasons";
 import { sim } from "./sim";
 import { useGame } from "./store";
 
-/** A camera-centred sky: no distant sphere edge when exploring the outer groves. */
-export function Sky({ day, season }: { day: boolean; season: SeasonName }) {
+/**
+ * A camera-centred sky: no distant sphere edge when exploring the outer groves.
+ * The sun and moon stand where sky.ts puts them for the clock. The moon is drawn
+ * as a sphere lit from the sun's direction, so its phase, and which way its
+ * lit side faces, come from where the two actually are. Both discs are drawn
+ * about eight times their true size so they read from the cart.
+ */
+export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
   const dome = useRef<Object3D>(null);
+  const material = useRef<ShaderMaterial>(null);
+  // NASA SVS's LRO colour map (public/textures/moon/CREDITS.md): the moon's surface, lit by the shader.
+  const moonMap = useMemo(() => {
+    const tex = new TextureLoader().load("textures/moon/moon_color.jpg", () => {
+      const u = material.current?.uniforms;
+      if (u?.moonReady) u.moonReady.value = 1;
+    });
+    tex.colorSpace = SRGBColorSpace;
+    return tex;
+  }, []);
+  useEffect(() => () => moonMap.dispose(), [moonMap]);
   const uniforms = useMemo(() => ({
-    zenith: { value: new Color(day ? (season === "winter" ? "#7496af" : "#427fae") : "#071224") },
-    horizon: { value: new Color(day ? (season === "autumn" ? "#e8c8a1" : "#d1e0d6") : "#263c51") },
-    daylight: { value: day ? 1 : 0 },
-  }), [day, season]);
+    zenith: { value: new Color() },
+    horizon: { value: new Color() },
+    daylight: { value: 0 },
+    warmth: { value: 0 },
+    sunDir: { value: new Vector3(0, 1, 0) },
+    moonDir: { value: new Vector3(0, -1, 0) },
+    moonFraction: { value: 0 },
+    moonMap: { value: moonMap },
+    moonReady: { value: 0 },
+  }), [moonMap]);
+  // Written through the material, not `uniforms`: the material holds its own
+  // copy, sharing the Color and Vector3 objects but not plain numbers, so a
+  // number set on `uniforms` after the first render would never reach the shader.
+  useEffect(() => {
+    const u = (material.current?.uniforms ?? uniforms) as typeof uniforms;
+    const t = sky.daylight;
+    u.zenith.value.set("#071224").lerp(new Color(season === "winter" ? "#7496af" : "#427fae"), t);
+    u.horizon.value.set("#263c51").lerp(new Color(season === "autumn" ? "#e8c8a1" : "#d1e0d6"), t);
+    u.daylight.value = t;
+    u.warmth.value = sky.warmth;
+    u.sunDir.value.set(...sky.sunDir);
+    u.moonDir.value.set(...sky.moonDir);
+    u.moonFraction.value = sky.moonFraction;
+    // In case the map finished loading before the material existed to hear it.
+    if (moonMap.image) u.moonReady.value = 1;
+  }, [sky, season, uniforms, moonMap]);
   const stars = useMemo(() => {
     const random = mulberry32(917);
     const positions = new Float32Array(750 * 3);
@@ -26,31 +66,70 @@ export function Sky({ day, season }: { day: boolean; season: SeasonName }) {
     }
     return positions;
   }, []);
+  // Stars come out as the sky darkens, not at a switch.
+  const starOpacity = 0.8 * (1 - sky.daylight) ** 2;
   useFrame(({ camera }) => dome.current?.position.copy(camera.position));
   return (
     <group ref={dome}>
       <mesh renderOrder={-10}>
         <sphereGeometry args={[280, 32, 16]} />
-        <shaderMaterial side={BackSide} depthWrite={false} uniforms={uniforms}
+        <shaderMaterial ref={material} side={BackSide} depthWrite={false} uniforms={uniforms}
           vertexShader={`varying vec3 direction;
             void main() { direction = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`}
           fragmentShader={`varying vec3 direction;
-            uniform vec3 zenith; uniform vec3 horizon; uniform float daylight;
+            uniform vec3 zenith; uniform vec3 horizon; uniform float daylight; uniform float warmth;
+            uniform vec3 sunDir; uniform vec3 moonDir; uniform float moonFraction;
+            uniform sampler2D moonMap; uniform float moonReady;
             void main() {
               vec3 d = normalize(direction);
               vec3 col = mix(horizon, zenith, pow(max(d.y, 0.0), 0.55));
-              float sun = max(dot(d, normalize(vec3(40., 55., 18.))), 0.0);
-              col += vec3(1., .8, .5) * pow(sun, 32.) * .28 * daylight;
-              col += mix(vec3(.55, .65, .8), vec3(1., .9, .65), daylight) * smoothstep(.9992, .9997, sun);
+              // Sunrise and sunset: the low sky warms, most toward the sun.
+              vec2 dh = normalize(d.xz + vec2(1e-5));
+              vec2 sh = normalize(sunDir.xz + vec2(1e-5));
+              float toward = 0.35 + 0.65 * pow(max(dot(dh, sh), 0.0), 3.0);
+              col = mix(col, vec3(.98, .55, .30), warmth * toward * pow(1.0 - max(d.y, 0.0), 3.0) * 0.75);
+              float sun = max(dot(d, sunDir), 0.0);
+              float sunUp = smoothstep(-0.05, 0.02, sunDir.y);
+              col += vec3(1., .55, .28) * pow(sun, 6.) * .3 * warmth * sunUp;
+              col += vec3(1., .8, .5) * pow(sun, 32.) * .28 * daylight * sunUp;
+              // Mixed in, not added, so a low sun stays orange instead of clipping to white.
+              col = mix(col, mix(vec3(1., .97, .88), vec3(1., .42, .16), warmth) * 1.15, smoothstep(.9992, .9997, sun) * sunUp);
+              // The moon: 0.0374 is the sine of the disc's radius (acos 0.9993, about 2.1 degrees).
+              // Disc coordinates and the map lookup run for every pixel, outside the branch,
+              // so the texture's mipmap derivatives stay defined.
+              float md = dot(d, moonDir);
+              float moonUp = smoothstep(-0.03, 0.03, moonDir.y);
+              vec3 right = normalize(cross(moonDir, vec3(0.0, 1.0, 0.0)) + vec3(1e-4, 0.0, 0.0));
+              vec3 up = cross(right, moonDir);
+              vec2 p = vec2(dot(d, right), dot(d, up)) / 0.0374;
+              float r2 = dot(p, p);
+              float z = sqrt(max(1.0 - r2, 0.0));
+              // The near side faces us: longitude runs toward the viewer's right (Mare Crisium
+              // is at +59), latitude up. The map is equirectangular, centred on longitude 0.
+              vec2 muv = vec2(0.5 + atan(p.x, max(z, 1e-4)) / 6.2831853, 0.5 + asin(clamp(p.y, -1.0, 1.0)) / 3.1415927);
+              vec3 albedo = mix(vec3(.82), texture2D(moonMap, muv).rgb, moonReady);
+              // The mosaic is normalised flat and a little blue: half its colour, and more contrast for the maria.
+              albedo = mix(vec3(dot(albedo, vec3(.2126, .7152, .0722))), albedo, 0.5);
+              albedo = pow(albedo, vec3(1.8)) * 1.45;
+              if (md > 0.9993 && moonUp > 0.0 && r2 < 1.0) {
+                // The visible hemisphere's normal faces back toward the viewer.
+                vec3 n = p.x * right + p.y * up - z * moonDir;
+                float lit = smoothstep(-0.04, 0.08, dot(n, sunDir));
+                float edge = smoothstep(1.0, 0.85, r2) * moonUp;
+                // Earthshine: the unlit side is faintly there at night.
+                col = mix(col, albedo * .1, (1.0 - lit) * edge * (1.0 - daylight) * 0.75);
+                col = mix(col, albedo * 1.05, lit * edge * mix(1.0, 0.55, daylight));
+              }
+              col += vec3(.45, .5, .62) * pow(max(md, 0.0), 900.0) * .35 * moonFraction * (1.0 - daylight) * moonUp;
               gl_FragColor = vec4(col, 1.);
               #include <tonemapping_fragment>
               #include <colorspace_fragment>
             }`} />
       </mesh>
-      {!day && <points>
+      <points visible={starOpacity > 0.01}>
         <bufferGeometry><bufferAttribute attach="attributes-position" args={[stars, 3]} /></bufferGeometry>
-        <pointsMaterial color="#e4edff" size={0.65} sizeAttenuation transparent opacity={0.8} depthWrite={false} fog={false} />
-      </points>}
+        <pointsMaterial color="#e4edff" size={0.65} sizeAttenuation transparent opacity={starOpacity} depthWrite={false} fog={false} />
+      </points>
     </group>
   );
 }
@@ -60,20 +139,39 @@ export const COARSE_POINTER = typeof matchMedia === "function" && matchMedia("(p
 /** Phones: a touch screen under 640px on its short side. */
 export const PHONE = COARSE_POINTER && Math.min(screen.width, screen.height) < 640;
 
-/** Keep one modest shadow map around the cart instead of covering the entire forest. */
-export function Sunlight({ day, detail }: { day: boolean; detail: boolean }) {
+/**
+ * WebKit (Safari, and every browser on iOS) renders a texture black when
+ * anisotropic filtering is on: roads, plazas and bark all went black in Safari
+ * while rocks, which never set it, were fine. Chrome's "Chrome/" token keeps it
+ * out; iOS Chrome ("CriOS") runs WebKit and stays in.
+ */
+const WEBKIT = typeof navigator !== "undefined" && /AppleWebKit/.test(navigator.userAgent) && !/Chrome\//.test(navigator.userAgent);
+
+/** Anisotropy to set on a texture: `n` where it works, off (1) in WebKit. */
+export function textureAnisotropy(n: number): number {
+  return WEBKIT ? 1 : n;
+}
+
+/**
+ * The one shadow-casting light, from the sun, the moon or the stars (sky.ts),
+ * kept on a modest shadow map around the cart instead of covering the forest.
+ */
+export function Sunlight({ light: l, detail }: { light: SkyState["light"]; detail: boolean }) {
   const light = useRef<DirectionalLight>(null);
   const target = useMemo(() => new Object3D(), []);
+  // Never from below the ground: a sun on the horizon still lights from just above it.
+  const dir = useMemo(() => new Vector3(l.dir[0], Math.max(l.dir[1], 0.05), l.dir[2]).normalize(), [l.dir]);
   useFrame(() => {
     if (!light.current) return;
     target.position.set(sim.x, 0, sim.z);
-    light.current.position.set(sim.x + 40, 55, sim.z + 18);
+    light.current.position.set(sim.x + dir.x * 80, dir.y * 80, sim.z + dir.z * 80);
     target.updateMatrixWorld();
   });
   return <>
     <primitive object={target} />
-    <directionalLight ref={light} target={target} color={day ? "#fff0d2" : "#94b7e5"}
-      intensity={day ? 2.4 : 0.55} castShadow={detail}
+    {/* With no shadow to cast (night, twilight, a low sun) the shadow pass is skipped entirely. */}
+    <directionalLight ref={light} target={target} color={l.color}
+      intensity={l.intensity} castShadow={detail && l.shadow > 0.01} shadow-intensity={l.shadow}
       shadow-mapSize={COARSE_POINTER ? [1024, 1024] : [2048, 2048]} shadow-camera-left={-40} shadow-camera-right={40}
       shadow-camera-top={40} shadow-camera-bottom={-40} shadow-camera-near={1} shadow-camera-far={160}
       shadow-bias={-0.0002} shadow-normalBias={0.08} />

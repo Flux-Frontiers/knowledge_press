@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { TimeOfDay } from "./daylight";
+import { effectiveTime, moonPhaseName, nextSunEvent, skyState, timeZonePlace, type Place, type SkyState, type TimeMode } from "./sky";
 import type { SeasonName } from "./seasons";
 import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
@@ -12,7 +13,9 @@ type SaveBlob = {
   library: string[];
   grovesVisited: string[];
   season: SeasonName;
-  timeOfDay: TimeOfDay;
+  timeMode: TimeMode;
+  /** The browser's location, rounded to 0.1 degree, once it has been given. */
+  place: Place | null;
   preferences: Preferences;
 };
 
@@ -22,14 +25,15 @@ function loadSave(): SaveBlob {
     library: [],
     grovesVisited: [],
     season: "summer",
-    timeOfDay: "day",
+    timeMode: "live",
+    place: null,
     preferences: readPreferences(),
   };
   if (typeof window === "undefined") return defaults;
   try {
     const raw = window.localStorage.getItem(SAVE_KEY);
     if (!raw) return defaults;
-    const parsed = JSON.parse(raw) as Partial<SaveBlob>;
+    const parsed = JSON.parse(raw) as Partial<SaveBlob> & { timeOfDay?: TimeOfDay };
     return {
       ...defaults,
       ...parsed,
@@ -43,7 +47,11 @@ function loadSave(): SaveBlob {
         parsed.season === "winter"
           ? parsed.season
           : "summer",
-      timeOfDay: parsed.timeOfDay === "night" ? "night" : "day",
+      // Saves from before the clock kept only a day/night flag; night stays night.
+      timeMode: parsed.timeMode === "live" || parsed.timeMode === "day" || parsed.timeMode === "night"
+        ? parsed.timeMode
+        : parsed.timeOfDay === "night" ? "night" : "live",
+      place: parsed.place && Number.isFinite(parsed.place.lat) && Number.isFinite(parsed.place.lon) ? parsed.place : null,
       preferences: readPreferences(parsed.preferences),
     };
   } catch {
@@ -55,7 +63,8 @@ function persist(s: {
   library: string[];
   grovesVisited: string[];
   season: SeasonName;
-  timeOfDay: TimeOfDay;
+  timeMode: TimeMode;
+  place: Place | null;
   preferences: Preferences;
 }) {
   try {
@@ -64,7 +73,8 @@ function persist(s: {
       library: s.library,
       grovesVisited: s.grovesVisited,
       season: s.season,
-      timeOfDay: s.timeOfDay,
+      timeMode: s.timeMode,
+      place: s.place,
       preferences: s.preferences,
     };
     window.localStorage.setItem(SAVE_KEY, JSON.stringify(blob));
@@ -81,13 +91,22 @@ export type JumpPose = {
   yaw: number;
 };
 
+export type PlaqueText = { title: string; byline: string; body: string };
+
 export type GameStore = {
   playing: boolean;
   preferences: Preferences;
   setPreferences: (patch: Partial<Preferences>) => void;
   paused: boolean;
   season: SeasonName;
+  /** Night or day as the sky now looks, derived from `sky`: what the lamps and glows switch on. */
   timeOfDay: TimeOfDay;
+  timeMode: TimeMode;
+  place: Place | null;
+  sky: SkyState;
+  /** In live mode, the next sunrise or sunset. */
+  sunEvent: { kind: "sunrise" | "sunset"; at: Date } | null;
+  moonName: string;
   query: string;
   searchPick: string | null;
   library: string[];
@@ -113,12 +132,18 @@ export type GameStore = {
   catalogOpen: boolean;
   /** The genre the book list is narrowed to, when opened from a grove's marker. */
   catalogGenre: string | null;
+  /** An exhibit plaque shown full size to read, after clicking it in the forest. */
+  plaque: PlaqueText | null;
   travelMode: TravelMode;
   jump: JumpPose | null;
   play: () => void;
   pause: (v?: boolean) => void;
   setSeason: (s: SeasonName) => void;
+  /** Cycle the clock: live, then fixed day, then fixed night. */
   toggleTimeOfDay: () => void;
+  /** Recompute the sky for the current moment; called every few seconds. */
+  tickSky: () => void;
+  setPlace: (place: Place) => void;
   setQuery: (q: string) => void;
   pickSearch: (slug: string | null) => void;
   collect: (slug: string, title: string) => void;
@@ -137,6 +162,7 @@ export type GameStore = {
   toggleCatalog: () => void;
   setCatalogOpen: (v: boolean) => void;
   openCatalog: (genre: string | null) => void;
+  openPlaque: (plaque: PlaqueText | null) => void;
   setTravelMode: (m: TravelMode) => void;
   toggleCircuit: () => void;
   requestJump: (pose: JumpPose, toast?: string) => void;
@@ -144,6 +170,20 @@ export type GameStore = {
 };
 
 const initial = loadSave();
+
+/** What the sky shows: the moment the mode picks, the sun and moon there, and what the HUD says of them. */
+function readSky(mode: TimeMode, place: Place | null, now = new Date()) {
+  const where = place ?? timeZonePlace(now);
+  const sky = skyState(effectiveTime(mode, now, where), where);
+  return {
+    sky,
+    timeOfDay: (sky.daylight < 0.3 ? "night" : "day") as TimeOfDay,
+    sunEvent: mode === "live" ? nextSunEvent(now, where) : null,
+    moonName: moonPhaseName(sky.moonPhase),
+  };
+}
+
+const TIME_CYCLE: Record<TimeMode, TimeMode> = { live: "day", day: "night", night: "live" };
 
 export const useGame = create<GameStore>((set, get) => ({
   playing: false,
@@ -155,7 +195,9 @@ export const useGame = create<GameStore>((set, get) => ({
   },
   paused: false,
   season: initial.season,
-  timeOfDay: initial.timeOfDay,
+  timeMode: initial.timeMode,
+  place: initial.place,
+  ...readSky(initial.timeMode, initial.place),
   query: "",
   searchPick: null,
   library: initial.library,
@@ -178,6 +220,7 @@ export const useGame = create<GameStore>((set, get) => ({
   atlasOpen: false,
   catalogOpen: false,
   catalogGenre: null,
+  plaque: null,
   travelMode: "free",
   jump: null,
   play: () => set({ playing: true, paused: false }),
@@ -190,9 +233,14 @@ export const useGame = create<GameStore>((set, get) => ({
     persist({ ...get(), season });
   },
   toggleTimeOfDay: () => {
-    const timeOfDay = get().timeOfDay === "day" ? "night" : "day";
-    set({ timeOfDay });
-    persist({ ...get(), timeOfDay });
+    const timeMode = TIME_CYCLE[get().timeMode];
+    set({ timeMode, ...readSky(timeMode, get().place) });
+    persist(get());
+  },
+  tickSky: () => set(readSky(get().timeMode, get().place)),
+  setPlace: (place) => {
+    set({ place, ...readSky(get().timeMode, place) });
+    persist(get());
   },
   setQuery: (query) => set({ query, searchPick: null }),
   pickSearch: (searchPick) => set({ searchPick }),
@@ -237,6 +285,7 @@ export const useGame = create<GameStore>((set, get) => ({
   toggleCatalog: () => set({ catalogOpen: !get().catalogOpen, catalogGenre: null, atlasOpen: false, libraryOpen: false }),
   openCatalog: (catalogGenre) => set({ catalogOpen: true, catalogGenre, atlasOpen: false, libraryOpen: false }),
   setCatalogOpen: (catalogOpen) => set({ catalogOpen }),
+  openPlaque: (plaque) => set(plaque ? { plaque, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { plaque: null }),
   // Leaving the ring drops the grove it was pointing at, so the lantern trail goes with it.
   setTravelMode: (travelMode) =>
     set(travelMode === "free" && get().travelMode === "circuit" ? { travelMode, selectedGrove: null } : { travelMode }),

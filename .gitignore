@@ -20,3 +20,6 @@ app/macos/build/
 app/fm-repro/FMRepro.xcodeproj/
 app/fm-repro/Info.plist
 app/fm-repro/build/
+
+# Screenshots and test renders from checking the forest by hand.
+renders/tests/

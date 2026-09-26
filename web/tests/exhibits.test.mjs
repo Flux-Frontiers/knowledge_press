@@ -49,3 +49,20 @@ test("exhibits stand in roadside glades: clear of trunks, off the road, apart fr
     assert.ok((fw.x * (e.x - a.x) + fw.z * (e.z - a.z)) / d > 0.999, `${e.id} approach looks away`);
   }
 });
+
+test("wind rotors turn over their own plaza: overhead of the cart, never out over the road", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const { rotorEnvelope, PLINTH_TOP } = require(`${process.env.FOREST_TEST_BUILD}/windRotors.js`);
+  const f = getForest();
+  for (const id of ["helix", "darrieus", "savonius"]) {
+    const e = f.exhibits.find((x) => x.id === id);
+    assert.ok(e, `${id} placed`);
+    const { reach, lowest } = rotorEnvelope(id);
+    assert.ok(lowest > PLINTH_TOP + 0.8, `${id} rotor sweeps the plinth top at ${lowest.toFixed(2)} m`);
+    // Anything wider than the plinth must pass over the head of someone standing beside it.
+    assert.ok(reach <= e.obstacle || lowest > 2.5, `${id} reaches ${reach.toFixed(2)} m at ${lowest.toFixed(2)} m`);
+    // The road's near edge (half the widest road, 1.7 m) and the cart's half width (1.05 m).
+    const toRoad = Math.hypot(e.roadX - e.x, e.roadZ - e.z);
+    assert.ok(reach < toRoad - 1.7 - 1.05, `${id} overhangs the road: ${reach.toFixed(2)} m of ${toRoad.toFixed(2)} m`);
+  }
+});
