@@ -369,6 +369,12 @@ mac-check: mac-generate
 	  -scheme KnowledgePress -destination 'platform=macOS' \
 	  -derivedDataPath build CODE_SIGNING_ALLOWED=NO build | tail -3
 
+# Developer ID signing takes no Private Cloud Compute: Apple's Developer ID
+# profile for this App ID does not grant it (the development and App Store
+# profiles do), and xcodebuild refuses to sign a restricted entitlement
+# without a profile granting it. So this build alone drops the entitlements
+# file on the command line; project.yml keeps PCC for every other build.
+# The notarized app answers on-device only.
 mac-build: mac-generate
 	@$(mac_resolve_identity); \
 	echo "Signing as $$IDENTITY"; \
@@ -377,6 +383,7 @@ mac-build: mac-generate
 	  -derivedDataPath build -configuration Release \
 	  CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="$$TEAM" \
 	  CODE_SIGN_IDENTITY="$$IDENTITY" OTHER_CODE_SIGN_FLAGS="--timestamp" \
+	  CODE_SIGN_ENTITLEMENTS= \
 	  build | tail -3
 
 # A Debug build signed with the Apple Development identity through automatic
