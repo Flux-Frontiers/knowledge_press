@@ -1,5 +1,8 @@
 # The Knowledge Press: the iOS / macOS app (app/) and the web forest (web/).
 #
+# Author: Eric G. Suchanek, PhD -- Flux-Frontiers, Liberty TWP, OH
+# Copyright (c) 2026 Eric G. Suchanek, PhD. Elastic License 2.0; see LICENSE.
+#
 # Both read a corpus that gutenberg_kg builds; nothing here builds one. Point
 # GUTENBERG_KG_DIR at a gutenberg_kg checkout (default: a sibling directory)
 # and run `make export-swift` there first. See app/RUNBOOK.md.
