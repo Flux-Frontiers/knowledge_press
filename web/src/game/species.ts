@@ -3,7 +3,7 @@
  * a small shift of the season's foliage colour, and its habit: the envelope
  * the book's chunks are laid out in and how the wood grows toward them.
  */
-export type SpeciesName = "oak" | "chestnut" | "fir" | "plane" | "blackthorn";
+export type SpeciesName = "oak" | "chestnut" | "fir" | "plane" | "blackthorn" | "pine" | "birch" | "willow" | "poplar";
 
 /**
  * A leaf outline. `ovate` is the original chestnut-style leaf at a half-width.
@@ -19,7 +19,7 @@ export type LeafShape =
  * Crown silhouette as a width profile over the crown's height, s in [0, 1]
  * from its base to its top (after Weber & Penn's crown shapes).
  */
-export type Envelope = "ellipsoid" | "cone" | "dome" | "ovoid" | "column" | "vase";
+export type Envelope = "ellipsoid" | "cone" | "dome" | "ovoid" | "column" | "vase" | "umbrella" | "spindle";
 
 /**
  * A species' growth habit. The book still decides everything that carries
@@ -38,6 +38,8 @@ export type Habit = {
    * keeps one central leader (fir).
    */
   leader: number;
+  /** Sections per whorl: >1 sets sections in level tiers around the stem (conifers), 1 spirals them. */
+  whorl: number;
   /** Chunk cluster radius around each section tip, as a multiple of the default. */
   spread: number;
   /** Chunks lift above (+) or hang below (-) their section tip, as a multiple of the default. */
@@ -52,6 +54,11 @@ export type Habit = {
   jitter: number;
   /** Pipe-model exponent: 2 is Leonardo's rule, higher tapers faster. */
   pipeExp: number;
+  /**
+   * Gravity after growth: thin wood bends toward the ground, carrying its
+   * chunks with it. 0 is stiff; a willow's 2.5 hangs its twigs straight down.
+   */
+  droop: number;
 };
 
 /** Crown half-width at crown height s in [0, 1], as a fraction of the widest. */
@@ -64,6 +71,8 @@ export function envelopeWidth(env: Envelope, s: number): number {
     case "dome": return Math.sqrt(Math.max(0, 1 - t * t)) * 0.8 + 0.2;
     case "vase": return 0.35 + 0.65 * Math.sin((Math.PI / 2) * Math.min(1, t * 1.25));
     case "column": return 1 - 0.4 * t;
+    case "umbrella": return t < 0.6 ? 0.25 + 0.75 * Math.sin((Math.PI / 2) * (t / 0.6)) : Math.sqrt(Math.max(0, 1 - ((t - 0.6) / 0.4) ** 2)) * 0.9 + 0.1;
+    case "spindle": return Math.sqrt(Math.sin(Math.PI * (0.08 + 0.84 * t)));
   }
 }
 
@@ -106,31 +115,64 @@ const FIR_HALF: [number, number][] = (() => {
   return out;
 })();
 
+// A pine tuft: fewer, longer needles than the fir spray, fanning toward the tip.
+const PINE_HALF: [number, number][] = (() => {
+  const out: [number, number][] = [];
+  const n = 7;
+  for (let k = 0; k < n; k++) {
+    const y = 0.68 - (1.2 * k) / (n - 1);
+    const reach = 0.3 + 0.28 * Math.sin((Math.PI * (k + 1)) / (n + 1));
+    out.push([0.04, y + 0.03], [reach, y + 0.3], [reach + 0.015, y + 0.26], [0.04, y - 0.05]);
+  }
+  out.push([0.035, -1]);
+  return out;
+})();
+
 export const SPECIES: Species[] = [
   {
     // English oak: short bole, broad low dome, long gnarled horizontal limbs.
     name: "oak", barkAspect: 2, leaf: { shape: "outline", half: OAK_HALF, smooth: true }, foliageShift: [0, 0, 0],
-    habit: { envelope: "dome", leader: 0, width: 1.55, clearBole: 0.22, spread: 1.1, lift: 0.6, tropism: 0.02, influence: 16, step: 1.1, jitter: 0.24, pipeExp: 2 },
+    habit: { envelope: "dome", whorl: 1, droop: 0.05, leader: 0, width: 1.55, clearBole: 0.22, spread: 1.1, lift: 0.6, tropism: 0.02, influence: 16, step: 1.1, jitter: 0.24, pipeExp: 2 },
   },
   {
     // Horse chestnut: a full rounded ellipsoid on a medium bole.
     name: "chestnut", barkAspect: 1, leaf: { shape: "ovate", width: 0.36 }, foliageShift: [0.01, 0.04, -0.03],
-    habit: { envelope: "ellipsoid", leader: 0.15, width: 1.15, clearBole: 0.28, spread: 1, lift: 1, tropism: 0.14, influence: 12, step: 1, jitter: 0.14, pipeExp: 2.2 },
+    habit: { envelope: "ellipsoid", whorl: 1, droop: 0.08, leader: 0.15, width: 1.15, clearBole: 0.28, spread: 1, lift: 1, tropism: 0.14, influence: 12, step: 1, jitter: 0.14, pipeExp: 2.2 },
   },
   {
     // Fir: a narrow cone from near the ground, flat sprays, a fast-tapering stem.
     name: "fir", barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12],
-    habit: { envelope: "cone", leader: 0.92, width: 0.95, clearBole: 0.1, spread: 0.7, lift: -0.3, tropism: 0.3, influence: 7, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
+    habit: { envelope: "cone", whorl: 1, droop: 0.05, leader: 0.92, width: 0.95, clearBole: 0.1, spread: 0.7, lift: -0.3, tropism: 0.3, influence: 7, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
   },
   {
     // London plane: a long clean bole under a tall egg-shaped crown of long, rising limbs.
     name: "plane", barkAspect: 1, leaf: { shape: "outline", half: PLANE_HALF, smooth: false }, foliageShift: [-0.01, 0.02, 0.05],
-    habit: { envelope: "ovoid", leader: 0.3, width: 1.05, clearBole: 0.38, spread: 1, lift: 1.2, tropism: 0.24, influence: 18, step: 1.15, jitter: 0.1, pipeExp: 2.1 },
+    habit: { envelope: "ovoid", whorl: 1, droop: 0, leader: 0.3, width: 1.05, clearBole: 0.38, spread: 1, lift: 1.2, tropism: 0.24, influence: 18, step: 1.15, jitter: 0.1, pipeExp: 2.1 },
   },
   {
     // Blackthorn: a low, dense, twiggy thicket-tree that spreads upward from low down.
     name: "blackthorn", barkAspect: 1, leaf: { shape: "ovate", width: 0.7 }, foliageShift: [0.02, -0.1, -0.1],
-    habit: { envelope: "vase", leader: 0, width: 1.3, clearBole: 0.12, spread: 1.25, lift: 0.8, tropism: 0.1, influence: 6, step: 0.7, jitter: 0.3, pipeExp: 2.5 },
+    habit: { envelope: "vase", whorl: 1, droop: 0, leader: 0, width: 1.3, clearBole: 0.12, spread: 1.25, lift: 0.8, tropism: 0.1, influence: 6, step: 0.7, jitter: 0.3, pipeExp: 2.5 },
+  },
+  {
+    // Stone pine: a tall bare stem under a flat-topped parasol of tufts.
+    name: "pine", barkAspect: 1, leaf: { shape: "outline", half: PINE_HALF, smooth: false }, foliageShift: [0.04, -0.08, -0.08],
+    habit: { envelope: "umbrella", whorl: 1, droop: 0, leader: 0.45, width: 1.45, clearBole: 0.5, spread: 1.1, lift: 0.4, tropism: 0.12, influence: 14, step: 1.1, jitter: 0.12, pipeExp: 2.2 },
+  },
+  {
+    // Silver birch: a slender stem, a narrow open crown, fine twigs that hang at the ends.
+    name: "birch", barkAspect: 1, leaf: { shape: "ovate", width: 0.5 }, foliageShift: [0.02, 0.06, 0.07],
+    habit: { envelope: "ovoid", whorl: 1, droop: 0.45, leader: 0.7, width: 0.75, clearBole: 0.25, spread: 0.9, lift: 0.6, tropism: 0.3, influence: 9, step: 0.85, jitter: 0.1, pipeExp: 2.7 },
+  },
+  {
+    // Weeping willow: a short stout trunk, arching limbs, curtains of twigs to the ground.
+    name: "willow", barkAspect: 1, leaf: { shape: "ovate", width: 0.16 }, foliageShift: [0.03, 0.02, 0.06],
+    habit: { envelope: "dome", whorl: 1, droop: 2.5, leader: 0.45, width: 1.3, clearBole: 0.5, spread: 1.2, lift: -0.9, tropism: 0.2, influence: 12, step: 1, jitter: 0.12, pipeExp: 2.3 },
+  },
+  {
+    // Lombardy poplar: a tall narrow spindle of steeply rising branches.
+    name: "poplar", barkAspect: 1, leaf: { shape: "ovate", width: 0.62 }, foliageShift: [-0.01, 0.05, 0.02],
+    habit: { envelope: "spindle", whorl: 1, droop: 0, leader: 0.85, width: 0.42, clearBole: 0.08, spread: 0.7, lift: 1.2, tropism: 0.7, influence: 8, step: 0.9, jitter: 0.08, pipeExp: 2.4 },
   },
 ];
 
@@ -198,26 +240,26 @@ function withStalk(pts: [number, number][]): [number, number][] {
 
 const GENRE_SPECIES: Record<string, SpeciesName> = {
   philosophy: "oak",
-  "ancient-classical": "oak",
-  shakespeare: "oak",
-  "sacred-texts": "oak",
   "english-literature": "chestnut",
   "american-literature": "chestnut",
   biography: "chestnut",
-  drama: "chestnut",
   "science-fiction": "fir",
   "natural-history": "fir",
-  travel: "fir",
-  "audel-electric": "fir",
-  letters: "plane",
-  diaries: "plane",
   "french-literature": "plane",
   "world-literature": "plane",
   spanish: "plane",
   curiosities: "plane",
   horror: "blackthorn",
-  "russian-literature": "blackthorn",
   "german-literature": "blackthorn",
+  "ancient-classical": "pine",
+  "sacred-texts": "pine",
+  "russian-literature": "birch",
+  letters: "birch",
+  diaries: "birch",
+  shakespeare: "willow",
+  drama: "willow",
+  travel: "poplar",
+  "audel-electric": "poplar",
 };
 
 /** Index into SPECIES; unmapped genres grow chestnut. */

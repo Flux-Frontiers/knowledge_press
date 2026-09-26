@@ -33,7 +33,7 @@ sun.position.set(30, 60, 40);
 scene.add(sun);
 
 const loader = new TextureLoader();
-const COL = 26, ROW = 30;
+const COL = 24, ROW = 26;
 const labels = document.getElementById("labels")!;
 let maxH = 0;
 

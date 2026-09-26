@@ -28,7 +28,7 @@ export type GrownTree = {
 };
 
 /** Bump when caps change so the forest cache rebuilds. */
-export const GROW_VERSION = 11;
+export const GROW_VERSION = 12;
 
 // This file mirrors the Python viz3d (kg_utils.viz3d.organic.colonize and
 // gutenberg_kg.treegeom.grow_tree_geometry) so both front ends grow the same
@@ -78,10 +78,14 @@ export function placeCrown(
   const nLeaf = Math.max(1, nChunks);
 
   const sectionTips: Vec3[] = [];
+  // Whorled species set `whorl` sections level around the stem per tier.
+  const w = Math.max(1, Math.round(habit.whorl));
+  const tiers = Math.ceil(nSections / w);
   for (let i = 0; i < nSections; i++) {
-    const t = nSections === 1 ? 0.5 : i / (nSections - 1);
+    const tier = Math.floor(i / w);
+    const t = tiers === 1 ? 0.5 : tier / (tiers - 1);
     const y = trunkHeight * (habit.clearBole + (0.95 - habit.clearBole) * t);
-    const angle = i * GOLDEN;
+    const angle = w === 1 ? i * GOLDEN : ((i % w) * 2 * Math.PI) / w + tier * GOLDEN;
     const radius = branchLength * habit.width * envelopeWidth(habit.envelope, t);
     sectionTips.push({
       x: radius * Math.cos(angle),
@@ -300,6 +304,122 @@ function colonize(pts: Float32Array, m: number, habit: Habit, rng: () => number)
 }
 
 /**
+ * No two trees of a species are clones: each book nudges its species' habit
+ * by a seeded few percent (crown width, bole, tropism, droop).
+ */
+function varyHabit(habit: Habit, slug: string): Habit {
+  const rng = mulberry32(seedFromKey(slug + ":habit"));
+  const u = () => rng() * 2 - 1;
+  return {
+    ...habit,
+    width: habit.width * (1 + 0.12 * u()),
+    clearBole: clamp(habit.clearBole + 0.04 * u(), 0.05, 0.6),
+    tropism: habit.tropism + 0.05 * u(),
+    droop: habit.droop * (1 + 0.2 * u()),
+  };
+}
+
+/**
+ * Pipe-model radii, parent^e = sum child^e (e = 2 is Leonardo's rule), then
+ * thickened toward the height floor. Radii depend only on topology.
+ */
+function pipeRadii(parents: Int32Array, n: number, tipRadius: number, pipeExp: number, trunkHeight: number): Float32Array {
+  const radii = new Float32Array(n);
+  radii.fill(tipRadius);
+  // Walk children -> parent. Children have higher indices, so each node's own
+  // radius is final before it is added to its parent.
+  const childSum = new Float32Array(n);
+  for (let i = n - 1; i >= 1; i--) {
+    if (childSum[i]! > 0) radii[i] = childSum[i]! ** (1 / pipeExp);
+    const p = parents[i]!;
+    if (p >= 0) childSum[p] += radii[i]! ** pipeExp;
+  }
+  if (childSum[0]! > 0) radii[0] = childSum[0]! ** (1 / pipeExp);
+  // Tip count does not grow with the book, so tall trees came out spindly.
+  // Thicken toward the floor in proportion to each segment's share of the
+  // trunk, so the trunk reaches it and twigs stay nearly unchanged.
+  const base = radii[0]!;
+  const f = Math.max(TRUNK_PER_HEIGHT * trunkHeight, 0.18) / base;
+  if (f > 1) for (let i = 0; i < n; i++) radii[i] = radii[i]! * (1 + (f - 1) * (radii[i]! / base));
+  return radii;
+}
+
+/** Max bend toward the ground per internode, in radians, at droop 1 on the finest twig. */
+const DROOP_PER_NODE = 0.3;
+/** Wood at least this fraction of the trunk's radius stays stiff. */
+const DROOP_STIFF = 0.45;
+/** Drooping wood stops this far above the ground. */
+const DROOP_FLOOR = 0.3;
+
+type Quat = [number, number, number, number];
+const qMul = (a: Quat, b: Quat): Quat => [
+  a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1],
+  a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0],
+  a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3],
+  a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2],
+];
+function qRotate(q: Quat, x: number, y: number, z: number): [number, number, number] {
+  const [qx, qy, qz, qw] = q;
+  const tx = 2 * (qy * z - qz * y), ty = 2 * (qz * x - qx * z), tz = 2 * (qx * y - qy * x);
+  return [x + qw * tx + (qy * tz - qz * ty), y + qw * ty + (qz * tx - qx * tz), z + qw * tz + (qx * ty - qy * tx)];
+}
+
+/**
+ * Option-4 gravity pass (after Stava et al. 2014's bending): walking out from
+ * the root, each thin segment turns toward the ground by an angle that grows
+ * as the wood thins, and every segment inherits its parent's turn, so limbs
+ * arch and twigs hang. Segment lengths are kept. Each crown point moves with
+ * the node it hangs nearest, so every chunk stays on its own twig.
+ */
+function droopSkeleton(
+  nodes: Float32Array, parents: Int32Array, n: number, radii: Float32Array, droop: number,
+  step: number, points: Float32Array[],
+) {
+  if (droop <= 0 || n < 2) return;
+  const before = nodes.slice();
+  const stiff = DROOP_STIFF * radii[0]!;
+  const rot: Quat[] = new Array(n);
+  rot[0] = [0, 0, 0, 1];
+  for (let i = 1; i < n; i++) {
+    const p = parents[i]!;
+    const vx = before[i * 3]! - before[p * 3]!, vy = before[i * 3 + 1]! - before[p * 3 + 1]!, vz = before[i * 3 + 2]! - before[p * 3 + 2]!;
+    const len = Math.hypot(vx, vy, vz) || 1e-9;
+    let [cx, cy, cz] = qRotate(rot[p]!, vx / len, vy / len, vz / len);
+    let q = rot[p]!;
+    const thin = Math.max(0, 1 - radii[i]! / stiff);
+    const want = droop * DROOP_PER_NODE * thin * thin;
+    // Angle left to the plumb-down direction; bend by at most that.
+    const toDown = Math.acos(clamp(-cy, -1, 1));
+    const a = Math.min(want, toDown);
+    if (a > 1e-5) {
+      // Axis c x down, normalised; down = (0, -1, 0).
+      let ax = cz, az = -cx;
+      const al = Math.hypot(ax, az);
+      if (al > 1e-6) {
+        ax /= al; az /= al;
+        const h = a / 2, sh = Math.sin(h);
+        const bend: Quat = [ax * sh, 0, az * sh, Math.cos(h)];
+        q = qMul(bend, q);
+        [cx, cy, cz] = qRotate(bend, cx, cy, cz);
+      }
+    }
+    rot[i] = q;
+    nodes[i * 3] = nodes[p * 3]! + cx * len;
+    nodes[i * 3 + 1] = Math.max(DROOP_FLOOR, nodes[p * 3 + 1]! + cy * len);
+    nodes[i * 3 + 2] = nodes[p * 3 + 2]! + cz * len;
+  }
+  const near = nearestNodeIndex(before, n, Math.max(step, 0.25));
+  for (const pts of points) {
+    for (let c = 0; c < pts.length / 3; c++) {
+      const k = near(pts[c * 3]!, pts[c * 3 + 1]!, pts[c * 3 + 2]!);
+      pts[c * 3] += nodes[k * 3]! - before[k * 3]!;
+      pts[c * 3 + 1] += nodes[k * 3 + 1]! - before[k * 3 + 1]!;
+      pts[c * 3 + 2] += nodes[k * 3 + 2]! - before[k * 3 + 2]!;
+    }
+  }
+}
+
+/**
  * The leaf level never changes the skeleton, so growth is cached per book:
  * switching levels only re-places leaves.
  */
@@ -343,33 +463,20 @@ export function growTree(opts: {
   const { slug, genre, nChunks } = opts;
   const tipRadius = opts.tipRadius ?? TIP_RADIUS;
   const species = opts.species ?? speciesFor(genre);
-  const habit = SPECIES[species]!.habit;
+  const habit = varyHabit(SPECIES[species]!.habit, slug);
   const cacheKey = `${slug}|${species}|${nChunks}|${tipRadius}`;
   const cached = skeletonCache.get(cacheKey);
   const { trunkHeight, crown, nCrown } = cached?.crownInfo ?? placeCrown(nChunks, habit, slug);
   const { attractors, grown } = cached ?? growSkeleton(slug, crown, nCrown, habit);
-  if (!cached) skeletonCache.set(cacheKey, { crownInfo: { trunkHeight, crown, nCrown }, attractors, grown });
   const { nodes, parents, n } = grown;
-
-
-  const radii = new Float32Array(n);
-  radii.fill(tipRadius);
-  const pipeExp = habit.pipeExp;
-  // Pipe model, parent^e = sum child^e (e = 2 is Leonardo's rule): walk children -> parent. Children have higher indices, so each
-  // node's own radius is final before it is added to its parent.
-  const childSum = new Float32Array(n);
-  for (let i = n - 1; i >= 1; i--) {
-    if (childSum[i]! > 0) radii[i] = childSum[i]! ** (1 / pipeExp);
-    const p = parents[i]!;
-    if (p >= 0) childSum[p] += radii[i]! ** pipeExp;
+  const radii = pipeRadii(parents, n, tipRadius, habit.pipeExp, trunkHeight);
+  if (!cached) {
+    // The attractors alias the crown unless they were sampled from it.
+    const pts = attractors.buffer === crown.buffer ? [crown] : [crown, attractors];
+    droopSkeleton(nodes, parents, n, radii, habit.droop, grown.step, pts);
+    skeletonCache.set(cacheKey, { crownInfo: { trunkHeight, crown, nCrown }, attractors, grown });
   }
-  if (childSum[0]! > 0) radii[0] = childSum[0]! ** (1 / pipeExp);
-  // Tip count does not grow with the book, so tall trees came out spindly.
-  // Thicken toward the floor in proportion to each segment's share of the
-  // trunk, so the trunk reaches it and twigs stay nearly unchanged.
-  const base = radii[0]!;
-  const f = Math.max(TRUNK_PER_HEIGHT * trunkHeight, 0.18) / base;
-  if (f > 1) for (let i = 0; i < n; i++) radii[i] = radii[i]! * (1 + (f - 1) * (radii[i]! / base));
+
 
   // Leaves. Like grow_tree_geometry, a leaf stands for a chunk at the chunk's
   // own crown position; the level keeps an even stride of them (1 = all). A
