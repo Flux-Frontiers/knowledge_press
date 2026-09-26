@@ -68,11 +68,12 @@ export const HUB_PLAZA_R = 10;
 /** Bearing of the redwood's plaque from the hub; home looks back along it. */
 export const HUB_PLAQUE_DIR = Math.atan2(4.6, -4.2);
 export const HUB_PLAQUE_DIST = 7.2;
-// Home: 15 m out along the plaque's bearing, so the plaque stands between the
-// cart and the redwood; facing the hub (yaw convention of sim.yawToward).
+// Home: 11.5 m out along the plaque's bearing, so the plaque stands between the
+// cart and the redwood; facing the hub (yaw convention of sim.yawToward). At 15 m
+// the chase camera sat beside the Ancient & Classical signpost, which filled the view.
 const HOME = {
-  x: Math.cos(HUB_PLAQUE_DIR) * 15,
-  z: Math.sin(HUB_PLAQUE_DIR) * 15,
+  x: Math.cos(HUB_PLAQUE_DIR) * 11.5,
+  z: Math.sin(HUB_PLAQUE_DIR) * 11.5,
   yaw: Math.atan2(Math.cos(HUB_PLAQUE_DIR), Math.sin(HUB_PLAQUE_DIR)),
 };
 

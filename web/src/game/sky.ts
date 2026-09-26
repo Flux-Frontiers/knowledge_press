@@ -7,8 +7,8 @@
 
 export type Vec3 = [number, number, number];
 export type Place = { lat: number; lon: number };
-/** Live follows the device clock; day and night pin the sky to today's noon or tonight. */
-export type TimeMode = "live" | "day" | "night";
+/** Live follows the device clock; the rest pin the sky to today's sunrise, noon, sunset or tonight. */
+export type TimeMode = "live" | "dawn" | "day" | "dusk" | "night";
 /** Radians. Azimuth is SunCalc's: from south, positive toward the west. */
 export type BodyPosition = { altitude: number; azimuth: number };
 
@@ -109,20 +109,35 @@ function localMidnight(now: Date): number {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate()).valueOf();
 }
 
+/** Sun altitude for dawn and dusk: near the peak of the glow, and high enough for faint long shadows. */
+const LOW_SUN = 4 * RAD;
+
 /**
- * The moment the sky shows. Day is today's solar noon. Night is the darkest
+ * The moment the sky shows. Dawn and dusk are when today's sun rises or
+ * sets through LOW_SUN; where it never climbs that high, noon. Day is today's solar noon. Night is the darkest
  * part of tonight when the moon is highest, so a moon, if there is one up
  * tonight, is in the sky; with none, the darkest hour.
  */
 export function effectiveTime(mode: TimeMode, now: Date, place: Place): Date {
   if (mode === "live") return now;
-  if (mode === "day") {
+  if (mode === "day" || mode === "dawn" || mode === "dusk") {
     const start = localMidnight(now);
     let best = start, bestAlt = -Infinity;
+    let rise = -1, set = -1;
+    let prev = sunPosition(new Date(start), place).altitude - LOW_SUN;
     for (let t = start; t < start + DAY_MS; t += STEP) {
       const a = sunPosition(new Date(t), place).altitude;
       if (a > bestAlt) { bestAlt = a; best = t; }
+      const cur = a - LOW_SUN;
+      if (t > start && (prev < 0) !== (cur < 0)) {
+        const at = t - STEP * (cur / (cur - prev));
+        if (cur > 0 && rise < 0) rise = at;
+        if (cur < 0) set = at;
+      }
+      prev = cur;
     }
+    if (mode === "dawn" && rise >= 0) return new Date(rise);
+    if (mode === "dusk" && set >= 0) return new Date(set);
     return new Date(best);
   }
   const start = localMidnight(now) + DAY_MS / 2;

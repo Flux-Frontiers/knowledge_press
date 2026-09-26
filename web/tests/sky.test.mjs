@@ -61,6 +61,23 @@ test("day and night pin the sky: noon sun up high, night sun well down", () => {
   assert.equal(effectiveTime("live", now, NYC), now);
 });
 
+test("dawn and dusk pin the sky low in the east and west, glowing", () => {
+  const { effectiveTime, skyState, sunPosition } = sky();
+  const now = new Date("2026-09-25T15:00:00Z");
+  const noon = effectiveTime("day", now, NYC);
+  for (const [mode, before] of [["dawn", true], ["dusk", false]]) {
+    const at = effectiveTime(mode, now, NYC);
+    const sun = sunPosition(at, NYC);
+    assert.ok(Math.abs(sun.altitude / DEG - 4) < 0.5, `${mode} altitude ${sun.altitude / DEG}`);
+    assert.equal(at < noon, before, `${mode} is on the right side of noon`);
+    // SunCalc azimuth is from south, positive west: dawn in the east, dusk in the west.
+    assert.equal(sun.azimuth > 0, !before, `${mode} azimuth ${sun.azimuth / DEG}`);
+    const s = skyState(at, NYC);
+    assert.ok(s.warmth > 0.8, `${mode} warmth ${s.warmth}`);
+    assert.ok(s.daylight > 0.7 && s.daylight < 1, `${mode} daylight ${s.daylight}`);
+  }
+});
+
 test("light hands over from sun to moon through twilight without a jump", () => {
   const { skyState } = sky();
   let prev = null;

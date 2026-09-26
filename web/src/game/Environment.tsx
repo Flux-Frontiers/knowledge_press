@@ -45,8 +45,8 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
   useEffect(() => {
     const u = (material.current?.uniforms ?? uniforms) as typeof uniforms;
     const t = sky.daylight;
-    u.zenith.value.set("#071224").lerp(new Color(season === "winter" ? "#7496af" : "#427fae"), t);
-    u.horizon.value.set("#263c51").lerp(new Color(season === "autumn" ? "#e8c8a1" : "#d1e0d6"), t);
+    u.zenith.value.set("#071224").lerp(new Color(season === "winter" ? "#7496af" : "#3563b1"), t);
+    u.horizon.value.set("#263c51").lerp(new Color(season === "autumn" ? "#e8c8a1" : "#7dadec"), t);
     u.daylight.value = t;
     u.warmth.value = sky.warmth;
     u.sunDir.value.set(...sky.sunDir);
@@ -82,7 +82,7 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
             uniform sampler2D moonMap; uniform float moonReady;
             void main() {
               vec3 d = normalize(direction);
-              vec3 col = mix(horizon, zenith, pow(max(d.y, 0.0), 0.55));
+              vec3 col = mix(horizon, zenith, pow(max(d.y, 0.0), 0.4));
               // Sunrise and sunset: the low sky warms, most toward the sun.
               vec2 dh = normalize(d.xz + vec2(1e-5));
               vec2 sh = normalize(sunDir.xz + vec2(1e-5));

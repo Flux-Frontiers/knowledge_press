@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Knowledge Press Forest: screenshot button.** A camera button beside the
+  clean-view eye saves the 3-D view as a PNG, without the HUD. Desktop
+  browsers download it; phones and tablets open the share sheet, where Save
+  Image puts it in Photos.
 - **Knowledge Press Forest on GitHub Pages.** The Web workflow publishes
   `web/dist` to https://flux-frontiers.github.io/knowledge_press/ on every
   push to `main` that touches `web/`, and on a manual run from `main`.
@@ -75,6 +79,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Knowledge Press Forest: clearer day sky.** Daytime fog is about half as
+  dense (0.28 of the night density, was 0.5) and blue, the sky's horizon is
+  blue instead of grey-green, and the zenith blue is deeper and reaches
+  further down the dome. The day colours are chosen for what ACES tone
+  mapping shows: the old pale horizon came out near grey. Night and
+  autumn's warm horizon are unchanged.
+- **Knowledge Press Forest: dawn and dusk.** The time button cycles live,
+  dawn, day, dusk and night. Dawn and dusk pin the sky to today's sun 4°
+  above the horizon, rising or setting, near the peak of the glow.
+- **Knowledge Press Forest: home is closer to the redwood.** The drive
+  starts, and H returns, 11.5 m from the hub instead of 15 m. From 15 m the
+  chase camera sat beside the Ancient & Classical signpost, which filled the
+  opening view.
+- **Knowledge Press Forest: stronger wind in the leaves.** Crowns sway
+  together, more the higher the leaf, in waves across each grove, and every
+  leaf flaps about its stalk at about 1 Hz. The wind is applied in world space
+  now; before, each leaf only drifted about its own width, too little to see
+  beyond a few metres. It follows the same gusts as the wind sculptures and
+  moves the leaf shadows with it.
 - **Knowledge Press Forest: the "In the cart" camera is at eye level.** It sits
   at a standing adult's 1.65 m (was 1.3 m), gazes level instead of slightly
   down, and uses a 60 degree field of view (was 72), so the horizon, plaques
@@ -85,6 +108,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Knowledge Press Forest: no more road hairpins.** Road routing
+  string-pulls each route until it is taut, resampling and pulling from the
+  far end too. One forward pull kept the corners of any road A* had hugged,
+  so the ring swung in to the hub's north spoke and doubled back 107° to the
+  Ancient & Classical stop. The sharpest turn away from a stop is now 35°,
+  the network is 49 m shorter, and three exhibits, placed along the roads,
+  stand in new spots.
+- **Knowledge Press Forest: grove signposts.** The sign stands on a post at
+  each end instead of one centre post, which came out through the back of
+  the board, over the text as read from behind.
 - **Knowledge Press Forest: plaque posts no longer show through the text.**
   The lectern posts rose to 1.6 m, past the tilted board's centre, and came
   out through its face at either end; they now stop at 1.3 m, behind it.

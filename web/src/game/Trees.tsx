@@ -66,16 +66,31 @@ export function Trees({
         shader.uniforms.windTime = wind;
         shader.uniforms.windStrength = windStrength;
         shader.vertexShader = "uniform float windTime; uniform float windStrength;\n" + shader.vertexShader;
-        shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `
-          #include <begin_vertex>
-          float phase = instanceMatrix[3].x * .31 + instanceMatrix[3].z * .27;
-          // Slow gusts roll across the forest on top of the flutter.
-          float gust = 0.65 + 0.35 * sin(windTime * 0.35 + instanceMatrix[3].x * .02);
-          transformed.x += sin(windTime * 1.7 + phase) * .2 * gust * windStrength * (position.y + 1.0);
-          transformed.z += cos(windTime * 1.2 + phase) * .1 * gust * windStrength * (position.y + 1.0);
+        // Three's project_vertex, with the wind added in world space after the
+        // instance matrix: in leaf space a flap along the face normal would be
+        // scaled down by the blade's thin z.
+        shader.vertexShader = shader.vertexShader.replace("#include <project_vertex>", `
+          vec4 mvPosition = instanceMatrix * vec4(transformed, 1.0);
+          vec3 base = instanceMatrix[3].xyz;
+          float phase = base.x * .31 + base.z * .27;
+          // Slow gusts roll across the forest (windRotors.ts gust(), which turns the sculptures).
+          float gust = 0.65 + 0.35 * sin(windTime * 0.35 + base.x * .02);
+          float w = gust * windStrength;
+          // The crown sways together, more the higher the leaf, in waves across the grove.
+          vec2 windDir = vec2(0.93, 0.37);
+          float sway = sin(windTime * 1.1 + base.x * .05 + base.z * .04) + 0.4 * sin(windTime * 2.3 + base.z * .07);
+          mvPosition.xz += windDir * sway * w * .009 * base.y;
+          // Each leaf flaps about its stalk (the shape's y = -1 end), along its face normal.
+          float tip = (position.y + 1.0) * 0.5;
+          float flap = sin(windTime * 4.0 + phase * 3.0) + 0.5 * sin(windTime * 6.4 + phase * 1.7);
+          // Divided, not normalize(): a hidden leaf is scaled to zero, and normalize(0) is NaN.
+          vec3 leafNormal = instanceMatrix[2].xyz / max(length(instanceMatrix[2].xyz), 1e-6);
+          mvPosition.xyz += leafNormal * flap * tip * w * .35 * length(instanceMatrix[1].xyz);
+          mvPosition = modelViewMatrix * mvPosition;
+          gl_Position = projectionMatrix * mvPosition;
         `);
       };
-      material.customProgramCacheKey = () => "forest-leaf-wind-v2";
+      material.customProgramCacheKey = () => "forest-leaf-wind-v3";
     }
     return { leaf, depth };
   }, [wind, windStrength]);

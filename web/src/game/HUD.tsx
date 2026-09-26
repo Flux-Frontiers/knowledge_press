@@ -1,12 +1,15 @@
-import { Bell, BellOff, BookMarked, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, X } from "lucide-react";
+import { Bell, BellOff, BookMarked, Camera, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest, type Grove, type TreeSite } from "./forest";
 import { QUESTS, questProgress } from "./quests";
+import { saveScreenshot } from "./screenshot";
 import { SEASON_ORDER, SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
 import { useGame, type PlaqueText } from "./store";
+
+const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
 
 export function HUD({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
@@ -17,13 +20,13 @@ export function HUD({ forest }: { forest: Forest }) {
   // The sky ticks every few seconds; subscribing re-renders the clock with it.
   useGame((s) => s.sky);
   const clock = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  const timeLabel = timeMode === "live" ? clock(new Date()) : timeMode === "day" ? "Day" : "Night";
+  const timeLabel = timeMode === "live" ? clock(new Date()) : TIME_NAME[timeMode];
   const timeTitle =
     timeMode === "live"
-      ? `Live clock${sunEvent ? ` · ${sunEvent.kind} ${clock(sunEvent.at)}` : ""} · ${moonName} · tap for day`
-      : timeMode === "day"
-        ? "Day · tap for night"
-        : `Night · ${moonName} · tap for the live clock`;
+      ? `Live clock${sunEvent ? ` · ${sunEvent.kind} ${clock(sunEvent.at)}` : ""} · ${moonName} · tap for dawn`
+      : timeMode === "night"
+        ? `Night · ${moonName} · tap for the live clock`
+        : `${TIME_NAME[timeMode]} · tap for ${TIME_NAME[timeMode === "dawn" ? "day" : timeMode === "day" ? "dusk" : "night"].toLowerCase()}`;
   const toggleTimeOfDay = useGame((s) => s.toggleTimeOfDay);
   const query = useGame((s) => s.query);
   const setQuery = useGame((s) => s.setQuery);
@@ -114,6 +117,14 @@ export function HUD({ forest }: { forest: Forest }) {
           >
             {clean ? <Eye className="size-4" strokeWidth={1.75} /> : <EyeOff className="size-4" strokeWidth={1.75} />}
           </button>
+          <button
+            type="button"
+            onClick={() => { saveScreenshot(COARSE_POINTER); (document.activeElement as HTMLElement | null)?.blur(); }}
+            className="grid size-11 place-items-center rounded-md border border-border bg-surface"
+            aria-label="Save a screenshot of the forest" title="Screenshot"
+          >
+            <Camera className="size-4" strokeWidth={1.75} />
+          </button>
           {clean ? null : (<>
             <button
               type="button"
@@ -124,8 +135,12 @@ export function HUD({ forest }: { forest: Forest }) {
             >
               {timeMode === "live" ? (
                 <Clock className="size-4" strokeWidth={1.75} />
+              ) : timeMode === "dawn" ? (
+                <Sunrise className="size-4" strokeWidth={1.75} />
               ) : timeMode === "day" ? (
                 <Sun className="size-4" strokeWidth={1.75} />
+              ) : timeMode === "dusk" ? (
+                <Sunset className="size-4" strokeWidth={1.75} />
               ) : (
                 <Moon className="size-4" strokeWidth={1.75} />
               )}
