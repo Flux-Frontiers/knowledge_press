@@ -12,6 +12,9 @@ const camPos = new Vector3();
 /** Within this of a picked tree, the cart has arrived (reading range plus a margin). */
 const TRAIL_ARRIVED = 9;
 const lookAt = new Vector3();
+/** The behind-the-cart camera: metres back and up from the cart. */
+const FOLLOW_BACK = 6.5;
+const FOLLOW_UP = 3.5;
 
 export function Player({ forest, playing }: { forest: Forest; playing: boolean }) {
   const group = useRef<Group>(null);
@@ -45,7 +48,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       teleportSim(jump.x, jump.z, jump.yaw);
       useGame.getState().clearJump();
       const f = forwardOf(sim.yaw);
-      state.camera.position.set(sim.x - f.x * 8.4, sim.y + 4.5, sim.z - f.z * 8.4);
+      state.camera.position.set(sim.x - f.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - f.z * FOLLOW_BACK);
       lookAt.set(sim.x + f.x * 2.6, sim.y + 1.4, sim.z + f.z * 2.6);
       state.camera.lookAt(lookAt);
     }
@@ -99,8 +102,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       state.camera.position.copy(camPos);
       lookAt.set(sim.x + f.x * 10, sim.y + 1.65, sim.z + f.z * 10);
     } else {
-      const follow = preferences.camera === "high" ? 12 : 8.4;
-      const height = preferences.camera === "high" ? 10 : 4.5;
+      const follow = preferences.camera === "high" ? 12 : FOLLOW_BACK;
+      const height = preferences.camera === "high" ? 10 : FOLLOW_UP;
       camPos.set(sim.x - f.x * follow, sim.y + height, sim.z - f.z * follow);
       state.camera.position.lerp(camPos, 1 - Math.exp(-3.4 * dt));
       lookAt.set(sim.x + f.x * 2.6, sim.y + 1.4, sim.z + f.z * 2.6);

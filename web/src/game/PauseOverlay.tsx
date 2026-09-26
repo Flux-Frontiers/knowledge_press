@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
 import { useGame } from "./store";
 
 export function PauseOverlay() {
@@ -6,11 +7,19 @@ export function PauseOverlay() {
   const pause = useGame((s) => s.pause);
   const prefs = useGame((s) => s.preferences);
   const setPreferences = useGame((s) => s.setPreferences);
+  const season = useGame((s) => s.season);
+  const setSeason = useGame((s) => s.setSeason);
   const dialog = useRef<HTMLDialogElement>(null);
+  const back = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (paused) dialog.current?.showModal();
-    else dialog.current?.close();
+    if (paused) {
+      dialog.current?.showModal();
+      // showModal focuses the first control, the pace menu, which phones then
+      // show as picked. React's autoFocus ran once at mount, while the dialog
+      // was closed, so it can't steer this; focus the way back instead.
+      back.current?.focus();
+    } else dialog.current?.close();
   }, [paused]);
 
   function resume() {
@@ -41,6 +50,11 @@ export function PauseOverlay() {
         <label className="flex items-center justify-between gap-4">Wind & gentle cart motion
           <input type="checkbox" checked={prefs.motion} onChange={(e) => setPreferences({ motion: e.target.checked })} />
         </label>
+        <label className="flex items-center justify-between gap-4">Season
+          <select value={season} onChange={(e) => setSeason(e.target.value as SeasonName)} className="rounded-md border border-border bg-bg p-2">
+            {SEASON_ORDER.map((name) => <option key={name} value={name}>{SEASONS[name].label}</option>)}
+          </select>
+        </label>
         <label className="flex items-center justify-between gap-4">Leaf complexity
           <select value={prefs.leaves} onChange={(e) => setPreferences({ leaves: e.target.value as typeof prefs.leaves })} className="rounded-md border border-border bg-bg p-2">
             <option value="low">Low · 1 in 10 chunks</option><option value="medium">Medium · 1 in 4</option>
@@ -63,7 +77,7 @@ export function PauseOverlay() {
         <p><span className="text-fg">G</span> groves · <span className="text-fg">B</span> books · <span className="text-fg">H</span> home · <span className="text-fg">Q</span> guided tour</p>
         <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. Gamepad: left stick to drive, right stick to look, A to read, LT to brake, RT to hurry.</p>
       </div>
-      <button type="button" autoFocus className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
+      <button ref={back} type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
     </dialog>
   );
 }

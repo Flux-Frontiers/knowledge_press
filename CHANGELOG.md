@@ -59,6 +59,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   would shade on every pixel of the forest; the night frame rate is unchanged.
 - **`make web-kill`** stops every running Vite dev or preview server,
   matched by command line rather than port.
+- **Knowledge Press Forest: season in Settings.** The season picker was only
+  on the start screen and in the season buttons, which phones hide; Settings
+  now has it too.
+- **Knowledge Press Forest: clean view.** A button at the top right hides the
+  other buttons, the title card, the search box and the pop-up cards, leaving
+  the map and the driving controls. The same button brings them back.
 
 ### Removed
 
@@ -71,12 +77,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   down, and uses a 60 degree field of view (was 72), so the horizon, plaques
   and plinths sit where they would on foot and tall pieces are not stretched
   at the frame's edges. Tilt up to take in a sculpture or the redwood.
+- **Knowledge Press Forest: the "Behind the cart" camera is closer.** It
+  follows 6.5 m back and 3.5 m up (was 8.4 m and 4.5 m).
 
 ### Fixed
 
 - **Knowledge Press Forest: plaque posts no longer show through the text.**
   The lectern posts rose to 1.6 m, past the tilted board's centre, and came
   out through its face at either end; they now stop at 1.3 m, behind it.
+
+- **Knowledge Press Forest: opening Settings no longer selects the pace
+  menu.** The dialog focused its first control, which phones showed as
+  picked; it now focuses "Back to the forest".
 
 - **Knowledge Press Forest: roads, plazas and bark are no longer black in
   Safari.** WebKit (Safari, and every browser on iOS) renders a texture black
