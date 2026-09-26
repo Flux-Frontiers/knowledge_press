@@ -13,6 +13,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Knowledge Press Forest on GitHub Pages.** The Web workflow publishes
+  `web/dist` to https://flux-frontiers.github.io/knowledge_press/ on every
+  push to `main` that touches `web/`, and on a manual run from `main`.
 - **Knowledge Press Forest: three wind sculptures.** Each is a vertical-axis
   rotor of a real design, on its own roadside plaza with a reading plaque:
   Gorlov's helical rotor (three stainless blades, each twisted half a turn),
