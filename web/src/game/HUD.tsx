@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookMarked, Clock, Compass, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, X } from "lucide-react";
+import { Bell, BellOff, BookMarked, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -54,6 +54,8 @@ export function HUD({ forest }: { forest: Forest }) {
   const catalogOpen = useGame((s) => s.catalogOpen);
   const toggleCatalog = useGame((s) => s.toggleCatalog);
   const plaque = useGame((s) => s.plaque);
+  const clean = useGame((s) => s.cleanView);
+  const toggleCleanView = useGame((s) => s.toggleCleanView);
   const silent = useGame((s) => s.preferences.silent);
   const setPreferences = useGame((s) => s.setPreferences);
 
@@ -85,144 +87,159 @@ export function HUD({ forest }: { forest: Forest }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-10 text-fg">
       <header className="pointer-events-auto flex items-start justify-between gap-3 p-3 sm:p-4">
-        <div className="rounded-lg border border-border bg-surface/90 px-3 py-2">
-          <p className="font-display text-lg leading-none">Knowledge Press</p>
-          <p className="mt-1 text-xs text-muted">
-            {forest.trees.length} trees · {SEASONS[season].label}
-            {" · "}
-            {timeLabel}
-            {travelMode === "circuit" ? " · ring" : ""}
-            {progress.done ? ` · ${progress.done}/${progress.total}` : ""}
-          </p>
-          {stats ? (
-            <p className="mt-1 font-mono text-[11px] text-faint tabular-nums">
-              {(stats.tris / 1e6).toFixed(2)}M tris · {stats.calls} calls · {(forest.leaves.count / 1000).toFixed(0)}k leaves · {stats.fps.toFixed(0)} fps
+        {clean ? null : (
+          <div className="rounded-lg border border-border bg-surface/90 px-3 py-2">
+            <p className="font-display text-lg leading-none">Knowledge Press</p>
+            <p className="mt-1 text-xs text-muted">
+              {forest.trees.length} trees · {SEASONS[season].label}
+              {" · "}
+              {timeLabel}
+              {travelMode === "circuit" ? " · ring" : ""}
+              {progress.done ? ` · ${progress.done}/${progress.total}` : ""}
             </p>
-          ) : null}
-        </div>
-        <div className="flex flex-wrap items-center justify-end gap-2">
+            {stats ? (
+              <p className="mt-1 font-mono text-[11px] text-faint tabular-nums">
+                {(stats.tris / 1e6).toFixed(2)}M tris · {stats.calls} calls · {(forest.leaves.count / 1000).toFixed(0)}k leaves · {stats.fps.toFixed(0)} fps
+              </p>
+            ) : null}
+          </div>
+        )}
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
-            onClick={toggleTimeOfDay}
+            onClick={() => { toggleCleanView(); (document.activeElement as HTMLElement | null)?.blur(); }}
             className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-            aria-label={timeTitle}
-            title={timeTitle}
+            aria-label={clean ? "Show the buttons again" : "Clean view: hide the buttons, keep the map"}
+            title={clean ? "Show the buttons" : "Clean view"}
           >
-            {timeMode === "live" ? (
-              <Clock className="size-4" strokeWidth={1.75} />
-            ) : timeMode === "day" ? (
-              <Sun className="size-4" strokeWidth={1.75} />
-            ) : (
-              <Moon className="size-4" strokeWidth={1.75} />
-            )}
+            {clean ? <Eye className="size-4" strokeWidth={1.75} /> : <EyeOff className="size-4" strokeWidth={1.75} />}
           </button>
-          <button
-            type="button"
-            onClick={() => setPreferences({ silent: !silent })}
-            className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-            aria-label={silent ? "Silent mode on: turn pop-up cards back on" : "Turn on silent mode: no pop-up cards"}
-            title={silent ? "Silent · tap for pop-up cards" : "Pop-up cards · tap for silent"}
-          >
-            {silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
-          </button>
-          <button
-            type="button"
-            onClick={() => { jumpHome(forest); (document.activeElement as HTMLElement | null)?.blur(); }}
-            className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-            aria-label="Home: back to the corpus redwood" title="Home · H"
-          >
-            <House className="size-4" strokeWidth={1.75} />
-          </button>
-          <button
-            type="button"
-            onClick={toggleAtlas}
-            className={
-              "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm " +
-              (atlasOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
-            }
-            aria-label="Open grove atlas"
-          >
-            <Map className="size-4" strokeWidth={1.75} />
-            <span className="hidden sm:inline">Groves</span>
-          </button>
-          <button
-            type="button"
-            onClick={toggleCatalog}
-            className={
-              "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm " +
-              (catalogOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
-            }
-            aria-label="Browse every book" title="Every book · B"
-          >
-            <Library className="size-4" strokeWidth={1.75} />
-            <span className="hidden sm:inline">Books</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => pause(true)}
-            className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-            aria-label="Controls and settings" title="Controls and settings · Esc"
-          >
-            <Settings2 className="size-4" strokeWidth={1.75} />
-          </button>
-          <button
-            type="button"
-            onClick={toggleLibrary}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm"
-          >
-            <BookMarked className="size-4" strokeWidth={1.75} />
-            <span className="tabular-nums">{library.length}</span>
-          </button>
+          {clean ? null : (<>
+            <button
+              type="button"
+              onClick={toggleTimeOfDay}
+              className="grid size-11 place-items-center rounded-md border border-border bg-surface"
+              aria-label={timeTitle}
+              title={timeTitle}
+            >
+              {timeMode === "live" ? (
+                <Clock className="size-4" strokeWidth={1.75} />
+              ) : timeMode === "day" ? (
+                <Sun className="size-4" strokeWidth={1.75} />
+              ) : (
+                <Moon className="size-4" strokeWidth={1.75} />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setPreferences({ silent: !silent })}
+              className="grid size-11 place-items-center rounded-md border border-border bg-surface"
+              aria-label={silent ? "Silent mode on: turn pop-up cards back on" : "Turn on silent mode: no pop-up cards"}
+              title={silent ? "Silent · tap for pop-up cards" : "Pop-up cards · tap for silent"}
+            >
+              {silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
+            </button>
+            <button
+              type="button"
+              onClick={() => { jumpHome(forest); (document.activeElement as HTMLElement | null)?.blur(); }}
+              className="grid size-11 place-items-center rounded-md border border-border bg-surface"
+              aria-label="Home: back to the corpus redwood" title="Home · H"
+            >
+              <House className="size-4" strokeWidth={1.75} />
+            </button>
+            <button
+              type="button"
+              onClick={toggleAtlas}
+              className={
+                "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm " +
+                (atlasOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
+              }
+              aria-label="Open grove atlas"
+            >
+              <Map className="size-4" strokeWidth={1.75} />
+              <span className="hidden sm:inline">Groves</span>
+            </button>
+            <button
+              type="button"
+              onClick={toggleCatalog}
+              className={
+                "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm " +
+                (catalogOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
+              }
+              aria-label="Browse every book" title="Every book · B"
+            >
+              <Library className="size-4" strokeWidth={1.75} />
+              <span className="hidden sm:inline">Books</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => pause(true)}
+              className="grid size-11 place-items-center rounded-md border border-border bg-surface"
+              aria-label="Controls and settings" title="Controls and settings · Esc"
+            >
+              <Settings2 className="size-4" strokeWidth={1.75} />
+            </button>
+            <button
+              type="button"
+              onClick={toggleLibrary}
+              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm"
+            >
+              <BookMarked className="size-4" strokeWidth={1.75} />
+              <span className="tabular-nums">{library.length}</span>
+            </button>
+          </>)}
         </div>
       </header>
 
-      {/* Bottom-centre above the key hints, results opening upward; touch layouts move it (styles.css). */}
-      <div className="search-dock pointer-events-auto z-20 mx-auto flex w-[min(100%-1.5rem,28rem)] flex-col gap-1 sm:absolute sm:bottom-9 sm:left-1/2 sm:mx-0 sm:w-[22rem] sm:-translate-x-1/2 sm:flex-col-reverse">
-        <label className="flex items-center gap-2 rounded-md border border-border bg-surface/90 px-3 py-2">
-          <Search className="size-4 shrink-0 text-muted" strokeWidth={1.75} />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && results[0]) jumpToTree(results[0]);
-              if (e.key === "Escape") e.currentTarget.blur();
-            }}
-            placeholder="Query the forest — freedom, fire, stoic…"
-            className="min-h-7 w-full bg-transparent text-sm text-fg outline-none placeholder:text-faint"
-          />
-          {query ? (
-            <button type="button" onClick={() => setQuery("")} aria-label="Clear the query and the lantern trail"
-              className="-my-2 -mr-2 grid size-9 shrink-0 place-items-center rounded-md text-muted">
-              <X className="size-4" strokeWidth={1.75} />
-            </button>
+      {clean ? null : (<>
+        {/* Bottom-centre above the key hints, results opening upward; touch layouts move it (styles.css). */}
+        <div className="search-dock pointer-events-auto z-20 mx-auto flex w-[min(100%-1.5rem,28rem)] flex-col gap-1 sm:absolute sm:bottom-9 sm:left-1/2 sm:mx-0 sm:w-[22rem] sm:-translate-x-1/2 sm:flex-col-reverse">
+          <label className="flex items-center gap-2 rounded-md border border-border bg-surface/90 px-3 py-2">
+            <Search className="size-4 shrink-0 text-muted" strokeWidth={1.75} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && results[0]) jumpToTree(results[0]);
+                if (e.key === "Escape") e.currentTarget.blur();
+              }}
+              placeholder="Query the forest — freedom, fire, stoic…"
+              className="min-h-7 w-full bg-transparent text-sm text-fg outline-none placeholder:text-faint"
+            />
+            {query ? (
+              <button type="button" onClick={() => setQuery("")} aria-label="Clear the query and the lantern trail"
+                className="-my-2 -mr-2 grid size-9 shrink-0 place-items-center rounded-md text-muted">
+                <X className="size-4" strokeWidth={1.75} />
+              </button>
+            ) : null}
+          </label>
+          {query.trim() ? (
+            <p className="px-1 text-xs text-muted sm:rounded-sm sm:bg-surface/80 sm:py-0.5">
+              {matches} tree{matches === 1 ? "" : "s"} answering
+              {picked ? ` · lantern points to ${picked.book.title}` : selected ? "" : " · lantern points to the nearest"}
+            </p>
           ) : null}
-        </label>
-        {query.trim() ? (
-          <p className="px-1 text-xs text-muted sm:rounded-sm sm:bg-surface/80 sm:py-0.5">
-            {matches} tree{matches === 1 ? "" : "s"} answering
-            {picked ? ` · lantern points to ${picked.book.title}` : selected ? "" : " · lantern points to the nearest"}
-          </p>
-        ) : null}
-        {query.trim() && matches && !picked ? (
-          <ul className="max-h-[40vh] overflow-auto rounded-md border border-border bg-surface/95 sm:max-h-72">
-            {results.slice(0, 30).map((t) => (
-              <li key={t.book.slug}>
-                <button type="button" onClick={() => jumpToTree(t)}
-                  className="flex min-h-11 w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-bg">
-                  <span className="size-2.5 shrink-0 rounded-full" style={{ background: t.color }} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm leading-snug">{t.book.title}</span>
-                    <span className="block truncate text-xs text-muted">{t.book.author} · {t.book.genreLabel}</span>
-                  </span>
-                  <span className="shrink-0 text-xs text-muted tabular-nums">{Math.round(Math.hypot(t.x - x, t.z - z))} m</span>
-                  <span className="shrink-0 text-xs text-primary">Jump</span>
-                </button>
-              </li>
-            ))}
-            {matches > 30 ? <li className="px-3 py-2 text-xs text-faint">{matches - 30} more; narrow the query</li> : null}
-          </ul>
-        ) : null}
-      </div>
+          {query.trim() && matches && !picked ? (
+            <ul className="max-h-[40vh] overflow-auto rounded-md border border-border bg-surface/95 sm:max-h-72">
+              {results.slice(0, 30).map((t) => (
+                <li key={t.book.slug}>
+                  <button type="button" onClick={() => jumpToTree(t)}
+                    className="flex min-h-11 w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-bg">
+                    <span className="size-2.5 shrink-0 rounded-full" style={{ background: t.color }} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm leading-snug">{t.book.title}</span>
+                      <span className="block truncate text-xs text-muted">{t.book.author} · {t.book.genreLabel}</span>
+                    </span>
+                    <span className="shrink-0 text-xs text-muted tabular-nums">{Math.round(Math.hypot(t.x - x, t.z - z))} m</span>
+                    <span className="shrink-0 text-xs text-primary">Jump</span>
+                  </button>
+                </li>
+              ))}
+              {matches > 30 ? <li className="px-3 py-2 text-xs text-faint">{matches - 30} more; narrow the query</li> : null}
+            </ul>
+          ) : null}
+        </div>
+      </>)}
 
       <div className="pointer-events-auto absolute top-36 right-3 w-28 sm:top-20 sm:w-40">
         <Minimap forest={forest} x={x} z={z} yaw={yaw} pins={query.trim() ? results : []} picked={searchPick} />
@@ -244,99 +261,101 @@ export function HUD({ forest }: { forest: Forest }) {
         )}
       </div>
 
-      <div className="book-dock pointer-events-auto absolute bottom-24 left-3 right-3 mx-auto max-w-lg sm:bottom-6 sm:left-4 sm:right-auto sm:max-w-[min(32rem,calc(50%-12rem))]">
-        {atRedwood ? (
-          <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">
-            <button
-              type="button"
-              onClick={() => setRedwoodClosed(true)}
-              className="absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-md text-muted"
-              aria-label="Dismiss"
-            >
-              <X className="size-5" strokeWidth={1.75} />
-            </button>
-            <p className="text-xs tracking-wide text-muted uppercase">The hub</p>
-            <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">The Corpus Redwood</h2>
-            <p className="text-sm text-muted tabular-nums">
-              {forest.corpusTree.limbs} books · {forest.corpusTree.totalChunks.toLocaleString("en-US")} chunks · {Math.round(forest.corpusTree.height)} m
-            </p>
-            <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">
-              One limb per book, each reaching toward its own tree. Browse them all and jump to any one.
-            </p>
-            <button type="button" onClick={toggleCatalog}
-              className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg">
-              Browse every book · B
-            </button>
-          </article>
-        ) : showBook && nearby ? (
-          <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">
-            <button
-              type="button"
-              onClick={dismissNearby}
-              className="absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-md text-muted"
-              aria-label="Dismiss book"
-            >
-              <X className="size-5" strokeWidth={1.75} />
-            </button>
-            <p className="text-xs tracking-wide text-muted uppercase">{nearby.book.genreLabel}</p>
-            <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">{nearby.book.title}</h2>
-            <p className="text-sm text-muted">{nearby.book.author}</p>
-            <p className="mt-1 hidden text-xs text-faint tabular-nums sm:block">
-              {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
-            </p>
-            <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
-            <button type="button" disabled={nearbyDist >= 6.8}
-              onClick={() => collect(nearby.book.slug, nearby.book.title)}
-              className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
-              {nearbyDist < 6.8 ? "Read into the press · E" : `Move closer · ${Math.ceil(nearbyDist)} m`}
-            </button>
-          </article>
-        ) : !silent && nextQuest && nextQuest.id !== questHintHidden ? (
-          <div className="relative flex items-start gap-2 rounded-md border border-border bg-surface/80 px-3 py-2 pr-12 text-sm text-muted">
-            <p className="min-w-0 flex-1">
-              <span className="text-fg">{nextQuest.title}.</span> {nextQuest.hint}
-            </p>
-            <button
-              type="button"
-              onClick={() => dismissQuestHint(nextQuest.id)}
-              className="absolute top-0.5 right-0.5 grid size-11 place-items-center rounded-md text-muted"
-              aria-label="Dismiss hint"
-            >
-              <X className="size-4" strokeWidth={1.75} />
-            </button>
-          </div>
-        ) : null}
-      </div>
+      {clean ? null : (<>
+        <div className="book-dock pointer-events-auto absolute bottom-24 left-3 right-3 mx-auto max-w-lg sm:bottom-6 sm:left-4 sm:right-auto sm:max-w-[min(32rem,calc(50%-12rem))]">
+          {atRedwood ? (
+            <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">
+              <button
+                type="button"
+                onClick={() => setRedwoodClosed(true)}
+                className="absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-md text-muted"
+                aria-label="Dismiss"
+              >
+                <X className="size-5" strokeWidth={1.75} />
+              </button>
+              <p className="text-xs tracking-wide text-muted uppercase">The hub</p>
+              <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">The Corpus Redwood</h2>
+              <p className="text-sm text-muted tabular-nums">
+                {forest.corpusTree.limbs} books · {forest.corpusTree.totalChunks.toLocaleString("en-US")} chunks · {Math.round(forest.corpusTree.height)} m
+              </p>
+              <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">
+                One limb per book, each reaching toward its own tree. Browse them all and jump to any one.
+              </p>
+              <button type="button" onClick={toggleCatalog}
+                className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg">
+                Browse every book · B
+              </button>
+            </article>
+          ) : showBook && nearby ? (
+            <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">
+              <button
+                type="button"
+                onClick={dismissNearby}
+                className="absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-md text-muted"
+                aria-label="Dismiss book"
+              >
+                <X className="size-5" strokeWidth={1.75} />
+              </button>
+              <p className="text-xs tracking-wide text-muted uppercase">{nearby.book.genreLabel}</p>
+              <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">{nearby.book.title}</h2>
+              <p className="text-sm text-muted">{nearby.book.author}</p>
+              <p className="mt-1 hidden text-xs text-faint tabular-nums sm:block">
+                {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
+              </p>
+              <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
+              <button type="button" disabled={nearbyDist >= 6.8}
+                onClick={() => collect(nearby.book.slug, nearby.book.title)}
+                className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
+                {nearbyDist < 6.8 ? "Read into the press · E" : `Move closer · ${Math.ceil(nearbyDist)} m`}
+              </button>
+            </article>
+          ) : !silent && nextQuest && nextQuest.id !== questHintHidden ? (
+            <div className="relative flex items-start gap-2 rounded-md border border-border bg-surface/80 px-3 py-2 pr-12 text-sm text-muted">
+              <p className="min-w-0 flex-1">
+                <span className="text-fg">{nextQuest.title}.</span> {nextQuest.hint}
+              </p>
+              <button
+                type="button"
+                onClick={() => dismissQuestHint(nextQuest.id)}
+                className="absolute top-0.5 right-0.5 grid size-11 place-items-center rounded-md text-muted"
+                aria-label="Dismiss hint"
+              >
+                <X className="size-4" strokeWidth={1.75} />
+              </button>
+            </div>
+          ) : null}
+        </div>
 
-      <div className="season-dock pointer-events-auto absolute right-3 bottom-24 hidden flex-col gap-1 sm:flex">
-        <button
-          type="button"
-          onClick={() => { toggleCircuit(); (document.activeElement as HTMLElement | null)?.blur(); }}
-          className={
-            "rounded-sm px-2 py-1 text-xs " +
-            (travelMode === "circuit" ? "bg-primary text-primary-fg" : "border border-border bg-surface text-muted")
-          }
-        >
-          {travelMode === "circuit" ? "On the ring" : "Ride the ring"}
-        </button>
-        {SEASON_ORDER.map((name) => (
+        <div className="season-dock pointer-events-auto absolute right-3 bottom-24 hidden flex-col gap-1 sm:flex">
           <button
-            key={name}
             type="button"
-            onClick={() => setSeason(name)}
+            onClick={() => { toggleCircuit(); (document.activeElement as HTMLElement | null)?.blur(); }}
             className={
               "rounded-sm px-2 py-1 text-xs " +
-              (season === name ? "bg-primary text-primary-fg" : "border border-border bg-surface text-muted")
+              (travelMode === "circuit" ? "bg-primary text-primary-fg" : "border border-border bg-surface text-muted")
             }
           >
-            {SEASONS[name].label}
+            {travelMode === "circuit" ? "On the ring" : "Ride the ring"}
           </button>
-        ))}
-      </div>
+          {SEASON_ORDER.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => setSeason(name)}
+              className={
+                "rounded-sm px-2 py-1 text-xs " +
+                (season === name ? "bg-primary text-primary-fg" : "border border-border bg-surface text-muted")
+              }
+            >
+              {SEASONS[name].label}
+            </button>
+          ))}
+        </div>
 
-      <p className="absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
-        WASD drive · Up/Down look · Space brake · E read · B books · C camera · Esc settings
-      </p>
+        <p className="absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
+          WASD drive · Up/Down look · Space brake · E read · B books · C camera · Esc settings
+        </p>
+      </>)}
 
       {toast ? (
         <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 rounded-md border border-border bg-surface px-4 py-2 text-sm">

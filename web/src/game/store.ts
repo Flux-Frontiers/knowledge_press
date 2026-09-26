@@ -134,6 +134,9 @@ export type GameStore = {
   catalogGenre: string | null;
   /** An exhibit plaque shown full size to read, after clicking it in the forest. */
   plaque: PlaqueText | null;
+  /** Hide the HUD's buttons, cards and search, leaving the map and the driving controls. */
+  cleanView: boolean;
+  toggleCleanView: () => void;
   travelMode: TravelMode;
   jump: JumpPose | null;
   play: () => void;
@@ -221,6 +224,8 @@ export const useGame = create<GameStore>((set, get) => ({
   catalogOpen: false,
   catalogGenre: null,
   plaque: null,
+  cleanView: false,
+  toggleCleanView: () => set({ cleanView: !get().cleanView }),
   travelMode: "free",
   jump: null,
   play: () => set({ playing: true, paused: false }),
