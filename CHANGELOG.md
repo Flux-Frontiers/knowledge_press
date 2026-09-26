@@ -13,6 +13,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Knowledge Press Forest: tree species that grow differently.** Each
+  species carries a growth habit: a crown envelope (dome, ellipsoid, cone,
+  ovoid, vase, umbrella, spindle), clear bole, central leader, and its own
+  space-colonization parameters (tropism, influence radius, internode step,
+  jitter, pipe-model exponent), plus a post-growth gravity droop that bends
+  thin wood and carries each chunk with its twig. The book still sets the
+  height, the sections and one crown point per chunk; the habit only sets
+  where they sit and how the wood reaches them. Oak, chestnut, fir, plane and
+  blackthorn no longer share one silhouette, and four species join them —
+  stone pine (ancient-classical, sacred-texts), silver birch
+  (russian-literature, letters, diaries), weeping willow (shakespeare, drama)
+  and Lombardy poplar (travel, audel-electric) — with CC0 ambientCG bark.
+  Each book nudges its species' habit a few percent, so no two trees in a
+  grove are clones. `web/species-preview.html` (dev only) grows the same books
+  as every species side by side.
+
 - **Knowledge Press Forest: screenshot button.** A camera button beside the
   clean-view eye saves the 3-D view as a PNG, without the HUD. Desktop
   browsers download it; phones and tablets open the share sheet, where Save
@@ -108,6 +124,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Knowledge Press Forest: forest build could hang.** A tree whose crown fit
+  nowhere on a grove's candidate spiral was left unplaced, the grove's radius
+  became NaN, and packing the groves round the hub looped forever. The spiral
+  now extends until every tree fits, and packing rejects a non-finite radius.
+  Hot hash grids use integer keys, so the build stays at ~11 s.
+- **Knowledge Press Forest: the ring road could cut across the hub** between
+  two near grove stops on opposite sides. The ring's stop order now counts
+  such a leg as the drive around the hub, and ring legs are routed round a
+  keep-out disc at the centre.
 - **Knowledge Press Forest: no more road hairpins.** Road routing
   string-pulls each route until it is taut, resampling and pulling from the
   far end too. One forward pull kept the corners of any road A* had hugged,
