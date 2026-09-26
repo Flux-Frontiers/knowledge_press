@@ -24,3 +24,9 @@ app/fm-repro/build/
 
 # Screenshots and test renders from checking the forest by hand.
 renders/tests/
+
+# KG artefacts. The snapshot manifests under .tscodekg/snapshots/ are the
+# tracked history; the graph and vector databases are rebuilt locally.
+.tscodekg/*
+!.tscodekg/snapshots/
+.kgcache/
