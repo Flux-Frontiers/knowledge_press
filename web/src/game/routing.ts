@@ -268,6 +268,8 @@ export function routeNetwork(opts: {
   need: number;
   /** Stops that get a spoke from the hub (default: every stop). */
   spokeTo?: number[];
+  /** The ring's centreline keeps at least this far from the hub's centre. */
+  ringClear?: number;
   cell?: number;
 }): { spokes: Point[][]; ring: { pts: Point[]; leg: number[] }; clearance: (x: number, z: number) => number } {
   const g = makeGrid(opts.obstacles, opts.worldR, opts.cell ?? 1);
@@ -286,15 +288,27 @@ export function routeNetwork(opts: {
   }
   for (const r of bySpoke) spokes.push(r);
 
+  // The ring routes round the hub, not across it: on a copy of the clearance
+  // map with a disc at the centre (spokes and `clearance` never see it); the
+  // road marks stay shared so the ring still merges onto the spokes.
+  const rg: Grid = opts.ringClear ? { ...g, clear: g.clear.slice() } : g;
+  if (opts.ringClear) {
+    const disc = opts.ringClear - need;
+    for (let i = 0; i < rg.n; i++) for (let j = 0; j < rg.n; j++) {
+      const d = Math.hypot(rg.origin + i * rg.cell, rg.origin + j * rg.cell) - disc;
+      const k = i * rg.n + j;
+      if (d < rg.clear[k]!) rg.clear[k] = d;
+    }
+  }
   const legPts: Point[] = [];
   const legOf: number[] = [];
   for (let i = 0; i < stops.length; i++) {
-    const leg = taut(g, astar(g, stops[i]!, stops[(i + 1) % stops.length]!, need), need);
-    markRoad(g, leg, need);
+    const leg = taut(rg, astar(rg, stops[i]!, stops[(i + 1) % stops.length]!, need), need);
+    markRoad(rg, leg, need);
     // Drop each leg's last point: it is the next leg's first.
     for (let k = 0; k < leg.length - 1; k++) { legPts.push(leg[k]!); legOf.push(i); }
   }
-  const ring = finish(g, legPts, need, true);
+  const ring = finish(rg, legPts, need, true);
   return {
     spokes,
     ring: { pts: ring.pts, leg: ring.span.map((s) => legOf[s]!) },

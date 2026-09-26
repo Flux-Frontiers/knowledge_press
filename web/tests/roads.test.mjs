@@ -84,3 +84,11 @@ test("home stands clear of the hub plaza's redwood and plaque, facing the redwoo
   const fw = forwardOf(yaw);
   assert.ok((fw.x * -x + fw.z * -z) / d > 0.999, "home faces the redwood");
 });
+
+test("the ring goes round the hub, never across it", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const f = getForest();
+  // A leg between two near stops on opposite sides once ran 7.5 m from the redwood.
+  const minR = Math.min(...f.ringPath.map((p) => Math.hypot(p.x, p.z)));
+  assert.ok(minR >= 17, `ring passes ${minR.toFixed(1)} m from the hub's centre`);
+});

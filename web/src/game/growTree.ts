@@ -123,10 +123,16 @@ export function placeCrown(
   return { trunkHeight, crown: leaves, nCrown: li };
 }
 
+/**
+ * One number per grid cell (cell indices within +-2^15), so hash grids skip
+ * building and hashing "i,j,k" strings in their hot loops.
+ */
+export const cellKey3 = (i: number, j: number, k: number) => ((i + 32768) * 65536 + (j + 32768)) * 65536 + (k + 32768);
+
 /** Nearest skeleton node to a point, through a uniform hash grid of the nodes. */
 function nearestNodeIndex(nodes: Float32Array, n: number, cell: number) {
-  const grid = new Map<string, number[]>();
-  const key = (i: number, j: number, k: number) => i + "," + j + "," + k;
+  const grid = new Map<number, number[]>();
+  const key = cellKey3;
   for (let a = 0; a < n; a++) {
     const kk = key(Math.floor(nodes[a * 3]! / cell), Math.floor(nodes[a * 3 + 1]! / cell), Math.floor(nodes[a * 3 + 2]! / cell));
     const list = grid.get(kk);
@@ -312,7 +318,7 @@ function varyHabit(habit: Habit, slug: string): Habit {
   const u = () => rng() * 2 - 1;
   return {
     ...habit,
-    width: habit.width * (1 + 0.12 * u()),
+    width: habit.width * (1 + 0.08 * u()),
     clearBole: clamp(habit.clearBole + 0.04 * u(), 0.05, 0.6),
     tropism: habit.tropism + 0.05 * u(),
     droop: habit.droop * (1 + 0.2 * u()),

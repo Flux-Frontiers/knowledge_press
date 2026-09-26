@@ -165,3 +165,10 @@ test("no tree's wood passes through another's, within or across groves", () => {
     }
   }
 });
+
+test("packing never spins on an unplaceable grove: a NaN radius throws", () => {
+  const { packAroundHub } = require(`${process.env.FOREST_TEST_BUILD}/math.js`);
+  // A grove whose layout left a tree unplaced had a NaN radius and hung the page.
+  assert.throws(() => packAroundHub([20, NaN], 22, 10), /radius 1 is NaN/);
+  assert.equal(packAroundHub([20, 30], 22, 10).length, 2);
+});
