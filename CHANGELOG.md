@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.24.0] - 2026-09-26
+
 ### Added
 
 - **Knowledge Press Forest: tree species that grow differently.** Each
@@ -21,14 +23,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   thin wood and carries each chunk with its twig. The book still sets the
   height, the sections and one crown point per chunk; the habit only sets
   where they sit and how the wood reaches them. Oak, chestnut, fir, plane and
-  blackthorn no longer share one silhouette, and four species join them —
+  blackthorn no longer share one silhouette, and four species join them --
   stone pine (ancient-classical, sacred-texts), silver birch
   (russian-literature, letters, diaries), weeping willow (shakespeare, drama)
-  and Lombardy poplar (travel, audel-electric) — with CC0 ambientCG bark.
+  and Lombardy poplar (travel, audel-electric) -- with CC0 ambientCG bark.
   Each book nudges its species' habit a few percent, so no two trees in a
   grove are clones. `web/species-preview.html` (dev only) grows the same books
   as every species side by side.
-
 - **Knowledge Press Forest: screenshot button.** A camera button beside the
   clean-view eye saves the 3-D view as a PNG, without the HUD. Desktop
   browsers download it; phones and tablets open the share sheet, where Save
@@ -95,6 +96,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Mac app: the Developer ID build answers on-device only.** Apple's
+  Developer ID profile does not grant Private Cloud Compute, so `make
+  mac-build` signs without the entitlements file. Every other build keeps
+  Private Cloud Compute.
 - **Knowledge Press Forest: clearer day sky.** Daytime fog is about half as
   dense (0.28 of the night density, was 0.5) and blue, the sky's horizon is
   blue instead of grey-green, and the zenith blue is deeper and reaches
@@ -151,11 +156,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Knowledge Press Forest: plaque posts no longer show through the text.**
   The lectern posts rose to 1.6 m, past the tilted board's centre, and came
   out through its face at either end; they now stop at 1.3 m, behind it.
-
 - **Knowledge Press Forest: opening Settings no longer selects the pace
   menu.** The dialog focused its first control, which phones showed as
   picked; it now focuses "Back to the forest".
-
 - **Knowledge Press Forest: roads, plazas and bark are no longer black in
   Safari.** WebKit (Safari, and every browser on iOS) renders a texture black
   when anisotropic filtering is on, which every brick and bark texture set.
