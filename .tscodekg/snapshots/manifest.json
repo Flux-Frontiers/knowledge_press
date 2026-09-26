@@ -1,0 +1,49 @@
+{
+  "format": "1.0",
+  "last_update": "2026-09-26T05:26:58.393273+00:00",
+  "snapshots": [
+    {
+      "key": "2026-09-26T05:26:58.392840+00:00",
+      "branch": "fix/web-sign-sky",
+      "timestamp": "2026-09-26T05:26:58.392912+00:00",
+      "version": "0.6.0",
+      "subject": "",
+      "tool": "tscode-kg",
+      "tool_version": "0.6.0",
+      "file": "2026-09-26T05:26:58.392840+00:00.json",
+      "metrics": {
+        "db_path": ".tscodekg/graph.sqlite",
+        "total_nodes": 315,
+        "meaningful_nodes": 315,
+        "total_edges": 811,
+        "node_counts": {
+          "class": 3,
+          "function": 199,
+          "interface": 1,
+          "method": 9,
+          "module": 57,
+          "type_alias": 46
+        },
+        "edge_counts": {
+          "CALLS": 354,
+          "CONTAINS": 258,
+          "IMPORTS": 197,
+          "INHERITS": 2
+        },
+        "module_count": 57,
+        "class_count": 3,
+        "function_count": 199,
+        "method_count": 9,
+        "docstring_coverage": 0.385,
+        "snapshot_count": 0,
+        "vector_backend": "sqlite-vec",
+        "critical_issues": 2,
+        "complexity_median": 2.0
+      },
+      "deltas": {
+        "vs_previous": null,
+        "vs_baseline": null
+      }
+    }
+  ]
+}
