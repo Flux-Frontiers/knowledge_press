@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, RepeatWrapping, RGBADepthPacking, Shape, ShapeGeometry, SRGBColorSpace, TextureLoader, Vector2 } from "three";
-import { COARSE_POINTER } from "./Environment";
+import { COARSE_POINTER, textureAnisotropy } from "./Environment";
 import { useGame } from "./store";
 import type { Forest } from "./forest";
 import { bookMatchesQuery } from "./forest";
@@ -18,7 +18,7 @@ function barkMaterial(species: Species) {
   const load = (map: string, srgb = false) => {
     const tex = loader.load(`textures/bark/${species.name}_${map}.jpg`);
     tex.wrapS = tex.wrapT = RepeatWrapping;
-    tex.anisotropy = 8;
+    tex.anisotropy = textureAnisotropy(8);
     if (srgb) tex.colorSpace = SRGBColorSpace;
     return tex;
   };

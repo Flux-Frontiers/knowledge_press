@@ -11,6 +11,53 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Knowledge Press Forest: three wind sculptures.** Each is a vertical-axis
+  rotor of a real design, on its own roadside plaza with a reading plaque:
+  Gorlov's helical rotor (three stainless blades, each twisted half a turn),
+  a Darrieus eggbeater (three white blades bowed in a sine arch), and a
+  Savonius tower (six copper S-rotor tiers, staggered, alternate tiers
+  mirrored and turning the other way). They spin with the "Wind & gentle cart
+  motion" setting, faster in the same gusts that move the leaves, and carry a
+  red obstruction light that blinks at night. They appear in the exhibit list
+  and on the minimap like the Mysterium. The Mysterium's plaque became a
+  shared `ExhibitPlaque`.
+- **Knowledge Press Forest: read an exhibit's plaque full size.** Click or tap
+  a plaque to open its text in a panel styled like the plaque itself; Escape,
+  the close button or a click outside closes it, and the cart stays parked
+  while it is open.
+- **Knowledge Press Forest: the sky keeps time.** The sun and moon stand
+  where they really are for the device clock, the date and the place
+  (`sky.ts`, after SunCalc): the sun crosses the sky, rises and sets with a
+  warm glow, and lights the forest from where it stands, with long shadows at
+  either end of the day. At night the moon casts the light, brighter as it
+  fills, and is drawn with its real phase: the disc is lit from the sun's
+  direction, so the terminator falls where it does in the sky. Stars fade in
+  through twilight. The time button now cycles Live, Day (today's solar noon)
+  and Night (the darkest part of tonight, with the moon up if it rises); its
+  tooltip gives the next sunrise or sunset and the moon's phase, and the status
+  line shows the time. The place comes from the browser's location, asked once
+  when play starts and kept rounded to 0.1 degree in this browser only; without
+  it (refused, or a plain-http address such as the LAN dev server) the sky uses
+  latitude 40 N and the time zone's longitude. Saves keep a night setting.
+- **Knowledge Press Forest: click the corpus redwood to browse every book.**
+  Its plaque opens full size, like the exhibit plaques.
+- **`make web-kill`** stops every running Vite dev or preview server,
+  matched by command line rather than port.
+
+### Removed
+
+- **Knowledge Press Forest: the "The Press" signpost** on the hub plaza.
+
+### Fixed
+
+- **Knowledge Press Forest: roads, plazas and bark are no longer black in
+  Safari.** WebKit (Safari, and every browser on iOS) renders a texture black
+  when anisotropic filtering is on, which every brick and bark texture set.
+  Anisotropy is now off in WebKit only (`textureAnisotropy` in
+  `Environment.tsx`); other browsers keep it for sharp roads at grazing angles.
+
 ## [1.23.0] - 2026-09-25
 
 The first release from this repository. The iOS/macOS app and Knowledge Press

@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { CanvasTexture, DoubleSide, LinearFilter, SRGBColorSpace } from "three";
+import type { Exhibit } from "./exhibits";
 import { groveByGenre, type Forest, type Grove, type Waypoint } from "./forest";
 import { useGame } from "./store";
 
@@ -175,19 +176,29 @@ export function makePlaqueTexture(title: string, byline: string, body: string): 
   return tex;
 }
 
-function HamletSign() {
-  const tex = useMemo(() => makeSignTexture("The Press", "Home · the hub", "#8fad86"), []);
+/** An exhibit's plaque: between the piece and the road, facing the road, so it reads with the piece behind it. */
+export function ExhibitPlaque({ exhibit: e, title, byline, body }: { exhibit: Exhibit; title: string; byline: string; body: string }) {
+  const tex = useMemo<CanvasTexture>(() => makePlaqueTexture(title, byline, body), [title, byline, body]);
   useEffect(() => () => tex.dispose(), [tex]);
+  const dx = e.roadX - e.x, dz = e.roadZ - e.z;
+  const d = Math.hypot(dx, dz) || 1;
+  const x = (dx / d) * (e.obstacle + 1.9), z = (dz / d) * (e.obstacle + 1.9);
+  // Tapping the plaque opens its text full size (HUD PlaquePanel).
   return (
-    // On the plaza, clear of the redwood's root flare, facing the hub.
-    <group position={[4.75, 0, 5.4]} rotation={[0, Math.atan2(-4.75, -5.4), 0]}>
-      <mesh position={[0, 1.15, 0]}>
-        <cylinderGeometry args={[0.08, 0.11, 2.3, 6]} />
-        <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
-      </mesh>
-      <mesh position={[0, 2.1, 0.07]}>
-        <boxGeometry args={[2.6, 0.91, 0.07]} />
-        <meshStandardMaterial map={tex} roughness={0.72} />
+    <group position={[x, 0, z]} rotation={[0, Math.atan2(dx, dz), 0]}
+      onClick={(ev) => { ev.stopPropagation(); useGame.getState().openPlaque({ title, byline, body }); }}
+      onPointerOver={() => { document.body.style.cursor = "pointer"; }}
+      onPointerOut={() => { document.body.style.cursor = ""; }}>
+      {[-1.25, 1.25].map((px) => (
+        <mesh key={px} position={[px, 0.8, 0]}>
+          <cylinderGeometry args={[0.07, 0.09, 1.6, 6]} />
+          <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
+        </mesh>
+      ))}
+      {/* Tilted back like a lectern so it reads from the cart. */}
+      <mesh position={[0, 1.55, 0.05]} rotation={[-0.35, 0, 0]}>
+        <boxGeometry args={[3.0, 1.5, 0.06]} />
+        <meshStandardMaterial map={tex} roughness={0.7} />
       </mesh>
     </group>
   );
@@ -197,7 +208,6 @@ export function Signposts({ forest }: { forest: Forest }) {
   const selectedGrove = useGame((s) => s.selectedGrove);
   return (
     <group>
-      <HamletSign />
       {forest.circuit.map((wp) => {
         const grove = groveByGenre(forest, wp.genre);
         if (!grove) return null;

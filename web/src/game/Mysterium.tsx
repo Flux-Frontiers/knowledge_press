@@ -2,7 +2,6 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   BoxGeometry,
-  CanvasTexture,
   BufferGeometry,
   DodecahedronGeometry,
   EdgesGeometry,
@@ -17,7 +16,7 @@ import {
   Vector3,
 } from "three";
 import type { Exhibit } from "./exhibits";
-import { makePlaqueTexture } from "./Signposts";
+import { ExhibitPlaque } from "./Signposts";
 import { useGame } from "./store";
 
 /**
@@ -112,30 +111,6 @@ const KEPLER_BODY =
   "each sphere is the inner radius of the solid around it. He was wrong about the planets, and " +
   "right that geometry could be asked the question.";
 
-/** Between the sculpture and the road, facing the road, so it reads with the sculpture behind it. */
-function KeplerPlaque({ exhibit: e }: { exhibit: Exhibit }) {
-  const tex = useMemo<CanvasTexture>(() => makePlaqueTexture("Mysterium Cosmographicum", "Johannes Kepler · 1596", KEPLER_BODY), []);
-  useEffect(() => () => tex.dispose(), [tex]);
-  const dx = e.roadX - e.x, dz = e.roadZ - e.z;
-  const d = Math.hypot(dx, dz) || 1;
-  const x = (dx / d) * (e.obstacle + 1.9), z = (dz / d) * (e.obstacle + 1.9);
-  return (
-    <group position={[x, 0, z]} rotation={[0, Math.atan2(dx, dz), 0]}>
-      {[-1.25, 1.25].map((px) => (
-        <mesh key={px} position={[px, 0.8, 0]}>
-          <cylinderGeometry args={[0.07, 0.09, 1.6, 6]} />
-          <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
-        </mesh>
-      ))}
-      {/* Tilted back like a lectern so it reads from the cart. */}
-      <mesh position={[0, 1.55, 0.05]} rotation={[-0.35, 0, 0]}>
-        <boxGeometry args={[3.0, 1.5, 0.06]} />
-        <meshStandardMaterial map={tex} roughness={0.7} />
-      </mesh>
-    </group>
-  );
-}
-
 export function Mysterium({ exhibit }: { exhibit: Exhibit }) {
   const R = exhibit.obstacle;
   const day = useGame((s) => s.timeOfDay === "day");
@@ -179,7 +154,7 @@ export function Mysterium({ exhibit }: { exhibit: Exhibit }) {
 
   return (
     <group position={[exhibit.x, 0, exhibit.z]}>
-      <KeplerPlaque exhibit={exhibit} />
+      <ExhibitPlaque exhibit={exhibit} title="Mysterium Cosmographicum" byline="Johannes Kepler · 1596" body={KEPLER_BODY} />
       {/* Stepped plinth; the cart collides with its lowest step (exhibit.obstacle). */}
       <mesh position={[0, 0.25, 0]} material={materials.stone} castShadow receiveShadow>
         <cylinderGeometry args={[R - 0.2, R, 0.5, 8]} />

@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DoubleSide, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, RepeatWrapping, RGBADepthPacking, SRGBColorSpace, TextureLoader } from "three";
-import { COARSE_POINTER } from "./Environment";
+import { COARSE_POINTER, textureAnisotropy } from "./Environment";
 import { HUB_PLAQUE_DIR, HUB_PLAQUE_DIST, type Forest } from "./forest";
 import type { SeasonName } from "./seasons";
 import { makePlaqueTexture } from "./Signposts";
+import { useGame } from "./store";
 
 // Redwoods are evergreen: the crown keeps its colour through the year, a touch
 // fresher in spring and frosted in winter.
@@ -20,7 +21,7 @@ function redwoodBark() {
   const load = (map: string, srgb = false) => {
     const tex = loader.load(`textures/bark/fir_${map}.jpg`);
     tex.wrapS = tex.wrapT = RepeatWrapping;
-    tex.anisotropy = 8;
+    tex.anisotropy = textureAnisotropy(8);
     if (srgb) tex.colorSpace = SRGBColorSpace;
     return tex;
   };
@@ -59,26 +60,33 @@ function sprayTexture() {
   }
   const tex = new CanvasTexture(c);
   tex.colorSpace = SRGBColorSpace;
-  tex.anisotropy = 4;
+  tex.anisotropy = textureAnisotropy(4);
   return tex;
+}
+
+const REDWOOD_BODY =
+  "One tree for the whole library. It grows by the same rule as every book tree, doubled: " +
+  "3.4 m of height for each doubling of the corpus's chunks. It carries one limb per book, " +
+  "the biggest books lowest, and each limb reaches toward that book's own tree in the forest. " +
+  "The trunk is as thick as its limbs together: at any height its cross-section is the sum of " +
+  "theirs above it. Click the tree or press B to browse every book and jump to its tree.";
+
+function pointer(on: boolean) {
+  document.body.style.cursor = on ? "pointer" : "";
 }
 
 function RedwoodPlaque({ forest }: { forest: Forest }) {
   const c = forest.corpusTree;
-  const tex = useMemo(() => makePlaqueTexture(
-    "The Corpus Redwood",
-    `${c.limbs} books · ${c.totalChunks.toLocaleString("en-US")} chunks · ${Math.round(c.height)} m`,
-    "One tree for the whole library. It grows by the same rule as every book tree, doubled: " +
-    "3.4 m of height for each doubling of the corpus's chunks. It carries one limb per book, " +
-    "the biggest books lowest, and each limb reaches toward that book's own tree in the forest. " +
-    "The trunk is as thick as its limbs together: at any height its cross-section is the sum of " +
-    "theirs above it. Press B to browse every book and jump to its tree.",
-  ), [c.limbs, c.totalChunks, c.height]);
+  const byline = `${c.limbs} books · ${c.totalChunks.toLocaleString("en-US")} chunks · ${Math.round(c.height)} m`;
+  const tex = useMemo(() => makePlaqueTexture("The Corpus Redwood", byline, REDWOOD_BODY), [byline]);
   useEffect(() => () => tex.dispose(), [tex]);
   const x = Math.cos(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
   const z = Math.sin(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
+  // Tapping the plaque opens it full size, as every exhibit plaque does.
   return (
-    <group position={[x, 0, z]} rotation={[0, Math.atan2(x, z), 0]}>
+    <group position={[x, 0, z]} rotation={[0, Math.atan2(x, z), 0]}
+      onClick={(e) => { e.stopPropagation(); useGame.getState().openPlaque({ title: "The Corpus Redwood", byline, body: REDWOOD_BODY }); }}
+      onPointerOver={() => pointer(true)} onPointerOut={() => pointer(false)}>
       {[-1.25, 1.25].map((px) => (
         <mesh key={px} position={[px, 0.8, 0]}>
           <cylinderGeometry args={[0.07, 0.09, 1.6, 6]} />
@@ -149,6 +157,14 @@ export function CorpusRedwood({ forest, season }: { forest: Forest; season: Seas
     <group>
       {/* Touch devices skip the redwood's shadows, as they do the book trees' leaves. */}
       <mesh geometry={bark} material={barkMat} castShadow={!COARSE_POINTER} receiveShadow />
+      {/* Tapping the trunk lists every book. An invisible cone takes the click:
+          hit-testing the bark itself, one limb per book, on every pointer move costs too much. */}
+      <mesh position={[0, c.height * 0.3, 0]}
+        onClick={(e) => { e.stopPropagation(); useGame.getState().openCatalog(null); }}
+        onPointerOver={() => pointer(true)} onPointerOut={() => pointer(false)}>
+        <cylinderGeometry args={[c.baseRadius * 0.35, c.baseRadius, c.height * 0.6, 12]} />
+        <meshBasicMaterial visible={false} />
+      </mesh>
       <instancedMesh ref={ref} args={[spray, sprayMat, Math.max(1, c.foliage.count)]} customDepthMaterial={sprayDepth}
         castShadow={!COARSE_POINTER} receiveShadow={!COARSE_POINTER} />
       <RedwoodPlaque forest={forest} />

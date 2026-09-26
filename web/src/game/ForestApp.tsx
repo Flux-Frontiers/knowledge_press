@@ -12,6 +12,27 @@ import { LEAF_SCALE } from "./preferences";
 import { resetSim } from "./sim";
 import { useGame } from "./store";
 
+/**
+ * The browser's location, for true sunrise and sunset, rounded to 0.1 degree
+ * and kept only in this browser's save. Asked for when play starts; with a place
+ * already saved it is refreshed only if permission is already granted, so the
+ * prompt does not come back every visit. Browsers allow it only on a secure
+ * origin, so over plain http on the LAN the sky keeps to the time zone.
+ */
+function requestPlace() {
+  if (typeof navigator === "undefined" || !navigator.geolocation || !window.isSecureContext) return;
+  const ask = () => navigator.geolocation.getCurrentPosition(
+    ({ coords }) => useGame.getState().setPlace({ lat: Math.round(coords.latitude * 10) / 10, lon: Math.round(coords.longitude * 10) / 10 }),
+    () => {},
+    { enableHighAccuracy: false, maximumAge: 6 * 3600000, timeout: 20000 },
+  );
+  if (!useGame.getState().place) {
+    ask();
+    return;
+  }
+  navigator.permissions?.query({ name: "geolocation" }).then((p) => { if (p.state === "granted") ask(); }).catch(() => {});
+}
+
 export function ForestApp() {
   const [mounted, setMounted] = useState(false);
   const [forest, setForest] = useState<Forest | null>(null);
@@ -19,6 +40,15 @@ export function ForestApp() {
   const play = useGame((s) => s.play);
   const setToast = useGame((s) => s.setToast);
   const toast = useGame((s) => s.toast);
+
+  // The sky follows the clock: sun and moon move a few hundredths of a degree between ticks.
+  useEffect(() => {
+    const id = window.setInterval(() => useGame.getState().tickSky(), 5000);
+    return () => window.clearInterval(id);
+  }, []);
+  useEffect(() => {
+    if (playing) requestPlace();
+  }, [playing]);
 
   useEffect(() => {
     setMounted(true);
@@ -83,7 +113,8 @@ export function ForestApp() {
       if (!st.playing) return;
       if (e.code === "Escape") {
         if (st.paused) return; // The settings dialog handles Escape itself.
-        if (st.catalogOpen) st.setCatalogOpen(false);
+        if (st.plaque) st.openPlaque(null);
+        else if (st.catalogOpen) st.setCatalogOpen(false);
         else if (st.atlasOpen) st.setAtlasOpen(false);
         else if (st.libraryOpen) st.toggleLibrary();
         else st.pause(true);

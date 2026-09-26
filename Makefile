@@ -32,10 +32,11 @@
 #   make web-dev       -- Vite dev server on port 5173
 #   make web-test      -- the node test suite
 #   make web-build     -- typecheck and production build
+#   make web-kill      -- stop every running Vite dev or preview server
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build
+.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build web-kill
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -52,6 +53,16 @@ web-test:
 
 web-build:
 	cd web && npm run build
+
+# Matched by command line, not port: `npm run dev` moves to 5174 when 5173 is
+# taken, and a preview server shares 5173. Only node processes running Vite's
+# binary match, not a shell whose command merely mentions it. Stops Vite from
+# any checkout.
+web-kill:
+	@pids=$$(pgrep -f '^([^ ]*/)?node [^ ]*node_modules/(\.bin/vite|vite/bin/vite\.js)( |$$)'); \
+	if [ -z "$$pids" ]; then echo "no Vite servers running"; exit 0; fi; \
+	ps -o pid=,command= -p "$$(echo $$pids | tr ' ' ',')"; \
+	kill $$pids && echo "stopped: $$(echo $$pids)"
 
 # ---------------------------------------------------------------------------
 # The Knowledge Press -- iPhone app (app/ios)
