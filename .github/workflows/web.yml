@@ -2,6 +2,8 @@ name: Web
 
 # The web forest: typecheck, node tests and a production build. Path-filtered
 # to web/ so an app-only change does not spend a runner here, and vice versa.
+# A push or manual run on main also publishes web/dist to GitHub Pages at
+# https://flux-frontiers.github.io/knowledge_press/.
 
 on:
   push:
@@ -39,3 +41,26 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - uses: actions/upload-pages-artifact@v4
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        with:
+          path: web/dist
+
+  deploy:
+    name: Deploy to Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: web
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # A newer push queues behind a deploy in progress rather than cutting it off.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

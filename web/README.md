@@ -10,6 +10,11 @@ See **[FEATURES.md](FEATURES.md)** for the backlog. Next: a real sky with
 stars and weather.
 
 
+## Play it
+
+The latest `main` build is live at
+**https://flux-frontiers.github.io/knowledge_press/**.
+
 ## Run it
 
 From this folder:
