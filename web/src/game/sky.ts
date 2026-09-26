@@ -177,8 +177,11 @@ export type SkyState = {
   moonDir: Vec3;
   moonFraction: number;
   moonPhase: number;
-  /** The one shadow-casting light: the sun by day, the moon by night, faint starlight with neither up. */
-  light: { dir: Vec3; color: string; intensity: number };
+  /**
+   * The one directional light: the sun by day, the moon by night, faint
+   * starlight with neither up. `shadow` is how strongly it casts shadows, 0 to 1.
+   */
+  light: { dir: Vec3; color: string; intensity: number; shadow: number };
 };
 
 export function skyState(at: Date, place: Place): SkyState {
@@ -190,18 +193,22 @@ export function skyState(at: Date, place: Place): SkyState {
   const alt = sun.altitude;
   const daylight = smoothstep(-8 * RAD, 8 * RAD, alt);
   const warmth = smoothstep(-6 * RAD, 0, alt) * (1 - smoothstep(2 * RAD, 14 * RAD, alt));
-  // Whichever gives more light casts the shadows, so twilight hands over without a jump.
+  // Whichever gives more light is the light, so twilight hands over without a jump.
   const sunI = 2.4 * smoothstep(-4 * RAD, 6 * RAD, alt);
   const moonI = 0.55 * (0.3 + 0.7 * fraction) * smoothstep(0, 8 * RAD, moon.altitude) * (1 - smoothstep(-10 * RAD, -2 * RAD, alt));
   const starI = 0.16 * (1 - daylight);
   let light: SkyState["light"];
   if (sunI >= moonI && sunI >= starI) {
-    light = { dir: sunDir, color: mixHex("#ff9a52", "#fff0d2", smoothstep(0, 25 * RAD, alt)), intensity: sunI };
+    // Only the sun casts shadows, fading out over its last few degrees. A low light
+    // drives the shadow camera's slanted box through far more forest, which
+    // halved the frame rate at sunset, and shadows that long are lost in the haze.
+    light = { dir: sunDir, color: mixHex("#ff9a52", "#fff0d2", smoothstep(0, 25 * RAD, alt)), intensity: sunI, shadow: smoothstep(3 * RAD, 8 * RAD, alt) };
   } else if (moonI >= starI) {
-    light = { dir: moonDir, color: "#94b7e5", intensity: moonI };
+    // Moonlight is too faint for its shadows to earn a shadow pass.
+    light = { dir: moonDir, color: "#94b7e5", intensity: moonI, shadow: 0 };
   } else {
     const n = Math.hypot(0.3, 1, 0.2);
-    light = { dir: [0.3 / n, 1 / n, 0.2 / n], color: "#7f93b8", intensity: starI };
+    light = { dir: [0.3 / n, 1 / n, 0.2 / n], color: "#7f93b8", intensity: starI, shadow: 0 };
   }
   return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, light };
 }

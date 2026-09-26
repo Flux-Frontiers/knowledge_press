@@ -17,6 +17,17 @@ import { useGame } from "./store";
  */
 export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
   const dome = useRef<Object3D>(null);
+  const material = useRef<ShaderMaterial>(null);
+  // NASA SVS's LRO colour map (public/textures/moon/CREDITS.md): the moon's surface, lit by the shader.
+  const moonMap = useMemo(() => {
+    const tex = new TextureLoader().load("textures/moon/moon_color.jpg", () => {
+      const u = material.current?.uniforms;
+      if (u?.moonReady) u.moonReady.value = 1;
+    });
+    tex.colorSpace = SRGBColorSpace;
+    return tex;
+  }, []);
+  useEffect(() => () => moonMap.dispose(), [moonMap]);
   const uniforms = useMemo(() => ({
     zenith: { value: new Color() },
     horizon: { value: new Color() },
@@ -25,11 +36,12 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
     sunDir: { value: new Vector3(0, 1, 0) },
     moonDir: { value: new Vector3(0, -1, 0) },
     moonFraction: { value: 0 },
-  }), []);
+    moonMap: { value: moonMap },
+    moonReady: { value: 0 },
+  }), [moonMap]);
   // Written through the material, not `uniforms`: the material holds its own
   // copy, sharing the Color and Vector3 objects but not plain numbers, so a
   // number set on `uniforms` after the first render would never reach the shader.
-  const material = useRef<ShaderMaterial>(null);
   useEffect(() => {
     const u = (material.current?.uniforms ?? uniforms) as typeof uniforms;
     const t = sky.daylight;
@@ -40,7 +52,9 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
     u.sunDir.value.set(...sky.sunDir);
     u.moonDir.value.set(...sky.moonDir);
     u.moonFraction.value = sky.moonFraction;
-  }, [sky, season, uniforms]);
+    // In case the map finished loading before the material existed to hear it.
+    if (moonMap.image) u.moonReady.value = 1;
+  }, [sky, season, uniforms, moonMap]);
   const stars = useMemo(() => {
     const random = mulberry32(917);
     const positions = new Float32Array(750 * 3);
@@ -65,6 +79,7 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
           fragmentShader={`varying vec3 direction;
             uniform vec3 zenith; uniform vec3 horizon; uniform float daylight; uniform float warmth;
             uniform vec3 sunDir; uniform vec3 moonDir; uniform float moonFraction;
+            uniform sampler2D moonMap; uniform float moonReady;
             void main() {
               vec3 d = normalize(direction);
               vec3 col = mix(horizon, zenith, pow(max(d.y, 0.0), 0.55));
@@ -80,21 +95,30 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
               // Mixed in, not added, so a low sun stays orange instead of clipping to white.
               col = mix(col, mix(vec3(1., .97, .88), vec3(1., .42, .16), warmth) * 1.15, smoothstep(.9992, .9997, sun) * sunUp);
               // The moon: 0.0374 is the sine of the disc's radius (acos 0.9993, about 2.1 degrees).
+              // Disc coordinates and the map lookup run for every pixel, outside the branch,
+              // so the texture's mipmap derivatives stay defined.
               float md = dot(d, moonDir);
               float moonUp = smoothstep(-0.03, 0.03, moonDir.y);
-              if (md > 0.9993 && moonUp > 0.0) {
-                vec3 right = normalize(cross(moonDir, vec3(0.0, 1.0, 0.0)) + vec3(1e-4, 0.0, 0.0));
-                vec3 up = cross(right, moonDir);
-                vec2 p = vec2(dot(d, right), dot(d, up)) / 0.0374;
-                float r2 = dot(p, p);
-                if (r2 < 1.0) {
-                  // The visible hemisphere's normal faces back toward the viewer.
-                  vec3 n = p.x * right + p.y * up - sqrt(1.0 - r2) * moonDir;
-                  float lit = smoothstep(-0.04, 0.08, dot(n, sunDir));
-                  float edge = smoothstep(1.0, 0.85, r2) * moonUp;
-                  col = mix(col, vec3(.08, .1, .14), (1.0 - lit) * edge * (1.0 - daylight) * 0.7);
-                  col = mix(col, vec3(.95, .94, .86), lit * edge * mix(1.0, 0.55, daylight));
-                }
+              vec3 right = normalize(cross(moonDir, vec3(0.0, 1.0, 0.0)) + vec3(1e-4, 0.0, 0.0));
+              vec3 up = cross(right, moonDir);
+              vec2 p = vec2(dot(d, right), dot(d, up)) / 0.0374;
+              float r2 = dot(p, p);
+              float z = sqrt(max(1.0 - r2, 0.0));
+              // The near side faces us: longitude runs toward the viewer's right (Mare Crisium
+              // is at +59), latitude up. The map is equirectangular, centred on longitude 0.
+              vec2 muv = vec2(0.5 + atan(p.x, max(z, 1e-4)) / 6.2831853, 0.5 + asin(clamp(p.y, -1.0, 1.0)) / 3.1415927);
+              vec3 albedo = mix(vec3(.82), texture2D(moonMap, muv).rgb, moonReady);
+              // The mosaic is normalised flat and a little blue: half its colour, and more contrast for the maria.
+              albedo = mix(vec3(dot(albedo, vec3(.2126, .7152, .0722))), albedo, 0.5);
+              albedo = pow(albedo, vec3(1.8)) * 1.45;
+              if (md > 0.9993 && moonUp > 0.0 && r2 < 1.0) {
+                // The visible hemisphere's normal faces back toward the viewer.
+                vec3 n = p.x * right + p.y * up - z * moonDir;
+                float lit = smoothstep(-0.04, 0.08, dot(n, sunDir));
+                float edge = smoothstep(1.0, 0.85, r2) * moonUp;
+                // Earthshine: the unlit side is faintly there at night.
+                col = mix(col, albedo * .1, (1.0 - lit) * edge * (1.0 - daylight) * 0.75);
+                col = mix(col, albedo * 1.05, lit * edge * mix(1.0, 0.55, daylight));
               }
               col += vec3(.45, .5, .62) * pow(max(md, 0.0), 900.0) * .35 * moonFraction * (1.0 - daylight) * moonUp;
               gl_FragColor = vec4(col, 1.);
@@ -140,15 +164,16 @@ export function Sunlight({ light: l, detail }: { light: SkyState["light"]; detai
   useFrame(() => {
     if (!light.current) return;
     target.position.set(sim.x, 0, sim.z);
-    light.current.position.set(sim.x + dir.x * 100, dir.y * 100, sim.z + dir.z * 100);
+    light.current.position.set(sim.x + dir.x * 80, dir.y * 80, sim.z + dir.z * 80);
     target.updateMatrixWorld();
   });
   return <>
     <primitive object={target} />
+    {/* With no shadow to cast (night, twilight, a low sun) the shadow pass is skipped entirely. */}
     <directionalLight ref={light} target={target} color={l.color}
-      intensity={l.intensity} castShadow={detail}
+      intensity={l.intensity} castShadow={detail && l.shadow > 0.01} shadow-intensity={l.shadow}
       shadow-mapSize={COARSE_POINTER ? [1024, 1024] : [2048, 2048]} shadow-camera-left={-40} shadow-camera-right={40}
-      shadow-camera-top={40} shadow-camera-bottom={-40} shadow-camera-near={1} shadow-camera-far={220}
+      shadow-camera-top={40} shadow-camera-bottom={-40} shadow-camera-near={1} shadow-camera-far={160}
       shadow-bias={-0.0002} shadow-normalBias={0.08} />
   </>;
 }

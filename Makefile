@@ -32,11 +32,12 @@
 #   make web-dev       -- Vite dev server on port 5173
 #   make web-test      -- the node test suite
 #   make web-build     -- typecheck and production build
+#   make web-preview   -- production build, served on the LAN like web-dev
 #   make web-kill      -- stop every running Vite dev or preview server
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build web-kill
+.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build web-preview web-kill
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -53,6 +54,12 @@ web-test:
 
 web-build:
 	cd web && npm run build
+
+# The compiled bundle, as the release zip ships it: the fair place to judge the
+# frame rate, since the dev server runs React in development mode. Port 5173, or
+# the next free one if web-dev is still up.
+web-preview: web-build
+	cd web && npm run preview
 
 # Matched by command line, not port: `npm run dev` moves to 5174 when 5173 is
 # taken, and a preview server shares 5173. Only node processes running Vite's

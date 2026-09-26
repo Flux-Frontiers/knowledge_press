@@ -41,8 +41,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   when play starts and kept rounded to 0.1 degree in this browser only; without
   it (refused, or a plain-http address such as the LAN dev server) the sky uses
   latitude 40 N and the time zone's longitude. Saves keep a night setting.
-- **Knowledge Press Forest: click the corpus redwood to browse every book.**
-  Its plaque opens full size, like the exhibit plaques.
+  Only a sun more than a few degrees up casts shadows: a low sun or the moon
+  drove the shadow camera through far more forest, and skipping that pass
+  makes nights and sunsets about 50% faster than before the clock.
+  The moon's face is NASA SVS's LRO colour map (`textures/moon/`), mapped onto
+  the near side and lit by the same terminator, so every phase shows the real
+  maria, with a faint earthshine on the dark side.
+  `docs/images/moon_phases.png` shows all eight phases as the shader draws
+  them; `scripts/render_moon_phases.py` regenerates it.
+- **Knowledge Press Forest: click the corpus redwood, or its plaque, to browse
+  every book.**
 - **`make web-kill`** stops every running Vite dev or preview server,
   matched by command line rather than port.
 

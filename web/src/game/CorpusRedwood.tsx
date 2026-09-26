@@ -82,10 +82,10 @@ function RedwoodPlaque({ forest }: { forest: Forest }) {
   useEffect(() => () => tex.dispose(), [tex]);
   const x = Math.cos(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
   const z = Math.sin(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
-  // Tapping the plaque opens it full size, as every exhibit plaque does.
+  // Tapping the plaque lists every book, as tapping the tree does.
   return (
     <group position={[x, 0, z]} rotation={[0, Math.atan2(x, z), 0]}
-      onClick={(e) => { e.stopPropagation(); useGame.getState().openPlaque({ title: "The Corpus Redwood", byline, body: REDWOOD_BODY }); }}
+      onClick={(e) => { e.stopPropagation(); useGame.getState().openCatalog(null); }}
       onPointerOver={() => pointer(true)} onPointerOut={() => pointer(false)}>
       {[-1.25, 1.25].map((px) => (
         <mesh key={px} position={[px, 0.8, 0]}>

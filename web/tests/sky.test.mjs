@@ -72,3 +72,13 @@ test("light hands over from sun to moon through twilight without a jump", () => 
   }
   assert.ok(prev > 0.3, "the full moon lights the night");
 });
+
+test("only a sun well above the horizon casts shadows", () => {
+  const { skyState } = sky();
+  const at = (iso) => skyState(new Date(iso), NYC).light;
+  assert.equal(at("2026-06-21T16:57:00Z").shadow, 1, "noon");
+  // New York, 21 June 2026: sunset 00:31 UTC, so the sun is about 1 deg up at 00:20.
+  assert.equal(at("2026-06-22T00:20:00Z").shadow, 0, "sun on the horizon");
+  assert.equal(at("2024-01-26T04:00:00Z").shadow, 0, "under a full moon");
+  assert.ok(at("2026-06-21T23:45:00Z").shadow > 0, "evening sun still casts");
+});
