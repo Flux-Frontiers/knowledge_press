@@ -53,7 +53,10 @@ test("compact layout: groves never overlap, trees keep driving room, the hub sta
       assert.ok(d >= 7.5, `${f.trees[i].book.slug} and ${f.trees[j].book.slug} are ${d.toFixed(1)} m apart`);
     }
   }
-  assert.ok(f.worldRadius < 275, `world radius ${f.worldRadius.toFixed(0)} m`);
+  // Species crowns set the groves' size, so this only catches a runaway layout
+  // (301 m with the species habits; the sky dome follows the camera and the
+  // ground, minimap and cart bounds all scale with worldRadius).
+  assert.ok(f.worldRadius < 340, `world radius ${f.worldRadius.toFixed(0)} m`);
 });
 
 test("every road keeps the cart clear of every trunk, the redwood and every exhibit", () => {

@@ -318,7 +318,7 @@ function varyHabit(habit: Habit, slug: string): Habit {
   const u = () => rng() * 2 - 1;
   return {
     ...habit,
-    width: habit.width * (1 + 0.08 * u()),
+    width: habit.width * (1 + 0.12 * u()),
     clearBole: clamp(habit.clearBole + 0.04 * u(), 0.05, 0.6),
     tropism: habit.tropism + 0.05 * u(),
     droop: habit.droop * (1 + 0.2 * u()),

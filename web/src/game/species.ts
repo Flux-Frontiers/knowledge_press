@@ -132,12 +132,12 @@ export const SPECIES: Species[] = [
   {
     // English oak: short bole, broad low dome, long gnarled horizontal limbs.
     name: "oak", barkAspect: 2, leaf: { shape: "outline", half: OAK_HALF, smooth: true }, foliageShift: [0, 0, 0],
-    habit: { envelope: "dome", whorl: 1, droop: 0.05, leader: 0, width: 1.1, clearBole: 0.22, spread: 1.1, lift: 0.6, tropism: 0.02, influence: 16, step: 1.1, jitter: 0.24, pipeExp: 2 },
+    habit: { envelope: "dome", whorl: 1, droop: 0.05, leader: 0, width: 1.55, clearBole: 0.22, spread: 1.1, lift: 0.6, tropism: 0.02, influence: 16, step: 1.1, jitter: 0.24, pipeExp: 2 },
   },
   {
     // Horse chestnut: a full rounded ellipsoid on a medium bole.
     name: "chestnut", barkAspect: 1, leaf: { shape: "ovate", width: 0.36 }, foliageShift: [0.01, 0.04, -0.03],
-    habit: { envelope: "ellipsoid", whorl: 1, droop: 0.08, leader: 0.15, width: 0.9, clearBole: 0.28, spread: 1, lift: 1, tropism: 0.14, influence: 12, step: 1, jitter: 0.14, pipeExp: 2.2 },
+    habit: { envelope: "ellipsoid", whorl: 1, droop: 0.08, leader: 0.15, width: 1.15, clearBole: 0.28, spread: 1, lift: 1, tropism: 0.14, influence: 12, step: 1, jitter: 0.14, pipeExp: 2.2 },
   },
   {
     // Fir: a narrow cone from near the ground, flat sprays, a fast-tapering stem.
@@ -147,17 +147,17 @@ export const SPECIES: Species[] = [
   {
     // London plane: a long clean bole under a tall egg-shaped crown of long, rising limbs.
     name: "plane", barkAspect: 1, leaf: { shape: "outline", half: PLANE_HALF, smooth: false }, foliageShift: [-0.01, 0.02, 0.05],
-    habit: { envelope: "ovoid", whorl: 1, droop: 0, leader: 0.3, width: 0.95, clearBole: 0.38, spread: 1, lift: 1.2, tropism: 0.24, influence: 18, step: 1.15, jitter: 0.1, pipeExp: 2.1 },
+    habit: { envelope: "ovoid", whorl: 1, droop: 0, leader: 0.3, width: 1.05, clearBole: 0.38, spread: 1, lift: 1.2, tropism: 0.24, influence: 18, step: 1.15, jitter: 0.1, pipeExp: 2.1 },
   },
   {
     // Blackthorn: a low, dense, twiggy thicket-tree that spreads upward from low down.
     name: "blackthorn", barkAspect: 1, leaf: { shape: "ovate", width: 0.7 }, foliageShift: [0.02, -0.1, -0.1],
-    habit: { envelope: "vase", whorl: 1, droop: 0, leader: 0, width: 1.0, clearBole: 0.12, spread: 1.25, lift: 0.8, tropism: 0.1, influence: 6, step: 0.7, jitter: 0.3, pipeExp: 2.5 },
+    habit: { envelope: "vase", whorl: 1, droop: 0, leader: 0, width: 1.3, clearBole: 0.12, spread: 1.25, lift: 0.8, tropism: 0.1, influence: 6, step: 0.7, jitter: 0.3, pipeExp: 2.5 },
   },
   {
     // Stone pine: a tall bare stem under a flat-topped parasol of tufts.
     name: "pine", barkAspect: 1, leaf: { shape: "outline", half: PINE_HALF, smooth: false }, foliageShift: [0.04, -0.08, -0.08],
-    habit: { envelope: "umbrella", whorl: 1, droop: 0, leader: 0.45, width: 1.05, clearBole: 0.5, spread: 1.1, lift: 0.4, tropism: 0.12, influence: 14, step: 1.1, jitter: 0.12, pipeExp: 2.2 },
+    habit: { envelope: "umbrella", whorl: 1, droop: 0, leader: 0.45, width: 1.45, clearBole: 0.5, spread: 1.1, lift: 0.4, tropism: 0.12, influence: 14, step: 1.1, jitter: 0.12, pipeExp: 2.2 },
   },
   {
     // Silver birch: a slender stem, a narrow open crown, fine twigs that hang at the ends.
