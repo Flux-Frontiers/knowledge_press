@@ -1,4 +1,5 @@
 [![Version](https://img.shields.io/badge/version-1.23.0-blue.svg)](https://github.com/Flux-Frontiers/knowledge_press/releases)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22969736-blue.svg)](https://doi.org/10.5281/zenodo.22969736)
 [![License: Elastic-2.0](https://img.shields.io/badge/License-Elastic%202.0%20%7C%20app%20proprietary-blue.svg)](LICENSE)
 [![Platforms](https://img.shields.io/badge/platforms-iOS%2026%20%7C%20macOS%2026%20%7C%20web-lightgrey.svg)](app/RUNBOOK.md)
 [![App](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/app.yml/badge.svg)](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/app.yml)
@@ -58,7 +59,7 @@ number.
 
 If you use The Knowledge Press in your research or project, please cite it:
 
-> Suchanek, E. G. (2026). *The Knowledge Press: Reading a GutenbergKG Corpus* (Version 1.23.0) [Software]. Flux-Frontiers. https://github.com/Flux-Frontiers/knowledge_press
+> Suchanek, E. G. (2026). *The Knowledge Press: Reading a GutenbergKG Corpus* (Version 1.23.0) [Software]. Flux-Frontiers. https://doi.org/10.5281/zenodo.22969736
 
 ```bibtex
 @software{suchanek_knowledgepress,
@@ -67,6 +68,7 @@ If you use The Knowledge Press in your research or project, please cite it:
   version   = {1.23.0},
   year      = {2026},
   publisher = {Flux-Frontiers},
+  doi       = {10.5281/zenodo.22969736},
   url       = {https://github.com/Flux-Frontiers/knowledge_press},
 }
 ```

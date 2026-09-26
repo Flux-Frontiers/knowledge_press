@@ -17,6 +17,7 @@ authors:
     affiliation: "Flux-Frontiers"
 version: "1.23.0"
 date-released: "2026-09-25"
+doi: "10.5281/zenodo.22969736"
 license-url: "https://www.elastic.co/licensing/elastic-license"
 repository-code: "https://github.com/Flux-Frontiers/knowledge_press"
 url: "https://github.com/Flux-Frontiers/knowledge_press"
