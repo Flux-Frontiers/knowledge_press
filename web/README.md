@@ -26,6 +26,11 @@ npm run dev
 
 Open the URL Vite prints. Click **Start driving**.
 
+The dev and preview servers proxy `/worker` to the GutenbergKG worker at
+`http://localhost:8000` (`make up` in gutenberg_kg), so the forest can fetch
+book text without the worker sending CORS headers. Set `WORKER_URL` to use a
+worker elsewhere. The static build on GitHub Pages has no proxy.
+
 | Key | Action |
 | --- | --- |
 | **W / S** | throttle / reverse |
