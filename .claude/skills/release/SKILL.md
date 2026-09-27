@@ -125,13 +125,25 @@ If a new version site ever appears (another app target, a docs page stamping
 the version), add it to `SITES` in `scripts/check_version.py` in the same
 commit.
 
+Then snapshot the code graph at this version, keyed on the release:
+
+```bash
+tscodekg build --repo .
+tscodekg snapshot save X.Y.Z --repo . --subject repo:knowledge_press
+```
+
+`tscodekg` is a global uv tool. The snapshot lands in `.tscodekg/snapshots/`,
+the only part of `.tscodekg/` that git tracks. Without the explicit version it
+would be keyed on a timestamp.
+
 ## Step 6: Commit
 
 ```bash
 git add CHANGELOG.md release-notes.md CITATION.cff README.md \
         web/package.json web/package-lock.json \
         app/ios/project.yml app/macos/project.yml \
-        app/GutenbergKGKit/Sources/KnowledgePressUI/AppVersion.swift
+        app/GutenbergKGKit/Sources/KnowledgePressUI/AppVersion.swift \
+        .tscodekg/snapshots/
 git commit -m "chore(release): vX.Y.Z release notes"
 ```
 

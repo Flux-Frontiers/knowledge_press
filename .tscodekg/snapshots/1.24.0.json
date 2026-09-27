@@ -1,0 +1,100 @@
+{
+  "key": "1.24.0",
+  "branch": "main",
+  "timestamp": "2026-09-27T02:35:55.410392+00:00",
+  "version": "1.24.0",
+  "subject": "repo:knowledge_press",
+  "tool": "tscode-kg",
+  "tool_version": "0.6.0",
+  "tree_hash": "5114bd798cd2d9d800675e69b5ae27234fe6bc4d",
+  "metrics": {
+    "db_path": ".tscodekg/graph.sqlite",
+    "total_nodes": 326,
+    "meaningful_nodes": 326,
+    "total_edges": 842,
+    "node_counts": {
+      "class": 3,
+      "function": 206,
+      "interface": 1,
+      "method": 9,
+      "module": 58,
+      "type_alias": 49
+    },
+    "edge_counts": {
+      "CALLS": 371,
+      "CONTAINS": 268,
+      "IMPORTS": 201,
+      "INHERITS": 2
+    },
+    "module_count": 58,
+    "class_count": 3,
+    "function_count": 206,
+    "method_count": 9,
+    "docstring_coverage": 0.4,
+    "snapshot_count": 1,
+    "vector_backend": "sqlite-vec",
+    "critical_issues": 2,
+    "complexity_median": 2.0
+  },
+  "hotspots": [
+    {
+      "name": "fn:web/src/game/tour.ts:next",
+      "callers": 3,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/routing.ts:clearanceAt",
+      "callers": 3,
+      "callees": 1
+    },
+    {
+      "name": "fn:web/src/game/sky.ts:toDays",
+      "callers": 3,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/sky.ts:sunPosition",
+      "callers": 3,
+      "callees": 3
+    },
+    {
+      "name": "fn:web/src/game/WindSculptures.tsx:useSpinners",
+      "callers": 3,
+      "callees": 3
+    },
+    {
+      "name": "fn:web/src/game/WindSculptures.tsx:useWindMaterials",
+      "callers": 3,
+      "callees": 3
+    },
+    {
+      "name": "fn:web/src/game/CorpusRedwood.tsx:pointer",
+      "callers": 2,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/HUD.tsx:jumpHome",
+      "callers": 2,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/input.ts:resetInput",
+      "callers": 2,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/roads.ts:vertex",
+      "callers": 2,
+      "callees": 0
+    }
+  ],
+  "issues": [
+    "[WARN] 131 orphaned declarations: `CorpusRedwood`, `RedwoodPlaque`, `redwoodBark`, `sprayTexture`, `ForestFloor` (and 126 more) \u2014 zero callers detected; verify these aren't dead code",
+    "[LOW] Low JSDoc coverage (33.9%) \u2014 semantic query quality will be poor; undocumented nodes embed only identifiers, not natural language"
+  ],
+  "vs_previous": null,
+  "vs_baseline": {
+    "nodes": 11,
+    "edges": 31
+  }
+}
