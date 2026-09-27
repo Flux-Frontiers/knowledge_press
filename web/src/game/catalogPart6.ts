@@ -4,6 +4,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "dhammapada_f_max_müller_translation",
     title: "Dhammapada (F. Max Müller translation)",
+    book: "Dhammapada (F. Max Müller translation)",
     author: "Unknown",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
@@ -14,6 +15,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "tao_te_ching_james_legge_translation",
     title: "Tao Te Ching (James Legge translation)",
+    book: "Tao Te Ching (James Legge translation)",
     author: "Laozi",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
@@ -24,6 +26,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_analects_of_confucius_james_legge_translation",
     title: "The Analects of Confucius (James Legge translation)",
+    book: "The Analects of Confucius (James Legge translation)",
     author: "James Legge",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
@@ -34,6 +37,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_bhagavad_gita_edwin_arnold_verse_translation",
     title: "The Bhagavad Gita (Edwin Arnold verse translation)",
+    book: "The Bhagavad Gita (Edwin Arnold verse translation)",
     author: "Unknown",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
@@ -44,6 +48,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_bible",
     title: "The Bible",
+    book: "The Bible (King James Version)",
     author: "Unknown",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
@@ -54,6 +59,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_quran_rodwell_translation",
     title: "The Quran (Rodwell translation)",
+    book: "The Quran (Rodwell translation)",
     author: "Unknown",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
@@ -64,6 +70,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_upanishads_max_müller_translation",
     title: "The Upanishads (Max Müller translation)",
+    book: "The Upanishads (Max Müller translation)",
     author: "Unknown",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
@@ -74,6 +81,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "a_journey_in_other_worlds_a_romance_of_the_future",
     title: "A Journey in Other Worlds: A Romance of the Future",
+    book: "A Journey in Other Worlds: A Romance of the Future",
     author: "John Jacob Astor",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -84,6 +92,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "a_princess_of_mars",
     title: "A princess of Mars",
+    book: "A Princess of Mars",
     author: "Edgar Rice Burroughs",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -94,6 +103,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "at_the_earths_core",
     title: "At the Earth's Core",
+    book: "At the Earth's Core",
     author: "Edgar Rice Burroughs",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -104,6 +114,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "etidorhpa_or_the_end_of_earth",
     title: "Etidorhpa; or, The End of Earth.",
+    book: "Etidorhpa; or, The End of Earth.",
     author: "John Uri Lloyd",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -114,6 +125,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "flatland_a_romance_of_many_dimensions",
     title: "Flatland: A Romance of Many Dimensions",
+    book: "Flatland",
     author: "Edwin Abbott Abbott",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -124,6 +136,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "frankenstein",
     title: "Frankenstein",
+    book: "Frankenstein",
     author: "Mary Wollstonecraft Shelley",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -134,6 +147,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "pellucidar_burroughs",
     title: "Pellucidar (Burroughs)",
+    book: "Pellucidar (Burroughs)",
     author: "Edgar Rice Burroughs",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -144,6 +158,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "symzonia_voyage_of_discovery",
     title: "Symzonia: Voyage of Discovery",
+    book: "Symzonia: Voyage of Discovery",
     author: "Adam, Captain Seaborn",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -154,6 +169,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_coming_race",
     title: "The Coming Race",
+    book: "The Coming Race",
     author: "Edward Bulwer Lytton, Baron Lytton",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -164,6 +180,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_first_men_in_the_moon",
     title: "The First Men in the Moon",
+    book: "The First Men in the Moon",
     author: "H. G. (Herbert George) Wells",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -174,6 +191,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_food_of_the_gods_and_how_it_came_to_earth",
     title: "The Food of the Gods and How It Came to Earth",
+    book: "The Food of the Gods (Wells)",
     author: "H. G. (Herbert George) Wells",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -184,6 +202,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_gods_of_mars",
     title: "The Gods of Mars",
+    book: "The Gods of Mars",
     author: "Edgar Rice Burroughs",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -194,6 +213,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_invisible_man",
     title: "The Invisible Man",
+    book: "The Invisible Man",
     author: "H. G. (Herbert George) Wells",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -204,6 +224,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_lost_world",
     title: "The Lost World",
+    book: "The Lost World",
     author: "Arthur Conan Doyle",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -214,6 +235,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_island_of_doctor_moreau",
     title: "The island of Doctor Moreau",
+    book: "The island of Doctor Moreau",
     author: "H. G. (Herbert George) Wells",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -224,6 +246,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_warlord_of_mars",
     title: "The warlord of Mars",
+    book: "The warlord of Mars",
     author: "Edgar Rice Burroughs",
     genre: "science-fiction",
     genreLabel: "Science Fiction",
@@ -234,6 +257,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "a_midsummer_nights_dream",
     title: "A Midsummer Nights Dream",
+    book: "A Midsummer Nights Dream",
     author: "William Shakespeare",
     genre: "shakespeare",
     genreLabel: "Shakespeare",
@@ -244,6 +268,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "hamlet",
     title: "Hamlet",
+    book: "Hamlet",
     author: "William Shakespeare",
     genre: "shakespeare",
     genreLabel: "Shakespeare",
@@ -254,6 +279,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "macbeth",
     title: "Macbeth",
+    book: "Macbeth",
     author: "William Shakespeare",
     genre: "shakespeare",
     genreLabel: "Shakespeare",
@@ -264,6 +290,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "romeo_and_juliet",
     title: "Romeo and Juliet",
+    book: "Romeo and Juliet",
     author: "William Shakespeare",
     genre: "shakespeare",
     genreLabel: "Shakespeare",
@@ -274,6 +301,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "don_quixote",
     title: "Don Quixote",
+    book: "Don Quixote",
     author: "Miguel de Cervantes Saavedra",
     genre: "spanish",
     genreLabel: "Spanish Literature",
@@ -284,6 +312,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "a_ladys_life_in_the_rocky_mountains",
     title: "A Lady's Life in the Rocky Mountains",
+    book: "A Lady's Life in the Rocky Mountains",
     author: "Isabella L. (Isabella Lucy) Bird",
     genre: "travel",
     genreLabel: "Travel",
@@ -294,6 +323,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_innocents_abroad_mark_twain",
     title: "The Innocents Abroad — Mark Twain",
+    book: "The Innocents Abroad — Mark Twain",
     author: "Mark Twain",
     genre: "travel",
     genreLabel: "Travel",
@@ -304,6 +334,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_travels_of_marco_polo",
     title: "The Travels of Marco Polo",
+    book: "The Travels of Marco Polo",
     author: "da Pisa Rusticiano",
     genre: "travel",
     genreLabel: "Travel",
@@ -314,6 +345,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "travels_in_the_interior_districts_of_africa_performed_under_",
     title: "Travels in the interior districts of Africa: performed under the direction and patronage of the African Association, in the years 1795, 1796, and 1797",
+    book: "Travels in the interior districts of Africa: performed under the direction and patronage of the African Association, in the years 1795, 1796, and 1797",
     author: "Mungo Park",
     genre: "travel",
     genreLabel: "Travel",
@@ -324,6 +356,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "two_years_before_the_mast",
     title: "Two Years Before the Mast",
+    book: "Two Years Before the Mast",
     author: "Richard Henry Dana",
     genre: "travel",
     genreLabel: "Travel",
@@ -334,6 +367,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "typee_a_peep_at_polynesian_life_herman_melville",
     title: "Typee: A Peep at Polynesian Life — Herman Melville",
+    book: "Typee: A Peep at Polynesian Life — Herman Melville",
     author: "Herman Melville",
     genre: "travel",
     genreLabel: "Travel",
@@ -344,6 +378,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "gitanjali_tagore",
     title: "Gitanjali (Tagore)",
+    book: "Gitanjali (Tagore)",
     author: "Rabindranath Tagore",
     genre: "world-literature",
     genreLabel: "World Literature",
@@ -354,6 +389,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "one_thousand_and_one_nights_lane_translation",
     title: "One Thousand and One Nights (Lane translation)",
+    book: "One Thousand and One Nights (Lane translation)",
     author: "Andrew Lang",
     genre: "world-literature",
     genreLabel: "World Literature",
@@ -364,6 +400,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_divine_comedy_carys_translation",
     title: "The Divine Comedy (Cary's Translation)",
+    book: "The Divine Comedy (Cary)",
     author: "Dante Alighieri",
     genre: "world-literature",
     genreLabel: "World Literature",
@@ -374,6 +411,7 @@ export const BOOKS_PART6: Book[] = [
   {
     slug: "the_divine_comedy_longfellows_translation",
     title: "The Divine Comedy (Longfellow's Translation)",
+    book: "The Divine Comedy (Longfellow)",
     author: "Dante Alighieri",
     genre: "world-literature",
     genreLabel: "World Literature",

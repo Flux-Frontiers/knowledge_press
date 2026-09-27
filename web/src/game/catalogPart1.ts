@@ -4,6 +4,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "adventures_of_huckleberry_finn",
     title: "Adventures of Huckleberry Finn",
+    book: "Adventures of Huckleberry Finn",
     author: "Mark Twain",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -14,6 +15,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "ebony_and_crystal_poems_in_verse_and_prose",
     title: "Ebony and Crystal: Poems in Verse and Prose",
+    book: "Ebony and Crystal: Poems in Verse and Prose",
     author: "Clark Ashton Smith",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -24,6 +26,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "leaves_of_grass",
     title: "Leaves of Grass",
+    book: "Leaves of Grass",
     author: "Walt Whitman",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -34,6 +37,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "moby_dick",
     title: "Moby Dick",
+    book: "Moby Dick",
     author: "Herman Melville",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -44,6 +48,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "my_antonia_cather",
     title: "My Antonia (Cather)",
+    book: "My Antonia (Cather)",
     author: "Willa Cather",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -54,6 +59,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "o_pioneers_cather",
     title: "O Pioneers! (Cather)",
+    book: "O Pioneers! (Cather)",
     author: "Willa Cather",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -64,6 +70,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "tales_of_mystery_and_imagination_poe",
     title: "Tales of Mystery and Imagination (Poe)",
+    book: "Tales of Mystery and Imagination (Poe)",
     author: "Edgar Allan Poe",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -74,6 +81,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_age_of_innocence_wharton",
     title: "The Age of Innocence (Wharton)",
+    book: "The Age of Innocence (Wharton)",
     author: "Edith Wharton",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -84,6 +92,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_awakening_chopin",
     title: "The Awakening (Chopin)",
+    book: "The Awakening (Chopin)",
     author: "Kate Chopin",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -94,6 +103,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_call_of_the_wild",
     title: "The Call of the Wild",
+    book: "The Call of the Wild",
     author: "Jack London",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -104,6 +114,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_house_of_mirth_wharton",
     title: "The House of Mirth (Wharton)",
+    book: "The House of Mirth (Wharton)",
     author: "Edith Wharton",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -114,6 +125,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_jungle_sinclair",
     title: "The Jungle (Sinclair)",
+    book: "The Jungle (Sinclair)",
     author: "Upton Sinclair",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -124,6 +136,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_legend_of_sleepy_hollow_irving",
     title: "The Legend of Sleepy Hollow (Irving)",
+    book: "The Legend of Sleepy Hollow (Irving)",
     author: "Washington Irving",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -134,6 +147,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_raven_and_other_poems_poe",
     title: "The Raven and Other Poems (Poe)",
+    book: "The Raven and Other Poems (Poe)",
     author: "Edgar Allan Poe",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -144,6 +158,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_red_badge_of_courage",
     title: "The Red Badge of Courage",
+    book: "The Red Badge of Courage",
     author: "Stephen Crane",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -154,6 +169,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_scarlet_letter",
     title: "The Scarlet Letter",
+    book: "The Scarlet Letter",
     author: "Nathaniel Hawthorne",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -164,6 +180,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_sea_wolf",
     title: "The Sea-Wolf",
+    book: "The Sea-Wolf (London)",
     author: "Jack London",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -174,6 +191,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_souls_of_black_folk_du_bois",
     title: "The Souls of Black Folk (Du Bois)",
+    book: "The Souls of Black Folk (Du Bois)",
     author: "W. E. B. (William Edward Burghardt) Du Bois",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -184,6 +202,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_star_treader_and_other_poems",
     title: "The Star-Treader, and other poems",
+    book: "The Star-Treader, and other poems",
     author: "Clark Ashton Smith",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -194,6 +213,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_yellow_wallpaper",
     title: "The Yellow Wallpaper",
+    book: "The Yellow Wallpaper",
     author: "Charlotte Perkins Gilman",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -204,6 +224,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "uncle_toms_cabin",
     title: "Uncle Toms Cabin",
+    book: "Uncle Toms Cabin",
     author: "Harriet Beecher Stowe",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -214,6 +235,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "walden",
     title: "Walden",
+    book: "Walden",
     author: "Henry David Thoreau",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -224,6 +246,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "white_fang_london",
     title: "White Fang (London)",
+    book: "White Fang (London)",
     author: "Jack London",
     genre: "american-literature",
     genreLabel: "American Literature",
@@ -234,6 +257,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "a_selection_from_the_discourses_of_epictetus_with_the_enchei",
     title: "A Selection from the Discourses of Epictetus with the Encheiridion",
+    book: "A Selection from the Discourses of Epictetus with the Encheiridion",
     author: "Epictetus",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -244,6 +268,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "histories_herodotus",
     title: "Histories (Herodotus)",
+    book: "Histories (Herodotus)",
     author: "Herodotus",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -254,6 +279,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "history_of_the_peloponnesian_war_thucydides",
     title: "History of the Peloponnesian War (Thucydides)",
+    book: "History of the Peloponnesian War (Thucydides)",
     author: "Thucydides",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -264,6 +290,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "medea_of_euripides",
     title: "Medea of Euripides",
+    book: "Medea of Euripides",
     author: "Euripides",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -274,6 +301,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "metamorphoses_ovid",
     title: "Metamorphoses (Ovid)",
+    book: "Metamorphoses (Ovid)",
     author: "Ovid",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -284,6 +312,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "minor_dialogues_together_with_the_dialogue_on_clemency",
     title: "Minor Dialogues, Together With the Dialogue on Clemency",
+    book: "Minor Dialogues, Together With the Dialogue on Clemency",
     author: "Lucius Annaeus Seneca",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -294,6 +323,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "oedipus_king_of_thebes",
     title: "Oedipus King of Thebes",
+    book: "Oedipus King of Thebes",
     author: "Sophocles",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -304,6 +334,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "on_the_nature_of_things_lucretius",
     title: "On the Nature of Things (Lucretius)",
+    book: "On the Nature of Things (Lucretius)",
     author: "Titus Lucretius Carus",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -314,6 +345,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "parallel_lives_plutarch",
     title: "Parallel Lives (Plutarch)",
+    book: "Parallel Lives (Plutarch)",
     author: "Plutarch",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -324,6 +356,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_aeneid",
     title: "The Aeneid",
+    book: "The Aeneid",
     author: "Virgil",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -334,6 +367,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_birds_aristophanes",
     title: "The Birds (Aristophanes)",
+    book: "The Birds (Aristophanes)",
     author: "Aristophanes",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -344,6 +378,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_clouds_aristophanes",
     title: "The Clouds (Aristophanes)",
+    book: "The Clouds (Aristophanes)",
     author: "Aristophanes",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -354,6 +389,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_consolation_of_philosophy_boethius",
     title: "The Consolation of Philosophy (Boethius)",
+    book: "The Consolation of Philosophy (Boethius)",
     author: "Boethius",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -364,6 +400,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_eleven_comedies_volume_1",
     title: "The Eleven Comedies, Volume 1",
+    book: "The Eleven Comedies, Volume 1",
     author: "Aristophanes",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -374,6 +411,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_eleven_comedies_volume_2",
     title: "The Eleven Comedies, Volume 2",
+    book: "The Eleven Comedies, Volume 2",
     author: "Aristophanes",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -384,6 +422,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_frogs",
     title: "The Frogs",
+    book: "The Frogs",
     author: "Aristophanes",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -394,6 +433,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_golden_sayings_of_epictetus_with_the_hymn_of_cleanthes",
     title: "The Golden Sayings of Epictetus, with the Hymn of Cleanthes",
+    book: "The Golden Sayings of Epictetus, with the Hymn of Cleanthes",
     author: "Epictetus",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -404,6 +444,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_house_of_atreus_being_the_agamemnon_the_libation_bearers",
     title: "The House of Atreus; Being the Agamemnon, the Libation bearers, and the Furies",
+    book: "The House of Atreus; Being the Agamemnon, the Libation bearers, and the Furies",
     author: "Aeschylus",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -414,6 +455,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_iliad",
     title: "The Iliad",
+    book: "The Iliad",
     author: "Homer",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -424,6 +466,7 @@ export const BOOKS_PART1: Book[] = [
   {
     slug: "the_meditations_of_the_emperor_marcus_aurelius_antoninus",
     title: "The Meditations of the Emperor Marcus Aurelius Antoninus",
+    book: "The Meditations of the Emperor Marcus Aurelius Antoninus",
     author: "Emperor of Rome Marcus Aurelius",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",

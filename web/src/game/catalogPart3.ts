@@ -4,6 +4,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "cranford_gaskell",
     title: "Cranford (Gaskell)",
+    book: "Cranford (Gaskell)",
     author: "Elizabeth Cleghorn Gaskell",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -14,6 +15,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "david_copperfield_dickens",
     title: "David Copperfield (Dickens)",
+    book: "David Copperfield (Dickens)",
     author: "Charles Dickens",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -24,6 +26,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "dracula",
     title: "Dracula",
+    book: "Dracula",
     author: "Bram Stoker",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -34,6 +37,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "emma",
     title: "Emma",
+    book: "Emma",
     author: "Jane Austen",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -44,6 +48,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "far_from_the_madding_crowd_hardy",
     title: "Far from the Madding Crowd (Hardy)",
+    book: "Far from the Madding Crowd (Hardy)",
     author: "Thomas Hardy",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -54,6 +59,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "great_expectations",
     title: "Great Expectations",
+    book: "Great Expectations",
     author: "Charles Dickens",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -64,6 +70,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "grimms_fairy_tales",
     title: "Grimms Fairy Tales",
+    book: "Grimms Fairy Tales",
     author: "Wilhelm Grimm",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -74,6 +81,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "gullivers_travels",
     title: "Gullivers Travels",
+    book: "Gullivers Travels",
     author: "Jonathan Swift",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -84,6 +92,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "heart_of_darkness",
     title: "Heart of Darkness",
+    book: "Heart of Darkness",
     author: "Joseph Conrad",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -94,6 +103,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "howards_end",
     title: "Howards End",
+    book: "Howards End",
     author: "E. M. (Edward Morgan) Forster",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -104,6 +114,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "jane_eyre",
     title: "Jane Eyre",
+    book: "Jane Eyre",
     author: "Charlotte Brontë",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -114,6 +125,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "kim_kipling",
     title: "Kim (Kipling)",
+    book: "Kim (Kipling)",
     author: "Rudyard Kipling",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -124,6 +136,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "middlemarch",
     title: "Middlemarch",
+    book: "Middlemarch",
     author: "George Eliot",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -134,6 +147,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "north_and_south_gaskell",
     title: "North and South (Gaskell)",
+    book: "North and South (Gaskell)",
     author: "Elizabeth Cleghorn Gaskell",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -144,6 +158,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "pride_and_prejudice",
     title: "Pride and Prejudice",
+    book: "Pride and Prejudice",
     author: "Jane Austen",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -154,6 +169,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "robinson_crusoe",
     title: "Robinson Crusoe",
+    book: "Robinson Crusoe",
     author: "Daniel Defoe",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -164,6 +180,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "sense_and_sensibility",
     title: "Sense and Sensibility",
+    book: "Sense and Sensibility",
     author: "Jane Austen",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -174,6 +191,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "tess_of_the_durbervilles_hardy",
     title: "Tess of the d'Urbervilles (Hardy)",
+    book: "Tess of the d'Urbervilles (Hardy)",
     author: "Thomas Hardy",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -184,6 +202,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_adventures_of_sherlock_holmes",
     title: "The Adventures of Sherlock Holmes",
+    book: "The Adventures of Sherlock Holmes",
     author: "Arthur Conan Doyle",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -194,6 +213,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_jungle_book_kipling",
     title: "The Jungle Book (Kipling)",
+    book: "The Jungle Book (Kipling)",
     author: "Rudyard Kipling",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -204,6 +224,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_man_who_was_thursday_chesterton",
     title: "The Man Who Was Thursday (Chesterton)",
+    book: "The Man Who Was Thursday (Chesterton)",
     author: "G. K. (Gilbert Keith) Chesterton",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -214,6 +235,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_mayor_of_casterbridge_hardy",
     title: "The Mayor of Casterbridge (Hardy)",
+    book: "The Mayor of Casterbridge (Hardy)",
     author: "Thomas Hardy",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -224,6 +246,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_picture_of_dorian_gray",
     title: "The Picture of Dorian Gray",
+    book: "The Picture of Dorian Gray",
     author: "Oscar Wilde",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -234,6 +257,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_portrait_of_a_lady_volume_1",
     title: "The Portrait of a Lady — Volume 1",
+    book: "The Portrait of a Lady — Volume 1",
     author: "Henry James",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -244,6 +268,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_portrait_of_a_lady_volume_2",
     title: "The Portrait of a Lady — Volume 2",
+    book: "The Portrait of a Lady — Volume 2",
     author: "Henry James",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -254,6 +279,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_strange_case_of_dr_jekyll_and_mr_hyde",
     title: "The Strange Case of Dr Jekyll and Mr Hyde",
+    book: "The Strange Case of Dr Jekyll and Mr Hyde",
     author: "Robert Louis Stevenson",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -264,6 +290,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_time_machine",
     title: "The Time Machine",
+    book: "The Time Machine",
     author: "H. G. (Herbert George) Wells",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -274,6 +301,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_turn_of_the_screw_henry_james",
     title: "The Turn of the Screw (Henry James)",
+    book: "The Turn of the Screw (Henry James)",
     author: "Henry James",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -284,6 +312,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_war_of_the_worlds",
     title: "The War of the Worlds",
+    book: "The War of the Worlds",
     author: "H. G. (Herbert George) Wells",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -294,6 +323,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "treasure_island",
     title: "Treasure Island",
+    book: "Treasure Island",
     author: "Robert Louis Stevenson",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -304,6 +334,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "vanity_fair_thackeray",
     title: "Vanity Fair (Thackeray)",
+    book: "Vanity Fair (Thackeray)",
     author: "William Makepeace Thackeray",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -314,6 +345,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "wuthering_heights",
     title: "Wuthering Heights",
+    book: "Wuthering Heights",
     author: "Emily Brontë",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -324,6 +356,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "around_the_world_in_eighty_days_verne",
     title: "Around the World in Eighty Days (Verne)",
+    book: "Around the World in Eighty Days (Verne)",
     author: "Jules Verne",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -334,6 +367,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "candide",
     title: "Candide",
+    book: "Candide",
     author: "Voltaire",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -344,6 +378,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "from_the_earth_to_the_moon_verne",
     title: "From the Earth to the Moon (Verne)",
+    book: "From the Earth to the Moon (Verne)",
     author: "Jules Verne",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -354,6 +389,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "germinal",
     title: "Germinal",
+    book: "Germinal (Zola)",
     author: "Émile Zola",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -364,6 +400,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "journey_to_the_center_of_the_earth_verne",
     title: "Journey to the Center of the Earth (Verne)",
+    book: "Journey to the Center of the Earth (Verne)",
     author: "Jules Verne",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -374,6 +411,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "les_miserables",
     title: "Les Miserables",
+    book: "Les Miserables",
     author: "Victor Hugo",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -384,6 +422,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "madame_bovary",
     title: "Madame Bovary",
+    book: "Madame Bovary",
     author: "Gustave Flaubert",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -394,6 +433,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "nana_zola",
     title: "Nana (Zola)",
+    book: "Nana (Zola)",
     author: "Émile Zola",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -404,6 +444,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_count_of_monte_cristo",
     title: "The Count of Monte Cristo",
+    book: "The Count of Monte Cristo",
     author: "Auguste Maquet",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -414,6 +455,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_hunchback_of_notre_dame_hugo",
     title: "The Hunchback of Notre-Dame (Hugo)",
+    book: "The Hunchback of Notre-Dame (Hugo)",
     author: "Victor Hugo",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -424,6 +466,7 @@ export const BOOKS_PART3: Book[] = [
   {
     slug: "the_three_musketeers",
     title: "The Three Musketeers",
+    book: "The Three Musketeers",
     author: "Auguste Maquet",
     genre: "french-literature",
     genreLabel: "French Literature",

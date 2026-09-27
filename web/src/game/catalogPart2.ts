@@ -4,6 +4,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_odyssey",
     title: "The Odyssey",
+    book: "The Odyssey",
     author: "Homer",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -14,6 +15,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_teaching_of_epictetus",
     title: "The Teaching of Epictetus",
+    book: "The Teaching of Epictetus",
     author: "Epictetus",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -24,6 +26,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "thoughts_of_marcus_aurelius_antoninus",
     title: "Thoughts of Marcus Aurelius Antoninus",
+    book: "Thoughts of Marcus Aurelius Antoninus",
     author: "Emperor of Rome Marcus Aurelius",
     genre: "ancient-classical",
     genreLabel: "Ancient & Classical",
@@ -34,6 +37,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "audels_electric_library_vol_1",
     title: "Audels Electric Library Vol 1",
+    book: "Audels Electric Library Vol 1",
     author: "Unknown",
     genre: "audel-electric",
     genreLabel: "Technical Reference",
@@ -44,6 +48,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "audels_electric_library_vol_10",
     title: "Audels Electric Library Vol 10",
+    book: "Audels Electric Library Vol 10",
     author: "Unknown",
     genre: "audel-electric",
     genreLabel: "Technical Reference",
@@ -54,6 +59,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "audels_electric_library_vol_2",
     title: "Audels Electric Library Vol 2",
+    book: "Audels Electric Library Vol 2",
     author: "Unknown",
     genre: "audel-electric",
     genreLabel: "Technical Reference",
@@ -64,6 +70,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "audels_electric_library_vol_3",
     title: "Audels Electric Library Vol 3",
+    book: "Audels Electric Library Vol 3",
     author: "Unknown",
     genre: "audel-electric",
     genreLabel: "Technical Reference",
@@ -74,6 +81,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "audels_electric_library_vol_4",
     title: "Audels Electric Library Vol 4",
+    book: "Audels Electric Library Vol 4",
     author: "Unknown",
     genre: "audel-electric",
     genreLabel: "Technical Reference",
@@ -84,6 +92,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "audels_electric_library_vol_7",
     title: "Audels Electric Library Vol 7",
+    book: "Audels Electric Library Vol 7",
     author: "Unknown",
     genre: "audel-electric",
     genreLabel: "Technical Reference",
@@ -94,6 +103,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "audels_electric_library_vol_8",
     title: "Audels Electric Library Vol 8",
+    book: "Audels Electric Library Vol 8",
     author: "Unknown",
     genre: "audel-electric",
     genreLabel: "Technical Reference",
@@ -104,6 +114,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "audels_electric_library_vol_9",
     title: "Audels Electric Library Vol 9",
+    book: "Audels Electric Library Vol 9",
     author: "Unknown",
     genre: "audel-electric",
     genreLabel: "Technical Reference",
@@ -114,6 +125,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "autobiography",
     title: "Autobiography",
+    book: "Autobiography",
     author: "John Stuart Mill",
     genre: "biography",
     genreLabel: "Biography",
@@ -124,6 +136,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "autobiography_of_benjamin_franklin",
     title: "Autobiography of Benjamin Franklin",
+    book: "Autobiography of Benjamin Franklin",
     author: "Benjamin Franklin",
     genre: "biography",
     genreLabel: "Biography",
@@ -134,6 +147,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "autobiography_of_benvenuto_cellini",
     title: "Autobiography of Benvenuto Cellini",
+    book: "Autobiography of Benvenuto Cellini",
     author: "Benvenuto Cellini",
     genre: "biography",
     genreLabel: "Biography",
@@ -144,6 +158,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "confessions_jean_jacques_rousseau",
     title: "Confessions — Jean-Jacques Rousseau",
+    book: "Confessions — Jean-Jacques Rousseau",
     author: "Jean-Jacques Rousseau",
     genre: "biography",
     genreLabel: "Biography",
@@ -154,6 +169,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "confessions_saint_augustine",
     title: "Confessions — Saint Augustine",
+    book: "Confessions — Saint Augustine",
     author: "of Hippo, Saint Augustine",
     genre: "biography",
     genreLabel: "Biography",
@@ -164,6 +180,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "incidents_in_the_life_of_a_slave_girl_harriet_jacobs",
     title: "Incidents in the Life of a Slave Girl — Harriet Jacobs",
+    book: "Incidents in the Life of a Slave Girl — Harriet Jacobs",
     author: "Harriet A. (Harriet Ann) Jacobs",
     genre: "biography",
     genreLabel: "Biography",
@@ -174,6 +191,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "miracle_mongers_and_their_methods_harry_houdini",
     title: "Miracle Mongers and Their Methods — Harry Houdini",
+    book: "Miracle Mongers and Their Methods — Harry Houdini",
     author: "Harry Houdini",
     genre: "biography",
     genreLabel: "Biography",
@@ -184,6 +202,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "narrative_of_the_life_of_frederick_douglass",
     title: "Narrative of the Life of Frederick Douglass",
+    book: "Narrative of the Life of Frederick Douglass",
     author: "Frederick Douglass",
     genre: "biography",
     genreLabel: "Biography",
@@ -194,6 +213,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "personal_memoirs_of_ulysses_s_grant_volume_1",
     title: "Personal Memoirs of Ulysses S. Grant — Volume 1",
+    book: "Personal Memoirs of Ulysses S. Grant — Volume 1",
     author: "Ulysses S. (Ulysses Simpson) Grant",
     genre: "biography",
     genreLabel: "Biography",
@@ -204,6 +224,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_education_of_henry_adams",
     title: "The Education of Henry Adams",
+    book: "The Education of Henry Adams",
     author: "Henry Adams",
     genre: "biography",
     genreLabel: "Biography",
@@ -214,6 +235,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_life_of_samuel_johnson_james_boswell",
     title: "The Life of Samuel Johnson — James Boswell",
+    book: "The Life of Samuel Johnson — James Boswell",
     author: "James Boswell",
     genre: "biography",
     genreLabel: "Biography",
@@ -224,6 +246,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "up_from_slavery_booker_t_washington",
     title: "Up From Slavery — Booker T. Washington",
+    book: "Up From Slavery — Booker T. Washington",
     author: "Booker T. Washington",
     genre: "biography",
     genreLabel: "Biography",
@@ -234,6 +257,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_diary_of_john_evelyn_volume_1",
     title: "The Diary of John Evelyn — Volume 1",
+    book: "The Diary of John Evelyn — Volume 1",
     author: "John Evelyn",
     genre: "diaries",
     genreLabel: "Diaries",
@@ -244,6 +268,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_diary_of_john_evelyn_volume_2",
     title: "The Diary of John Evelyn — Volume 2",
+    book: "The Diary of John Evelyn — Volume 2",
     author: "John Evelyn",
     genre: "diaries",
     genreLabel: "Diaries",
@@ -254,6 +279,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_diary_of_samuel_pepys_complete",
     title: "The Diary of Samuel Pepys — Complete",
+    book: "The Diary of Samuel Pepys — Complete",
     author: "Samuel Pepys",
     genre: "diaries",
     genreLabel: "Diaries",
@@ -264,6 +290,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_journal_of_a_tour_to_the_hebrides_with_samuel_johnson",
     title: "The Journal of a Tour to the Hebrides with Samuel Johnson",
+    book: "The Journal of a Tour to the Hebrides with Samuel Johnson",
     author: "James Boswell",
     genre: "diaries",
     genreLabel: "Diaries",
@@ -274,6 +301,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "a_dolls_house_henrik_ibsen",
     title: "A Doll's House — Henrik Ibsen",
+    book: "A Doll's House — Henrik Ibsen",
     author: "Henrik Ibsen",
     genre: "drama",
     genreLabel: "Drama",
@@ -284,6 +312,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "doctor_faustus_christopher_marlowe",
     title: "Doctor Faustus — Christopher Marlowe",
+    book: "Doctor Faustus — Christopher Marlowe",
     author: "Christopher Marlowe",
     genre: "drama",
     genreLabel: "Drama",
@@ -294,6 +323,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "hedda_gabler_henrik_ibsen",
     title: "Hedda Gabler — Henrik Ibsen",
+    book: "Hedda Gabler — Henrik Ibsen",
     author: "Henrik Ibsen",
     genre: "drama",
     genreLabel: "Drama",
@@ -304,6 +334,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "major_barbara",
     title: "Major Barbara",
+    book: "Major Barbara",
     author: "Bernard Shaw",
     genre: "drama",
     genreLabel: "Drama",
@@ -314,6 +345,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "pygmalion_george_bernard_shaw",
     title: "Pygmalion — George Bernard Shaw",
+    book: "Pygmalion — George Bernard Shaw",
     author: "Bernard Shaw",
     genre: "drama",
     genreLabel: "Drama",
@@ -324,6 +356,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "tamburlaine_the_great_christopher_marlowe",
     title: "Tamburlaine the Great — Christopher Marlowe",
+    book: "Tamburlaine the Great — Christopher Marlowe",
     author: "Christopher Marlowe",
     genre: "drama",
     genreLabel: "Drama",
@@ -334,6 +367,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_duchess_of_malfi_john_webster",
     title: "The Duchess of Malfi — John Webster",
+    book: "The Duchess of Malfi — John Webster",
     author: "John Webster",
     genre: "drama",
     genreLabel: "Drama",
@@ -344,6 +378,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_importance_of_being_earnest_oscar_wilde",
     title: "The Importance of Being Earnest — Oscar Wilde",
+    book: "The Importance of Being Earnest — Oscar Wilde",
     author: "Oscar Wilde",
     genre: "drama",
     genreLabel: "Drama",
@@ -354,6 +389,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_master_builder",
     title: "The Master Builder",
+    book: "The Master Builder",
     author: "Henrik Ibsen",
     genre: "drama",
     genreLabel: "Drama",
@@ -364,6 +400,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "the_sea_gull",
     title: "The sea-gull",
+    book: "The sea-gull",
     author: "Anton Pavlovich Chekhov",
     genre: "drama",
     genreLabel: "Drama",
@@ -374,6 +411,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "a_christmas_carol_in_prose_being_a_ghost_story_of_christmas",
     title: "A Christmas Carol in Prose; Being a Ghost Story of Christmas",
+    book: "A Christmas Carol in Prose; Being a Ghost Story of Christmas",
     author: "Charles Dickens",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -384,6 +422,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "a_modest_proposal",
     title: "A Modest Proposal",
+    book: "A Modest Proposal",
     author: "Jonathan Swift",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -394,6 +433,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "a_room_with_a_view_forster",
     title: "A Room with a View (Forster)",
+    book: "A Room with a View (Forster)",
     author: "E. M. (Edward Morgan) Forster",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -404,6 +444,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "a_tale_of_two_cities",
     title: "A Tale of Two Cities",
+    book: "A Tale of Two Cities",
     author: "Charles Dickens",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -414,6 +455,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "alices_adventures_in_wonderland",
     title: "Alices Adventures in Wonderland",
+    book: "Alices Adventures in Wonderland",
     author: "Lewis Carroll",
     genre: "english-literature",
     genreLabel: "English Literature",
@@ -424,6 +466,7 @@ export const BOOKS_PART2: Book[] = [
   {
     slug: "bleak_house_dickens",
     title: "Bleak House (Dickens)",
+    book: "Bleak House (Dickens)",
     author: "Charles Dickens",
     genre: "english-literature",
     genreLabel: "English Literature",
