@@ -95,3 +95,27 @@ test("the ring goes round the hub, never across it", () => {
   const minR = Math.min(...f.ringPath.map((p) => Math.hypot(p.x, p.z)));
   assert.ok(minR >= 17, `ring passes ${minR.toFixed(1)} m from the hub's centre`);
 });
+
+test("grove signposts stand off the road, on their grove's side, clear of trunks", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const f = getForest();
+  const segDist = (x, z, s) => {
+    const dx = s.bx - s.ax, dz = s.bz - s.az;
+    const t = Math.max(0, Math.min(1, ((x - s.ax) * dx + (z - s.az) * dz) / (dx * dx + dz * dz || 1)));
+    return Math.hypot(x - s.ax - dx * t, z - s.az - dz * t);
+  };
+  assert.equal(f.signs.length, f.circuit.length);
+  for (const sign of f.signs) {
+    const g = f.groves.find((gr) => gr.genre === sign.genre);
+    const wp = f.circuit.find((w) => w.genre === sign.genre);
+    // Half the widest road (1.7) + the cart's radius (1.05) + half the board's depth.
+    const road = Math.min(...f.roads.map((s) => segDist(sign.x, sign.z, s)));
+    assert.ok(road >= 3, `${sign.genre} sign is ${road.toFixed(2)} m from a road`);
+    // On the grove's side of the road (where the road runs straight at the grove, either side is).
+    assert.ok((sign.x - wp.x) * (g.x - wp.x) + (sign.z - wp.z) * (g.z - wp.z) >= 0, `${sign.genre} sign is on the far side`);
+    for (const t of f.trees) {
+      const c = Math.hypot(sign.x - t.x, sign.z - t.z) - t.trunkRadius;
+      assert.ok(c >= 1.8, `${sign.genre} sign is ${c.toFixed(2)} m from ${t.book.slug}`);
+    }
+  }
+});

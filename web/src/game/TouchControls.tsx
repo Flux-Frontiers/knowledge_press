@@ -6,6 +6,7 @@ import { useGame } from "./store";
 export function TouchControls() {
   const collect = useGame((s) => s.collect);
   const nearbySlug = useGame((s) => s.nearbySlug);
+  const pressed = useGame((s) => (s.nearbySlug ? s.library.includes(s.nearbySlug) : false));
   const nearbyDist = useGame((s) => s.nearbyDist);
   const blocked = useGame((s) => s.paused || s.libraryOpen || s.atlasOpen);
   const toggleCircuit = useGame((s) => s.toggleCircuit);
@@ -73,7 +74,7 @@ export function TouchControls() {
           <button type="button" disabled={!nearbySlug || nearbyDist >= 6.8}
             className="min-h-14 min-w-14 rounded-full border border-border bg-primary px-4 text-sm font-medium text-primary-fg disabled:opacity-40"
             onClick={() => { if (nearbySlug && nearbyDist < 6.8) collect(nearbySlug, bookBySlug(nearbySlug)?.title ?? "Book"); }}>
-            Read
+            {pressed ? "In press" : "Read"}
           </button>
         </div>
       </div>

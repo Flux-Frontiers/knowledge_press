@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookMarked, Camera, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
+import { Bell, BellOff, BookMarked, Camera, Check, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -67,6 +67,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const nearby = shownSlug ? forest.trees.find((t) => t.book.slug === shownSlug) : undefined;
   const showBook = Boolean(nearby && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
   const bookDist = nearby ? Math.hypot(nearby.x - x, nearby.z - z) : Infinity;
+  const pressed = nearby ? library.includes(nearby.book.slug) : false;
   // The redwood's card shows on the hub plaza; once closed it stays closed until the cart leaves.
   const hubDist = Math.hypot(x, z);
   const [redwoodClosed, setRedwoodClosed] = useState(false);
@@ -320,11 +321,17 @@ export function HUD({ forest }: { forest: Forest }) {
                 {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
               </p>
               <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
-              <button type="button" disabled={bookDist >= READ_RANGE}
-                onClick={() => collect(nearby.book.slug, nearby.book.title)}
-                className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
-                {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
-              </button>
+              {pressed ? (
+                <p className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary/60 px-4 text-sm text-fg">
+                  <Check className="size-4 text-primary" strokeWidth={2} /> In your press
+                </p>
+              ) : (
+                <button type="button" disabled={bookDist >= READ_RANGE}
+                  onClick={() => collect(nearby.book.slug, nearby.book.title)}
+                  className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
+                  {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
+                </button>
+              )}
             </article>
           ) : !silent && nextQuest && nextQuest.id !== questHintHidden ? (
             <div className="relative flex items-start gap-2 rounded-md border border-border bg-surface/80 px-3 py-2 pr-12 text-sm text-muted">

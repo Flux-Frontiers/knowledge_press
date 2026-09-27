@@ -264,7 +264,7 @@ export const useGame = create<GameStore>((set, get) => ({
   collect: (slug, title) => {
     const lib = get().library;
     if (lib.includes(slug)) {
-      set({ lastReadSlug: slug, toast: title });
+      set({ lastReadSlug: slug, toast: `Already in your press · ${title}` });
       return;
     }
     const library = [...lib, slug];
