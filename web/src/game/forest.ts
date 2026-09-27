@@ -286,7 +286,7 @@ function buildForest(leafMultiplier: number): Forest {
   const GROVE_GAP = 10;
   const bookInner = 6.5;
   const grownBy = genres.map((g) => byGenre.get(g)!.map((book) =>
-    growTree({ slug: book.slug, genre: book.genre, nChunks: book.chunks, leafScale: leafMultiplier })));
+    growTree({ slug: book.slug, genre: book.genre, nChunks: book.chunks, leafScale: leafMultiplier, periods: book.periods })));
   const layouts = grownBy.map((g) => shyLayout(g, bookInner));
   const groveRadius = (outer: number) => Math.max(14, outer) + 6;
   const groveCenters = packAroundHub(layouts.map((l) => groveRadius(l.outer)), 22, GROVE_GAP);

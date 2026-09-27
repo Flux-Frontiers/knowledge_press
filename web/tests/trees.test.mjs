@@ -141,7 +141,7 @@ test("no tree's wood passes through another's, within or across groves", () => {
   const { growTree } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
   const f = getForest();
   const wood = f.trees.map((t) => {
-    const g = growTree({ slug: t.book.slug, genre: t.book.genre, nChunks: t.book.chunks });
+    const g = growTree({ slug: t.book.slug, genre: t.book.genre, nChunks: t.book.chunks, periods: t.book.periods });
     const { nodes, radii, n } = g.skeleton;
     const pts = [];
     let reach = 0;
@@ -171,4 +171,53 @@ test("packing never spins on an unplaceable grove: a NaN radius throws", () => {
   // A grove whose layout left a tree unplaced had a NaN radius and hung the page.
   assert.throws(() => packAroundHub([20, NaN], 22, 10), /radius 1 is NaN/);
   assert.equal(packAroundHub([20, 30], 22, 10).length, 2);
+});
+
+test("diary entries hang along their year's limb, not at its tip", () => {
+  const { placeDiaryCrown, PERIOD_BINS } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
+  const { SPECIES, speciesFor } = require(`${process.env.FOREST_TEST_BUILD}/species.js`);
+  const habit = SPECIES[speciesFor("diaries")].habit;
+  // Ten years, one chunk in each year's first and last slices. (With only two
+  // years both limbs sit at the envelope's narrow ends, too short to tell apart.)
+  const bins = Array.from({ length: PERIOD_BINS }, (_, i) => (i === 0 || i === PERIOD_BINS - 1 ? 1 : 0));
+  const periods = Array.from({ length: 10 }, (_, y) => ({ label: String(1660 + y), entries: 50, bins }));
+  const { crown, nCrown } = placeDiaryCrown(periods, 1000, habit, "t");
+  assert.equal(nCrown, 20);
+  const out = (i) => Math.hypot(crown[i * 3], crown[i * 3 + 2]);
+  // January's chunk sits near the trunk, December's out toward the tip.
+  for (let y = 0; y < 10; y++) {
+    assert.ok(out(2 * y) < out(2 * y + 1) / 2, `${1660 + y}: ${out(2 * y).toFixed(2)} vs ${out(2 * y + 1).toFixed(2)}`);
+  }
+});
+
+test("a full diary year is not squeezed by the crown's taper", () => {
+  const { placeDiaryCrown, PERIOD_BINS } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
+  const { SPECIES, speciesFor } = require(`${process.env.FOREST_TEST_BUILD}/species.js`);
+  const habit = SPECIES[speciesFor("diaries")].habit;
+  const bins = Array.from({ length: PERIOD_BINS }, (_, i) => (i === PERIOD_BINS - 1 ? 1 : 0));
+  const periods = Array.from({ length: 10 }, (_, y) => ({ label: String(1660 + y), entries: 100, bins }));
+  const { crown } = placeDiaryCrown(periods, 1000, habit, "t");
+  // One December chunk per year: its distance from the trunk is that limb's reach.
+  const reach = periods.map((_, i) => Math.hypot(crown[i * 3], crown[i * 3 + 2]));
+  assert.ok(Math.min(...reach) >= 0.45 * Math.max(...reach), reach.map((r) => r.toFixed(2)).join(" "));
+});
+
+test("catalog diaries grow from their periods, every leaf on a branch", () => {
+  const { growTree } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
+  const { BOOKS } = require(`${process.env.FOREST_TEST_BUILD}/catalog.js`);
+  const diaries = BOOKS.filter((b) => b.periods);
+  assert.ok(diaries.length > 0, "the catalog carries no diary periods");
+  for (const b of diaries) {
+    const binned = b.periods.reduce((s, p) => s + p.bins.reduce((a, c) => a + c, 0), 0);
+    assert.equal(binned, b.chunks, `${b.slug}: periods hold ${binned} of ${b.chunks} chunks`);
+    const g = growTree({ slug: b.slug, genre: b.genre, nChunks: b.chunks, periods: b.periods, leafScale: 0.1 });
+    const { nodes, n } = g.skeleton;
+    for (let l = 0; l < g.nLeaves; l++) {
+      let best = Infinity;
+      for (let i = 0; i < n; i++) {
+        best = Math.min(best, Math.hypot(g.leafPoints[l * 3] - nodes[i * 3], g.leafPoints[l * 3 + 1] - nodes[i * 3 + 1], g.leafPoints[l * 3 + 2] - nodes[i * 3 + 2]));
+      }
+      assert.ok(best <= 0.6 + 1e-4, `${b.slug}: leaf ${l} is ${best.toFixed(2)} m from a branch`);
+    }
+  }
 });

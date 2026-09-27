@@ -1,4 +1,5 @@
 import { clamp, mulberry32, seedFromKey } from "./math";
+import type { Period } from "./catalogTypes";
 import { envelopeWidth, SPECIES, speciesFor, type Habit } from "./species";
 
 export type Vec3 = { x: number; y: number; z: number };
@@ -28,7 +29,7 @@ export type GrownTree = {
 };
 
 /** Bump when caps change so the forest cache rebuilds. */
-export const GROW_VERSION = 12;
+export const GROW_VERSION = 13;
 
 // This file mirrors the Python viz3d (kg_utils.viz3d.organic.colonize and
 // gutenberg_kg.treegeom.grow_tree_geometry) so both front ends grow the same
@@ -61,6 +62,30 @@ const TWIG_MIN_R = 0.035;
 
 const GOLDEN = Math.PI * (3 - Math.sqrt(5));
 
+/** Book trees are this tall at most (and diaries too). */
+const trunkHeightFor = (nChunks: number) => Math.min(1.7 * Math.max(1, Math.log2(1 + nChunks)), 22);
+
+/**
+ * treegeom.crown_sections: tips climb from the clear bole to the top at
+ * golden-angle azimuths (or in level whorls), each as far out as the species'
+ * envelope is wide there.
+ */
+function crownSections(n: number, trunkHeight: number, branchLength: number, habit: Habit): Vec3[] {
+  const tips: Vec3[] = [];
+  // Whorled species set `whorl` sections level around the stem per tier.
+  const w = Math.max(1, Math.round(habit.whorl));
+  const tiers = Math.ceil(n / w);
+  for (let i = 0; i < n; i++) {
+    const tier = Math.floor(i / w);
+    const t = tiers === 1 ? 0.5 : tier / (tiers - 1);
+    const y = trunkHeight * (habit.clearBole + (0.95 - habit.clearBole) * t);
+    const angle = w === 1 ? i * GOLDEN : ((i % w) * 2 * Math.PI) / w + tier * GOLDEN;
+    const radius = branchLength * habit.width * envelopeWidth(habit.envelope, t);
+    tips.push({ x: radius * Math.cos(angle), y, z: radius * Math.sin(angle) });
+  }
+  return tips;
+}
+
 /**
  * Place section tips and one crown point per chunk, the way ForestLayout does,
  * inside the species' envelope: sections climb from the clear bole to the top
@@ -72,27 +97,11 @@ export function placeCrown(
   slug: string,
 ): { trunkHeight: number; crown: Float32Array; nCrown: number } {
   const rng = mulberry32(seedFromKey(slug + ":crown"));
-  const trunkHeight = Math.min(1.7 * Math.max(1, Math.log2(1 + nChunks)), 22);
+  const trunkHeight = trunkHeightFor(nChunks);
   const nSections = Math.max(5, Math.round(Math.sqrt(nChunks) * 1.25));
   const branchLength = 2.1 + Math.sqrt(nSections) * 0.55;
   const nLeaf = Math.max(1, nChunks);
-
-  const sectionTips: Vec3[] = [];
-  // Whorled species set `whorl` sections level around the stem per tier.
-  const w = Math.max(1, Math.round(habit.whorl));
-  const tiers = Math.ceil(nSections / w);
-  for (let i = 0; i < nSections; i++) {
-    const tier = Math.floor(i / w);
-    const t = tiers === 1 ? 0.5 : tier / (tiers - 1);
-    const y = trunkHeight * (habit.clearBole + (0.95 - habit.clearBole) * t);
-    const angle = w === 1 ? i * GOLDEN : ((i % w) * 2 * Math.PI) / w + tier * GOLDEN;
-    const radius = branchLength * habit.width * envelopeWidth(habit.envelope, t);
-    sectionTips.push({
-      x: radius * Math.cos(angle),
-      y,
-      z: radius * Math.sin(angle),
-    });
-  }
+  const sectionTips = crownSections(nSections, trunkHeight, branchLength, habit);
 
   const leaves = new Float32Array(nLeaf * 3);
   let li = 0;
@@ -121,6 +130,84 @@ export function placeCrown(
     }
   }
   return { trunkHeight, crown: leaves, nCrown: li };
+}
+
+// treegeom's diary limbs (ForestLayout.compute, entry-structured books).
+/** treegeom.PERIOD_BINS: slices along a limb in Period.bins. */
+export const PERIOD_BINS = 53;
+/** treegeom._DIARY_LIMB_REACH */
+const DIARY_LIMB_REACH = 1.5;
+/** treegeom._LIMB_BARE: bare wood next to the trunk. */
+const LIMB_BARE = 0.2;
+/** treegeom._DIARY_LIMB_FLOOR: the envelope's taper stops here. */
+const DIARY_LIMB_FLOOR = 0.6;
+/** treegeom._DIARY_SHARE_BOUNDS */
+const SHARE_MIN = 0.5, SHARE_MAX = 1.4;
+
+/**
+ * A diary's crown, after treegeom: one limb per period (a calendar year when
+ * dated), each as long as its share of entries allows and tapered by the
+ * species' envelope only down to DIARY_LIMB_FLOOR. A period's chunks hang
+ * along its limb at their place in the year, in a sleeve around the wood,
+ * rather than all at the tip. Returns null for fewer than two periods.
+ */
+export function placeDiaryCrown(
+  periods: Period[],
+  nChunks: number,
+  habit: Habit,
+  slug: string,
+): { trunkHeight: number; crown: Float32Array; nCrown: number } | null {
+  const n = periods.length;
+  if (n < 2) return null;
+  const rng = mulberry32(seedFromKey(slug + ":crown"));
+  const trunkHeight = trunkHeightFor(nChunks);
+  const branchLength = 2.1 + Math.sqrt(n) * 0.55;
+  const tips = crownSections(n, trunkHeight, branchLength * DIARY_LIMB_REACH, habit);
+
+  // treegeom._size_limbs_by_entries
+  const reach = tips.map((t) => Math.hypot(t.x, t.z));
+  const widest = Math.max(...reach) || 1;
+  const meanEntries = Math.max(periods.reduce((s, p) => s + p.entries, 0) / n, 1);
+  tips.forEach((t, i) => {
+    const taper = Math.max(reach[i]! / widest, DIARY_LIMB_FLOOR);
+    const share = clamp(Math.sqrt(periods[i]!.entries / meanEntries), SHARE_MIN, SHARE_MAX);
+    const scale = reach[i]! > 0 ? (widest * taper * share) / reach[i]! : 1;
+    t.x *= scale;
+    t.z *= scale;
+  });
+
+  // Room to the nearest neighbouring tip, so consecutive years' foliage does not interpenetrate.
+  const room = tips.map((a, i) => {
+    let best = Infinity;
+    tips.forEach((b, j) => { if (j !== i) best = Math.min(best, Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z)); });
+    return Number.isFinite(best) ? best : 1;
+  });
+
+  const nCrown = periods.reduce((s, p) => s + p.bins.reduce((a, c) => a + c, 0), 0);
+  const crown = new Float32Array(Math.max(1, nCrown) * 3);
+  let li = 0;
+  periods.forEach((p, i) => {
+    const tip = tips[i]!;
+    const weight = Math.min(Math.sqrt(p.entries / meanEntries), 1.6);
+    const sleeve = 0.5 * Math.min(0.45 * room[i]! * weight, branchLength * 0.4 * weight);
+    // Limb frame: d along the limb, u level across it, v up across it.
+    const dl = Math.hypot(tip.x, tip.z) || 1;
+    const dx = tip.x / dl, dz = tip.z / dl;
+    const ux = -dz, uz = dx;
+    p.bins.forEach((count, b) => {
+      for (let c = 0; c < count; c++) {
+        const t = LIMB_BARE + (1 - LIMB_BARE) * Math.min(1, (b + rng()) / PERIOD_BINS);
+        const a = li * GOLDEN;
+        const r = sleeve * (0.6 + 0.8 * rng());
+        const up = Math.sin(a) * r + rng() * sleeve * 0.3 * habit.lift;
+        crown[li * 3] = t * tip.x + Math.cos(a) * r * ux;
+        crown[li * 3 + 1] = tip.y + up;
+        crown[li * 3 + 2] = t * tip.z + Math.cos(a) * r * uz;
+        li++;
+      }
+    });
+  });
+  return { trunkHeight, crown, nCrown: li };
 }
 
 /**
@@ -465,14 +552,18 @@ export function growTree(opts: {
   species?: number;
   /** Fraction of the book's chunks that carry a leaf; the skeleton never changes with it. */
   leafScale?: number;
+  /** A diary's period limbs (Book.periods); grows limbs along which entries hang. */
+  periods?: Period[];
 }): GrownTree {
   const { slug, genre, nChunks } = opts;
   const tipRadius = opts.tipRadius ?? TIP_RADIUS;
   const species = opts.species ?? speciesFor(genre);
   const habit = varyHabit(SPECIES[species]!.habit, slug);
-  const cacheKey = `${slug}|${species}|${nChunks}|${tipRadius}`;
+  const cacheKey = `${slug}|${species}|${nChunks}|${tipRadius}|${opts.periods?.length ?? 0}`;
   const cached = skeletonCache.get(cacheKey);
-  const { trunkHeight, crown, nCrown } = cached?.crownInfo ?? placeCrown(nChunks, habit, slug);
+  const { trunkHeight, crown, nCrown } = cached?.crownInfo
+    ?? (opts.periods && placeDiaryCrown(opts.periods, nChunks, habit, slug))
+    ?? placeCrown(nChunks, habit, slug);
   const { attractors, grown } = cached ?? growSkeleton(slug, crown, nCrown, habit);
   const { nodes, parents, n } = grown;
   const radii = pipeRadii(parents, n, tipRadius, habit.pipeExp, trunkHeight);
