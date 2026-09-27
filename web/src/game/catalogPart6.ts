@@ -52,8 +52,8 @@ export const BOOKS_PART6: Book[] = [
     author: "Unknown",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
-    chunks: 6654,
-    excerpt: "Now after the death of Joshua it came to pass, that the children of Israel asked the LORD, saying, Who shall go up for us against the Canaanites first, to fight against them? 1:2 And the LORD said, Judah shall go up: behold, I have delivered the land into his hand. And Judah…",
+    chunks: 6695,
+    excerpt: "And when Joshua had let the people go, the children of Israel went every man unto his inheritance to possess the land. And the people served the LORD all the days of Joshua, and all the days of the elders that outlived Joshua, who had seen all the great works of the LORD,…",
     tags: ["sacred-texts"],
   },
   {
