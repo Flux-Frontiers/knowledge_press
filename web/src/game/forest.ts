@@ -103,8 +103,10 @@ export type Forest = {
   roadLines: RoadLine[];
   /** Road junctions (ring stops and the hub), each paved with a disc. */
   plazas: { x: number; z: number; r: number }[];
-  /** One stop per grove, for signposts. */
+  /** One stop per grove, on the ring. */
   circuit: Waypoint[];
+  /** Each grove's signpost: beside its stop, off the road on the grove's side, facing the road. */
+  signs: { genre: string; x: number; z: number; yaw: number }[];
   /** The ring road sampled every ~2 m, for the guided tour to follow. */
   ringPath: Waypoint[];
   /**
@@ -246,6 +248,17 @@ function shyLayout(grown: GrownTree[], inner: number): { pts: { x: number; z: nu
  * Does the ring double back at this stop (arrive and leave within 60 degrees of
  * each other)? Such a stop gets a wide turning circle instead of a junction disc.
  */
+/** A signpost's centre from any road centreline: half the widest road (1.7 m), the cart (1.05 m), and a little. */
+const SIGN_ROAD_CLEAR = 3;
+/** From any trunk surface: the board is 3 m wide. */
+const SIGN_TRUNK_CLEAR = 1.8;
+
+function segDistance(x: number, z: number, s: RoadSeg): number {
+  const dx = s.bx - s.ax, dz = s.bz - s.az;
+  const t = Math.max(0, Math.min(1, ((x - s.ax) * dx + (z - s.az) * dz) / (dx * dx + dz * dz || 1)));
+  return Math.hypot(x - s.ax - dx * t, z - s.az - dz * t);
+}
+
 function turnsBack(ring: [number, number][], wp: { x: number; z: number }): boolean {
   const n = ring.length;
   let k = 0, best = Infinity;
@@ -389,9 +402,11 @@ function buildForest(leafMultiplier: number): Forest {
   }
 
   // Roads are routed around the trunks (routing.ts). The centreline keeps
-  // ROAD_CLEARANCE from every trunk surface: half the widest road (1.7 m) plus
-  // the cart's radius (1.05 m), so nothing on a road can pin the cart.
-  const ROAD_CLEARANCE = 2.75;
+  // ROAD_CLEARANCE from every trunk surface. The floor is half the widest road
+  // (1.7 m) plus the cart's radius (1.05 m), so nothing on a road can pin the
+  // cart; 6.5 m also keeps every road outside READ_RANGE of a trunk, so a book's
+  // card never pops up on a slow stretch of road.
+  const ROAD_CLEARANCE = 6.5;
   const fir = SPECIES.find((s) => s.name === "fir")!;
   const corpusTree = growCorpusTree(trees, fir.barkAspect);
   const net = routeNetwork({
@@ -419,11 +434,34 @@ function buildForest(leafMultiplier: number): Forest {
     }
   }
   const exhibits = placeExhibits({ specs: EXHIBITS, roadLines, trees, worldRadius });
+  const stopR = circuit.map((wp) => (turnsBack(ring.pts, wp) ? 6 : 4));
   const plazas = [
     { x: 0, z: 0, r: HUB_PLAZA_R },
-    ...circuit.map((wp) => ({ x: wp.x, z: wp.z, r: turnsBack(ring.pts, wp) ? 6 : 4 })),
+    ...circuit.map((wp, i) => ({ x: wp.x, z: wp.z, r: stopR[i]! })),
     ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.plazaR })),
   ];
+  // Signposts used to stand on the ring beside the stop, where the cart ran them
+  // over. Each now stands just off the stop's plaza, clear of every road (a
+  // hairpin stop has road on both sides) and trunk, as near the grove's bearing
+  // as it can, facing back to the stop.
+  const signs = circuit.map((wp, i) => {
+    const g = groves.find((gr) => gr.genre === wp.genre)!;
+    const toward = Math.atan2(g.z - wp.z, g.x - wp.x);
+    for (let d = stopR[i]! + 1.5; d <= stopR[i]! + 9; d += 0.5) {
+      let best: { x: number; z: number } | null = null;
+      for (let k = 0; k < 36; k++) {
+        const a = toward + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (Math.PI / 18);
+        const x = wp.x + Math.cos(a) * d, z = wp.z + Math.sin(a) * d;
+        if (roads.every((r) => segDistance(x, z, r) >= SIGN_ROAD_CLEAR)
+          && trees.every((t) => Math.hypot(x - t.x, z - t.z) - t.trunkRadius >= SIGN_TRUNK_CLEAR)) {
+          best = { x, z };
+          break;
+        }
+      }
+      if (best) return { genre: wp.genre, x: best.x, z: best.z, yaw: Math.atan2(wp.x - best.x, wp.z - best.z) };
+    }
+    return { genre: wp.genre, x: wp.x, z: wp.z, yaw: wp.yaw };
+  });
   // Each ring sample carries the grove whose stop comes next, so the tour still
   // lights the right signpost and trail.
   const ringPath: Waypoint[] = ring.pts.map(([x, z], i) => {
@@ -439,6 +477,7 @@ function buildForest(leafMultiplier: number): Forest {
     roadLines,
     plazas,
     circuit,
+    signs,
     ringPath,
     chunks,
     leaves: {
@@ -459,6 +498,47 @@ function buildForest(leafMultiplier: number): Forest {
     grid,
     cell,
   };
+}
+
+/**
+ * The first tree a ray hits, or null. Each tree is a pair of upright cylinders,
+ * a trunk and a rough crown; a cylinder the ray starts inside is skipped, so a
+ * crown overhanging the camera doesn't swallow every click.
+ *
+ * :param o: Ray origin (the camera).
+ * :param d: Ray direction; need not be normalized, maxDist is in its units.
+ * :param maxDist: Ignore hits farther than this, e.g. past the fog.
+ */
+export function pickTree(
+  forest: Forest,
+  o: { x: number; y: number; z: number },
+  d: { x: number; y: number; z: number },
+  maxDist: number,
+): TreeSite | null {
+  const a = d.x * d.x + d.z * d.z;
+  if (a < 1e-9) return null;
+  let best: TreeSite | null = null;
+  let bestT = maxDist;
+  const hit = (t: TreeSite, r: number, y0: number, y1: number) => {
+    const fx = o.x - t.x;
+    const fz = o.z - t.z;
+    const c = fx * fx + fz * fz - r * r;
+    if (c < 0) return;
+    const b = fx * d.x + fz * d.z;
+    const disc = b * b - a * c;
+    if (disc < 0) return;
+    const along = (-b - Math.sqrt(disc)) / a;
+    if (along < 0 || along >= bestT) return;
+    const y = o.y + d.y * along;
+    if (y < y0 || y > y1) return;
+    best = t;
+    bestT = along;
+  };
+  for (const t of forest.trees) {
+    hit(t, Math.max(0.6, t.trunkRadius * 1.6), 0, t.height);
+    hit(t, Math.min(5, 1 + t.height * 0.2), t.height * 0.3, t.height * 1.05);
+  }
+  return best;
 }
 
 export function treesNear(forest: Forest, x: number, z: number, radius: number): TreeSite[] {

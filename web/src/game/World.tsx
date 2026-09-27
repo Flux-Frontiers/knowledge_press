@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, type ComponentType } from "react";
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
 import { ForestFloor, Sky, Sunlight, textureAnisotropy, useGroundTexture } from "./Environment";
 import { DAY_OVERRIDE } from "./daylight";
+import { FOG_SCALE } from "./preferences";
 import type { Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./forest";
 import { disc, ribbon, type FlatMesh } from "./roads";
@@ -36,7 +37,8 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
     () => new Color(pal.fog).lerp(new Color(DAY_OVERRIDE.fog), t).lerp(new Color("#e3a07a"), sky.warmth * 0.45),
     [t, sky.warmth, pal.fog],
   );
-  const fogDensity = (season === "winter" ? 0.0077 : 0.0105) * (1 + (DAY_OVERRIDE.fogDensityScale - 1) * t);
+  const fogLevel = useGame((s) => s.preferences.fog);
+  const fogDensity = (season === "winter" ? 0.0077 : 0.0105) * (1 + (DAY_OVERRIDE.fogDensityScale - 1) * t) * FOG_SCALE[fogLevel];
   const ambientColor = useMemo(() => new Color(pal.ambient).lerp(new Color(DAY_OVERRIDE.ambient), t), [t, pal.ambient]);
   const hemiIntensity = 0.78 * (1 + (DAY_OVERRIDE.hemiIntensity - 1) * t);
   const detail = useGame((s) => s.preferences.detail);

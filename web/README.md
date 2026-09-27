@@ -29,7 +29,8 @@ Open the URL Vite prints. Click **Start driving**.
 | Key | Action |
 | --- | --- |
 | **W / S** | throttle / reverse |
-| **A / D** or **Left / Right** | steer left / right (chase camera) |
+| **A / D** | steer left / right |
+| **Left / Right** | look left / right; the view eases back ahead on release (gamepad: right stick) |
 | **Up / Down** | tilt the camera up / down (gamepad: right stick) |
 | **Space** | brake |
 | **C** | camera: behind the cart, high view, in the cart |

@@ -50,11 +50,6 @@ export function PauseOverlay() {
         <label className="flex items-center justify-between gap-4">Wind & gentle cart motion
           <input type="checkbox" checked={prefs.motion} onChange={(e) => setPreferences({ motion: e.target.checked })} />
         </label>
-        <label className="flex items-center justify-between gap-4">Season
-          <select value={season} onChange={(e) => setSeason(e.target.value as SeasonName)} className="rounded-md border border-border bg-bg p-2">
-            {SEASON_ORDER.map((name) => <option key={name} value={name}>{SEASONS[name].label}</option>)}
-          </select>
-        </label>
         <label className="flex items-center justify-between gap-4">Leaf complexity
           <select value={prefs.leaves} onChange={(e) => setPreferences({ leaves: e.target.value as typeof prefs.leaves })} className="rounded-md border border-border bg-bg p-2">
             <option value="low">Low · 1 in 10 chunks</option><option value="medium">Medium · 1 in 4</option>
@@ -71,11 +66,25 @@ export function PauseOverlay() {
           <input type="checkbox" checked={prefs.detail} onChange={(e) => setPreferences({ detail: e.target.checked })} />
         </label>
       </div>
+      <h3 className="mb-3 text-xs tracking-[0.2em] text-primary uppercase">Environment</h3>
+      <div className="mb-5 grid gap-4 text-sm">
+        <label className="flex items-center justify-between gap-4">Season
+          <select value={season} onChange={(e) => setSeason(e.target.value as SeasonName)} className="rounded-md border border-border bg-bg p-2">
+            {SEASON_ORDER.map((name) => <option key={name} value={name}>{SEASONS[name].label}</option>)}
+          </select>
+        </label>
+        <label className="flex items-center justify-between gap-4">Fog
+          <select value={prefs.fog} onChange={(e) => setPreferences({ fog: e.target.value as typeof prefs.fog })} className="rounded-md border border-border bg-bg p-2">
+            <option value="clear">Clear</option><option value="light">Light</option>
+            <option value="normal">Normal</option><option value="heavy">Heavy</option>
+          </select>
+        </label>
+      </div>
       <div className="rounded-md bg-bg p-3 text-sm leading-relaxed text-muted">
-        <p><span className="text-fg">WASD</span> drive · <span className="text-fg">Left/Right</span> steer · <span className="text-fg">Up/Down</span> look · <span className="text-fg">Space</span> brake</p>
+        <p><span className="text-fg">WASD</span> drive · <span className="text-fg">Arrows</span> look around · <span className="text-fg">Space</span> brake</p>
         <p><span className="text-fg">Shift</span> hurry · <span className="text-fg">E</span> read · <span className="text-fg">C</span> camera</p>
         <p><span className="text-fg">G</span> groves · <span className="text-fg">B</span> books · <span className="text-fg">H</span> home · <span className="text-fg">Q</span> guided tour</p>
-        <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. Gamepad: left stick to drive, right stick to look, A to read, LT to brake, RT to hurry.</p>
+        <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. Gamepad: left stick to drive, right stick to look around, A to read, LT to brake, RT to hurry.</p>
       </div>
       <button ref={back} type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
     </dialog>

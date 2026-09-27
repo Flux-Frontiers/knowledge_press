@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { CanvasTexture, DoubleSide, LinearFilter, SRGBColorSpace } from "three";
 import type { Exhibit } from "./exhibits";
-import { groveByGenre, type Forest, type Grove, type Waypoint } from "./forest";
+import { groveByGenre, type Forest, type Grove } from "./forest";
 import { useGame } from "./store";
 
 function wrapLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -68,11 +68,11 @@ function makeSignTexture(label: string, meta: string, accent: string): CanvasTex
 }
 
 function Signpost({
-  wp,
+  sign,
   grove,
   selected,
 }: {
-  wp: Waypoint;
+  sign: Forest["signs"][number];
   grove: Grove;
   selected: boolean;
 }) {
@@ -82,16 +82,7 @@ function Signpost({
   );
   useEffect(() => () => tex.dispose(), [tex]);
 
-  const dist = Math.hypot(wp.x, wp.z) || 1;
-  const ux = wp.x / dist;
-  const uz = wp.z / dist;
-  const rx = uz;
-  const rz = -ux;
-  const x = wp.x + rx * 1.35;
-  const z = wp.z + rz * 1.35;
-  const lookX = wp.x - ux * 5.5;
-  const lookZ = wp.z - uz * 5.5;
-  const yaw = Math.atan2(lookX - x, lookZ - z);
+  const { x, z, yaw } = sign;
 
   // Tapping the sign lists the grove's books.
   return (
@@ -214,15 +205,15 @@ export function Signposts({ forest }: { forest: Forest }) {
   const selectedGrove = useGame((s) => s.selectedGrove);
   return (
     <group>
-      {forest.circuit.map((wp) => {
-        const grove = groveByGenre(forest, wp.genre);
+      {forest.signs.map((sign) => {
+        const grove = groveByGenre(forest, sign.genre);
         if (!grove) return null;
         return (
           <Signpost
-            key={wp.genre}
-            wp={wp}
+            key={sign.genre}
+            sign={sign}
             grove={grove}
-            selected={selectedGrove === wp.genre}
+            selected={selectedGrove === sign.genre}
           />
         );
       })}

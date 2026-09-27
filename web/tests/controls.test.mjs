@@ -96,7 +96,7 @@ test("input reset clears held keyboard, touch axes, brake and interaction edges"
   input.setTouchPitch(1);
   assert.equal(input.sampleActions().pitch, 1, "the touch look strip tilts like Up");
   input.resetInput();
-  assert.deepEqual(input.sampleActions(), { throttle: 0, steer: 0, boost: false, brake: false, interact: false, interactDown: false, pitch: 0 });
+  assert.deepEqual(input.sampleActions(), { throttle: 0, steer: 0, boost: false, brake: false, interact: false, interactDown: false, pitch: 0, look: 0 });
   // Up/Down look; only W/S drive.
   input.setInjectedKeys(["ArrowUp"]);
   let look = input.sampleActions();
@@ -106,6 +106,15 @@ test("input reset clears held keyboard, touch axes, brake and interaction edges"
   look = input.sampleActions();
   assert.equal(look.pitch, -1);
   assert.equal(look.throttle, 1);
+  // Left/Right look; only A/D steer.
+  input.setInjectedKeys(["ArrowLeft"]);
+  look = input.sampleActions();
+  assert.equal(look.look, 1);
+  assert.equal(look.steer, 0);
+  input.setInjectedKeys(["ArrowRight", "KeyA"]);
+  look = input.sampleActions();
+  assert.equal(look.look, -1);
+  assert.equal(look.steer, 1);
   input.resetInput();
   input.setInjectedKeys(["Space"]);
   assert.equal(input.sampleActions().interact, false, "Space never collects a book");

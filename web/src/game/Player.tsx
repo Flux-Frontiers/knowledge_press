@@ -14,7 +14,7 @@ const TRAIL_ARRIVED = 9;
 const lookAt = new Vector3();
 /** The behind-the-cart camera: metres back and up from the cart. */
 const FOLLOW_BACK = 6.5;
-const FOLLOW_UP = 3.5;
+const FOLLOW_UP = 2.5;
 
 export function Player({ forest, playing }: { forest: Forest; playing: boolean }) {
   const group = useRef<Group>(null);
@@ -24,6 +24,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   const wasBlocked = useRef(false);
   // Camera tilt in radians, held between drives; Up/Down or the right stick.
   const pitch = useRef(0);
+  /** Pan off the cart's heading, radians, left positive. */
+  const look = useRef(0);
   const lastMarked = useRef<string | null>(null);
 
   const paused = useGame((s) => s.paused);
@@ -46,10 +48,11 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     wasBlocked.current = blocked;
     if (jump) {
       teleportSim(jump.x, jump.z, jump.yaw);
+      look.current = 0;
       useGame.getState().clearJump();
       const f = forwardOf(sim.yaw);
       state.camera.position.set(sim.x - f.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - f.z * FOLLOW_BACK);
-      lookAt.set(sim.x + f.x * 2.6, sim.y + 1.4, sim.z + f.z * 2.6);
+      lookAt.set(sim.x + f.x * 10, sim.y + FOLLOW_UP, sim.z + f.z * 10);
       state.camera.lookAt(lookAt);
     }
 
@@ -76,6 +79,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       }
       stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake });
       pitch.current = clamp(pitch.current + a.pitch * 1.1 * dt, -0.45, 0.75);
+      // Held arrows pan up to ~110° either way; released, the view eases back ahead.
+      look.current = a.look ? clamp(look.current + a.look * 1.6 * dt, -1.9, 1.9) : look.current * Math.exp(-3 * dt);
 
       if (a.interact) {
         const near = treesNear(forest, sim.x, sim.z, 6.8);
@@ -93,20 +98,24 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     }
 
     const f = forwardOf(sim.yaw);
+    // The camera faces the cart's heading turned by the look pan; the cart itself keeps f.
+    const v = forwardOf(sim.yaw + look.current);
     const inCart = preferences.camera === "cart";
     if (inCart) {
       // A standing adult's eye level (1.65 m), gazing level over the lantern, so the
       // horizon, plaques and plinths sit where they would on foot; tilt to look up.
       // Rigid, no chase lag.
-      camPos.set(sim.x - f.x * 0.45, sim.y + 1.65, sim.z - f.z * 0.45);
+      camPos.set(sim.x - v.x * 0.45, sim.y + 1.65, sim.z - v.z * 0.45);
       state.camera.position.copy(camPos);
-      lookAt.set(sim.x + f.x * 10, sim.y + 1.65, sim.z + f.z * 10);
+      lookAt.set(sim.x + v.x * 10, sim.y + 1.65, sim.z + v.z * 10);
     } else {
       const follow = preferences.camera === "high" ? 12 : FOLLOW_BACK;
       const height = preferences.camera === "high" ? 10 : FOLLOW_UP;
-      camPos.set(sim.x - f.x * follow, sim.y + height, sim.z - f.z * follow);
+      camPos.set(sim.x - v.x * follow, sim.y + height, sim.z - v.z * follow);
       state.camera.position.lerp(camPos, 1 - Math.exp(-3.4 * dt));
-      lookAt.set(sim.x + f.x * 2.6, sim.y + 1.4, sim.z + f.z * 2.6);
+      // Behind the cart, look level down the road; the high view looks down at the cart.
+      const ahead = preferences.camera === "high" ? 2.6 : 10;
+      lookAt.set(sim.x + v.x * ahead, sim.y + (preferences.camera === "high" ? 1.4 : FOLLOW_UP), sim.z + v.z * ahead);
     }
     // Tilt by raising or lowering the look point over its horizontal distance.
     lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current);
@@ -157,7 +166,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     poseAcc.current += dt;
     if (poseAcc.current > 0.08) {
       poseAcc.current = 0;
-      setNearby(bestSlug, bestD);
+      setNearby(bestSlug, bestD, sim.speed);
       setPose(sim.x, sim.z, sim.yaw, sim.speed);
     }
   });

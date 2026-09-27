@@ -116,6 +116,10 @@ export type GameStore = {
   nearbySlug: string | null;
   nearbyDist: number;
   nearbyDismissed: string | null;
+  /** The tree whose card popped up on its own: the cart slowed within reading range of it. */
+  cardSlug: string | null;
+  /** A tree the player picked (clicked, searched, catalog): its card shows even in silent mode. */
+  pinnedSlug: string | null;
   questHintHidden: string | null;
   speed: number;
   x: number;
@@ -153,7 +157,8 @@ export type GameStore = {
   pickSearch: (slug: string | null) => void;
   collect: (slug: string, title: string) => void;
   markGrove: (genre: string) => void;
-  setNearby: (slug: string | null, dist: number) => void;
+  setNearby: (slug: string | null, dist: number, speed: number) => void;
+  pinTree: (slug: string | null) => void;
   dismissNearby: () => void;
   dismissQuestHint: (id: string) => void;
   setPose: (x: number, z: number, yaw: number, speed: number) => void;
@@ -188,6 +193,11 @@ function readSky(mode: TimeMode, place: Place | null, now = new Date()) {
   };
 }
 
+/** Distance from a trunk, m, within which a book can be read into the press. */
+export const READ_RANGE = 6.8;
+/** A nearby book's card pops up only below this cart speed, m/s. */
+const CARD_SPEED = 1.5;
+
 export const useGame = create<GameStore>((set, get) => ({
   playing: false,
   preferences: initial.preferences,
@@ -208,6 +218,8 @@ export const useGame = create<GameStore>((set, get) => ({
   nearbySlug: null,
   nearbyDist: 99,
   nearbyDismissed: null,
+  cardSlug: null,
+  pinnedSlug: null,
   questHintHidden: null,
   speed: 0,
   x: 0,
@@ -252,7 +264,7 @@ export const useGame = create<GameStore>((set, get) => ({
   collect: (slug, title) => {
     const lib = get().library;
     if (lib.includes(slug)) {
-      set({ lastReadSlug: slug, toast: title });
+      set({ lastReadSlug: slug, toast: `Already in your press · ${title}` });
       return;
     }
     const library = [...lib, slug];
@@ -266,17 +278,24 @@ export const useGame = create<GameStore>((set, get) => ({
     set({ grovesVisited: next });
     persist({ ...get(), grovesVisited: next });
   },
-  setNearby: (nearbySlug, nearbyDist) => {
-    const prev = get().nearbySlug;
-    if (nearbySlug === prev) {
-      set({ nearbyDist });
+  setNearby: (nearbySlug, nearbyDist, speed) => {
+    // Roads pass within 3 m of trunks, so distance alone would pop a card at
+    // every tree on the way. Pop one only when the cart slows within reading range,
+    // and drop it as soon as the cart leaves that range or another tree is nearer.
+    const inRange = nearbySlug !== null && nearbyDist < READ_RANGE;
+    const s = get();
+    if (nearbySlug !== s.nearbySlug) {
+      set({ nearbySlug, nearbyDist, nearbyDismissed: null, cardSlug: inRange && Math.abs(speed) < CARD_SPEED ? nearbySlug : null });
       return;
     }
-    set({ nearbySlug, nearbyDist, nearbyDismissed: null });
+    const cardSlug = !inRange ? null : s.cardSlug ?? (Math.abs(speed) < CARD_SPEED ? nearbySlug : null);
+    set(cardSlug === s.cardSlug ? { nearbyDist } : { nearbyDist, cardSlug });
   },
+  pinTree: (pinnedSlug) => set({ pinnedSlug }),
   dismissNearby: () => {
-    const slug = get().nearbySlug;
-    if (slug) set({ nearbyDismissed: slug });
+    const { nearbySlug, pinnedSlug } = get();
+    if (pinnedSlug) set({ pinnedSlug: null });
+    else if (nearbySlug) set({ nearbyDismissed: nearbySlug });
   },
   dismissQuestHint: (id) => set({ questHintHidden: id }),
   setPose: (x, z, yaw, speed) => set({ x, z, yaw, speed }),

@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookMarked, Camera, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
+import { Bell, BellOff, BookMarked, Camera, Check, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -7,7 +7,7 @@ import { QUESTS, questProgress } from "./quests";
 import { saveScreenshot } from "./screenshot";
 import { SEASON_ORDER, SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
-import { useGame, type PlaqueText } from "./store";
+import { READ_RANGE, useGame, type PlaqueText } from "./store";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
 
@@ -31,8 +31,8 @@ export function HUD({ forest }: { forest: Forest }) {
   const query = useGame((s) => s.query);
   const setQuery = useGame((s) => s.setQuery);
   const searchPick = useGame((s) => s.searchPick);
-  const nearbySlug = useGame((s) => s.nearbySlug);
-  const nearbyDist = useGame((s) => s.nearbyDist);
+  const cardSlug = useGame((s) => s.cardSlug);
+  const pinnedSlug = useGame((s) => s.pinnedSlug);
   const collect = useGame((s) => s.collect);
   const nearbyDismissed = useGame((s) => s.nearbyDismissed);
   const dismissNearby = useGame((s) => s.dismissNearby);
@@ -62,15 +62,18 @@ export function HUD({ forest }: { forest: Forest }) {
   const silent = useGame((s) => s.preferences.silent);
   const setPreferences = useGame((s) => s.setPreferences);
 
-  // Silent mode keeps every card from popping up on its own.
-  const nearby = nearbySlug && !silent ? forest.trees.find((t) => t.book.slug === nearbySlug) : undefined;
-  const showBook = Boolean(nearby && nearby.book.slug !== nearbyDismissed);
+  // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
+  const shownSlug = pinnedSlug ?? (silent ? null : cardSlug);
+  const nearby = shownSlug ? forest.trees.find((t) => t.book.slug === shownSlug) : undefined;
+  const showBook = Boolean(nearby && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
+  const bookDist = nearby ? Math.hypot(nearby.x - x, nearby.z - z) : Infinity;
+  const pressed = nearby ? library.includes(nearby.book.slug) : false;
   // The redwood's card shows on the hub plaza; once closed it stays closed until the cart leaves.
   const hubDist = Math.hypot(x, z);
   const [redwoodClosed, setRedwoodClosed] = useState(false);
   const leftHub = hubDist > 20;
   useEffect(() => { if (leftHub) setRedwoodClosed(false); }, [leftHub]);
-  const atRedwood = !silent && hubDist < 16 && !redwoodClosed;
+  const atRedwood = !silent && !pinnedSlug && hubDist < 16 && !redwoodClosed;
   const progress = questProgress({ library, grovesVisited, season });
   const nextQuest = QUESTS.find((q) => !q.done({ library, grovesVisited, season }));
   const selected = forest.groves.find((g) => g.genre === selectedGrove);
@@ -318,11 +321,17 @@ export function HUD({ forest }: { forest: Forest }) {
                 {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
               </p>
               <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
-              <button type="button" disabled={nearbyDist >= 6.8}
-                onClick={() => collect(nearby.book.slug, nearby.book.title)}
-                className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
-                {nearbyDist < 6.8 ? "Read into the press · E" : `Move closer · ${Math.ceil(nearbyDist)} m`}
-              </button>
+              {pressed ? (
+                <p className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary/60 px-4 text-sm text-fg">
+                  <Check className="size-4 text-primary" strokeWidth={2} /> In your press
+                </p>
+              ) : (
+                <button type="button" disabled={bookDist >= READ_RANGE}
+                  onClick={() => collect(nearby.book.slug, nearby.book.title)}
+                  className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
+                  {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
+                </button>
+              )}
             </article>
           ) : !silent && nextQuest && nextQuest.id !== questHintHidden ? (
             <div className="relative flex items-start gap-2 rounded-md border border-border bg-surface/80 px-3 py-2 pr-12 text-sm text-muted">
@@ -368,7 +377,7 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
 
         <p className="absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
-          WASD drive · Up/Down look · Space brake · E read · B books · C camera · Esc settings
+          WASD drive · Arrows look · Space brake · E read · B books · C camera · Esc settings
         </p>
       </>)}
 
@@ -396,6 +405,7 @@ function jumpToTree(t: TreeSite) {
   const s = useGame.getState();
   s.selectGrove(null);
   s.pickSearch(t.book.slug);
+  s.pinTree(t.book.slug);
   s.requestJump(treeApproach(t, s.x, s.z), t.book.title);
   (document.activeElement as HTMLElement | null)?.blur();
 }

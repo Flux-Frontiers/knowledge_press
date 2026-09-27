@@ -1,8 +1,8 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
-import { ACESFilmicToneMapping } from "three";
+import { useEffect, useRef, type RefObject } from "react";
+import { ACESFilmicToneMapping, Raycaster, Vector2 } from "three";
 import { COARSE_POINTER, PHONE } from "./Environment";
-import type { Forest } from "./forest";
+import { pickTree, type Forest, type TreeSite } from "./forest";
 import { Player } from "./Player";
 import { setScreenshotCapture } from "./screenshot";
 import { Trees } from "./Trees";
@@ -14,6 +14,7 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
   const query = useGame((s) => s.query);
   const playing = useGame((s) => s.playing);
   const detail = useGame((s) => s.preferences.detail);
+  const picker = useRef<((e: MouseEvent) => TreeSite | null) | null>(null);
 
   return (
     <Canvas
@@ -27,18 +28,24 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
         gl.toneMappingExposure = 1.1;
       }}
       onPointerDown={() => (document.activeElement as HTMLElement | null)?.blur()}
-      onPointerMissed={() => {
+      onPointerMissed={(e) => {
         const s = useGame.getState();
         if (s.catalogOpen) s.setCatalogOpen(false);
         else if (s.libraryOpen) s.toggleLibrary();
         else if (s.atlasOpen) s.toggleAtlas();
-        else s.dismissNearby();
+        else {
+          // Clicking a tree pins its card, silent mode or not; clicking open ground clears it.
+          const tree = picker.current?.(e);
+          if (tree) s.pinTree(tree.book.slug);
+          else s.dismissNearby();
+        }
       }}
     >
       <World forest={forest} season={season} />
       <Trees forest={forest} season={season} query={query} />
       <StatsSampler />
       <ScreenshotCapture />
+      <TreePicker forest={forest} picker={picker} />
       <Player forest={forest} playing={playing} />
     </Canvas>
   );
@@ -60,6 +67,27 @@ function StatsSampler() {
     s.setStats({ tris: gl.info.render.triangles, calls: gl.info.render.calls, fps: acc.current.frames / acc.current.t });
     acc.current = { t: 0, frames: 0 };
   });
+  return null;
+}
+
+const raycaster = new Raycaster();
+const ndc = new Vector2();
+
+/** Trees have no pointer handlers (raycasting their meshes is costly), so a click that hits nothing is tested against their outlines. */
+function TreePicker({ forest, picker }: { forest: Forest; picker: RefObject<((e: MouseEvent) => TreeSite | null) | null> }) {
+  const { camera, gl, scene } = useThree();
+  useEffect(() => {
+    picker.current = (e) => {
+      const rect = gl.domElement.getBoundingClientRect();
+      ndc.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+      raycaster.setFromCamera(ndc, camera);
+      // No farther than the fog lets you see (Trees.tsx hides groves past the same cutoff).
+      const density = scene.fog && "density" in scene.fog ? (scene.fog.density as number) : 0;
+      const maxDist = density > 0 ? 2.6 / density : 200;
+      return pickTree(forest, raycaster.ray.origin, raycaster.ray.direction, maxDist);
+    };
+    return () => { picker.current = null; };
+  }, [forest, picker, camera, gl, scene]);
   return null;
 }
 
