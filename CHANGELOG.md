@@ -11,6 +11,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- On-device search gives a reciprocal-rank-fusion tie to the exact-phrase
+  (BM25) hit instead of the dense one, matching gutenberg_kg's worker.
+  "pillar of salt" now puts Genesis 19:26 ahead of Ruskin's "pillar of
+  sand". Needs the `golden.json` from a gutenberg_kg `export-swift` run made
+  after the matching change there.
+
 ## [1.24.0] - 2026-09-26
 
 ### Added

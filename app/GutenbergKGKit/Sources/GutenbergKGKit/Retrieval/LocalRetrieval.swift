@@ -301,11 +301,14 @@ public struct LocalRetrieval: RetrievalEngine {
     static func fuse(dense: [String], lexical: [String], k: Int, rrfK: Int) -> [String] {
         var scores: [String: Double] = [:]
         var order: [String] = []
-        for (rank, id) in dense.enumerated() {
+        // Lexical first, so a cross-channel tie goes to the exact match:
+        // "pillar of salt" has one BM25 hit, Genesis 19:26, which used to lose
+        // to the dense top hit at the same 1/60.
+        for (rank, id) in lexical.enumerated() {
             if scores[id] == nil { order.append(id) }
             scores[id, default: 0] += 1.0 / Double(rrfK + rank)
         }
-        for (rank, id) in lexical.enumerated() {
+        for (rank, id) in dense.enumerated() {
             if scores[id] == nil { order.append(id) }
             scores[id, default: 0] += 1.0 / Double(rrfK + rank)
         }

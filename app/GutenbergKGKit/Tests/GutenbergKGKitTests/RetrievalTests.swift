@@ -104,7 +104,7 @@ private func makeTokenizer() -> WordPieceTokenizer {
         let fused = LocalRetrieval.fuse(
             dense: ["a", "b", "c"], lexical: ["c", "d"], k: 3, rrfK: 60)
 
-        #expect(fused == ["c", "a", "b"])
+        #expect(fused == ["c", "a", "d"])
     }
 
     @Test func aHitBothChannelsFindWinsOutright() {
@@ -114,12 +114,12 @@ private func makeTokenizer() -> WordPieceTokenizer {
         #expect(fused == ["c"])
     }
 
-    @Test func tiesKeepFirstSeenOrder() {
+    @Test func aTieGoesToTheLexicalChannel() {
         // Python's stable sort over an insertion-ordered dict does the same,
         // and golden.json records that order.
         let fused = LocalRetrieval.fuse(dense: ["a"], lexical: ["b"], k: 2, rrfK: 60)
 
-        #expect(fused == ["a", "b"])
+        #expect(fused == ["b", "a"])
     }
 
     @Test func lexicalOnlyResultsStillRank() {
