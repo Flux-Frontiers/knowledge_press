@@ -140,6 +140,8 @@ export type GameStore = {
   catalogGenre: string | null;
   /** An exhibit plaque shown full size to read, after clicking it in the forest. */
   plaque: PlaqueText | null;
+  /** The book open in the reader (Reader.tsx), by slug. */
+  readingSlug: string | null;
   /** Hide the HUD's buttons, cards and search, leaving the map and the driving controls. */
   cleanView: boolean;
   toggleCleanView: () => void;
@@ -173,6 +175,7 @@ export type GameStore = {
   setCatalogOpen: (v: boolean) => void;
   openCatalog: (genre: string | null) => void;
   openPlaque: (plaque: PlaqueText | null) => void;
+  openReader: (slug: string | null) => void;
   setTravelMode: (m: TravelMode) => void;
   toggleCircuit: () => void;
   requestJump: (pose: JumpPose, toast?: string) => void;
@@ -236,6 +239,7 @@ export const useGame = create<GameStore>((set, get) => ({
   catalogOpen: false,
   catalogGenre: null,
   plaque: null,
+  readingSlug: null,
   cleanView: false,
   toggleCleanView: () => set({ cleanView: !get().cleanView }),
   travelMode: "free",
@@ -310,6 +314,7 @@ export const useGame = create<GameStore>((set, get) => ({
   openCatalog: (catalogGenre) => set({ catalogOpen: true, catalogGenre, atlasOpen: false, libraryOpen: false }),
   setCatalogOpen: (catalogOpen) => set({ catalogOpen }),
   openPlaque: (plaque) => set(plaque ? { plaque, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { plaque: null }),
+  openReader: (readingSlug) => set(readingSlug ? { readingSlug, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { readingSlug: null }),
   // Leaving the ring drops the grove it was pointing at, so the lantern trail goes with it.
   setTravelMode: (travelMode) =>
     set(travelMode === "free" && get().travelMode === "circuit" ? { travelMode, selectedGrove: null } : { travelMode }),
