@@ -39,7 +39,7 @@ cannot read. Setup, phones and iPads, and troubleshooting are in
 | **Left / Right** | look left / right; the view eases back ahead on release (gamepad: right stick) |
 | **Up / Down** | tilt the camera up / down (gamepad: right stick) |
 | **Space** | brake |
-| **C** | camera: behind the cart, high view, in the cart |
+| **C** | camera: behind the cart, high view, in the cart, god's eye (the whole forest from above) |
 | **E** | read the nearest tree into the press |
 | **G** | grove atlas — jump to a genre or an exhibit |
 | **B** | every book — filter the corpus and jump to any tree |
