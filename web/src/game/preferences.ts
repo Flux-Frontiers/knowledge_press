@@ -10,7 +10,14 @@ export type Preferences = {
   stats: boolean;
   /** Silent mode: no cards pop up on their own (nearby book, redwood, quest hints). */
   silent: boolean;
+  /** Fog density; see FOG_SCALE. */
+  fog: FogLevel;
 };
+
+export type FogLevel = "clear" | "light" | "normal" | "heavy";
+
+/** Multiplier on the season's fog density (World.tsx). */
+export const FOG_SCALE: Record<FogLevel, number> = { clear: 0.3, light: 0.6, normal: 1, heavy: 1.8 };
 
 export type LeafDetail = "low" | "medium" | "high" | "ultra";
 
@@ -35,5 +42,6 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
       : typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches ? "low" : "medium",
     stats: value?.stats === true,
     silent: value?.silent === true,
+    fog: value?.fog && value.fog in FOG_SCALE ? value.fog : "normal",
   };
 }

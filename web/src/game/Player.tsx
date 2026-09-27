@@ -14,7 +14,7 @@ const TRAIL_ARRIVED = 9;
 const lookAt = new Vector3();
 /** The behind-the-cart camera: metres back and up from the cart. */
 const FOLLOW_BACK = 6.5;
-const FOLLOW_UP = 3.5;
+const FOLLOW_UP = 2.5;
 
 export function Player({ forest, playing }: { forest: Forest; playing: boolean }) {
   const group = useRef<Group>(null);
@@ -49,7 +49,9 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       useGame.getState().clearJump();
       const f = forwardOf(sim.yaw);
       state.camera.position.set(sim.x - f.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - f.z * FOLLOW_BACK);
-      lookAt.set(sim.x + f.x * 2.6, sim.y + 1.4, sim.z + f.z * 2.6);
+      // Behind the cart, look level down the road; the high view looks down at the cart.
+      const ahead = preferences.camera === "high" ? 2.6 : 10;
+      lookAt.set(sim.x + f.x * ahead, sim.y + (preferences.camera === "high" ? 1.4 : FOLLOW_UP), sim.z + f.z * ahead);
       state.camera.lookAt(lookAt);
     }
 
@@ -157,7 +159,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     poseAcc.current += dt;
     if (poseAcc.current > 0.08) {
       poseAcc.current = 0;
-      setNearby(bestSlug, bestD);
+      setNearby(bestSlug, bestD, sim.speed);
       setPose(sim.x, sim.z, sim.yaw, sim.speed);
     }
   });

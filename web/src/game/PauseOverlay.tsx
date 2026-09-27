@@ -50,11 +50,6 @@ export function PauseOverlay() {
         <label className="flex items-center justify-between gap-4">Wind & gentle cart motion
           <input type="checkbox" checked={prefs.motion} onChange={(e) => setPreferences({ motion: e.target.checked })} />
         </label>
-        <label className="flex items-center justify-between gap-4">Season
-          <select value={season} onChange={(e) => setSeason(e.target.value as SeasonName)} className="rounded-md border border-border bg-bg p-2">
-            {SEASON_ORDER.map((name) => <option key={name} value={name}>{SEASONS[name].label}</option>)}
-          </select>
-        </label>
         <label className="flex items-center justify-between gap-4">Leaf complexity
           <select value={prefs.leaves} onChange={(e) => setPreferences({ leaves: e.target.value as typeof prefs.leaves })} className="rounded-md border border-border bg-bg p-2">
             <option value="low">Low · 1 in 10 chunks</option><option value="medium">Medium · 1 in 4</option>
@@ -69,6 +64,20 @@ export function PauseOverlay() {
         </label>
         <label className="flex items-center justify-between gap-4">Shadows & forest floor detail
           <input type="checkbox" checked={prefs.detail} onChange={(e) => setPreferences({ detail: e.target.checked })} />
+        </label>
+      </div>
+      <h3 className="mb-3 text-xs tracking-[0.2em] text-primary uppercase">Environment</h3>
+      <div className="mb-5 grid gap-4 text-sm">
+        <label className="flex items-center justify-between gap-4">Season
+          <select value={season} onChange={(e) => setSeason(e.target.value as SeasonName)} className="rounded-md border border-border bg-bg p-2">
+            {SEASON_ORDER.map((name) => <option key={name} value={name}>{SEASONS[name].label}</option>)}
+          </select>
+        </label>
+        <label className="flex items-center justify-between gap-4">Fog
+          <select value={prefs.fog} onChange={(e) => setPreferences({ fog: e.target.value as typeof prefs.fog })} className="rounded-md border border-border bg-bg p-2">
+            <option value="clear">Clear</option><option value="light">Light</option>
+            <option value="normal">Normal</option><option value="heavy">Heavy</option>
+          </select>
         </label>
       </div>
       <div className="rounded-md bg-bg p-3 text-sm leading-relaxed text-muted">

@@ -7,7 +7,7 @@ import { QUESTS, questProgress } from "./quests";
 import { saveScreenshot } from "./screenshot";
 import { SEASON_ORDER, SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
-import { useGame, type PlaqueText } from "./store";
+import { READ_RANGE, useGame, type PlaqueText } from "./store";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
 
@@ -31,8 +31,8 @@ export function HUD({ forest }: { forest: Forest }) {
   const query = useGame((s) => s.query);
   const setQuery = useGame((s) => s.setQuery);
   const searchPick = useGame((s) => s.searchPick);
-  const nearbySlug = useGame((s) => s.nearbySlug);
-  const nearbyDist = useGame((s) => s.nearbyDist);
+  const cardSlug = useGame((s) => s.cardSlug);
+  const pinnedSlug = useGame((s) => s.pinnedSlug);
   const collect = useGame((s) => s.collect);
   const nearbyDismissed = useGame((s) => s.nearbyDismissed);
   const dismissNearby = useGame((s) => s.dismissNearby);
@@ -62,15 +62,17 @@ export function HUD({ forest }: { forest: Forest }) {
   const silent = useGame((s) => s.preferences.silent);
   const setPreferences = useGame((s) => s.setPreferences);
 
-  // Silent mode keeps every card from popping up on its own.
-  const nearby = nearbySlug && !silent ? forest.trees.find((t) => t.book.slug === nearbySlug) : undefined;
-  const showBook = Boolean(nearby && nearby.book.slug !== nearbyDismissed);
+  // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
+  const shownSlug = pinnedSlug ?? (silent ? null : cardSlug);
+  const nearby = shownSlug ? forest.trees.find((t) => t.book.slug === shownSlug) : undefined;
+  const showBook = Boolean(nearby && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
+  const bookDist = nearby ? Math.hypot(nearby.x - x, nearby.z - z) : Infinity;
   // The redwood's card shows on the hub plaza; once closed it stays closed until the cart leaves.
   const hubDist = Math.hypot(x, z);
   const [redwoodClosed, setRedwoodClosed] = useState(false);
   const leftHub = hubDist > 20;
   useEffect(() => { if (leftHub) setRedwoodClosed(false); }, [leftHub]);
-  const atRedwood = !silent && hubDist < 16 && !redwoodClosed;
+  const atRedwood = !silent && !pinnedSlug && hubDist < 16 && !redwoodClosed;
   const progress = questProgress({ library, grovesVisited, season });
   const nextQuest = QUESTS.find((q) => !q.done({ library, grovesVisited, season }));
   const selected = forest.groves.find((g) => g.genre === selectedGrove);
@@ -318,10 +320,10 @@ export function HUD({ forest }: { forest: Forest }) {
                 {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
               </p>
               <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
-              <button type="button" disabled={nearbyDist >= 6.8}
+              <button type="button" disabled={bookDist >= READ_RANGE}
                 onClick={() => collect(nearby.book.slug, nearby.book.title)}
                 className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
-                {nearbyDist < 6.8 ? "Read into the press · E" : `Move closer · ${Math.ceil(nearbyDist)} m`}
+                {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
               </button>
             </article>
           ) : !silent && nextQuest && nextQuest.id !== questHintHidden ? (
@@ -396,6 +398,7 @@ function jumpToTree(t: TreeSite) {
   const s = useGame.getState();
   s.selectGrove(null);
   s.pickSearch(t.book.slug);
+  s.pinTree(t.book.slug);
   s.requestJump(treeApproach(t, s.x, s.z), t.book.title);
   (document.activeElement as HTMLElement | null)?.blur();
 }

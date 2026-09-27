@@ -389,9 +389,11 @@ function buildForest(leafMultiplier: number): Forest {
   }
 
   // Roads are routed around the trunks (routing.ts). The centreline keeps
-  // ROAD_CLEARANCE from every trunk surface: half the widest road (1.7 m) plus
-  // the cart's radius (1.05 m), so nothing on a road can pin the cart.
-  const ROAD_CLEARANCE = 2.75;
+  // ROAD_CLEARANCE from every trunk surface. The floor is half the widest road
+  // (1.7 m) plus the cart's radius (1.05 m), so nothing on a road can pin the
+  // cart; 6.5 m also keeps every road outside READ_RANGE of a trunk, so a book's
+  // card never pops up on a slow stretch of road.
+  const ROAD_CLEARANCE = 6.5;
   const fir = SPECIES.find((s) => s.name === "fir")!;
   const corpusTree = growCorpusTree(trees, fir.barkAspect);
   const net = routeNetwork({
@@ -459,6 +461,47 @@ function buildForest(leafMultiplier: number): Forest {
     grid,
     cell,
   };
+}
+
+/**
+ * The first tree a ray hits, or null. Each tree is a pair of upright cylinders,
+ * a trunk and a rough crown; a cylinder the ray starts inside is skipped, so a
+ * crown overhanging the camera doesn't swallow every click.
+ *
+ * :param o: Ray origin (the camera).
+ * :param d: Ray direction; need not be normalized, maxDist is in its units.
+ * :param maxDist: Ignore hits farther than this, e.g. past the fog.
+ */
+export function pickTree(
+  forest: Forest,
+  o: { x: number; y: number; z: number },
+  d: { x: number; y: number; z: number },
+  maxDist: number,
+): TreeSite | null {
+  const a = d.x * d.x + d.z * d.z;
+  if (a < 1e-9) return null;
+  let best: TreeSite | null = null;
+  let bestT = maxDist;
+  const hit = (t: TreeSite, r: number, y0: number, y1: number) => {
+    const fx = o.x - t.x;
+    const fz = o.z - t.z;
+    const c = fx * fx + fz * fz - r * r;
+    if (c < 0) return;
+    const b = fx * d.x + fz * d.z;
+    const disc = b * b - a * c;
+    if (disc < 0) return;
+    const along = (-b - Math.sqrt(disc)) / a;
+    if (along < 0 || along >= bestT) return;
+    const y = o.y + d.y * along;
+    if (y < y0 || y > y1) return;
+    best = t;
+    bestT = along;
+  };
+  for (const t of forest.trees) {
+    hit(t, Math.max(0.6, t.trunkRadius * 1.6), 0, t.height);
+    hit(t, Math.min(5, 1 + t.height * 0.2), t.height * 0.3, t.height * 1.05);
+  }
+  return best;
 }
 
 export function treesNear(forest: Forest, x: number, z: number, radius: number): TreeSite[] {
