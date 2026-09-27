@@ -44,7 +44,7 @@ export function PauseOverlay() {
         </label>
         <label className="flex items-center justify-between gap-4">Camera · C
           <select value={prefs.camera} onChange={(e) => setPreferences({ camera: e.target.value as typeof prefs.camera })} className="rounded-md border border-border bg-bg p-2">
-            <option value="follow">Behind the cart</option><option value="high">High view</option><option value="cart">In the cart</option>
+            <option value="follow">Behind the cart</option><option value="high">High view</option><option value="cart">In the cart</option><option value="god">God's eye · the whole forest</option>
           </select>
         </label>
         <label className="flex items-center justify-between gap-4">Wind & gentle cart motion

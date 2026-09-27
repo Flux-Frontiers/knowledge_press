@@ -15,6 +15,13 @@ const lookAt = new Vector3();
 /** The behind-the-cart camera: metres back and up from the cart. */
 const FOLLOW_BACK = 6.5;
 const FOLLOW_UP = 2.5;
+/** The god's-eye camera: this much margin around the world, and pulled south by this fraction of its height so the view is not straight down. */
+const GOD_MARGIN = 1.08;
+const GOD_TILT = 0.35;
+/** The camera's clip planes at ground level (ForestCanvas), and the god's-eye near plane. */
+const GROUND_NEAR = 0.12;
+const GROUND_FAR = 560;
+const GOD_NEAR = 2;
 
 export function Player({ forest, playing }: { forest: Forest; playing: boolean }) {
   const group = useRef<Group>(null);
@@ -101,7 +108,19 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     // The camera faces the cart's heading turned by the look pan; the cart itself keeps f.
     const v = forwardOf(sim.yaw + look.current);
     const inCart = preferences.camera === "cart";
-    if (inCart) {
+    const godEye = preferences.camera === "god";
+    const cam = state.camera as PerspectiveCamera;
+    if (godEye) {
+      // High over the hub, the whole world radius in the vertical field of view.
+      const height = (forest.worldRadius * GOD_MARGIN) / Math.tan(MathUtils.degToRad(cam.fov / 2));
+      camPos.set(0, height, height * GOD_TILT);
+      state.camera.position.lerp(camPos, 1 - Math.exp(-2.2 * dt));
+      lookAt.set(0, 0, 0);
+      // Push both clip planes out: at ground level's 0.12 m near plane the depth
+      // buffer cannot tell the roads from the ground a kilometre away.
+      cam.far = state.camera.position.length() + forest.worldRadius * 2;
+      cam.near = GOD_NEAR;
+    } else if (inCart) {
       // A standing adult's eye level (1.65 m), gazing level over the lantern, so the
       // horizon, plaques and plinths sit where they would on foot; tilt to look up.
       // Rigid, no chase lag.
@@ -118,9 +137,12 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       lookAt.set(sim.x + v.x * ahead, sim.y + (preferences.camera === "high" ? 1.4 : FOLLOW_UP), sim.z + v.z * ahead);
     }
     // Tilt by raising or lowering the look point over its horizontal distance.
-    lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current);
+    if (!godEye) {
+      lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current);
+      cam.far = GROUND_FAR;
+      cam.near = GROUND_NEAR;
+    }
     state.camera.lookAt(lookAt);
-    const cam = state.camera as PerspectiveCamera;
     const fovTarget = inCart ? 60 : 58;
     cam.fov = MathUtils.lerp(cam.fov, fovTarget, 1 - Math.exp(-4 * dt));
     cam.updateProjectionMatrix();
