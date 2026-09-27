@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookMarked, Camera, Check, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
+import { Bell, BellOff, BookMarked, BookOpen, Camera, Check, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -7,6 +7,7 @@ import { QUESTS, questProgress } from "./quests";
 import { saveScreenshot } from "./screenshot";
 import { SEASON_ORDER, SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
+import { ReaderPanel } from "./Reader";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
@@ -57,6 +58,9 @@ export function HUD({ forest }: { forest: Forest }) {
   const catalogOpen = useGame((s) => s.catalogOpen);
   const toggleCatalog = useGame((s) => s.toggleCatalog);
   const plaque = useGame((s) => s.plaque);
+  const readingSlug = useGame((s) => s.readingSlug);
+  const openReader = useGame((s) => s.openReader);
+  const reading = readingSlug ? forest.trees.find((t) => t.book.slug === readingSlug) : undefined;
   const clean = useGame((s) => s.cleanView);
   const toggleCleanView = useGame((s) => s.toggleCleanView);
   const silent = useGame((s) => s.preferences.silent);
@@ -321,17 +325,23 @@ export function HUD({ forest }: { forest: Forest }) {
                 {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
               </p>
               <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
-              {pressed ? (
-                <p className="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary/60 px-4 text-sm text-fg">
-                  <Check className="size-4 text-primary" strokeWidth={2} /> In your press
-                </p>
-              ) : (
-                <button type="button" disabled={bookDist >= READ_RANGE}
-                  onClick={() => collect(nearby.book.slug, nearby.book.title)}
-                  className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
-                  {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {pressed ? (
+                  <p className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary/60 px-4 text-sm text-fg">
+                    <Check className="size-4 text-primary" strokeWidth={2} /> In your press
+                  </p>
+                ) : (
+                  <button type="button" disabled={bookDist >= READ_RANGE}
+                    onClick={() => collect(nearby.book.slug, nearby.book.title)}
+                    className="min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
+                    {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
+                  </button>
+                )}
+                <button type="button" onClick={() => openReader(nearby.book.slug)}
+                  className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-4 text-sm text-fg">
+                  <BookOpen className="size-4" strokeWidth={1.75} /> Open the book
                 </button>
-              )}
+              </div>
             </article>
           ) : !silent && nextQuest && nextQuest.id !== questHintHidden ? (
             <div className="relative flex items-start gap-2 rounded-md border border-border bg-surface/80 px-3 py-2 pr-12 text-sm text-muted">
@@ -391,6 +401,7 @@ export function HUD({ forest }: { forest: Forest }) {
       {atlasOpen ? <AtlasPanel forest={forest} /> : null}
       {catalogOpen ? <CatalogPanel forest={forest} /> : null}
       {plaque ? <PlaquePanel plaque={plaque} /> : null}
+      {reading ? <ReaderPanel key={reading.book.slug} book={reading.book} /> : null}
     </div>
   );
 }
@@ -637,16 +648,21 @@ function LibraryPanel({ forest }: { forest: Forest }) {
                     {t.book.author} · {t.book.genreLabel}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  className="shrink-0 text-xs text-primary"
-                  onClick={() => {
-                    const g = forest.groves.find((gr) => gr.genre === t.book.genre);
-                    if (g) jumpToGrove(g);
-                  }}
-                >
-                  Grove
-                </button>
+                <div className="flex shrink-0 gap-3">
+                  <button type="button" className="text-xs text-primary" onClick={() => useGame.getState().openReader(t.book.slug)}>
+                    Open
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs text-primary"
+                    onClick={() => {
+                      const g = forest.groves.find((gr) => gr.genre === t.book.genre);
+                      if (g) jumpToGrove(g);
+                    }}
+                  >
+                    Grove
+                  </button>
+                </div>
               </li>
             ))
           )}

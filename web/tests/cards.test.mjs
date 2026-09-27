@@ -68,3 +68,16 @@ test("reading a book twice says it is already in the press", () => {
   assert.equal(st().toast, "Already in your press · Othello");
   assert.equal(st().library.filter((s) => s === "othello").length, 1);
 });
+
+test("opening a book closes the side panels; closing it leaves them shut", () => {
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().toggleLibrary();
+  assert.equal(st().libraryOpen, true);
+  st().openReader("hamlet");
+  assert.equal(st().readingSlug, "hamlet");
+  assert.equal(st().libraryOpen, false);
+  st().openReader(null);
+  assert.equal(st().readingSlug, null);
+  assert.equal(st().libraryOpen, false);
+});

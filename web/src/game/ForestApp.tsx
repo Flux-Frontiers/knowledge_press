@@ -113,14 +113,16 @@ export function ForestApp() {
       if (!st.playing) return;
       if (e.code === "Escape") {
         if (st.paused) return; // The settings dialog handles Escape itself.
-        if (st.plaque) st.openPlaque(null);
+        if (st.readingSlug) st.openReader(null);
+        else if (st.plaque) st.openPlaque(null);
         else if (st.catalogOpen) st.setCatalogOpen(false);
         else if (st.atlasOpen) st.setAtlasOpen(false);
         else if (st.libraryOpen) st.toggleLibrary();
         else st.pause(true);
         return;
       }
-      if (st.paused || isInputTarget(e.target)) return;
+      // The reader and the settings take the keyboard; only Escape reaches past them.
+      if (st.paused || st.readingSlug || isInputTarget(e.target)) return;
       if (e.code === "KeyL") st.toggleLibrary();
       if (e.code === "KeyG") st.toggleAtlas();
       if (e.code === "KeyB") st.toggleCatalog();
