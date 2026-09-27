@@ -377,7 +377,7 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
 
         <p className="absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
-          WASD drive · Up/Down look · Space brake · E read · B books · C camera · Esc settings
+          WASD drive · Arrows look · Space brake · E read · B books · C camera · Esc settings
         </p>
       </>)}
 

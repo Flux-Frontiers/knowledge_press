@@ -81,10 +81,10 @@ export function PauseOverlay() {
         </label>
       </div>
       <div className="rounded-md bg-bg p-3 text-sm leading-relaxed text-muted">
-        <p><span className="text-fg">WASD</span> drive · <span className="text-fg">Left/Right</span> steer · <span className="text-fg">Up/Down</span> look · <span className="text-fg">Space</span> brake</p>
+        <p><span className="text-fg">WASD</span> drive · <span className="text-fg">Arrows</span> look around · <span className="text-fg">Space</span> brake</p>
         <p><span className="text-fg">Shift</span> hurry · <span className="text-fg">E</span> read · <span className="text-fg">C</span> camera</p>
         <p><span className="text-fg">G</span> groves · <span className="text-fg">B</span> books · <span className="text-fg">H</span> home · <span className="text-fg">Q</span> guided tour</p>
-        <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. Gamepad: left stick to drive, right stick to look, A to read, LT to brake, RT to hurry.</p>
+        <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. Gamepad: left stick to drive, right stick to look around, A to read, LT to brake, RT to hurry.</p>
       </div>
       <button ref={back} type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
     </dialog>

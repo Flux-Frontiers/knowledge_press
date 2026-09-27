@@ -21,6 +21,8 @@ export type Actions = {
   interactDown: boolean;
   /** Camera tilt rate, -1 (down) to 1 (up). */
   pitch: number;
+  /** Camera pan, -1 (right) to 1 (left), like steer; the view eases back to ahead on release. */
+  look: number;
 };
 
 const keys = new Set<string>();
@@ -143,9 +145,10 @@ function pollGamepad(actions: Actions) {
     if (pad.buttons[0]?.pressed) actions.interactDown = true;
     if (pad.buttons[6]?.pressed) actions.brake = true;
     if (pad.buttons[7] && pad.buttons[7].value > 0.4) actions.boost = true;
-    // Right stick Y looks up and down (-1 is up).
-    const look = pad.axes[3] ?? 0;
-    if (Math.abs(look) > 0.15) actions.pitch += -look;
+    // Right stick looks around: Y up and down (-1 is up), X left and right (-1 is left).
+    const look = radialDeadzone(pad.axes[2] ?? 0, pad.axes[3] ?? 0);
+    actions.pitch += -look.y;
+    actions.look += -look.x;
   }
 }
 
@@ -158,15 +161,18 @@ export function sampleActions(): Actions {
     interact: false,
     interactDown: false,
     pitch: 0,
+    look: 0,
   };
 
   if (held("KeyW")) actions.throttle += 1;
   if (held("KeyS")) actions.throttle -= 1;
-  // Up/Down look; W/S drive.
+  // Arrows look around; W/S drive, A/D steer.
   if (held("ArrowUp")) actions.pitch += 1;
   if (held("ArrowDown")) actions.pitch -= 1;
-  if (held("KeyA") || held("ArrowLeft")) actions.steer += 1;
-  if (held("KeyD") || held("ArrowRight")) actions.steer -= 1;
+  if (held("ArrowLeft")) actions.look += 1;
+  if (held("ArrowRight")) actions.look -= 1;
+  if (held("KeyA")) actions.steer += 1;
+  if (held("KeyD")) actions.steer -= 1;
   if (held("ShiftLeft") || held("ShiftRight")) actions.boost = true;
   if (held("KeyE")) actions.interactDown = true;
   if (held("Space")) actions.brake = true;
@@ -182,6 +188,7 @@ export function sampleActions(): Actions {
   actions.throttle = Math.max(-1, Math.min(1, actions.throttle));
   actions.steer = Math.max(-1, Math.min(1, actions.steer));
   actions.pitch = Math.max(-1, Math.min(1, actions.pitch));
+  actions.look = Math.max(-1, Math.min(1, actions.look));
   actions.interact = actions.interactDown && !prevInteract;
   prevInteract = actions.interactDown;
   return actions;
