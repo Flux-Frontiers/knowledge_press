@@ -249,3 +249,23 @@ test("every diary year forks from the trunk, none from another year's limb", () 
   // With the species' 0.7 leader, Pepys's 1667-1669 all forked from one side limb.
   assert.equal(forks.size, b.periods.length);
 });
+
+test("diary limbs spiral up the trunk a fifth of a turn per year", () => {
+  const { placeDiaryCrown, PERIOD_BINS } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
+  const { SPECIES, speciesFor } = require(`${process.env.FOREST_TEST_BUILD}/species.js`);
+  const habit = SPECIES[speciesFor("diaries")].habit;
+  const K = 40;
+  const bins = Array.from({ length: PERIOD_BINS }, (_, i) => (i === PERIOD_BINS - 1 ? K : 0));
+  const periods = Array.from({ length: 8 }, (_, y) => ({ label: String(1660 + y), entries: 100, bins }));
+  const { crown } = placeDiaryCrown(periods, 800 * K, habit, "t");
+  // K December chunks per year sit around its limb's tip; their mean lies on the limb.
+  const az = periods.map((_, i) => {
+    let x = 0, z = 0;
+    for (let k = i * K; k < (i + 1) * K; k++) { x += crown[k * 3]; z += crown[k * 3 + 2]; }
+    return Math.atan2(z, x);
+  });
+  for (let i = 1; i < az.length; i++) {
+    const step = (((az[i] - az[i - 1]) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    assert.ok(Math.abs(step - (2 * Math.PI) / 5) < 0.25, `year ${i}: step ${step.toFixed(2)} rad`);
+  }
+});

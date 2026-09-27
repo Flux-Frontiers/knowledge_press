@@ -29,7 +29,7 @@ export type GrownTree = {
 };
 
 /** Bump when caps change so the forest cache rebuilds. */
-export const GROW_VERSION = 14;
+export const GROW_VERSION = 15;
 
 // This file mirrors the Python viz3d (kg_utils.viz3d.organic.colonize and
 // gutenberg_kg.treegeom.grow_tree_geometry) so both front ends grow the same
@@ -143,6 +143,8 @@ const LIMB_BARE = 0.2;
 const DIARY_LIMB_FLOOR = 0.6;
 /** treegeom._DIARY_LEADER: the trunk rises plumb through the whole crown. */
 const DIARY_LEADER = 1;
+/** treegeom._DIARY_TURN: five years to a full turn, so the timeline spirals up the trunk. */
+const DIARY_TURN = (2 * Math.PI) / 5;
 /** treegeom._DIARY_SHARE_BOUNDS */
 const SHARE_MIN = 0.5, SHARE_MAX = 1.4;
 
@@ -166,8 +168,12 @@ export function placeDiaryCrown(
   const branchLength = 2.1 + Math.sqrt(n) * 0.55;
   const tips = crownSections(n, trunkHeight, branchLength * DIARY_LIMB_REACH, habit);
 
-  // treegeom._size_limbs_by_entries
+  // treegeom._spiral_limbs, then _size_limbs_by_entries.
   const reach = tips.map((t) => Math.hypot(t.x, t.z));
+  tips.forEach((t, i) => {
+    t.x = reach[i]! * Math.cos(i * DIARY_TURN);
+    t.z = reach[i]! * Math.sin(i * DIARY_TURN);
+  });
   const widest = Math.max(...reach) || 1;
   const meanEntries = Math.max(periods.reduce((s, p) => s + p.entries, 0) / n, 1);
   tips.forEach((t, i) => {
