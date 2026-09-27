@@ -221,3 +221,31 @@ test("catalog diaries grow from their periods, every leaf on a branch", () => {
     }
   }
 });
+
+test("every diary year forks from the trunk, none from another year's limb", () => {
+  const { growTree, placeDiaryCrown } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
+  const { SPECIES, speciesFor } = require(`${process.env.FOREST_TEST_BUILD}/species.js`);
+  const { BOOKS } = require(`${process.env.FOREST_TEST_BUILD}/catalog.js`);
+  const b = BOOKS.find((x) => x.slug.includes("pepys") && x.periods);
+  const g = growTree({ slug: b.slug, genre: b.genre, nChunks: b.chunks, periods: b.periods });
+  const { nodes, parents, n } = g.skeleton;
+  const { crown } = placeDiaryCrown(b.periods, b.chunks, SPECIES[speciesFor(b.genre)].habit, b.slug);
+  const forks = new Set();
+  let li = 0;
+  for (const p of b.periods) {
+    const m = p.bins.reduce((a, c) => a + c, 0);
+    let sx = 0, sy = 0, sz = 0;
+    for (let k = 0; k < m; k++, li++) { sx += crown[li * 3]; sy += crown[li * 3 + 1]; sz += crown[li * 3 + 2]; }
+    sx /= m; sy /= m; sz /= m;
+    let c = 0, bd = Infinity;
+    for (let i = 0; i < n; i++) {
+      const d = Math.hypot(nodes[i * 3] - sx, nodes[i * 3 + 1] - sy, nodes[i * 3 + 2] - sz);
+      if (d < bd) { bd = d; c = i; }
+    }
+    // Walk in to the trunk axis: the node where this year's wood leaves it.
+    while (parents[c] >= 0 && Math.hypot(nodes[c * 3], nodes[c * 3 + 2]) > 0.35) c = parents[c];
+    forks.add(c);
+  }
+  // With the species' 0.7 leader, Pepys's 1667-1669 all forked from one side limb.
+  assert.equal(forks.size, b.periods.length);
+});

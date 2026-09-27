@@ -29,7 +29,7 @@ export type GrownTree = {
 };
 
 /** Bump when caps change so the forest cache rebuilds. */
-export const GROW_VERSION = 13;
+export const GROW_VERSION = 14;
 
 // This file mirrors the Python viz3d (kg_utils.viz3d.organic.colonize and
 // gutenberg_kg.treegeom.grow_tree_geometry) so both front ends grow the same
@@ -141,6 +141,8 @@ const DIARY_LIMB_REACH = 1.5;
 const LIMB_BARE = 0.2;
 /** treegeom._DIARY_LIMB_FLOOR: the envelope's taper stops here. */
 const DIARY_LIMB_FLOOR = 0.6;
+/** treegeom._DIARY_LEADER: the trunk rises plumb through the whole crown. */
+const DIARY_LEADER = 1;
 /** treegeom._DIARY_SHARE_BOUNDS */
 const SHARE_MIN = 0.5, SHARE_MAX = 1.4;
 
@@ -558,7 +560,12 @@ export function growTree(opts: {
   const { slug, genre, nChunks } = opts;
   const tipRadius = opts.tipRadius ?? TIP_RADIUS;
   const species = opts.species ?? speciesFor(genre);
-  const habit = varyHabit(SPECIES[species]!.habit, slug);
+  const diary = (opts.periods?.length ?? 0) >= 2;
+  // treegeom._DIARY_LEADER: a diary's trunk is its timeline, so it climbs to the
+  // last year and every year forks from it. The species' shorter leader let
+  // colonization serve the top few years from one side limb, leaning the crown.
+  const species0 = varyHabit(SPECIES[species]!.habit, slug);
+  const habit = diary ? { ...species0, leader: DIARY_LEADER } : species0;
   const cacheKey = `${slug}|${species}|${nChunks}|${tipRadius}|${opts.periods?.length ?? 0}`;
   const cached = skeletonCache.get(cacheKey);
   const { trunkHeight, crown, nCrown } = cached?.crownInfo
