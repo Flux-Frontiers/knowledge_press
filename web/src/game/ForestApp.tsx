@@ -128,7 +128,7 @@ export function ForestApp() {
       if (e.code === "KeyB") st.toggleCatalog();
       if (e.code === "KeyQ") st.toggleCircuit();
       if (e.code === "KeyC") {
-        const next = { follow: "high", high: "cart", cart: "follow" } as const;
+        const next = { follow: "high", high: "cart", cart: "god", god: "follow" } as const;
         st.setPreferences({ camera: next[st.preferences.camera] });
       }
       if (e.code === "KeyH" && forest) {

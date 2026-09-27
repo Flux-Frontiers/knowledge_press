@@ -9,4 +9,12 @@ export type Book = {
   chunks: number;
   excerpt: string;
   tags: string[];
+  /**
+   * Diaries only: one limb per period (a calendar year when dated), earliest
+   * first. `bins` counts the period's chunks in equal slices along its limb,
+   * by each entry's fraction of the year; trailing empty slices are dropped.
+   */
+  periods?: Period[];
 };
+
+export type Period = { label: string; entries: number; bins: number[] };

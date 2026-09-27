@@ -4,6 +4,9 @@ import { BufferAttribute, BufferGeometry, CanvasTexture, Color, InstancedMesh, M
 import { ForestFloor, Sky, Sunlight, textureAnisotropy, useGroundTexture } from "./Environment";
 import { DAY_OVERRIDE } from "./daylight";
 import { FOG_SCALE } from "./preferences";
+
+/** Fog multiplier in the god's-eye view. */
+const GOD_EYE_FOG = 0.1;
 import type { Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./forest";
 import { disc, ribbon, type FlatMesh } from "./roads";
@@ -38,7 +41,11 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
     [t, sky.warmth, pal.fog],
   );
   const fogLevel = useGame((s) => s.preferences.fog);
-  const fogDensity = (season === "winter" ? 0.0077 : 0.0105) * (1 + (DAY_OVERRIDE.fogDensityScale - 1) * t) * FOG_SCALE[fogLevel];
+  // The god's-eye view looks across the whole forest, far past what the fog lets
+  // you see at ground level; thin it so the far groves are not fogged or culled.
+  const godEye = useGame((s) => s.preferences.camera === "god");
+  const fogDensity = (season === "winter" ? 0.0077 : 0.0105) * (1 + (DAY_OVERRIDE.fogDensityScale - 1) * t) * FOG_SCALE[fogLevel]
+    * (godEye ? GOD_EYE_FOG : 1);
   const ambientColor = useMemo(() => new Color(pal.ambient).lerp(new Color(DAY_OVERRIDE.ambient), t), [t, pal.ambient]);
   const hemiIntensity = 0.78 * (1 + (DAY_OVERRIDE.hemiIntensity - 1) * t);
   const detail = useGame((s) => s.preferences.detail);
