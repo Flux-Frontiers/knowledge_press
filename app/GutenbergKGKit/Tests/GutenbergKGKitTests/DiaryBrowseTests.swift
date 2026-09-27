@@ -61,9 +61,9 @@ struct DiaryBrowseTests {
         // broke, not that the corpus changed under the test.
         let expected: [String: Int] = [
             "evelyn-volume-1": 874,
-            "evelyn-volume-2": 1_426,
+            "evelyn-volume-2": 1_427,
             "johnson": 88,
-            "pepys-complete": 2_754,
+            "pepys-complete": 3_358,
         ]
         for (kgName, count) in expected {
             #expect(try diaries.diaryEntries(kgName: kgName).count == count, "\(kgName)")
@@ -112,13 +112,13 @@ struct DiaryBrowseTests {
         let browser = try openBrowser()
         let entries = try await browser.chapters(
             genre: "diaries", book: "The Diary of Samuel Pepys — Complete")
-        #expect(entries.count == 2_754)
+        #expect(entries.count == 3_358)
 
         let content = try await browser.chapter(
             genre: "diaries", book: "The Diary of Samuel Pepys — Complete", sectionId: entries[0].id)
         #expect(!content.text.isEmpty)
         #expect(content.index == 0)
-        #expect(content.total == 2_754)
+        #expect(content.total == 3_358)
     }
 
     @Test func browserRejectsAnUnknownDiary() async throws {
