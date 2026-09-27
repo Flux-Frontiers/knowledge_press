@@ -4,6 +4,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "essays_first_and_second_series_emerson",
     title: "Essays — First and Second Series (Emerson)",
+    book: "Essays — First and Second Series (Emerson)",
     author: "Ralph Waldo Emerson",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -14,6 +15,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "groundwork_of_the_metaphysics_of_morals_kant",
     title: "Groundwork of the Metaphysics of Morals (Kant)",
+    book: "Groundwork of the Metaphysics of Morals (Kant)",
     author: "Immanuel Kant",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -24,6 +26,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "hegels_lectures_on_the_history_of_philosophy_volume_3_of_3",
     title: "Hegel's Lectures on the History of Philosophy: Volume 3 (of 3)",
+    book: "Hegel's Lectures on the History of Philosophy: Volume 3 (of 3)",
     author: "Georg Wilhelm Friedrich Hegel",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -34,6 +37,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "leviathan",
     title: "Leviathan",
+    book: "Leviathan",
     author: "Thomas Hobbes",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -44,6 +48,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "meditations",
     title: "Meditations",
+    book: "Meditations",
     author: "Emperor of Rome Marcus Aurelius",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -54,6 +59,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "nicomachean_ethics_aristotle",
     title: "Nicomachean Ethics (Aristotle)",
+    book: "Nicomachean Ethics (Aristotle)",
     author: "Aristotle",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -64,6 +70,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "on_liberty_mill",
     title: "On Liberty (Mill)",
+    book: "On Liberty (Mill)",
     author: "John Stuart Mill",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -74,6 +81,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "on_the_duty_of_civil_disobedience_thoreau",
     title: "On the Duty of Civil Disobedience (Thoreau)",
+    book: "On the Duty of Civil Disobedience (Thoreau)",
     author: "Henry David Thoreau",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -84,6 +92,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "phaedo_plato",
     title: "Phaedo (Plato)",
+    book: "Phaedo (Plato)",
     author: "Plato",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -94,6 +103,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "plutarchs_morals",
     title: "Plutarch's Morals",
+    book: "Plutarch's Morals",
     author: "Plutarch",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -104,6 +114,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "poetics_aristotle",
     title: "Poetics (Aristotle)",
+    book: "Poetics (Aristotle)",
     author: "Aristotle",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -114,6 +125,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "politics_aristotle",
     title: "Politics (Aristotle)",
+    book: "Politics (Aristotle)",
     author: "Aristotle",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -124,6 +136,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "second_treatise_of_government",
     title: "Second Treatise of Government",
+    book: "Second Treatise of Government",
     author: "John Locke",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -134,6 +147,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_art_of_war_sun_tzu",
     title: "The Art of War (Sun Tzu)",
+    book: "The Art of War (Sun Tzu)",
     author: "active 6th century B.C. Sunzi",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -144,6 +158,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_birth_of_tragedy_or_hellenism_and_pessimism",
     title: "The Birth of Tragedy; or, Hellenism and Pessimism",
+    book: "The Birth of Tragedy; or, Hellenism and Pessimism",
     author: "Friedrich Wilhelm Nietzsche",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -154,6 +169,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_city_of_god_volume_i",
     title: "The City of God, Volume I",
+    book: "The City of God, Volume I",
     author: "of Hippo, Saint Augustine",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -164,6 +180,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_crown_of_wild_olive",
     title: "The Crown of Wild Olive",
+    book: "The Crown of Wild Olive",
     author: "John Ruskin",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -174,6 +191,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_enchiridion",
     title: "The Enchiridion",
+    book: "The Enchiridion",
     author: "Epictetus",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -184,6 +202,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_federalist_papers",
     title: "The Federalist Papers",
+    book: "The Federalist Papers",
     author: "James Madison",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -194,6 +213,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_kama_sutra_of_vatsyayana",
     title: "The Kama Sutra of Vatsyayana",
+    book: "The Kama Sutra of Vatsyayana",
     author: "Vatsyayana",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -204,6 +224,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_lives_and_opinions_of_eminent_philosophers",
     title: "The Lives and Opinions of Eminent Philosophers",
+    book: "The Lives and Opinions of Eminent Philosophers",
     author: "Diogenes Laertius",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -214,6 +235,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_prince",
     title: "The Prince",
+    book: "The Prince",
     author: "Niccolò Machiavelli",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -224,6 +246,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_problems_of_philosophy_russell",
     title: "The Problems of Philosophy (Russell)",
+    book: "The Problems of Philosophy (Russell)",
     author: "Bertrand Russell",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -234,6 +257,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_republic",
     title: "The Republic",
+    book: "The Republic",
     author: "Plato",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -244,6 +268,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_social_contract_rousseau",
     title: "The Social Contract (Rousseau)",
+    book: "The Social Contract (Rousseau)",
     author: "Jean-Jacques Rousseau",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -254,6 +279,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_symposium_plato",
     title: "The Symposium (Plato)",
+    book: "The Symposium (Plato)",
     author: "Plato",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -264,6 +290,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_twilight_of_the_idols_or_how_to_philosophize_with_the_ha",
     title: "The Twilight of the Idols; or, How to Philosophize with the Hammer. The Antichrist",
+    book: "The Twilight of the Idols; or, How to Philosophize with the Hammer. The Antichrist",
     author: "Friedrich Wilhelm Nietzsche",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -274,6 +301,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_wealth_of_nations",
     title: "The Wealth of Nations",
+    book: "The Wealth of Nations",
     author: "Adam Smith",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -284,6 +312,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_origin_and_development_of_the_moral_ideas",
     title: "The origin and development of the moral ideas",
+    book: "The origin and development of the moral ideas",
     author: "Edward Westermarck",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -294,6 +323,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "thus_spake_zarathustra",
     title: "Thus Spake Zarathustra",
+    book: "Thus Spake Zarathustra",
     author: "Friedrich Wilhelm Nietzsche",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -304,6 +334,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "utilitarianism_mill",
     title: "Utilitarianism (Mill)",
+    book: "Utilitarianism (Mill)",
     author: "John Stuart Mill",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -314,6 +345,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "anna_karenina",
     title: "Anna Karenina",
+    book: "Anna Karenina",
     author: "Leo, graf Tolstoy",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -324,6 +356,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "childhood_boyhood_youth_tolstoy",
     title: "Childhood, Boyhood, Youth (Tolstoy)",
+    book: "Childhood, Boyhood, Youth (Tolstoy)",
     author: "Leo, graf Tolstoy",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -334,6 +367,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "crime_and_punishment",
     title: "Crime and Punishment",
+    book: "Crime and Punishment",
     author: "Fyodor Dostoyevsky",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -344,6 +378,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "dead_souls",
     title: "Dead Souls",
+    book: "Dead Souls",
     author: "Nikolai Vasilevich Gogol",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -354,6 +389,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "fathers_and_sons_turgenev",
     title: "Fathers and Sons (Turgenev)",
+    book: "Fathers and Sons (Turgenev)",
     author: "Ivan Sergeevich Turgenev",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -364,6 +400,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "notes_from_underground_dostoevsky",
     title: "Notes from Underground (Dostoevsky)",
+    book: "Notes from Underground (Dostoevsky)",
     author: "Fyodor Dostoyevsky",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -374,6 +411,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "oblomov",
     title: "Oblomov",
+    book: "Oblomov",
     author: "Ivan Aleksandrovich Goncharov",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -384,6 +422,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "on_the_eve_a_novel",
     title: "On the eve: A novel",
+    book: "On the Eve (Turgenev)",
     author: "Ivan Sergeevich Turgenev",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -394,6 +433,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_brothers_karamazov",
     title: "The Brothers Karamazov",
+    book: "The Brothers Karamazov",
     author: "Fyodor Dostoyevsky",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -404,6 +444,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_idiot",
     title: "The Idiot",
+    book: "The Idiot",
     author: "Fyodor Dostoyevsky",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -414,6 +455,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "the_possessed_or_the_devils",
     title: "The possessed :  or, The devils",
+    book: "The possessed :  or, The devils",
     author: "Fyodor Dostoyevsky",
     genre: "russian-literature",
     genreLabel: "Russian Literature",
@@ -424,6 +466,7 @@ export const BOOKS_PART5: Book[] = [
   {
     slug: "war_and_peace",
     title: "War and Peace",
+    book: "War and Peace",
     author: "Leo, graf Tolstoy",
     genre: "russian-literature",
     genreLabel: "Russian Literature",

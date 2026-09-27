@@ -4,6 +4,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "twenty_thousand_leagues_under_the_sea",
     title: "Twenty Thousand Leagues Under the Sea",
+    book: "Twenty Thousand Leagues Under the Sea",
     author: "Jules Verne",
     genre: "french-literature",
     genreLabel: "French Literature",
@@ -14,6 +15,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "faust_part_i_goethe",
     title: "Faust Part I (Goethe)",
+    book: "Faust Part I (Goethe)",
     author: "Johann Wolfgang von Goethe",
     genre: "german-literature",
     genreLabel: "German Literature",
@@ -24,6 +26,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "faust_der_tragödie_zweiter_teil",
     title: "Faust: Der Tragödie zweiter Teil",
+    book: "Faust: Der Tragödie zweiter Teil",
     author: "Johann Wolfgang von Goethe",
     genre: "german-literature",
     genreLabel: "German Literature",
@@ -34,6 +37,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "siddhartha_hesse",
     title: "Siddhartha (Hesse)",
+    book: "Siddhartha (Hesse)",
     author: "Hermann Hesse",
     genre: "german-literature",
     genreLabel: "German Literature",
@@ -44,6 +48,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_metamorphosis_kafka",
     title: "The Metamorphosis (Kafka)",
+    book: "The Metamorphosis (Kafka)",
     author: "Franz Kafka",
     genre: "german-literature",
     genreLabel: "German Literature",
@@ -54,6 +59,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_trial_kafka",
     title: "The Trial (Kafka)",
+    book: "The Trial (Kafka)",
     author: "Franz Kafka",
     genre: "german-literature",
     genreLabel: "German Literature",
@@ -64,6 +70,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "at_the_mountains_of_madness",
     title: "At the Mountains of Madness",
+    book: "At the Mountains of Madness",
     author: "H. P. (Howard Phillips) Lovecraft",
     genre: "horror",
     genreLabel: "Horror",
@@ -74,6 +81,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "carmilla",
     title: "Carmilla",
+    book: "Carmilla",
     author: "Joseph Sheridan Le Fanu",
     genre: "horror",
     genreLabel: "Horror",
@@ -84,6 +92,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "ghost_stories_of_an_antiquary",
     title: "Ghost Stories of an Antiquary",
+    book: "Ghost Stories of an Antiquary",
     author: "M. R. (Montague Rhodes) James",
     genre: "horror",
     genreLabel: "Horror",
@@ -94,6 +103,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "tales_of_terror_and_mystery",
     title: "Tales of Terror and Mystery",
+    book: "Tales of Terror and Mystery",
     author: "Arthur Conan Doyle",
     genre: "horror",
     genreLabel: "Horror",
@@ -104,6 +114,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_call_of_cthulhu",
     title: "The Call of Cthulhu",
+    book: "The Call of Cthulhu",
     author: "H. P. (Howard Phillips) Lovecraft",
     genre: "horror",
     genreLabel: "Horror",
@@ -114,6 +125,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_case_of_charles_dexter_ward",
     title: "The Case of Charles Dexter Ward",
+    book: "The Case of Charles Dexter Ward",
     author: "H. P. (Howard Phillips) Lovecraft",
     genre: "horror",
     genreLabel: "Horror",
@@ -124,6 +136,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_colour_out_of_space",
     title: "The Colour Out of Space",
+    book: "The Colour Out of Space",
     author: "H. P. (Howard Phillips) Lovecraft",
     genre: "horror",
     genreLabel: "Horror",
@@ -134,6 +147,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_dunwich_horror",
     title: "The Dunwich Horror",
+    book: "The Dunwich Horror",
     author: "H. P. (Howard Phillips) Lovecraft",
     genre: "horror",
     genreLabel: "Horror",
@@ -144,6 +158,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_great_god_pan",
     title: "The Great God Pan",
+    book: "The Great God Pan",
     author: "Arthur Machen",
     genre: "horror",
     genreLabel: "Horror",
@@ -154,6 +169,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_house_on_the_borderland",
     title: "The House on the Borderland",
+    book: "The House on the Borderland",
     author: "William Hope Hodgson",
     genre: "horror",
     genreLabel: "Horror",
@@ -164,6 +180,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_king_in_yellow",
     title: "The King in Yellow",
+    book: "The King in Yellow",
     author: "Robert W. (Robert William) Chambers",
     genre: "horror",
     genreLabel: "Horror",
@@ -174,6 +191,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_monk_a_romance",
     title: "The Monk: A Romance",
+    book: "The Monk: A Romance",
     author: "M. G. (Matthew Gregory) Lewis",
     genre: "horror",
     genreLabel: "Horror",
@@ -184,6 +202,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_mysteries_of_udolpho",
     title: "The Mysteries of Udolpho",
+    book: "The Mysteries of Udolpho",
     author: "Ann Ward Radcliffe",
     genre: "horror",
     genreLabel: "Horror",
@@ -194,6 +213,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_shadow_over_innsmouth",
     title: "The Shadow over Innsmouth",
+    book: "The Shadow over Innsmouth",
     author: "H. P. (Howard Phillips) Lovecraft",
     genre: "horror",
     genreLabel: "Horror",
@@ -204,6 +224,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_shunned_house",
     title: "The Shunned House",
+    book: "The Shunned House",
     author: "H. P. (Howard Phillips) Lovecraft",
     genre: "horror",
     genreLabel: "Horror",
@@ -214,6 +235,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_willows",
     title: "The Willows",
+    book: "The Willows",
     author: "Algernon Blackwood",
     genre: "horror",
     genreLabel: "Horror",
@@ -224,6 +246,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "letters_of_john_keats_to_his_family_and_friends",
     title: "Letters of John Keats to His Family and Friends",
+    book: "Letters of John Keats to His Family and Friends",
     author: "John Keats",
     genre: "letters",
     genreLabel: "Letters",
@@ -234,6 +257,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "letters_of_pliny_the_younger",
     title: "Letters of Pliny the Younger",
+    book: "Letters of Pliny the Younger",
     author: "the Younger Pliny",
     genre: "letters",
     genreLabel: "Letters",
@@ -244,6 +268,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "letters_on_england",
     title: "Letters on England",
+    book: "Letters on England",
     author: "Voltaire",
     genre: "letters",
     genreLabel: "Letters",
@@ -254,6 +279,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "letters_to_his_son_lord_chesterfield",
     title: "Letters to His Son — Lord Chesterfield",
+    book: "Letters to His Son — Lord Chesterfield",
     author: "Philip Dormer Stanhope, Earl of Chesterfield",
     genre: "letters",
     genreLabel: "Letters",
@@ -264,6 +290,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_works_of_lord_byron_letters_and_journals_vol_1",
     title: "The Works of Lord Byron: Letters and Journals. Vol. 1",
+    book: "The Works of Lord Byron: Letters and Journals. Vol. 1",
     author: "George Gordon Byron, Baron Byron",
     genre: "letters",
     genreLabel: "Letters",
@@ -274,6 +301,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_works_of_lord_byron_letters_and_journals_vol_2",
     title: "The Works of Lord Byron: Letters and Journals. Vol. 2",
+    book: "The Works of Lord Byron: Letters and Journals. Vol. 2",
     author: "George Gordon Byron, Baron Byron",
     genre: "letters",
     genreLabel: "Letters",
@@ -284,6 +312,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "autobiography_of_charles_darwin",
     title: "Autobiography of Charles Darwin",
+    book: "Autobiography of Charles Darwin",
     author: "Charles Darwin",
     genre: "natural-history",
     genreLabel: "Natural History",
@@ -294,6 +323,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "mans_place_in_nature_thomas_h_huxley",
     title: "Man's Place in Nature — Thomas H. Huxley",
+    book: "Man's Place in Nature — Thomas H. Huxley",
     author: "Thomas Henry Huxley",
     genre: "natural-history",
     genreLabel: "Natural History",
@@ -304,6 +334,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "on_the_origin_of_species_charles_darwin",
     title: "On the Origin of Species — Charles Darwin",
+    book: "On the Origin of Species — Charles Darwin",
     author: "Charles Darwin",
     genre: "natural-history",
     genreLabel: "Natural History",
@@ -314,6 +345,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_chemical_history_of_a_candle_michael_faraday",
     title: "The Chemical History of a Candle — Michael Faraday",
+    book: "The Chemical History of a Candle — Michael Faraday",
     author: "Michael Faraday",
     genre: "natural-history",
     genreLabel: "Natural History",
@@ -324,6 +356,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_descent_of_man_charles_darwin",
     title: "The Descent of Man — Charles Darwin",
+    book: "The Descent of Man — Charles Darwin",
     author: "Charles Darwin",
     genre: "natural-history",
     genreLabel: "Natural History",
@@ -334,6 +367,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_malay_archipelago_alfred_russel_wallace",
     title: "The Malay Archipelago — Alfred Russel Wallace",
+    book: "The Malay Archipelago — Alfred Russel Wallace",
     author: "Alfred Russel Wallace",
     genre: "natural-history",
     genreLabel: "Natural History",
@@ -344,6 +378,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "the_voyage_of_the_beagle_charles_darwin",
     title: "The Voyage of the Beagle — Charles Darwin",
+    book: "The Voyage of the Beagle — Charles Darwin",
     author: "Charles Darwin",
     genre: "natural-history",
     genreLabel: "Natural History",
@@ -354,6 +389,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "a_pickle_for_the_knowing_ones",
     title: "A Pickle for the Knowing Ones",
+    book: "A Pickle for the Knowing Ones",
     author: "Timothy Dexter",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -364,6 +400,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "a_vindication_of_the_rights_of_woman_wollstonecraft",
     title: "A Vindication of the Rights of Woman (Wollstonecraft)",
+    book: "A Vindication of the Rights of Woman (Wollstonecraft)",
     author: "Mary Wollstonecraft",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -374,6 +411,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "apology_plato",
     title: "Apology (Plato)",
+    book: "Apology (Plato)",
     author: "Plato",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -384,6 +422,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "beyond_good_and_evil",
     title: "Beyond Good and Evil",
+    book: "Beyond Good and Evil",
     author: "Friedrich Wilhelm Nietzsche",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -394,6 +433,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "common_sense",
     title: "Common Sense",
+    book: "Common Sense",
     author: "Thomas Paine",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -404,6 +444,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "critique_of_pure_reason_kant",
     title: "Critique of Pure Reason (Kant)",
+    book: "Critique of Pure Reason (Kant)",
     author: "Immanuel Kant",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -414,6 +455,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "discourse_on_the_method_of_rightly_conducting_ones_reason_an",
     title: "Discourse on the Method of Rightly Conducting One's Reason and of Seeking Truth in the Sciences",
+    book: "Discourse on the Method of Rightly Conducting One's Reason and of Seeking Truth in the Sciences",
     author: "René Descartes",
     genre: "philosophy",
     genreLabel: "Philosophy",
@@ -424,6 +466,7 @@ export const BOOKS_PART4: Book[] = [
   {
     slug: "ecce_homo",
     title: "Ecce Homo",
+    book: "Ecce Homo",
     author: "Friedrich Wilhelm Nietzsche",
     genre: "philosophy",
     genreLabel: "Philosophy",
