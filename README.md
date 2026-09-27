@@ -49,6 +49,20 @@ make web-dev
 app answering on a phone with the network off.
 [`web/README.md`](web/README.md) covers the forest's controls and layout.
 
+## A single tree as an image
+
+The forest's trees are grown by the same rules as gutenberg_kg's Python
+viewer, so any one of them can be rendered there as a still. From the
+gutenberg_kg checkout:
+
+```bash
+gutenkg quilt --book Pepys --still                  # one 1600x1600 PNG in renders/quilts/
+gutenkg quilt --book Hamlet --still --season winter --size 2400
+```
+
+`--plain`, `--season`, `--zoom` and `--size` apply. Without `--still`, the
+same command renders a Looking Glass light-field quilt.
+
 ## History
 
 This code lived in gutenberg_kg until September 2026 and was split out with
