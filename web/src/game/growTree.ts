@@ -29,7 +29,7 @@ export type GrownTree = {
 };
 
 /** Bump when caps change so the forest cache rebuilds. */
-export const GROW_VERSION = 15;
+export const GROW_VERSION = 16;
 
 // This file mirrors the Python viz3d (kg_utils.viz3d.organic.colonize and
 // gutenberg_kg.treegeom.grow_tree_geometry) so both front ends grow the same
@@ -143,8 +143,12 @@ const LIMB_BARE = 0.2;
 const DIARY_LIMB_FLOOR = 0.6;
 /** treegeom._DIARY_LEADER: the trunk rises plumb through the whole crown. */
 const DIARY_LEADER = 1;
-/** treegeom._DIARY_TURN: five years to a full turn, so the timeline spirals up the trunk. */
-const DIARY_TURN = (2 * Math.PI) / 5;
+/**
+ * treegeom._DIARY_TURN: half the golden angle per year (~68.75°). Neighbouring
+ * years stay close so the timeline spirals up the trunk, and no year stacks
+ * above another (a fifth of a turn stacked every fifth: a star from above).
+ */
+const DIARY_TURN = GOLDEN / 2;
 /** treegeom._DIARY_SHARE_BOUNDS */
 const SHARE_MIN = 0.5, SHARE_MAX = 1.4;
 
@@ -166,14 +170,23 @@ export function placeDiaryCrown(
   const rng = mulberry32(seedFromKey(slug + ":crown"));
   const trunkHeight = trunkHeightFor(nChunks);
   const branchLength = 2.1 + Math.sqrt(n) * 0.55;
-  const tips = crownSections(n, trunkHeight, branchLength * DIARY_LIMB_REACH, habit);
-
-  // treegeom._spiral_limbs, then _size_limbs_by_entries.
-  const reach = tips.map((t) => Math.hypot(t.x, t.z));
-  tips.forEach((t, i) => {
-    t.x = reach[i]! * Math.cos(i * DIARY_TURN);
-    t.z = reach[i]! * Math.sin(i * DIARY_TURN);
+  // treegeom._period_steps and _diary_limb_tips: a limb's height and turn both
+  // follow its year, so a skipped year leaves bare trunk and a skipped turn.
+  const years = periods.every((p) => /^\d+$/.test(p.label));
+  const steps = periods.map((p, i) => (years ? Number(p.label) - Number(periods[0]!.label) : i));
+  const span = steps[n - 1]! - steps[0]!;
+  const tips: Vec3[] = steps.map((st) => {
+    const t = span > 0 ? st / span : 0.5;
+    const radius = branchLength * DIARY_LIMB_REACH * habit.width * envelopeWidth(habit.envelope, t);
+    return {
+      x: radius * Math.cos(st * DIARY_TURN),
+      y: trunkHeight * (habit.clearBole + (0.95 - habit.clearBole) * t),
+      z: radius * Math.sin(st * DIARY_TURN),
+    };
   });
+
+  // treegeom._size_limbs_by_entries
+  const reach = tips.map((t) => Math.hypot(t.x, t.z));
   const widest = Math.max(...reach) || 1;
   const meanEntries = Math.max(periods.reduce((s, p) => s + p.entries, 0) / n, 1);
   tips.forEach((t, i) => {

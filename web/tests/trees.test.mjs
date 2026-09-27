@@ -250,7 +250,7 @@ test("every diary year forks from the trunk, none from another year's limb", () 
   assert.equal(forks.size, b.periods.length);
 });
 
-test("diary limbs spiral up the trunk a fifth of a turn per year", () => {
+test("diary limbs spiral up the trunk half a golden angle per year", () => {
   const { placeDiaryCrown, PERIOD_BINS } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
   const { SPECIES, speciesFor } = require(`${process.env.FOREST_TEST_BUILD}/species.js`);
   const habit = SPECIES[speciesFor("diaries")].habit;
@@ -266,6 +266,24 @@ test("diary limbs spiral up the trunk a fifth of a turn per year", () => {
   });
   for (let i = 1; i < az.length; i++) {
     const step = (((az[i] - az[i - 1]) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-    assert.ok(Math.abs(step - (2 * Math.PI) / 5) < 0.25, `year ${i}: step ${step.toFixed(2)} rad`);
+    assert.ok(Math.abs(step - Math.PI * (3 - Math.sqrt(5)) / 2) < 0.25, `year ${i}: step ${step.toFixed(2)} rad`);
   }
+});
+
+test("a skipped diary year leaves bare trunk", () => {
+  const { placeDiaryCrown, PERIOD_BINS } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
+  const { SPECIES, speciesFor } = require(`${process.env.FOREST_TEST_BUILD}/species.js`);
+  const habit = SPECIES[speciesFor("diaries")].habit;
+  const K = 40;
+  const bins = Array.from({ length: PERIOD_BINS }, (_, i) => (i === PERIOD_BINS - 1 ? K : 0));
+  const periods = ["1660", "1661", "1665"].map((label) => ({ label, entries: 100, bins }));
+  const { crown } = placeDiaryCrown(periods, 300 * K, habit, "t");
+  const y = periods.map((_, i) => {
+    let s = 0;
+    for (let k = i * K; k < (i + 1) * K; k++) s += crown[k * 3 + 1];
+    return s / K;
+  });
+  // 1661 to 1665 is four years of trunk; 1660 to 1661 is one.
+  const ratio = (y[2] - y[1]) / (y[1] - y[0]);
+  assert.ok(Math.abs(ratio - 4) < 0.3, `ratio ${ratio.toFixed(2)}`);
 });
