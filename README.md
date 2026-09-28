@@ -12,8 +12,6 @@
 [![App](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/app.yml/badge.svg)](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/app.yml)
 [![Web](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/web.yml/badge.svg)](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/web.yml)
 
-# The Knowledge Press
-
 The apps that read a [GutenbergKG](https://github.com/Flux-Frontiers/gutenberg_kg)
 corpus. GutenbergKG builds the library, a knowledge graph of public-domain books;
 this repo holds the ways to read it.
