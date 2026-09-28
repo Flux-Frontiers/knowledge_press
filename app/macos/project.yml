@@ -5,12 +5,16 @@
 # `swift run KnowledgePress` from app/GutenbergKGKit still works and is still
 # the fastest loop. This target exists for the things a SwiftPM executable
 # cannot be: a double-clickable bundle, signed with a Developer ID and
-# notarized, that someone else can install.
+# notarized, that someone else can install -- or archived, sandboxed, for the
+# Mac App Store.
 name: KnowledgePress
 options:
   bundleIdPrefix: com.fluxfrontiers
+  # 26.0, for the reason app/ios/project.yml gives: the on-device answer
+  # engine is macOS 26 and Private Cloud Compute 27, so on 14 or 15 the app
+  # installs and cannot write an answer. The store listing says macOS 26.
   deploymentTarget:
-    macOS: "14.0"
+    macOS: "26.0"
   createIntermediateGroups: true
 
 packages:
@@ -48,10 +52,19 @@ targets:
     # restricted entitlement its profile does not grant is killed at launch.
     # Until a Developer ID profile with PCC is minted and embedded, the
     # Release build has to go without: see the Release config below.
+    #
+    # App Sandbox is required on the Mac App Store, and lives here rather than
+    # in an archive-only file so `make mac-dev` runs sandboxed too: a sandbox
+    # failure shows up in the dev build instead of in TestFlight, since an
+    # App Store-signed app cannot be run locally. network.client is the
+    # outgoing connection to the LAN worker. `make mac-build` drops this whole
+    # file on its command line, so the notarized app stays unsandboxed.
     entitlements:
       path: KnowledgePress.entitlements
       properties:
         com.apple.developer.private-cloud-compute: true
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
     info:
       path: Info.plist
       properties:
@@ -63,11 +76,20 @@ targets:
         # See app/ios/project.yml: spares every upload the by-hand
         # export-compliance question.
         ITSAppUsesNonExemptEncryption: false
-        LSMinimumSystemVersion: "14.0"
+        LSMinimumSystemVersion: "26.0"
+        # Required on the Mac App Store: an upload without it is rejected at
+        # validation. Books, matching docs/APP_STORE_LISTING.md.
+        LSApplicationCategoryType: public.app-category.books
         NSHumanReadableCopyright: "© 2026 Eric G. Suchanek, PhD. Elastic-2.0."
         # The worker is reachable over plain HTTP on the LAN, same as iOS.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
+        # macOS 15 and later ask before an app reaches the local network, as
+        # iOS does, and show this text in the prompt.
+        NSLocalNetworkUsageDescription:
+          The Knowledge Press connects to the GutenbergKG worker running on a
+          Mac on your network to retrieve passages. Answers are written on
+          this Mac.
     # Same reason as app/ios/project.yml: without a shared scheme xcodebuild
     # invents one spanning every target in the workspace.
     scheme: {}
@@ -82,11 +104,13 @@ targets:
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        # Required for notarization. Deliberately no App Sandbox: an installed
-        # corpus lives at ~/Library/Application Support/Corpus, shared with
-        # `swift run`, and wins over the bundled one. Adding com.apple.security.app-sandbox later moves it
-        # into the app's container and costs one re-copy -- no code change,
-        # since CorpusPacks.defaultDirectory() resolves through FileManager.
+        # Required for notarization. The sandboxed builds (mac-dev, the App
+        # Store archive) keep Application Support in
+        # ~/Library/Containers/com.fluxfrontiers.knowledgepress; the
+        # unsandboxed Developer ID build shares ~/Library/Application
+        # Support/Corpus with `swift run`. An installed corpus wins over the
+        # bundled one. No code change either way, since
+        # CorpusPacks.defaultDirectory() resolves through FileManager.
         ENABLE_HARDENED_RUNTIME: YES
         DEVELOPMENT_TEAM: ""
       configs:

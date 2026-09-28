@@ -31,6 +31,8 @@
 #   make mac-verify    -- prove the signature is distributable before shipping
 #   make mac-notarize  -- submit the .app to Apple, wait, staple the ticket
 #   make mac-dmg       -- package the stapled .app as a signed .dmg
+#   make mac-archive   -- sandboxed Release .xcarchive for the Mac App Store
+#   make mac-upload    -- export the archive as a .pkg and send it to App Store Connect
 #
 # The web forest (web/):
 #   make web-install   -- npm install
@@ -42,7 +44,7 @@
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build web-preview web-kill
+.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -394,11 +396,11 @@ ios-push-all: ios-build
 # build does; CorpusPacks.bundledDirectory() finds it in Contents/Resources.
 # An installed corpus still wins over the bundled one.
 #
-# Deliberately unsandboxed, so the .app reads the same
-# ~/Library/Application Support/Corpus that `swift run` does. Adding the
-# sandbox later moves that into the app's container and costs one re-copy --
-# no code change, since CorpusPacks.defaultDirectory() goes through
-# FileManager.
+# The Developer ID build is unsandboxed -- mac-build drops the entitlements
+# file -- so it reads the same ~/Library/Application Support/Corpus that
+# `swift run` does. mac-dev and mac-archive carry App Sandbox, so theirs is
+# inside ~/Library/Containers/com.fluxfrontiers.knowledgepress; both bundle
+# the corpus rather than rely on one being copied there.
 # ---------------------------------------------------------------------------
 
 MAC_BUILD_DIR ?= app/macos/build
@@ -482,7 +484,10 @@ mac-build: mac-stage-corpus mac-generate
 # build on a machine fails with `Device "<host>" isn't registered in your
 # developer account` unless `-allowProvisioningDeviceRegistration` lets
 # xcodebuild add it. Both flags together are what Xcode's own Run button does.
-mac-dev: mac-generate
+#
+# Sandboxed, like the App Store build, so it stages the corpus too: its
+# Application Support is the app's container, not the one `swift run` fills.
+mac-dev: mac-stage-corpus mac-generate
 	@$(ios_resolve_team); \
 	cd app/macos && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj \
 	  -scheme KnowledgePress -destination 'platform=macOS' \
@@ -572,3 +577,30 @@ mac-notarize-dmg:
 
 mac-release: mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg
 	@echo "Signed, notarized, stapled, packaged: $(MAC_DMG)"
+
+# Mac App Store archive: the Mac twin of ios-archive. Automatic signing picks
+# the Apple Distribution identity and a Mac App Store profile, which grants
+# PCC, so unlike mac-build this keeps the entitlements file: PCC plus the App
+# Sandbox the store requires. Stages the corpus for ios-archive's reason.
+mac-archive: mac-stage-corpus mac-generate
+	@$(ios_resolve_team); \
+	cd app/macos && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj \
+	  -scheme KnowledgePress -destination 'generic/platform=macOS' \
+	  -archivePath build/KnowledgePress.xcarchive \
+	  -allowProvisioningUpdates \
+	  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM="$$TEAM" archive
+
+# Export the archive as a signed installer .pkg and upload it; the Mac twin of
+# ios-upload, with the same ExportOptions.plist and the same App Store Connect
+# API key. Same bundle ID as the iOS app, so it lands on that app record once
+# the record has macOS added as a platform. See app/RUNBOOK.md section 8.
+mac-upload: mac-archive
+	@$(ios_resolve_team); \
+	cd app/macos && xcodebuild -exportArchive \
+	  -archivePath build/KnowledgePress.xcarchive \
+	  -exportOptionsPlist ../ios/ExportOptions.plist \
+	  -exportPath build/export \
+	  -allowProvisioningUpdates \
+	  && xcrun altool --upload-app --type macos \
+	     --file build/export/KnowledgePress.pkg \
+	     --apiKey "$$ASC_KEY_ID" --apiIssuer "$$ASC_ISSUER_ID"

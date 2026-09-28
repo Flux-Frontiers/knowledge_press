@@ -771,6 +771,8 @@ make mac-release       # all five, in order
 make mac-unstage-corpus  # empty app/macos/Corpus again when you are done
 ```
 
+The Mac App Store build is in section 8.
+
 `mac-dev` is the odd one out, and it exists for one reason: Private Cloud
 Compute. A restricted entitlement has to be in the provisioning profile as
 well as the signature, automatic signing with the Apple Development identity
@@ -820,7 +822,8 @@ gitignored.
 
 ### The corpus ships inside the app
 
-`make mac-build` runs `make mac-stage-corpus` first, which copies the exported
+`make mac-build` runs `make mac-stage-corpus` first (so do `mac-dev` and
+`mac-archive`), which copies the exported
 packs (`$(GUTENBERG_KG_DIR)/bundles/gutenberg-all/swift`, 743 MB) into
 `app/macos/Corpus`. That folder is a folder reference in
 `app/macos/project.yml`, so the packs land in
@@ -892,27 +895,36 @@ obviously name the entitlement as the cause.
 `app/macos/project.yml` sets it `NO` for Release, and `make mac-verify` fails
 loudly if it ever reappears. That check is the reason the target exists.
 
-### No sandbox, deliberately
+### Sandboxed everywhere except the Developer ID build
 
-The app reads `~/Library/Application Support/Corpus` — the same directory
-`swift run` uses, so one corpus serves both. Adding
-`com.apple.security.app-sandbox` later relocates it to
+`app/macos/project.yml` declares `com.apple.security.app-sandbox` and
+`com.apple.security.network.client` beside PCC, because the Mac App Store
+requires the sandbox. `make mac-dev` and `make mac-archive` carry them.
+`make mac-build` drops the entitlements file on its command line (see above),
+so the notarized Developer ID app stays unsandboxed and reads
+`~/Library/Application Support/Corpus`, the same directory `swift run` uses.
 
-```
-~/Library/Containers/com.fluxfrontiers.knowledgepress/
-    Data/Library/Application Support/Corpus
-```
+The sandbox lives in `project.yml` rather than in an archive-only file so the
+dev build runs under it too. An App Store-signed app cannot be run locally, so
+without that a sandbox failure would first show up in TestFlight.
 
-which costs one re-copy and **no code change**, since
-`CorpusPacks.defaultDirectory()` resolves through `FileManager`'s
-`.applicationSupportDirectory` and follows the container automatically. That
-is the same property that makes the iOS build work. Note macOS only
-auto-migrates data for bundle-ID-keyed paths, and `Corpus` is not one, so the
-migration would be a manual copy — trivial for reproducible data.
+A sandboxed build's Application Support is inside its container,
+`~/Library/Containers/<uuid>/Data/Library/Application Support`. Recent macOS
+names the container by UUID rather than bundle ID and refuses a shell access
+to it. **No code change** follows from that, since
+`CorpusPacks.defaultDirectory()` and the conversation store resolve through
+`FileManager`'s `.applicationSupportDirectory` and follow the container
+automatically, as on iOS. Two consequences:
 
-Choosing unsandboxed now does not foreclose the Mac App Store. Sandboxing is a
-per-build entitlement, not a one-way door; an App Store build would flip it on
-and sign with Apple Distribution instead.
+- `mac-dev` does not see the corpus `swift run` uses, so it stages and bundles
+  the corpus, as `mac-build` and `mac-archive` do.
+- Conversations saved by an earlier unsandboxed dev build stay in
+  `~/Library/Application Support/Conversations`; the sandboxed build starts
+  with none.
+
+Verified 2026-09-27 on the `mac-dev` build: `--ask` answers with both the
+on-device and the Private Cloud Compute engine, and `lsof` on the running app
+shows every pack opened from `KnowledgePress.app/Contents/Resources/Corpus`.
 
 ### What is signed, and what that is worth
 
@@ -1007,6 +1019,31 @@ export ASC_ISSUER_ID=…    # the issuer UUID from the Keys tab
 Create it at App Store Connect → Users and Access → Integrations → App Store
 Connect API. The `.p8` downloads exactly once.
 
+### The Mac app on the Mac App Store
+
+```sh
+make mac-archive   # sandboxed Release .xcarchive, corpus staged and bundled
+make mac-upload    # export a signed .pkg and send it to App Store Connect
+```
+
+The Mac twins of `ios-archive` and `ios-upload`, with the same
+`ExportOptions.plist` and the same API key. Automatic signing archives with
+Apple Development, and the export re-signs with a cloud-managed Apple
+Distribution certificate and a Mac Team Store profile, which grants PCC, so
+the store build keeps Private Cloud Compute where the Developer ID build
+cannot. The installer package is signed with a 3rd Party Mac Developer
+Installer certificate, which the first export creates in your account.
+
+It uses the iOS app's bundle ID, so it is the same App Store Connect record
+and one Universal Purchase. **Add macOS as a platform on that record before
+the first `mac-upload`**; the upload has nowhere to go until then.
+
+Verified 2026-09-27 up to the upload: archive, then export to a 313 MB
+`.pkg`, whose `DistributionSummary.plist` lists PCC, app-sandbox and
+network.client under a Cloud Managed Apple Distribution certificate. The
+floor is macOS 26 (`LSMinimumSystemVersion`), and `LSApplicationCategoryType`
+is `public.app-category.books`, which Mac uploads require.
+
 ### Still to do before a first submission
 
 - [ ] Answers verified on the phone with the network off -- section 6's open
@@ -1018,6 +1055,8 @@ Connect API. The `.p8` downloads exactly once.
 - [ ] A first TestFlight build, installed from TestFlight on a device that has
       never had a development build -- the only way to prove the bundled
       corpus is found
+- [ ] macOS added as a platform on the App Store Connect record, Mac
+      screenshots, then a first `make mac-upload` and a Mac TestFlight install
 
 ## 9. Troubleshooting
 
