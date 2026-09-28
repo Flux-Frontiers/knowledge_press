@@ -72,6 +72,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The forest credits the right authors.** The web catalog is regenerated
+  from gutenberg_kg's corrected metadata: The Count of Monte Cristo is by
+  Alexandre Dumas and Auguste Maquet rather than Maquet alone, The Federalist
+  Papers by Hamilton, Jay and Madison, and names such as "Leo, graf Tolstoy"
+  and "H. G. (Herbert George) Wells" read Leo Tolstoy and H. G. Wells. Only
+  author names changed.
 - **The Browse reader shows clean text.** A chapter is assembled from
   overlapping chunks, so a sentence at every seam appeared twice ("It was an
   awful sight of money when it was piled up", twice, in Huckleberry Finn's
