@@ -238,7 +238,7 @@ public enum HelpContent {
                 heading: "By default, nothing",
                 paragraphs: [
                     "The books, the search index and the model all live on this device. With the **On-device** engine the app works in airplane mode, and no question you ask is transmitted anywhere.",
-                    "Your conversations are stored on this device only. They are not backed up to iCloud, not sent to us, and not sent to anyone else.",
+                    "Your conversations are stored on this device. They are part of your device backup, and are not sent to us or to anyone else.",
                 ]),
             HelpSection(
                 heading: "If you choose Private Cloud",

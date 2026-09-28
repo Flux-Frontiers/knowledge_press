@@ -11,6 +11,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Simulator targets for App Store screenshots.** `make ios-sim` builds the
+  app for a simulator, installs it with the corpus, sets a dark 9:41 status
+  bar and launches it; `make ios-sim-screenshot` writes a screenshot at the
+  exact size App Store Connect wants for that device. `SIM` names the
+  simulator, `SIM_APPEARANCE` the appearance.
+- **`docs/APP_STORE_LISTING.md`** holds the store listing text: name,
+  subtitle, promotional text, description, keywords, review notes and URLs.
+
+### Fixed
+
+- **Retrieval in the simulator.** The query embedder ran on Core ML's GPU
+  path, which the simulator lacks ("Espresso compiled without MPSGraph
+  engine"), and its vectors matched nothing, so every search came back
+  empty. The simulator now runs the embedder on the CPU; devices are
+  unchanged.
+- **The help page "What leaves this device" said conversations are not
+  backed up.** They are part of the device backup on purpose (the corpus is
+  excluded; conversations cannot be regenerated). The page now says so. The
+  privacy and support pages on the web site also said answers are off by
+  default; on-device is the default wherever Apple Intelligence is on.
+
 ## [1.25.0] - 2026-09-27
 
 ### Added
