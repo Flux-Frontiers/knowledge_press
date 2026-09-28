@@ -99,6 +99,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The sacred texts' trees match the rebuilt corpus.** The web catalog is
+  re-exported after a corpus rebuild: the Dhammapada, the Bhagavad Gita, the
+  Bible, the Quran and the Upanishads each have one more chunk, and the Gita,
+  the Bible and the Quran show new excerpts.
 - **The web forest's README and FEATURES describe the forest as it is.**
   They still described a Fibonacci annulus with one ring road, listed the sky
   as next, and mapped 12 of the 43 source files. They now cover the
