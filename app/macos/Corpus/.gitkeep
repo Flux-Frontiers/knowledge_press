@@ -1,0 +1,11 @@
+# Staged, not committed.
+#
+# `make mac-stage-corpus` copies bundles/gutenberg-all/swift into this folder
+# before a release build, so the notarized Mac app ships the corpus inside it.
+# `make mac-build` stages it itself. The folder is committed empty so that
+# `make mac-check` and CI compile against an existing-but-empty path rather
+# than a missing one; XcodeGen fails the build outright on a folder reference
+# that does not exist.
+#
+# CorpusPacks.bundledDirectory() treats a folder with no manifest.json as
+# "this build has no corpus", which is exactly the empty case.
