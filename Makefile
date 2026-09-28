@@ -41,13 +41,15 @@
 #   make web-build     -- typecheck and production build
 #   make web-preview   -- production build, served on the LAN like web-dev
 #   make web-kill      -- stop every running Vite dev or preview server
+#   make web-books     -- write each book's text into web/public/books (gutenberg_kg)
+#   make web-books-publish -- upload that text for the Pages build, then redeploy
 #
 # The app icon (app/icon):
 #   make icons         -- re-render every icon PNG from the press-seal SVGs
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: icons ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill
+.PHONY: icons ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill web-books web-books-publish
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -80,6 +82,30 @@ web-kill:
 	if [ -z "$$pids" ]; then echo "no Vite servers running"; exit 0; fi; \
 	ps -o pid=,command= -p "$$(echo $$pids | tr ' ' ',')"; \
 	kill $$pids && echo "stopped: $$(echo $$pids)"
+
+# The reader opens each book from web/public/books/<slug>.json, written by
+# `gutenkg export-web-books` from the Swift packs (run `make export-swift` in
+# gutenberg_kg first). The files are gitignored: about 175 MB, 63 MB as a
+# tarball. web-books-publish uploads the tarball to the BOOK_TEXT_TAG release,
+# which web.yml unpacks into the build, and redeploys Pages. The release stays
+# a draft because Zenodo archives every published release, prereleases
+# included; web.yml needs contents: write to read a draft.
+BOOK_TEXT_TAG ?= book-text
+BOOK_TEXT_TARBALL := $(patsubst %/,%,$(or $(TMPDIR),/tmp))/books.tar.gz
+
+web-books:
+	$(MAKE) -C "$(GUTENBERG_KG_DIR)" export-web-books KNOWLEDGE_PRESS_DIR="$(CURDIR)"
+
+web-books-publish:
+	@test -n "$$(ls web/public/books 2>/dev/null)" \
+	  || { echo "No book text in web/public/books -- run 'make web-books' first."; exit 1; }
+	tar -czf "$(BOOK_TEXT_TARBALL)" -C web/public/books .
+	gh release view $(BOOK_TEXT_TAG) >/dev/null 2>&1 \
+	  || gh release create $(BOOK_TEXT_TAG) --draft --title "Book text for the web forest" \
+	       --notes "books.tar.gz: every book's chapters for the forest reader, from 'make web-books'. Kept a draft so Zenodo does not archive it; do not publish."
+	gh release upload $(BOOK_TEXT_TAG) "$(BOOK_TEXT_TARBALL)" --clobber
+	rm -f "$(BOOK_TEXT_TARBALL)"
+	gh workflow run web.yml --ref main
 
 # ---------------------------------------------------------------------------
 # The app icon (app/icon)

@@ -46,6 +46,6 @@ The sky is done (see Shipped); weather is the next world pass.
 | Tour stops 5 s at each grove's signpost with a generated caption, read aloud if chosen | `tour.ts`, `narration.ts`, `speech.ts`, `HUD.tsx` |
 | Named grove signposts | `Signposts.tsx` |
 | Denser skeletons (raised attractor / node caps) | `growTree.ts` |
-| Read a book from its tree, through the local worker | `Reader.tsx`, `worker.ts`, `vite.config.ts` |
+| Read a book from its tree, from static per-book JSON | `Reader.tsx`, `bookText.ts` |
 | Press / local library | `store.ts` |
 | Screenshots without the HUD | `screenshot.ts` |

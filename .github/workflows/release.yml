@@ -32,12 +32,18 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       # The catalog is compiled into the bundle and vite's base is "./", so
-      # the zip serves from any static host or subdirectory as it stands.
+      # the zip serves from any static host or subdirectory as it stands. The
+      # reader's book text comes from the draft `book-text` release, as in web.yml.
       - name: Build the web forest
         working-directory: web
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           npm ci
           npm test
+          gh release download book-text --repo "$GITHUB_REPOSITORY" --pattern books.tar.gz --dir "$RUNNER_TEMP"
+          mkdir -p public/books
+          tar -xzf "$RUNNER_TEMP/books.tar.gz" -C public/books
           npm run build
           (cd dist && zip -qr "../../knowledge-press-forest-${GITHUB_REF_NAME}.zip" .)
 

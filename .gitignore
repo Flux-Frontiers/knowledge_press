@@ -42,3 +42,6 @@ renders/icon-concepts/
 
 # Simulator screenshots (make ios-sim-screenshot)
 screenshots/
+
+# Book text for the forest reader (make web-books); published as a release asset.
+web/public/books/
