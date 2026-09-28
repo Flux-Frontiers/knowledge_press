@@ -79,7 +79,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   and "H. G. (Herbert George) Wells" read Leo Tolstoy and H. G. Wells. The
   Audel manuals show their author, Frank D. Graham, instead of "Unknown", and
   the five sacred texts, which name no author, are credited to "Various".
-  Only author names changed.
+  The eight Audel trees are sized and excerpted from gutenberg_kg's cleaned
+  OCR, which drops drawings read as text: 8 to 11 percent fewer chunks each,
+  and most excerpts now open on prose instead of diagram debris.
 - **The Browse reader shows clean text.** A chapter is assembled from
   overlapping chunks, so a sentence at every seam appeared twice ("It was an
   awful sight of money when it was piled up", twice, in Huckleberry Finn's
