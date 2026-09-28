@@ -180,7 +180,7 @@ private struct ChapterReaderView: View {
                 if let content {
                     Text(content.title ?? "")
                         .font(.title2.bold())
-                    Text(content.text)
+                    Text(ChapterText.reflow(content.text))
                         .font(.body)
                         .textSelection(.enabled)
                         .lineSpacing(4)
@@ -193,6 +193,11 @@ private struct ChapterReaderView: View {
             .frame(maxWidth: 700, alignment: .leading)
         }
         .navigationTitle(content?.title ?? "Chapter")
+        // The chapter heading is already the first thing in the body; a
+        // large title above it printed "CHAPTER I." twice on the iPhone.
+        #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+        #endif
         .task(id: sectionId) { await load() }
     }
 

@@ -26,6 +26,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The Browse reader shows clean text.** A chapter is assembled from
+  overlapping chunks, so a sentence at every seam appeared twice ("It was an
+  awful sight of money when it was piled up", twice, in Huckleberry Finn's
+  first chapter); the overlap is now dropped by matching text. Prose kept
+  the printed edition's hard line wrap and broke mid-sentence on a phone; it
+  is now unwrapped, while verse and lists keep their lines. On the iPhone
+  the chapter title no longer prints twice.
 - **Retrieval in the simulator.** The query embedder ran on Core ML's GPU
   path, which the simulator lacks ("Espresso compiled without MPSGraph
   engine"), and its vectors matched nothing, so every search came back

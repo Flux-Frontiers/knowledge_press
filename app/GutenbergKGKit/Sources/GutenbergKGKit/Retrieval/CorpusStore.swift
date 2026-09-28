@@ -259,18 +259,22 @@ public final class PassagePack: @unchecked Sendable {
         let previous = index > 0 ? all[index - 1].id : nil
         let next = index + 1 < all.count ? all[index + 1].id : nil
 
-        var text = ""
+        var chunks: [ChapterText.Chunk] = []
         if sectionID.hasPrefix("chapter:") {
             let number = Int(sectionID.dropFirst("chapter:".count)) ?? -1
             try each(
                 """
-                SELECT content FROM passages
+                SELECT char_start, content FROM passages
                  WHERE file_path = ? AND kind = 'chunk' AND chapter = ?
                  ORDER BY char_start
                 """,
                 bind: [filePath], ints: [Int64(number)]
             ) { statement in
-                text += (text.isEmpty ? "" : "\n\n") + (Self.text(statement, 0) ?? "")
+                chunks.append(
+                    ChapterText.Chunk(
+                        start: sqlite3_column_type(statement, 0) == SQLITE_NULL
+                            ? nil : Int(sqlite3_column_int64(statement, 0)),
+                        text: Self.text(statement, 1) ?? ""))
             }
         } else {
             // Chunks between this section marker and the next one.
@@ -280,7 +284,7 @@ public final class PassagePack: @unchecked Sendable {
                 end = boundary
             }
             var sql = """
-                SELECT content FROM passages
+                SELECT char_start, content FROM passages
                  WHERE file_path = ? AND kind = 'chunk' AND char_start >= ?
                 """
             var bounds: [Int64] = [Int64(start)]
@@ -290,9 +294,14 @@ public final class PassagePack: @unchecked Sendable {
             }
             sql += " ORDER BY char_start"
             try each(sql, bind: [filePath], ints: bounds) { statement in
-                text += (text.isEmpty ? "" : "\n\n") + (Self.text(statement, 0) ?? "")
+                chunks.append(
+                    ChapterText.Chunk(
+                        start: sqlite3_column_type(statement, 0) == SQLITE_NULL
+                            ? nil : Int(sqlite3_column_int64(statement, 0)),
+                        text: Self.text(statement, 1) ?? ""))
             }
         }
+        let text = ChapterText.join(chunks)
 
         return ChapterContent(
             title: all[index].title,
