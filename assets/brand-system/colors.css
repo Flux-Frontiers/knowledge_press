@@ -1,0 +1,8 @@
+/* The Knowledge Press -- brand colors, the four inks of the press seal.
+   © 2026 Eric G. Suchanek, PhD -- Flux-Frontiers. See TRADEMARK.md. */
+:root {
+  --kp-ink: #151b29;    /* the navy ground and the KP; text on light grounds */
+  --kp-ring: #237f59;   /* the seal's outer band */
+  --kp-seal: #2dcc78;   /* the seal's disc */
+  --kp-paper: #f4f0dc;  /* the seal's rule; text on dark grounds */
+}

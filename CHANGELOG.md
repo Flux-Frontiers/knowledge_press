@@ -13,6 +13,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A brand folder, `assets/brand-system/`,** built around the press seal:
+  the seal in full color and in one-color navy and cream, the name as a
+  wordmark, horizontal and stacked lockups for light and dark grounds, the
+  four colors in `colors.css`, and a README with the seal's construction,
+  clear space, minimum sizes and misuse. TRADEMARK.md already claimed
+  assets at that path; until now it did not exist here. The KP and the name
+  are set in Merriweather Bold, committed under `fonts/` with its SIL Open
+  Font License, and `build.py` traces them into every SVG in the folder and
+  into the app icon sources and the favicon, so all of them share one KP.
 - **`make icons`** re-renders every app icon PNG from the press-seal SVGs in
   `app/icon/`: the 1024 px master and its iOS and splash copies, the proof
   strip, and the ten macOS sizes. Its output is deterministic, so a run with
@@ -67,9 +76,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   hub is gone. The app icon on iOS and macOS, the splash and About screens,
   and the web app's favicon now show a seal: a KP ligature for The Knowledge
   Press, the K's serifs landing on the P's stem, set in a ringed green disc
-  like a printer's mark. The letters are Georgia Bold traced to outlines, so
-  the source SVGs in `app/icon/` render the same on any machine; the old
-  live-text K also ran past the green disc at its lower right.
+  like a printer's mark. The letters are Merriweather Bold, an openly
+  licensed serif, traced to outlines, so the source SVGs in `app/icon/`
+  render the same on any machine; the old live-text K, in Georgia, also ran
+  past the green disc at its lower right.
 - **The forest is a hub and spoke.** Groves stood on a golden-angle spiral at
   whatever distance they fitted, joined by roads routed around the trunks, so
   from above the roads wandered. Now the smaller groves stand outside a
@@ -89,6 +99,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The web forest's README and FEATURES describe the forest as it is.**
+  They still described a Fibonacci annulus with one ring road, listed the sky
+  as next, and mapped 12 of the 43 source files. They now cover the
+  hub-and-spoke layout, the tour's stops and narration, species, diary
+  limbs, where the sky gets its location, the wind sculptures and the
+  reader, and FEATURES moves the sky to Shipped and weather to Next.
+- **The privacy page covers the web forest.** It described only the app.
+  A new section says what the Knowledge Press Forest keeps in the browser,
+  that it asks for the location to place the sky (rounded to 0.1 degree,
+  kept in the browser), what reading aloud and reading books involve, and
+  that GitHub Pages and Google Fonts see each visitor's IP address. Effective
+  2026-09-28.
 - **The forest credits the right authors.** The web catalog is regenerated
   from gutenberg_kg's corrected metadata: The Count of Monte Cristo is by
   Alexandre Dumas and Auguste Maquet rather than Maquet alone, The Federalist
