@@ -23,7 +23,8 @@ targets:
     platform: iOS
     sources:
       - Sources
-      # Rendered from app/icon/press-seal.svg and committed rather than built.
+      # Rendered from app/icon/press-seal.svg by `make icons` and committed
+      # rather than built.
       - Assets.xcassets
       - PrivacyInfo.xcprivacy
       # A folder reference, so the corpus keeps its layout inside the bundle

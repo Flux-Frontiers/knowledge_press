@@ -182,7 +182,8 @@ throwaway scratch package, never in `app/GutenbergKGKit`.
       (2026-09-03). The image needed its own pass: with only the app stapled
       it was `rejected / source=no usable signature`.
 - [x] App icon — the press seal is in the iOS and macOS asset catalogs;
-      app/icon/press-seal.svg is the source artwork
+      app/icon/press-seal.svg is the source artwork, and `make icons`
+      re-renders the PNGs from it
 
 **Known gaps** — tracked below in "What is not built yet": no in-app corpus
 download, no image generation, no chat persistence.
