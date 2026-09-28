@@ -76,6 +76,13 @@ light matching groves (`stoic`, `freedom`, `fire`, `sea`) — the lantern trail
 points at the nearest hit. Switch season to **Winter** to drop the canopy and
 read the wood.
 
+**Time of day** has five modes; tap the clock in the HUD to step through them.
+The default, **Live**, sets the sky from your own clock: the sun where it is
+now for your time zone, the next sunrise or sunset, and the moon's current
+phase. **Dawn**, **Day**, **Dusk** and **Night** hold the sky at that hour.
+At night the stars and the lantern carry the scene. The choice is remembered
+between visits, like the season.
+
 ## Map to the PyVista stack
 
 | gutenberg_kg | this package |
