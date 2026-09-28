@@ -26,12 +26,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   corpus. `make mac-stage-corpus` and `make mac-unstage-corpus` do the staging
   by hand; `make mac-verify` fails if the built app has no corpus. An installed
   corpus in Application Support still wins over the bundled one.
+- **Mac App Store build.** `make mac-archive` makes a sandboxed Release
+  archive with the corpus bundled, and `make mac-upload` exports it as a signed
+  `.pkg` and sends it to App Store Connect, under the iOS app's record. The
+  store build keeps Private Cloud Compute, which the Developer ID build cannot.
 - **Staged corpora are gitignored.** Whatever `ios-stage-corpus` or
   `mac-stage-corpus` copies into `app/ios/Corpus` or `app/macos/Corpus` no
   longer shows up as 743 MB of untracked files; only the `.gitkeep` is tracked.
 - **Ask again.** Every question in a chat has an **Ask again** button (and a
   context-menu item) that asks it once more, in the same corpus scope, with
   the answer engine and search settings as they are now.
+
+### Changed
+
+- **The Mac app needs macOS 26**, the version its answer engines need and the
+  store listing already states; it was 14.0.
+- **The Mac dev build is sandboxed**, as the App Store build must be, so a
+  sandbox failure shows up locally. `make mac-dev` now bundles the corpus,
+  since its Application Support is the app's container. The notarized
+  Developer ID build is unchanged: unsandboxed, sharing `swift run`'s corpus.
 
 ### Fixed
 
