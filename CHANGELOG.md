@@ -59,6 +59,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **A new icon: the press seal.** The graph mark with a Gutenberg "G" at its
+  hub is gone. The app icon on iOS and macOS, the splash and About screens,
+  and the web app's favicon now show a seal: a KP ligature for The Knowledge
+  Press, the K's serifs landing on the P's stem, set in a ringed green disc
+  like a printer's mark. The letters are Georgia Bold traced to outlines, so
+  the source SVGs in `app/icon/` render the same on any machine; the old
+  live-text K also ran past the green disc at its lower right.
 - **The forest is a hub and spoke.** Groves stood on a golden-angle spiral at
   whatever distance they fitted, joined by roads routed around the trunks, so
   from above the roads wandered. Now the smaller groves stand outside a
