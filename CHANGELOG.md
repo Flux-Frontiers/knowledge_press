@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **`make icons`** re-renders every app icon PNG from the press-seal SVGs in
+  `app/icon/`: the 1024 px master and its iOS and splash copies, the proof
+  strip, and the ten macOS sizes. Its output is deterministic, so a run with
+  unchanged SVGs leaves the tree clean. macOS only; it draws with AppKit.
 - **Search the corpus by author.** The Browse tab's genre list has a search
   field. Results are grouped by author, list each book with the genre it is
   shelved under, and open into the book's chapters. Every word typed has to

@@ -41,10 +41,13 @@
 #   make web-build     -- typecheck and production build
 #   make web-preview   -- production build, served on the LAN like web-dev
 #   make web-kill      -- stop every running Vite dev or preview server
+#
+# The app icon (app/icon):
+#   make icons         -- re-render every icon PNG from the press-seal SVGs
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill
+.PHONY: icons ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -77,6 +80,18 @@ web-kill:
 	if [ -z "$$pids" ]; then echo "no Vite servers running"; exit 0; fi; \
 	ps -o pid=,command= -p "$$(echo $$pids | tr ' ' ',')"; \
 	kill $$pids && echo "stopped: $$(echo $$pids)"
+
+# ---------------------------------------------------------------------------
+# The app icon (app/icon)
+#
+# app/icon/press-seal.svg and press-seal-macos.svg are the artwork. This
+# re-renders the 1024 px master (with its iOS and splash copies), the proof
+# strip and the ten macOS sizes from them; commit the PNGs it writes. macOS
+# only, since it draws the SVGs with AppKit.
+# ---------------------------------------------------------------------------
+
+icons:
+	swift app/icon/render_icons.swift
 
 # ---------------------------------------------------------------------------
 # The Knowledge Press -- iPhone app (app/ios)
