@@ -2,7 +2,7 @@
 // The Knowledge Press. Not redistributable; see app/LICENSE.
 //
 // Settings — a translation of chat.py's `_render_sidebar`: corpus scope,
-// search sliders, answer engine, clear chat. Renders as the persistent
+// search sliders, answer engine, delete all conversations. Renders as the persistent
 // sidebar on macOS and as a sheet on iPhone; same controls either way.
 
 import Foundation
@@ -20,9 +20,9 @@ public struct SettingsView: View {
 
     /// Whether to show the answer engine and corpus scope here.
     ///
-    /// False on the shells whose sidebar already carries them: one home per
-    /// control, so a reader who changed the scope in the sidebar does not
-    /// find a second copy of it here that may or may not agree.
+    /// False only in the Mac Settings window, whose sidebar is always
+    /// visible beside it and already carries both. The iPad passes true:
+    /// its sidebar hides in portrait, and Settings has to stand on its own.
     let showsEngineAndScope: Bool
 
     /// Public so the macOS app module can put it in a `Settings` scene,
@@ -88,10 +88,10 @@ public struct SettingsView: View {
             illustrationSection
 
             Section {
-                Button("🗑️ Delete conversation", role: .destructive) {
+                Button("🗑️ Delete all conversations", role: .destructive) {
                     confirmingDelete = true
                 }
-                .disabled(model.activeConversation == nil && model.turns.isEmpty)
+                .disabled(model.conversations.isEmpty && model.turns.isEmpty)
             }
 
             corpusSection
@@ -111,12 +111,14 @@ public struct SettingsView: View {
             }
         }
         .confirmationDialog(
-            "Delete this conversation?", isPresented: $confirmingDelete, titleVisibility: .visible
+            "Delete all conversations?", isPresented: $confirmingDelete, titleVisibility: .visible
         ) {
-            Button("Delete", role: .destructive) { model.deleteActiveConversation() }
+            Button("Delete All", role: .destructive) { model.deleteAllConversations() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This removes the questions, answers, and any illustrations. It cannot be undone.")
+            Text(
+                "This removes every saved conversation -- the questions, answers, and any illustrations -- and the chat on screen. It cannot be undone."
+            )
         }
         // One sheet for the section info buttons, one for the Help row. Both
         // present `HelpView`; only the starting page differs.

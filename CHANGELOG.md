@@ -20,6 +20,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   simulator, `SIM_APPEARANCE` the appearance.
 - **`docs/APP_STORE_LISTING.md`** holds the store listing text: name,
   subtitle, promotional text, description, keywords, review notes and URLs.
+- **Ask again.** Every question in a chat has an **Ask again** button (and a
+  context-menu item) that asks it once more, in the same corpus scope, with
+  the answer engine and search settings as they are now.
 
 ### Fixed
 
@@ -33,6 +36,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   excluded; conversations cannot be regenerated). The page now says so. The
   privacy and support pages on the web site also said answers are off by
   default; on-device is the default wherever Apple Intelligence is on.
+- **The opening screen says what the seed questions are.** A line above
+  them now explains that tapping one asks it, and that the tag is the part
+  of the corpus it searches. Before, the list had no label.
+- **iPad: the answer engine and corpus scope are back in Settings.** They
+  were only in the sidebar, which portrait hides, so Settings on an iPad had
+  no way to change them. The iPhone always had them; the iPad now matches.
+
+### Changed
+
+- **Settings: Delete all conversations.** The Settings row that deleted the
+  open conversation now deletes every saved conversation and the chat on
+  screen, after a confirmation. Deleting one conversation is still in the
+  chat toolbar and in the sidebar's swipe and context menus.
 
 ## [1.25.0] - 2026-09-27
 

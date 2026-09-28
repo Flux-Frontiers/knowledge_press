@@ -562,6 +562,37 @@ public final class AppModel {
         }
     }
 
+    /// Delete every saved conversation and whatever is on screen.
+    ///
+    /// The Settings row. Clears the buffer and the list at once rather than
+    /// waiting on the disk, the same way `delete(_:)` does; the store write
+    /// then confirms an empty index.
+    func deleteAllConversations() {
+        cancel()
+        turns.removeAll()
+        activeConversation = nil
+        conversations.removeAll()
+        guard let store else { return }
+        pendingPersist = Task { [weak self] in
+            let summaries = await Task.detached(priority: .utility) { () -> [ConversationSummary] in
+                try? store.deleteAll()
+                return (try? store.summaries()) ?? []
+            }.value
+            self?.conversations = summaries
+        }
+    }
+
+    /// Ask a turn's question again, in the scope it was first asked in.
+    ///
+    /// A new turn at the end of the chat, answered with the engine and search
+    /// settings as they are now -- which is the point: a reader who changed a
+    /// slider, or hit the Private Cloud filter, wants the same question run
+    /// again, not the old answer back.
+    func askAgain(_ id: ChatTurn.ID) {
+        guard let turn = turns.first(where: { $0.id == id }) else { return }
+        send(turn.question, corpusOverride: turn.corpus)
+    }
+
     /// Retitle a conversation. An empty or whitespace-only title is refused
     /// and the row keeps the name it had.
     func rename(_ id: UUID, to title: String) {

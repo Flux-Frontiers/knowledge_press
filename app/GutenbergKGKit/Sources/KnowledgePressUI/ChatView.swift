@@ -66,6 +66,10 @@ struct ChatView: View {
                 .foregroundStyle(.secondary)
             EngineBadge()
             VStack(alignment: .leading, spacing: 8) {
+                Text("Or start with one of these. Tap a question to ask it; the tag is the part of the corpus it searches.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 6)
                 ForEach(AppModel.suggestedQueries, id: \.query) { suggestion in
                     Button {
                         model.send(suggestion.query, corpusOverride: suggestion.corpus)
@@ -151,6 +155,7 @@ struct EngineBadge: View {
 
 /// One question/answer exchange.
 struct TurnView: View {
+    @Environment(AppModel.self) private var model
     let turn: ChatTurn
 
     var body: some View {
@@ -169,6 +174,23 @@ struct TurnView: View {
                 }
                 .padding(10)
                 .background(.tint.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
+                .contextMenu {
+                    Button("Ask again", systemImage: "arrow.clockwise") {
+                        model.askAgain(turn.id)
+                    }
+                    .disabled(model.isQuerying)
+                }
+            }
+            // Visible as well as in the context menu: a long press is not
+            // something a reader goes looking for.
+            HStack {
+                Spacer()
+                Button("Ask again", systemImage: "arrow.clockwise") {
+                    model.askAgain(turn.id)
+                }
+                .font(.caption)
+                .buttonStyle(.borderless)
+                .disabled(model.isQuerying)
             }
             AssistantTurnView(turn: turn)
         }

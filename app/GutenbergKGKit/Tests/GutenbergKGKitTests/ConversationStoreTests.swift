@@ -138,6 +138,28 @@ struct ConversationStoreTests {
         }
     }
 
+    @Test("deleting all removes every conversation directory and empties the index")
+    func deleteAllRemovesEverything() throws {
+        try withScratchStore { store in
+            let one = Conversation(title: "one", turns: [completedTurn()])
+            let two = Conversation(title: "two", turns: [completedTurn()])
+            try store.save(one)
+            try store.save(two)
+            let before = try store.summaries()
+            #expect(before.count == 2)
+
+            try store.deleteAll()
+
+            let after = try store.summaries()
+            #expect(after.isEmpty)
+            for id in [one.id, two.id] {
+                #expect(
+                    FileManager.default.fileExists(atPath: store.conversationDirectory(id).path)
+                        == false)
+            }
+        }
+    }
+
     @Test("a missing index is rebuilt from the conversation directories")
     func indexRebuildsWhenDeleted() throws {
         try withScratchStore { store in
