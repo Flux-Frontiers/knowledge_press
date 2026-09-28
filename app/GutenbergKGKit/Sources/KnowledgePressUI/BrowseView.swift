@@ -7,6 +7,10 @@
 //
 // A NavigationStack rather than the split view it started as: the same drill
 // reads correctly on a phone and on a Mac window, and it is one code path.
+//
+// The genre list carries an author search. Results are grouped by author and
+// open into the same chapter list the drill reaches, so search is a shortcut
+// into the drill rather than a second way to read a book.
 
 import GutenbergKGKit
 import SwiftUI
@@ -15,6 +19,14 @@ struct BrowseView: View {
     @Environment(AppModel.self) private var model
     @State private var path: [BrowseStep] = []
     @State private var loadError: String?
+    @State private var query = ""
+    /// Every book in the corpus, for author search. Reloaded whenever the
+    /// genre list changes, which is also when a corpus is installed.
+    @State private var shelf: [ShelvedBook] = []
+
+    private var searching: Bool {
+        !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     /// The packs when they are installed, the worker when they are not —
     /// Browse does not need to know which, and neither does the reader.
@@ -22,30 +34,20 @@ struct BrowseView: View {
 
     var body: some View {
         NavigationStack(path: $path) {
-            List(model.genres) { genre in
-                NavigationLink(value: BrowseStep.books(genre.genre)) {
-                    HStack {
-                        Text(genre.genre)
-                        Spacer()
-                        Text("\(genre.bookCount)")
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    }
+            Group {
+                if searching {
+                    authorResults
+                } else {
+                    genreList
                 }
             }
             .navigationTitle("Corpus")
-            .overlay {
-                if model.genres.isEmpty {
-                    ContentUnavailableView(
-                        "No genres yet",
-                        systemImage: "books.vertical",
-                        description: Text(model.connectionError ?? "Connecting to the worker…"))
-                }
-            }
+            .searchable(text: $query, prompt: "Search authors")
             .navigationDestination(for: BrowseStep.self) { step in
                 destination(for: step)
             }
         }
+        .task(id: model.genres) { await loadShelf() }
         .overlay(alignment: .bottom) {
             if let loadError {
                 Label(loadError, systemImage: "exclamationmark.triangle")
@@ -54,6 +56,75 @@ struct BrowseView: View {
                     .background(.orange.opacity(0.15), in: Capsule())
                     .padding()
             }
+        }
+    }
+
+    private var genreList: some View {
+        List(model.genres) { genre in
+            NavigationLink(value: BrowseStep.books(genre.genre)) {
+                HStack {
+                    Text(genre.genre)
+                    Spacer()
+                    Text("\(genre.bookCount)")
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .overlay {
+            if model.genres.isEmpty {
+                ContentUnavailableView(
+                    "No genres yet",
+                    systemImage: "books.vertical",
+                    description: Text(model.connectionError ?? "Connecting to the worker…"))
+            }
+        }
+    }
+
+    /// One section per matching author, each listing their books with the
+    /// genre they are shelved under, since an author's books can sit in
+    /// several.
+    private var authorResults: some View {
+        let matches = AuthorSearch.search(query, in: shelf)
+        return List {
+            ForEach(matches) { match in
+                Section {
+                    ForEach(match.books) { shelved in
+                        NavigationLink(
+                            value: BrowseStep.chapters(
+                                genre: shelved.genre, book: shelved.book.book,
+                                title: shelved.book.title ?? shelved.book.book)
+                        ) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(shelved.book.title ?? shelved.book.book)
+                                Text(shelved.genre)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                } header: {
+                    // Names as the catalog spells them, not shouted in caps.
+                    Text(match.author).textCase(nil)
+                }
+            }
+        }
+        .overlay {
+            if matches.isEmpty {
+                ContentUnavailableView.search(text: query)
+            }
+        }
+    }
+
+    private func loadShelf() async {
+        guard !model.genres.isEmpty else {
+            shelf = []
+            return
+        }
+        do {
+            shelf = try await browser.shelf(genres: model.genres)
+        } catch {
+            loadError = error.localizedDescription
         }
     }
 

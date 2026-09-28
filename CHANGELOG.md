@@ -13,6 +13,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Search the corpus by author.** The Browse tab's genre list has a search
+  field. Results are grouped by author, list each book with the genre it is
+  shelved under, and open into the book's chapters. Every word typed has to
+  begin a word of the name, in any order, ignoring case and accents: "tolst"
+  finds Tolstoy and "emile zola" finds Émile Zola. Works from the installed
+  corpus and from the worker alike.
 - **Simulator targets for App Store screenshots.** `make ios-sim` builds the
   app for a simulator, installs it with the corpus, sets a dark 9:41 status
   bar and launches it; `make ios-sim-screenshot` writes a screenshot at the
