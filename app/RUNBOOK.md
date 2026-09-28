@@ -762,12 +762,13 @@ notarized, that opens on a machine which has never seen it before.
 
 ```sh
 make mac-dev           # Debug .app, automatic signing, carries Private Cloud Compute
-make mac-build         # Release .app, Developer ID signed, hardened runtime
+make mac-build         # Release .app, corpus bundled, Developer ID signed, hardened runtime
 make mac-verify        # prove it is distributable before a round trip
 make mac-notarize      # submit the .app, wait, staple the ticket
 make mac-dmg           # package it as a signed .dmg
 make mac-notarize-dmg  # notarize and staple the image itself
 make mac-release       # all five, in order
+make mac-unstage-corpus  # empty app/macos/Corpus again when you are done
 ```
 
 `mac-dev` is the odd one out, and it exists for one reason: Private Cloud
@@ -816,6 +817,40 @@ The signing identity is read out of the login keychain, so no name or team ID
 is written into the repo. `app/macos/project.yml` is the source of truth;
 `KnowledgePress.xcodeproj`, `Info.plist` and `build/` are all generated and
 gitignored.
+
+### The corpus ships inside the app
+
+`make mac-build` runs `make mac-stage-corpus` first, which copies the exported
+packs (`$(GUTENBERG_KG_DIR)/bundles/gutenberg-all/swift`, 743 MB) into
+`app/macos/Corpus`. That folder is a folder reference in
+`app/macos/project.yml`, so the packs land in
+`KnowledgePress.app/Contents/Resources/Corpus` with their layout intact, and
+`CorpusPacks.bundledDirectory()` finds them there. It is the same mechanism as
+the iOS App Store build; see section 8 for why nothing is copied out at
+runtime. The app comes to about 750 MB.
+
+`app/macos/Corpus` is committed empty with a `.gitkeep`, and its contents are
+gitignored, so `make mac-check` and CI compile against an empty folder.
+`make mac-verify` fails if the built app has no `Corpus/manifest.json`, before
+a notarization round trip is spent on an app that answers nothing.
+
+**On your own Mac the bundled corpus is shadowed.** `CorpusPacks.installed()`
+tries `~/Library/Application Support/Corpus` first, so a Mac with a corpus
+installed per section 4 reads that copy, not the one in the bundle. To see
+what a recipient sees, move that folder aside before launching the release
+build, and put it back after. The app creates an empty `Corpus` in its place
+on launch, which is what the `rmdir` removes:
+
+```sh
+AS="$HOME/Library/Application Support"
+mv "$AS/Corpus" "$AS/Corpus.moved-aside"
+app/macos/build/Build/Products/Release/KnowledgePress.app/Contents/MacOS/KnowledgePress \
+  --ask "Who is Mr. Darcy?" --engine onDevice
+rmdir "$AS/Corpus"; mv "$AS/Corpus.moved-aside" "$AS/Corpus"
+```
+
+Verified 2026-09-27: an on-device answer citing three passages, from the
+bundle alone.
 
 ### It shares one source file with `swift run`, on purpose
 

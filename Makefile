@@ -25,7 +25,9 @@
 # The Mac app (app/macos) -- see app/RUNBOOK.md section 7:
 #   make mac-generate  -- regenerate KnowledgePress.xcodeproj from project.yml
 #   make mac-check     -- compile unsigned; no certificate needed (the CI gate)
-#   make mac-build     -- Release .app, Developer ID signed, hardened runtime
+#   make mac-stage-corpus   -- copy the corpus packs into app/macos/Corpus
+#   make mac-unstage-corpus -- empty app/macos/Corpus again
+#   make mac-build     -- Release .app, corpus bundled, Developer ID signed
 #   make mac-verify    -- prove the signature is distributable before shipping
 #   make mac-notarize  -- submit the .app to Apple, wait, staple the ticket
 #   make mac-dmg       -- package the stapled .app as a signed .dmg
@@ -40,7 +42,7 @@
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build web-preview web-kill
+.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build web-preview web-kill
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -388,6 +390,10 @@ ios-push-all: ios-build
 # These targets produce the thing a SwiftPM executable cannot be: a signed,
 # notarized bundle someone else can install.
 #
+# The release build carries the corpus inside the .app, as the App Store iOS
+# build does; CorpusPacks.bundledDirectory() finds it in Contents/Resources.
+# An installed corpus still wins over the bundled one.
+#
 # Deliberately unsandboxed, so the .app reads the same
 # ~/Library/Application Support/Corpus that `swift run` does. Adding the
 # sandbox later moves that into the app's container and costs one re-copy --
@@ -396,6 +402,7 @@ ios-push-all: ios-build
 # ---------------------------------------------------------------------------
 
 MAC_BUILD_DIR ?= app/macos/build
+MAC_CORPUS_DIR ?= $(IOS_CORPUS_DIR)
 MAC_APP = $(MAC_BUILD_DIR)/Build/Products/Release/KnowledgePress.app
 MAC_DMG ?= $(MAC_BUILD_DIR)/KnowledgePress.dmg
 # `notarytool store-credentials <name>` writes this; see RUNBOOK section 7.
@@ -426,13 +433,35 @@ mac-check: mac-generate
 	  -scheme KnowledgePress -destination 'platform=macOS' \
 	  -derivedDataPath build CODE_SIGNING_ALLOWED=NO build | tail -3
 
+# Copy the exported corpus into app/macos/Corpus so the release build ships it
+# inside the app; the Mac twin of ios-stage-corpus. mac-dev and `swift run` do
+# not need it -- they read ~/Library/Application Support/Corpus, which
+# CorpusPacks prefers over the bundled copy anyway.
+mac-stage-corpus:
+	@test -f "$(MAC_CORPUS_DIR)/manifest.json" \
+	  || { echo "No exported corpus at $(MAC_CORPUS_DIR) -- run 'make export-swift' in $(GUTENBERG_KG_DIR) first."; exit 1; }
+	@echo "Staging corpus into app/macos/Corpus ..."
+	@rm -rf app/macos/Corpus && mkdir -p app/macos/Corpus
+	@cp -R "$(MAC_CORPUS_DIR)/." app/macos/Corpus/
+	@git checkout -- app/macos/Corpus/.gitkeep 2>/dev/null || true
+	@du -sh app/macos/Corpus
+
+# Remove the staged corpus, so mac-check and mac-dev stop carrying it.
+mac-unstage-corpus:
+	@rm -rf app/macos/Corpus && mkdir -p app/macos/Corpus
+	@git checkout -- app/macos/Corpus/.gitkeep 2>/dev/null || true
+	@echo "app/macos/Corpus emptied."
+
+# Stages the corpus first, for the same reason ios-archive does: a notarized
+# .app with an empty Corpus folder installs, launches, and answers nothing.
+#
 # Developer ID signing takes no Private Cloud Compute: Apple's Developer ID
 # profile for this App ID does not grant it (the development and App Store
 # profiles do), and xcodebuild refuses to sign a restricted entitlement
 # without a profile granting it. So this build alone drops the entitlements
 # file on the command line; project.yml keeps PCC for every other build.
 # The notarized app answers on-device only.
-mac-build: mac-generate
+mac-build: mac-stage-corpus mac-generate
 	@$(mac_resolve_identity); \
 	echo "Signing as $$IDENTITY"; \
 	cd app/macos && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj \
@@ -485,6 +514,10 @@ mac-verify:
 	@codesign -d --entitlements - "$(MAC_APP)" 2>&1 | grep -q 'get-task-allow' \
 	  && { echo "PRESENT -- notarization will be rejected"; exit 1; } \
 	  || echo "absent"
+	@echo "== bundled corpus =="
+	@test -f "$(MAC_APP)/Contents/Resources/Corpus/manifest.json" \
+	  && du -sh "$(MAC_APP)/Contents/Resources/Corpus" | cut -f1 \
+	  || { echo "MISSING -- the app would ship with no corpus; run 'make mac-build'"; exit 1; }
 	@echo "== gatekeeper =="
 	@spctl -a -vvv -t exec "$(MAC_APP)" 2>&1 | head -3
 

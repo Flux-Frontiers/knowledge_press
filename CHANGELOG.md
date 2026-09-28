@@ -20,6 +20,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   simulator, `SIM_APPEARANCE` the appearance.
 - **`docs/APP_STORE_LISTING.md`** holds the store listing text: name,
   subtitle, promotional text, description, keywords, review notes and URLs.
+- **The Mac app ships with the corpus.** `make mac-build` stages the exported
+  packs into `app/macos/Corpus` and bundles them into the .app, as the iOS App
+  Store build does, so the notarized app works on a Mac with no installed
+  corpus. `make mac-stage-corpus` and `make mac-unstage-corpus` do the staging
+  by hand; `make mac-verify` fails if the built app has no corpus. An installed
+  corpus in Application Support still wins over the bundled one.
+- **Staged corpora are gitignored.** Whatever `ios-stage-corpus` or
+  `mac-stage-corpus` copies into `app/ios/Corpus` or `app/macos/Corpus` no
+  longer shows up as 743 MB of untracked files; only the `.gitkeep` is tracked.
 - **Ask again.** Every question in a chat has an **Ask again** button (and a
   context-menu item) that asks it once more, in the same corpus scope, with
   the answer engine and search settings as they are now.

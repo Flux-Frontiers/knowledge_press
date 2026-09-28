@@ -31,6 +31,11 @@ targets:
       # See app/ios/project.yml — generated, but committed.
       - Assets.xcassets
       - PrivacyInfo.xcprivacy
+      # See app/ios/project.yml: a folder reference, so the corpus keeps its
+      # layout inside Contents/Resources. Empty in development and in CI;
+      # `make mac-stage-corpus` fills it, and `make mac-build` stages first.
+      - path: Corpus
+        type: folder
     dependencies:
       - package: GutenbergKGKit
         product: KnowledgePressUI
@@ -77,9 +82,9 @@ targets:
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        # Required for notarization. Deliberately no App Sandbox: the corpus
-        # lives at ~/Library/Application Support/Corpus, shared with
-        # `swift run`. Adding com.apple.security.app-sandbox later moves it
+        # Required for notarization. Deliberately no App Sandbox: an installed
+        # corpus lives at ~/Library/Application Support/Corpus, shared with
+        # `swift run`, and wins over the bundled one. Adding com.apple.security.app-sandbox later moves it
         # into the app's container and costs one re-copy -- no code change,
         # since CorpusPacks.defaultDirectory() resolves through FileManager.
         ENABLE_HARDENED_RUNTIME: YES

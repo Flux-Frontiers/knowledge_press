@@ -14,10 +14,16 @@ app/ios/KnowledgePress.xcodeproj/
 app/ios/Info.plist
 app/ios/KnowledgePress.entitlements
 app/ios/build/
+# The staged corpus (make ios-stage-corpus); only the placeholder is tracked.
+app/ios/Corpus/*
+!app/ios/Corpus/.gitkeep
 app/macos/KnowledgePress.xcodeproj/
 app/macos/Info.plist
 app/macos/KnowledgePress.entitlements
 app/macos/build/
+# The staged corpus (make mac-stage-corpus); only the placeholder is tracked.
+app/macos/Corpus/*
+!app/macos/Corpus/.gitkeep
 app/fm-repro/FMRepro.xcodeproj/
 app/fm-repro/Info.plist
 app/fm-repro/build/
