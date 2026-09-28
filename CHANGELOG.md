@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.26.0] - 2026-09-28
+
 ### Added
 
 - **A brand folder, `assets/brand-system/`,** built around the press seal:
@@ -89,13 +91,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   with 1,720 m of road instead of 1,947 m. Home sits on a spoke, facing the
   redwood. The tour laps the inner ring first, then the outer, with its turns
   rounded.
-
 - **The Mac app needs macOS 26**, the version its answer engines need and the
   store listing already states; it was 14.0.
 - **The Mac dev build is sandboxed**, as the App Store build must be, so a
   sandbox failure shows up locally. `make mac-dev` now bundles the corpus,
   since its Application Support is the app's container. The notarized
   Developer ID build is unchanged: unsandboxed, sharing `swift run`'s corpus.
+- **Settings: Delete all conversations.** The Settings row that deleted the
+  open conversation now deletes every saved conversation and the chat on
+  screen, after a confirmation. Deleting one conversation is still in the
+  chat toolbar and in the sidebar's swipe and context menus.
 
 ### Fixed
 
@@ -148,13 +153,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **iPad: the answer engine and corpus scope are back in Settings.** They
   were only in the sidebar, which portrait hides, so Settings on an iPad had
   no way to change them. The iPhone always had them; the iPad now matches.
-
-### Changed
-
-- **Settings: Delete all conversations.** The Settings row that deleted the
-  open conversation now deletes every saved conversation and the chat on
-  screen, after a confirmation. Deleting one conversation is still in the
-  chat toolbar and in the sidebar's swipe and context menus.
 
 ## [1.25.0] - 2026-09-27
 
