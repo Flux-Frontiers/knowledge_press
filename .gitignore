@@ -31,6 +31,9 @@ app/fm-repro/build/
 # Screenshots and test renders from checking the forest by hand.
 renders/tests/
 
+# Icon concept sketches; the chosen artwork lives in app/icon/.
+renders/icon-concepts/
+
 # KG artefacts. The snapshot manifests under .tscodekg/snapshots/ are the
 # tracked history; the graph and vector databases are rebuilt locally.
 .tscodekg/*
