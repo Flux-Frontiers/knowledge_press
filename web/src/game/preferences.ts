@@ -13,6 +13,8 @@ export type Preferences = {
   silent: boolean;
   /** Fog density; see FOG_SCALE. */
   fog: FogLevel;
+  /** Riding the ring, read each grove's summary aloud at its stop. */
+  narrate: boolean;
 };
 
 export type FogLevel = "clear" | "light" | "normal" | "heavy";
@@ -44,5 +46,6 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     stats: value?.stats === true,
     silent: value?.silent === true,
     fog: value?.fog && value.fog in FOG_SCALE ? value.fog : "normal",
+    narrate: value?.narrate === true,
   };
 }

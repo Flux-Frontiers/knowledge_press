@@ -3,6 +3,7 @@ import { growCorpusTree, type CorpusTree } from "./corpusTree";
 import { EXHIBITS, placeExhibits, type Exhibit } from "./exhibits";
 import { GROW_VERSION, cellKey3, emitBark, emitLeaves, growTree, type BarkBuffers, type GrownTree } from "./growTree";
 import { sunflower, wheelLayout } from "./math";
+import { groveNarration } from "./narration";
 import { SPECIES, speciesFor } from "./species";
 
 export const GENRE_PALETTE = [
@@ -26,6 +27,8 @@ export type Grove = {
   radius: number;
   color: string;
   bookCount: number;
+  /** What the guided tour says here: a summary of the grove's books. */
+  narration: string;
 };
 
 export type TreeSite = {
@@ -367,6 +370,7 @@ function buildForest(leafMultiplier: number): Forest {
       radius: bookOuter + 6,
       color,
       bookCount: books.length,
+      narration: groveNarration(books[0]?.genreLabel ?? genre, books),
     });
     const species = speciesFor(genre);
     const bark: BarkBuffers = { pos: [], normal: [], uv: [], index: [] };

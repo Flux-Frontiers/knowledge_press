@@ -146,6 +146,8 @@ export type GameStore = {
   cleanView: boolean;
   toggleCleanView: () => void;
   travelMode: TravelMode;
+  /** The grove the tour is pulled up at (its caption shows), or null. */
+  tourStop: string | null;
   jump: JumpPose | null;
   play: () => void;
   pause: (v?: boolean) => void;
@@ -177,6 +179,7 @@ export type GameStore = {
   openPlaque: (plaque: PlaqueText | null) => void;
   openReader: (slug: string | null) => void;
   setTravelMode: (m: TravelMode) => void;
+  setTourStop: (genre: string | null) => void;
   toggleCircuit: () => void;
   requestJump: (pose: JumpPose, toast?: string) => void;
   clearJump: () => void;
@@ -243,6 +246,7 @@ export const useGame = create<GameStore>((set, get) => ({
   cleanView: false,
   toggleCleanView: () => set({ cleanView: !get().cleanView }),
   travelMode: "free",
+  tourStop: null,
   jump: null,
   play: () => set({ playing: true, paused: false }),
   pause: (v) => {
@@ -318,6 +322,7 @@ export const useGame = create<GameStore>((set, get) => ({
   // Leaving the ring drops the grove it was pointing at, so the lantern trail goes with it.
   setTravelMode: (travelMode) =>
     set(travelMode === "free" && get().travelMode === "circuit" ? { travelMode, selectedGrove: null } : { travelMode }),
+  setTourStop: (tourStop) => { if (get().tourStop !== tourStop) set({ tourStop }); },
   toggleCircuit: () => {
     const next = get().travelMode === "circuit" ? "free" : "circuit";
     set({

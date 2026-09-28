@@ -5,7 +5,8 @@ import { treesNear, type Forest } from "./forest";
 import { resetInput, sampleActions } from "./input";
 import { clamp } from "./math";
 import { forwardOf, sim, stepVehicle, teleportSim } from "./sim";
-import { planTour, steerTour, tourState } from "./tour";
+import { hush, speak, speaking } from "./speech";
+import { planTour, steerTour, tourState, tourStop } from "./tour";
 import { useGame } from "./store";
 
 const camPos = new Vector3();
@@ -64,25 +65,40 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     }
 
     if (blocked) {
-      // Still keep camera on the cart while paused
+      // Still keep camera on the cart while paused; a pause or a panel ends the narration.
+      if (speaking()) hush();
     } else {
       const a = sampleActions();
       let throttle = a.throttle;
       let steer = a.steer;
       let tourBrake = false;
       const mode = useGame.getState().travelMode;
-      if (mode !== "circuit") tourState.tour = null;
+      const endTour = () => {
+        tourState.tour = null;
+        if (game.tourStop) {
+          game.setTourStop(null);
+          hush();
+        }
+      };
+      if (mode !== "circuit") endTour();
       else if (forest.ringPath.length > 1) {
         if (Math.abs(a.steer) > 0.38 || a.brake || a.throttle < 0) {
-          tourState.tour = null;
+          endTour();
           useGame.getState().setTravelMode("free");
           useGame.getState().setToast("Free drive");
         } else {
           tourState.tour ??= planTour(forest, sim.x, sim.z, sim.yaw);
-          const c = steerTour(tourState.tour, sim.x, sim.z, sim.yaw, sim.speed, dt);
+          const c = steerTour(tourState.tour, sim.x, sim.z, sim.yaw, sim.speed, dt, speaking());
           steer = c.steer;
           if (throttle === 0) throttle = c.throttle;
           tourBrake = c.brake;
+          // Pulled up at a grove: show its summary, and read it aloud if asked to.
+          const stop = tourStop(tourState.tour);
+          if (stop !== game.tourStop) {
+            game.setTourStop(stop);
+            const said = stop ? forest.groves.find((g) => g.genre === stop)?.narration : undefined;
+            if (said && preferences.narrate && !preferences.silent) speak(said);
+          }
           useGame.getState().selectGrove(c.genre);
         }
       }
