@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="The Knowledge Press app icon">
+  <rect width="1024" height="1024" fill="#151b29"/>
+  <circle cx="512" cy="512" r="347" fill="#237f59"/>
+  <circle cx="512" cy="512" r="313" fill="none" stroke="#f4f0dc" stroke-width="17"/>
+  <circle cx="512" cy="512" r="273" fill="#2dcc78"/>
+  <text x="512" y="686" fill="#151b29" text-anchor="middle"
+        font-family="Georgia, Times New Roman, serif" font-size="500" font-weight="bold">K</text>
+</svg>
