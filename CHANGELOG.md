@@ -13,6 +13,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A brand folder, `assets/brand-system/`,** built around the press seal:
+  the seal in full color and in one-color navy and cream, the name as a
+  wordmark, horizontal and stacked lockups for light and dark grounds, the
+  four colors in `colors.css`, and a README with the seal's construction,
+  clear space, minimum sizes and misuse. TRADEMARK.md already claimed
+  assets at that path; until now it did not exist here. The KP and the name
+  are set in Merriweather Bold, committed under `fonts/` with its SIL Open
+  Font License, and `build.py` traces them into every SVG in the folder and
+  into the app icon sources and the favicon, so all of them share one KP.
 - **`make icons`** re-renders every app icon PNG from the press-seal SVGs in
   `app/icon/`: the 1024 px master and its iOS and splash copies, the proof
   strip, and the ten macOS sizes. Its output is deterministic, so a run with
@@ -67,9 +76,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   hub is gone. The app icon on iOS and macOS, the splash and About screens,
   and the web app's favicon now show a seal: a KP ligature for The Knowledge
   Press, the K's serifs landing on the P's stem, set in a ringed green disc
-  like a printer's mark. The letters are Georgia Bold traced to outlines, so
-  the source SVGs in `app/icon/` render the same on any machine; the old
-  live-text K also ran past the green disc at its lower right.
+  like a printer's mark. The letters are Merriweather Bold, an openly
+  licensed serif, traced to outlines, so the source SVGs in `app/icon/`
+  render the same on any machine; the old live-text K, in Georgia, also ran
+  past the green disc at its lower right.
 - **The forest is a hub and spoke.** Groves stood on a golden-angle spiral at
   whatever distance they fitted, joined by roads routed around the trunks, so
   from above the roads wandered. Now the smaller groves stand outside a
