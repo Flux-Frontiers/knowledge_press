@@ -99,6 +99,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The web forest's README and FEATURES describe the forest as it is.**
+  They still described a Fibonacci annulus with one ring road, listed the sky
+  as next, and mapped 12 of the 43 source files. They now cover the
+  hub-and-spoke layout, the tour's stops and narration, species, diary
+  limbs, where the sky gets its location, the wind sculptures and the
+  reader, and FEATURES moves the sky to Shipped and weather to Next.
 - **The forest credits the right authors.** The web catalog is regenerated
   from gutenberg_kg's corrected metadata: The Count of Monte Cristo is by
   Alexandre Dumas and Auguste Maquet rather than Maquet alone, The Federalist
