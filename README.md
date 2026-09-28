@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/brand-system/lockup-horizontal-paper.svg">
+    <img src="assets/brand-system/lockup-horizontal-ink.svg" alt="The Knowledge Press" width="560">
+  </picture>
+</p>
+
 [![Version](https://img.shields.io/badge/version-1.26.0-blue.svg)](https://github.com/Flux-Frontiers/knowledge_press/releases)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22969736-blue.svg)](https://doi.org/10.5281/zenodo.22969736)
 [![License: Elastic-2.0](https://img.shields.io/badge/License-Elastic%202.0%20%7C%20app%20proprietary-blue.svg)](LICENSE)
