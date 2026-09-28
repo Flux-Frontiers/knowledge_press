@@ -56,6 +56,9 @@ export function PauseOverlay() {
             <option value="high">High · 1 in 2</option><option value="ultra">Ultra · every chunk</option>
           </select>
         </label>
+        <label className="flex items-center justify-between gap-4">Read each grove aloud on the ring
+          <input type="checkbox" checked={prefs.narrate} onChange={(e) => setPreferences({ narrate: e.target.checked })} />
+        </label>
         <label className="flex items-center justify-between gap-4">Silent mode · no pop-up cards
           <input type="checkbox" checked={prefs.silent} onChange={(e) => setPreferences({ silent: e.target.checked })} />
         </label>

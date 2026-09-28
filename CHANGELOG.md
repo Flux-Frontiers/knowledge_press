@@ -17,7 +17,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   app for a simulator, installs it with the corpus, sets a dark 9:41 status
   bar and launches it; `make ios-sim-screenshot` writes a screenshot at the
   exact size App Store Connect wants for that device. `SIM` names the
-  simulator, `SIM_APPEARANCE` the appearance.
+  simulator, `SIM_APPEARANCE` the appearance. `make ios-sim-kill` shuts every
+  booted simulator down afterward; left running, each one is a full iOS
+  userland that outlives Xcode and holds tens of GB.
 - **`docs/APP_STORE_LISTING.md`** holds the store listing text: name,
   subtitle, promotional text, description, keywords, review notes and URLs.
 - **The Mac app ships with the corpus.** `make mac-build` stages the exported
@@ -40,6 +42,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   up at each grove's stop, turns to face its signpost, holds there for five
   seconds, then turns back to the road and carries on. Any steering, braking
   or reversing still ends the tour.
+- **Grove narration on the tour.** At each stop a caption summarizes the
+  grove: how many books, its leading authors, its longest book, and for the
+  diaries the years their entries span. It is generated from the catalog, so
+  a new book changes it with nothing written by hand. A new setting, "Read
+  each grove aloud on the ring" (off by default), speaks it with the
+  browser's speech synthesis, which on Apple devices is the system's own
+  voices; the cart waits at the sign until the sentence ends. Silent mode
+  hides the caption and mutes the voice.
 
 ### Changed
 

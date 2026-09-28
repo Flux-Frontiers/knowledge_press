@@ -44,7 +44,7 @@
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill
+.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -174,6 +174,7 @@ ios-deploy: ios-install-corpus ios-verify-corpus ios-launch
 #   make ios-sim SIM="iPhone 17 Pro Max"      # 6.9" iPhone slot
 #   make ios-sim SIM="iPad Pro 13-inch (M5)"  # 13" iPad slot
 #   make ios-sim-screenshot                   # -> screenshots/<SIM>-<time>.png
+#   make ios-sim-kill                         # shut every booted simulator down
 #   SIM_APPEARANCE=light for a light-mode set; dark is the default.
 # ---------------------------------------------------------------------------
 
@@ -218,6 +219,18 @@ ios-sim-screenshot:
 	@mkdir -p screenshots
 	@out="screenshots/$$(echo '$(SIM)' | tr ' ' '-')-$$(date +%H%M%S).png"; \
 	  xcrun simctl io "$(SIM)" screenshot "$$out" >/dev/null 2>&1 && echo "$$out"
+
+# ios-sim boots a simulator and nothing shuts it down again: it outlives
+# Xcode, the Simulator or DeviceHub window and the shell that ran make, and
+# each one is a full iOS userland. The two screenshot devices left booted
+# overnight held 43 GB between them and pinned swap. Closing the window does
+# not stop the device; this does. Shuts down every booted simulator, not only
+# $(SIM). Their installed apps and corpora survive a shutdown.
+ios-sim-kill:
+	@booted=$$(xcrun simctl list devices booted | sed -n 's/^ *\(.*\) (\([0-9A-F-]*\)) (Booted).*/\1/p'); \
+	if [ -z "$$booted" ]; then echo "no simulators booted"; exit 0; fi; \
+	echo "$$booted"; \
+	xcrun simctl shutdown all && echo "shut down."
 
 # App build number (CFBundleVersion) for every xcodebuild below: the git commit
 # count, which only grows, so each App Store Connect upload outranks the last

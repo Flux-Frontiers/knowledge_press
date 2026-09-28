@@ -165,12 +165,20 @@ function turnTo(yaw: number, target: number, tol: number): { steer: number; done
   return { steer: clamp(err * 2.5, -1, 1), done: Math.abs(err) < tol };
 }
 
+/** The grove the cart is pulled up at, facing or about to face its sign; null while driving. */
+export function tourStop(t: Tour): string | null {
+  if (!t.dwell || t.dwell.phase === "brake") return null;
+  return t.stops[t.next]?.genre ?? null;
+}
+
 /**
  * Advance progress and return the controls that hold the cart to the route.
  *
  * :param dt: Seconds since the last call, for the hold at each grove.
+ * :param busy: The grove is still being narrated; the hold lasts at least
+ *   DWELL seconds and until this is false.
  */
-export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: number, dt: number): { steer: number; throttle: number; brake: boolean; genre: string } {
+export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: number, dt: number, busy = false): { steer: number; throttle: number; brake: boolean; genre: string } {
   const stop = t.stops[t.next];
   if (t.dwell && stop) {
     const d = t.dwell;
@@ -186,7 +194,7 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
     }
     if (d.phase === "hold") {
       d.left -= dt;
-      if (d.left <= 0) d.phase = "back";
+      if (d.left <= 0 && !busy) d.phase = "back";
       return { steer: 0, ...hold };
     }
     const [tx, tz] = t.pts[along(t, t.i, 5)]!;
