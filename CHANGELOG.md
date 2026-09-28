@@ -36,8 +36,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Ask again.** Every question in a chat has an **Ask again** button (and a
   context-menu item) that asks it once more, in the same corpus scope, with
   the answer engine and search settings as they are now.
+- **The forest tour stops at every grove.** Riding the ring, the cart pulls
+  up at each grove's stop, turns to face its signpost, holds there for five
+  seconds, then turns back to the road and carries on. Any steering, braking
+  or reversing still ends the tour.
 
 ### Changed
+
+- **The forest is a hub and spoke.** Groves stood on a golden-angle spiral at
+  whatever distance they fitted, joined by roads routed around the trunks, so
+  from above the roads wandered. Now the smaller groves stand outside a
+  circular inner ring road and the larger ones outside an outer ring road,
+  with six straight spokes from the redwood's plaza. The split between the
+  tiers is whichever gives the smallest world: 284 m across instead of 301 m,
+  with 1,720 m of road instead of 1,947 m. Home sits on a spoke, facing the
+  redwood. The tour laps the inner ring first, then the outer, with its turns
+  rounded.
 
 - **The Mac app needs macOS 26**, the version its answer engines need and the
   store listing already states; it was 14.0.

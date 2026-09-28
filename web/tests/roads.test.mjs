@@ -4,20 +4,31 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 globalThis.window ??= { localStorage: { getItem: () => null, setItem() {} } };
 
-test("the ring is one closed road through every grove stop", () => {
-  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+test("hub and spoke: circular ring roads through every grove stop, straight spokes from the hub", () => {
+  const { getForest, HUB_PLAZA_R } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
   const f = getForest();
   const rings = f.roadLines.filter((l) => l.kind === "ring");
-  assert.equal(rings.length, 1);
-  const ring = rings[0];
-  assert.ok(ring.closed);
-  for (const wp of f.circuit) {
-    const d = Math.min(...ring.pts.map(([x, z]) => Math.hypot(x - wp.x, z - wp.z)));
-    assert.ok(d < 0.01, `ring misses the ${wp.genre} stop by ${d.toFixed(2)} m`);
+  assert.ok(rings.length >= 1 && rings.length <= 2, `${rings.length} rings`);
+  for (const ring of rings) {
+    assert.ok(ring.closed);
+    const r = ring.pts.map(([x, z]) => Math.hypot(x, z));
+    assert.ok(Math.max(...r) - Math.min(...r) < 1e-6, "a ring road is a circle round the hub");
   }
-  const n = ring.pts.length;
-  // The tour follows the same samples and names the grove it is heading for.
-  assert.equal(f.ringPath.length, n);
+  // Every stop is a sample of one ring, so the ring passes through it.
+  for (const wp of f.circuit) {
+    const d = Math.min(...rings.flatMap((ring) => ring.pts.map(([x, z]) => Math.hypot(x - wp.x, z - wp.z))));
+    assert.ok(d < 0.01, `no ring reaches the ${wp.genre} stop (${d.toFixed(2)} m)`);
+  }
+  const outer = Math.max(...rings.map((ring) => Math.hypot(...ring.pts[0])));
+  const spokes = f.roadLines.filter((l) => l.kind === "spoke");
+  assert.ok(spokes.length >= 3 && spokes.length <= 6, `${spokes.length} spokes`);
+  for (const s of spokes) {
+    const [x0, z0] = s.pts[0], [x1, z1] = s.pts[s.pts.length - 1];
+    assert.ok(Math.abs(Math.hypot(x0, z0) - (HUB_PLAZA_R - 1)) < 1e-6, "a spoke starts at the hub plaza");
+    assert.ok(Math.abs(Math.hypot(x1, z1) - outer) < 1e-6, "a spoke runs out to the outer ring");
+    assert.ok(Math.abs(x0 * z1 - z0 * x1) < 1e-6 * Math.hypot(x1, z1), "a spoke runs straight out from the hub");
+  }
+  // The tour loop names the grove it is heading for at every sample.
   const genres = new Set(f.groves.map((g) => g.genre));
   assert.ok(f.ringPath.every((wp) => genres.has(wp.genre)));
 });
@@ -41,10 +52,11 @@ test("compact layout: groves never overlap, trees keep driving room, the hub sta
   const f = getForest();
   for (let i = 0; i < f.groves.length; i++) {
     const a = f.groves[i];
-    assert.ok(Math.hypot(a.x, a.z) - a.radius >= 22 - 1e-6, `${a.genre} crowds the hub`);
+    assert.ok(Math.hypot(a.x, a.z) - a.radius >= 18 - 1e-6, `${a.genre} crowds the hub`);
     for (let j = i + 1; j < f.groves.length; j++) {
       const b = f.groves[j];
-      assert.ok(Math.hypot(a.x - b.x, a.z - b.z) >= a.radius + b.radius + 10 - 1e-6, `${a.genre} and ${b.genre} overlap`);
+      // Groves in one tier keep 8 m apart; across tiers a ring road runs between them.
+      assert.ok(Math.hypot(a.x - b.x, a.z - b.z) >= a.radius + b.radius + 2.8 - 1e-6, `${a.genre} and ${b.genre} overlap`);
     }
   }
   for (let i = 0; i < f.trees.length; i++) {

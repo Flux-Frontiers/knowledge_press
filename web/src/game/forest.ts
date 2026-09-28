@@ -2,8 +2,7 @@ import { BOOKS, type Book } from "./catalog";
 import { growCorpusTree, type CorpusTree } from "./corpusTree";
 import { EXHIBITS, placeExhibits, type Exhibit } from "./exhibits";
 import { GROW_VERSION, cellKey3, emitBark, emitLeaves, growTree, type BarkBuffers, type GrownTree } from "./growTree";
-import { loopOrder, packAroundHub, sunflower } from "./math";
-import { routeNetwork } from "./routing";
+import { sunflower, wheelLayout } from "./math";
 import { SPECIES, speciesFor } from "./species";
 
 export const GENRE_PALETTE = [
@@ -65,8 +64,21 @@ export type Waypoint = {
 
 /** The hub: a paved plaza around the corpus redwood (the cart collides with its root flare). */
 export const HUB_PLAZA_R = 10;
-/** The ring keeps this far from the hub's centre (inside the nearest grove stops, ~20.6 m out). */
+/** The inner ring road keeps at least this far from the hub's centre. */
 const HUB_CLEAR = 18;
+/** A ring road's centreline to the edge of the groves outside it; a grove's stop is on the ring. */
+const GROVE_SETBACK = 1.4;
+/** Least clear ground between two groves. */
+const GROVE_GAP = 8;
+/** Least clear ground from a spoke's centreline to a grove it passes between. */
+const SPOKE_LANE = 2;
+/** Ring roads are sampled about this far apart. */
+const ROAD_STEP = 2;
+/** The most spokes from the hub. */
+const MAX_SPOKES = 6;
+/** Paved disc where a spoke meets a ring; the tour's turn there is rounded inside it. */
+const JUNCTION_R = 6;
+const TOUR_TURN_R = 5;
 /** Bearing of the redwood's plaque from the hub; home looks back along it. */
 export const HUB_PLAQUE_DIR = Math.atan2(4.6, -4.2);
 export const HUB_PLAQUE_DIST = 7.2;
@@ -103,11 +115,14 @@ export type Forest = {
   roadLines: RoadLine[];
   /** Road junctions (ring stops and the hub), each paved with a disc. */
   plazas: { x: number; z: number; r: number }[];
-  /** One stop per grove, on the ring. */
+  /** One stop per grove, on its tier's ring, in the order the tour loop reaches them. */
   circuit: Waypoint[];
   /** Each grove's signpost: beside its stop, off the road on the grove's side, facing the road. */
   signs: { genre: string; x: number; z: number; yaw: number }[];
-  /** The ring road sampled every ~2 m, for the guided tour to follow. */
+  /**
+   * The guided tour's loop, sampled every ~2 m: round the inner ring, out along
+   * the first spoke, round the outer ring, and back in. With one tier, the ring.
+   */
   ringPath: Waypoint[];
   /**
    * One render chunk per grove: its bark mesh and its leaf range. A grove is one
@@ -160,7 +175,7 @@ export function groveApproach(g: Grove): Waypoint {
   const dist = Math.hypot(g.x, g.z) || 1;
   const ux = g.x / dist;
   const uz = g.z / dist;
-  const stand = Math.max(7, dist - g.radius - 1.4);
+  const stand = Math.max(7, dist - g.radius - GROVE_SETBACK);
   const x = ux * stand;
   const z = uz * stand;
   const yaw = Math.atan2(-ux, -uz);
@@ -244,10 +259,6 @@ function shyLayout(grown: GrownTree[], inner: number): { pts: { x: number; z: nu
   return { pts: out, outer: Math.max(0, ...out.map((p) => Math.hypot(p.x, p.z))) };
 }
 
-/**
- * Does the ring double back at this stop (arrive and leave within 60 degrees of
- * each other)? Such a stop gets a wide turning circle instead of a junction disc.
- */
 /** A signpost's centre from any road centreline: half the widest road (1.7 m), the cart (1.05 m), and a little. */
 const SIGN_ROAD_CLEAR = 3;
 /** From any trunk surface: the board is 3 m wide. */
@@ -259,17 +270,52 @@ function segDistance(x: number, z: number, s: RoadSeg): number {
   return Math.hypot(x - s.ax - dx * t, z - s.az - dz * t);
 }
 
-function turnsBack(ring: [number, number][], wp: { x: number; z: number }): boolean {
-  const n = ring.length;
-  let k = 0, best = Infinity;
-  ring.forEach(([x, z], i) => {
-    const d = Math.hypot(x - wp.x, z - wp.z);
-    if (d < best) { best = d; k = i; }
+/**
+ * Round every sharp turn of a closed loop: the samples within `r` of the
+ * corner give way to a quadratic curve from the point `r` before it to the
+ * point `r` after, which never strays more than `r` from the corner. Stops
+ * sit on the rings, well away from any turn, so they stay loop samples.
+ */
+function roundTurns(path: [number, number][], r: number): [number, number][] {
+  const loop = path.filter((p, k) => {
+    const q = path[(k - 1 + path.length) % path.length]!;
+    return Math.hypot(p[0] - q[0], p[1] - q[1]) > 1e-6;
   });
-  const [ax, az] = ring[(k - 3 + n) % n]!, [bx, bz] = ring[k]!, [cx, cz] = ring[(k + 3) % n]!;
-  const inx = bx - ax, inz = bz - az, outx = cx - bx, outz = cz - bz;
-  const cos = (inx * outx + inz * outz) / ((Math.hypot(inx, inz) * Math.hypot(outx, outz)) || 1);
-  return cos < -0.5;
+  const n = loop.length;
+  const out: [number, number][] = [];
+  const skip = new Set<number>();
+  const curves = new Map<number, [number, number][]>();
+  for (let k = 0; k < n; k++) {
+    const [px, pz] = loop[(k - 1 + n) % n]!, [cx, cz] = loop[k]!, [nx, nz] = loop[(k + 1) % n]!;
+    const ux = cx - px, uz = cz - pz, vx = nx - cx, vz = nz - cz;
+    const turn = Math.acos(Math.max(-1, Math.min(1, (ux * vx + uz * vz) / ((Math.hypot(ux, uz) * Math.hypot(vx, vz)) || 1))));
+    if (turn < 0.5) continue;
+    const lu = Math.hypot(ux, uz) || 1, lv = Math.hypot(vx, vz) || 1;
+    const a: [number, number] = [cx - (ux / lu) * r, cz - (uz / lu) * r];
+    const b: [number, number] = [cx + (vx / lv) * r, cz + (vz / lv) * r];
+    for (let j = 1; j < n / 2; j++) {
+      const q = loop[(k - j + n) % n]!;
+      if (Math.hypot(q[0] - cx, q[1] - cz) >= r) break;
+      skip.add((k - j + n) % n);
+    }
+    for (let j = 1; j < n / 2; j++) {
+      const q = loop[(k + j) % n]!;
+      if (Math.hypot(q[0] - cx, q[1] - cz) >= r) break;
+      skip.add((k + j) % n);
+    }
+    skip.add(k);
+    const curve: [number, number][] = [];
+    for (let s = 0; s <= 6; s++) {
+      const t = s / 6;
+      curve.push([(1 - t) ** 2 * a[0] + 2 * t * (1 - t) * cx + t * t * b[0], (1 - t) ** 2 * a[1] + 2 * t * (1 - t) * cz + t * t * b[1]]);
+    }
+    curves.set(k, curve);
+  }
+  for (let k = 0; k < n; k++) {
+    if (curves.has(k)) out.push(...curves.get(k)!);
+    else if (!skip.has(k)) out.push(loop[k]!);
+  }
+  return out.filter((p, k) => k === 0 || Math.hypot(p[0] - out[k - 1]![0], p[1] - out[k - 1]![1]) > 1e-6);
 }
 
 function buildForest(leafMultiplier: number): Forest {
@@ -281,15 +327,21 @@ function buildForest(leafMultiplier: number): Forest {
   }
   const genres = [...byGenre.keys()];
   const nGenres = genres.length;
-  // Compact layout: trees packed as tight as their crowns allow (shyLayout),
-  // and groves packed as close to the hub as they fit, GROVE_GAP apart for roads.
-  const GROVE_GAP = 10;
+  // Trees packed as tight as their crowns allow (shyLayout); groves on a
+  // hub-and-spoke wheel around the redwood (wheelLayout).
   const bookInner = 6.5;
   const grownBy = genres.map((g) => byGenre.get(g)!.map((book) =>
     growTree({ slug: book.slug, genre: book.genre, nChunks: book.chunks, leafScale: leafMultiplier, periods: book.periods })));
   const layouts = grownBy.map((g) => shyLayout(g, bookInner));
   const groveRadius = (outer: number) => Math.max(14, outer) + 6;
-  const groveCenters = packAroundHub(layouts.map((l) => groveRadius(l.outer)), 22, GROVE_GAP);
+  const wheel = wheelLayout(layouts.map((l) => groveRadius(l.outer)), {
+    hub: HUB_CLEAR, setback: GROVE_SETBACK, gap: GROVE_GAP, lane: SPOKE_LANE, spokes: MAX_SPOKES,
+  });
+  // Turn the wheel so a spoke runs out behind home: the drive starts on the road.
+  const turn = HUB_PLAQUE_DIR - (wheel.spokes[0] ?? HUB_PLAQUE_DIR);
+  const cos = Math.cos(turn), sin = Math.sin(turn);
+  const groveCenters = wheel.centers.map(({ x, z }) => ({ x: x * cos - z * sin, z: x * sin + z * cos }));
+  wheel.spokes = wheel.spokes.map((a) => Math.atan2(Math.sin(a + turn), Math.cos(a + turn)));
 
   const groves: Grove[] = [];
   const trees: TreeSite[] = [];
@@ -378,52 +430,37 @@ function buildForest(leafMultiplier: number): Forest {
     else grid.set(k, [i]);
   });
 
-  let worldRadius = 80;
-  for (const g of groves) {
-    const d = Math.hypot(g.x, g.z) + g.radius;
-    if (d > worldRadius) worldRadius = d;
-  }
+  const worldRadius = Math.max(80, wheel.outer);
 
-  // The ring visits the stops as one short loop that never crosses itself.
-  // Angle order alone zigzags between near and far groves, doubling back at
-  // every stop, because the groves sit at very different distances from the hub.
-  const byAngle = groves
+  // Roads: a circular ring road per tier, each grove's stop on its tier's
+  // ring at the grove's bearing, and straight spokes from the hub plaza out
+  // to the last ring through the gaps in the inner tier.
+  const stopsOf = wheel.rings.map((_, t) => groves
+    .filter((_, gi) => wheel.tier[gi] === t)
     .map((g) => groveApproach(g))
-    .sort((a, b) => Math.atan2(a.z, a.x) - Math.atan2(b.z, b.x));
-  // Legs that would cut across the hub are costed as the walk around it.
-  const circuit = loopOrder(byAngle, byAngle.map((_, i) => i), HUB_CLEAR).map((i) => byAngle[i]!);
-  // A few spokes, spread around the hub, instead of one to every grove:
-  // nearest stops first, each at least SPOKE_SPREAD from the spokes already chosen.
-  const SPOKE_SPREAD = Math.PI / 3.2;
-  const spokeTo: number[] = [];
-  for (const i of circuit.map((_, i) => i).sort((a, b) => Math.hypot(circuit[a]!.x, circuit[a]!.z) - Math.hypot(circuit[b]!.x, circuit[b]!.z))) {
-    const a = Math.atan2(circuit[i]!.z, circuit[i]!.x);
-    if (spokeTo.every((j) => Math.abs(Math.atan2(Math.sin(a - Math.atan2(circuit[j]!.z, circuit[j]!.x)), Math.cos(a - Math.atan2(circuit[j]!.z, circuit[j]!.x)))) >= SPOKE_SPREAD)) spokeTo.push(i);
-  }
-
-  // Roads are routed around the trunks (routing.ts). The centreline keeps
-  // ROAD_CLEARANCE from every trunk surface. The floor is half the widest road
-  // (1.7 m) plus the cart's radius (1.05 m), so nothing on a road can pin the
-  // cart; 6.5 m also keeps every road outside READ_RANGE of a trunk, so a book's
-  // card never pops up on a slow stretch of road.
-  const ROAD_CLEARANCE = 6.5;
-  const fir = SPECIES.find((s) => s.name === "fir")!;
-  const corpusTree = growCorpusTree(trees, fir.barkAspect);
-  const net = routeNetwork({
-    hubR: HUB_PLAZA_R - 1,
-    ringClear: HUB_CLEAR,
-    stops: circuit.map((wp) => [wp.x, wp.z] as [number, number]),
-    obstacles: [
-      ...trees.map((t) => ({ x: t.x, z: t.z, r: t.trunkRadius })),
-      { x: 0, z: 0, r: corpusTree.baseRadius },
-    ],
-    worldR: Math.max(...groves.map((g) => Math.hypot(g.x, g.z) + g.radius)) + 20,
-    need: ROAD_CLEARANCE,
-    spokeTo,
-  });
-  const roadLines: RoadLine[] = net.spokes.map((pts) => ({ kind: "spoke", pts, closed: false }));
-  const ring = { pts: net.ring.pts, span: net.ring.leg };
-  roadLines.push({ kind: "ring", pts: ring.pts, closed: true });
+    .sort((a, b) => Math.atan2(a.z, a.x) - Math.atan2(b.z, b.x)));
+  const tourSpoke = wheel.spokes[0] ?? 0;
+  /** One lap of ring t from bearing `from`, counter-clockwise, with every stop and spoke as a sample. */
+  const lap = (t: number, from: number): [number, number][] => {
+    const R = wheel.rings[t]!;
+    const turn = (a: number) => ((a - from) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+    const marks = [...stopsOf[t]!.map((wp) => Math.atan2(wp.z, wp.x)), ...wheel.spokes].map(turn);
+    const steps = Math.ceil((2 * Math.PI * R) / ROAD_STEP);
+    const at = [...new Set([...Array.from({ length: steps }, (_, k) => (2 * Math.PI * k) / steps), ...marks])]
+      .sort((a, b) => a - b)
+      .filter((a, k, arr) => k === 0 || marks.includes(a) || a - arr[k - 1]! > 0.25 / R);
+    return at.map((a) => [R * Math.cos(from + a), R * Math.sin(from + a)] as [number, number]);
+  };
+  const spokeLine = (a: number, r0: number, r1: number): [number, number][] => {
+    const steps = Math.max(1, Math.ceil(Math.abs(r1 - r0) / ROAD_STEP));
+    return Array.from({ length: steps + 1 }, (_, k) => {
+      const r = r0 + ((r1 - r0) * k) / steps;
+      return [r * Math.cos(a), r * Math.sin(a)] as [number, number];
+    });
+  };
+  const lastRing = wheel.rings[wheel.rings.length - 1]!;
+  const roadLines: RoadLine[] = wheel.spokes.map((a) => ({ kind: "spoke", pts: spokeLine(a, HUB_PLAZA_R - 1, lastRing), closed: false }));
+  wheel.rings.forEach((_, t) => roadLines.push({ kind: "ring", pts: lap(t, tourSpoke), closed: true }));
   const roads: RoadSeg[] = [];
   for (const line of roadLines) {
     const n = line.pts.length;
@@ -433,21 +470,46 @@ function buildForest(leafMultiplier: number): Forest {
       roads.push({ ax, az, bx, bz, kind: line.kind });
     }
   }
+
+  // The tour loop: each ring in turn, joined by the first spoke, out and back.
+  const loop: [number, number][] = [];
+  wheel.rings.forEach((R, t) => {
+    loop.push(...lap(t, tourSpoke));
+    if (t + 1 < wheel.rings.length) loop.push(...spokeLine(tourSpoke, R, wheel.rings[t + 1]!).slice(0, -1));
+  });
+  for (let t = wheel.rings.length - 1; t > 0; t--) loop.push(...spokeLine(tourSpoke, wheel.rings[t]!, wheel.rings[t - 1]!).slice(0, -1));
+  const tourPts = roundTurns(loop, TOUR_TURN_R);
+  // The stops in the order the loop reaches them, each landing on a loop sample.
+  const stopIndex = new Map<Waypoint, number>();
+  let from = 0;
+  for (const tierStops of stopsOf) {
+    for (const wp of [...tierStops].sort((a, b) => {
+      const at = (w: Waypoint) => tourPts.findIndex((p, k) => k >= from && Math.hypot(p[0] - w.x, p[1] - w.z) < 1e-6);
+      return at(a) - at(b);
+    })) {
+      const k = tourPts.findIndex((p, kk) => kk >= from && Math.hypot(p[0] - wp.x, p[1] - wp.z) < 1e-6);
+      stopIndex.set(wp, k);
+    }
+    from = Math.max(...tierStops.map((wp) => stopIndex.get(wp)!));
+  }
+  const circuit = [...stopIndex.entries()].sort((a, b) => a[1] - b[1]).map(([wp]) => wp);
+
+  const corpusTree = growCorpusTree(trees, SPECIES.find((s) => s.name === "fir")!.barkAspect);
   const exhibits = placeExhibits({ specs: EXHIBITS, roadLines, trees, worldRadius });
-  const stopR = circuit.map((wp) => (turnsBack(ring.pts, wp) ? 6 : 4));
+  const STOP_R = 4;
   const plazas = [
     { x: 0, z: 0, r: HUB_PLAZA_R },
-    ...circuit.map((wp, i) => ({ x: wp.x, z: wp.z, r: stopR[i]! })),
+    ...circuit.map((wp) => ({ x: wp.x, z: wp.z, r: STOP_R })),
+    // Where a spoke crosses a ring.
+    ...wheel.spokes.flatMap((a) => wheel.rings.map((R) => ({ x: R * Math.cos(a), z: R * Math.sin(a), r: JUNCTION_R }))),
     ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.plazaR })),
   ];
-  // Signposts used to stand on the ring beside the stop, where the cart ran them
-  // over. Each now stands just off the stop's plaza, clear of every road (a
-  // hairpin stop has road on both sides) and trunk, as near the grove's bearing
-  // as it can, facing back to the stop.
-  const signs = circuit.map((wp, i) => {
+  // Each signpost stands just off its stop's plaza, clear of every road and
+  // trunk, as near the grove's bearing as it can, facing back to the stop.
+  const signs = circuit.map((wp) => {
     const g = groves.find((gr) => gr.genre === wp.genre)!;
     const toward = Math.atan2(g.z - wp.z, g.x - wp.x);
-    for (let d = stopR[i]! + 1.5; d <= stopR[i]! + 9; d += 0.5) {
+    for (let d = STOP_R + 1.5; d <= STOP_R + 9; d += 0.5) {
       let best: { x: number; z: number } | null = null;
       for (let k = 0; k < 36; k++) {
         const a = toward + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (Math.PI / 18);
@@ -462,12 +524,21 @@ function buildForest(leafMultiplier: number): Forest {
     }
     return { genre: wp.genre, x: wp.x, z: wp.z, yaw: wp.yaw };
   });
-  // Each ring sample carries the grove whose stop comes next, so the tour still
+  // Each loop sample carries the grove whose stop comes next, so the tour
   // lights the right signpost and trail.
-  const ringPath: Waypoint[] = ring.pts.map(([x, z], i) => {
-    const [nx, nz] = ring.pts[(i + 1) % ring.pts.length]!;
-    const wp = circuit[(ring.span[i]! + 1) % circuit.length]!;
-    return { x, z, yaw: Math.atan2(-(nx - x), -(nz - z)), genre: wp.genre, label: wp.label };
+  const nextGenre: string[] = new Array(tourPts.length);
+  const stopAt = new Map([...stopIndex.entries()].map(([wp, k]) => [k, wp.genre]));
+  let upcoming = circuit[0]!.genre;
+  for (let pass = 0; pass < 2; pass++) {
+    for (let k = tourPts.length - 1; k >= 0; k--) {
+      upcoming = stopAt.get(k) ?? upcoming;
+      nextGenre[k] = upcoming;
+    }
+  }
+  const labelOf = new Map(groves.map((g) => [g.genre, g.label]));
+  const ringPath: Waypoint[] = tourPts.map(([x, z], i) => {
+    const [nx, nz] = tourPts[(i + 1) % tourPts.length]!;
+    return { x, z, yaw: Math.atan2(-(nx - x), -(nz - z)), genre: nextGenre[i]!, label: labelOf.get(nextGenre[i]!)! };
   });
 
   return {

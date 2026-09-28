@@ -44,89 +44,162 @@ export function sunflower(n: number, inner: number, spacing: number): { pts: { x
 }
 
 /**
- * Pack circles of the given radii around a clear hub: each goes on the golden
- * angle at the smallest distance that keeps `gap` from the hub and every
- * circle already placed.
+ * A hub-and-spoke wheel of groves. Groves stand in one or two tiers around a
+ * clear hub, each tier outside its own circular ring road: a grove's inner
+ * edge sits `setback` beyond its tier's ring, so the road passes every grove
+ * in the tier at the same distance. The smaller groves take the inner tier,
+ * where a ring is short; the tier split is whichever gives the smallest world.
+ * Within a tier big and small groves alternate (small ones stand nearer the
+ * ring, so a big neighbour needs less angle) and any spare angle is shared
+ * evenly. Spokes run straight from the hub out to the last ring, through the
+ * gaps between inner-tier groves that leave a `lane` of clearance on both sides,
+ * at most `spokes` of them, as evenly spread as the gaps allow.
+ *
+ * :param radii: Grove radii, in the caller's grove order.
+ * :param opts: `hub`, the least radius of the first ring; `setback`, ring road
+ *   to grove edge; `gap`, least clear distance between two groves; `lane`,
+ *   least clear distance from a spoke's centreline to a grove edge; `spokes`,
+ *   the most spokes.
+ * :returns: Each grove's centre and tier, each tier's ring radius, the spoke
+ *   bearings (radians), and the world radius (the outermost grove edge).
  */
-export function packAroundHub(radii: number[], hub: number, gap: number): { x: number; z: number }[] {
-  const golden = Math.PI * (3 - Math.sqrt(5));
-  const placed: { x: number; z: number; r: number }[] = [];
-  for (let i = 0; i < radii.length; i++) {
-    const r = radii[i]!;
-    // A NaN radius never fits anywhere and would spin forever.
-    if (!Number.isFinite(r)) throw new Error(`packAroundHub: radius ${i} is ${r}`);
-    const a = i * golden;
-    let d = hub + r;
-    for (;;) {
-      const x = d * Math.cos(a), z = d * Math.sin(a);
-      if (placed.every((p) => Math.hypot(p.x - x, p.z - z) >= p.r + r + gap)) {
-        placed.push({ x, z, r });
-        break;
+export function wheelLayout(
+  radii: number[],
+  opts: { hub: number; setback: number; gap: number; lane: number; spokes: number },
+): { centers: { x: number; z: number }[]; tier: number[]; rings: number[]; spokes: number[]; outer: number } {
+  const { hub, setback, gap, lane } = opts;
+  radii.forEach((r, i) => {
+    if (!Number.isFinite(r) || r <= 0) throw new Error(`wheelLayout: radius ${i} is ${r}`);
+  });
+  const n = radii.length;
+  // Angle between neighbours whose inner edges both sit `setback` outside ring R.
+  const sep = (R: number, a: number, b: number) => {
+    const ca = R + setback + a, cb = R + setback + b, d = a + b + gap;
+    return Math.acos(clamp((ca * ca + cb * cb - d * d) / (2 * ca * cb), -1, 1));
+  };
+  // Big, small, next big, next small ...; ties by grove order so the layout is stable.
+  const alternate = (idx: number[]) => {
+    const s = [...idx].sort((a, b) => radii[b]! - radii[a]! || a - b);
+    const out: number[] = [];
+    while (s.length) {
+      out.push(s.shift()!);
+      if (s.length) out.push(s.pop()!);
+    }
+    return out;
+  };
+  const place = (order: number[], R: number): number[] | null => {
+    const k = order.length;
+    if (k === 1) return [0];
+    const gaps = order.map((g, i) => sep(R, radii[g]!, radii[order[(i + 1) % k]!]!));
+    const slack = 2 * Math.PI - gaps.reduce((a, b) => a + b, 0);
+    if (slack < 0) return null;
+    const ang: number[] = [0];
+    for (let i = 1; i < k; i++) ang.push(ang[i - 1]! + gaps[i - 1]! + slack / k);
+    const at = (i: number) => {
+      const c = R + setback + radii[order[i]!]!;
+      return { x: c * Math.cos(ang[i]!), z: c * Math.sin(ang[i]!) };
+    };
+    // Neighbours are spaced by construction; check every other pair too.
+    for (let i = 0; i < k; i++) for (let j = i + 1; j < k; j++) {
+      const a = at(i), b = at(j);
+      if (Math.hypot(a.x - b.x, a.z - b.z) < radii[order[i]!]! + radii[order[j]!]! + gap - 1e-6) return null;
+    }
+    return ang;
+  };
+  // The least ring radius, at or above `least`, that fits the tier.
+  const fit = (order: number[], least: number) => {
+    let lo = least, hi = least;
+    while (!place(order, hi)) hi = hi * 2 + 1;
+    if (hi === least) return least;
+    for (let it = 0; it < 40; it++) {
+      const mid = (lo + hi) / 2;
+      if (place(order, mid)) hi = mid; else lo = mid;
+    }
+    return hi;
+  };
+  const bySize = [...radii.keys()].sort((a, b) => radii[a]! - radii[b]! || a - b);
+  let best: { tiers: number[][]; rings: number[]; outer: number } | null = null;
+  // k groves in the inner tier; k = 0 is a single ring.
+  for (let k = 0; k < n; k++) {
+    const tiers = (k ? [bySize.slice(0, k), bySize.slice(k)] : [bySize]).map(alternate);
+    const rings: number[] = [];
+    let least = hub;
+    for (const t of tiers) {
+      const R = fit(t, least);
+      rings.push(R);
+      least = R + setback + 2 * Math.max(...t.map((g) => radii[g]!)) + setback;
+    }
+    const last = tiers[tiers.length - 1]!;
+    const outer = rings[rings.length - 1]! + setback + 2 * Math.max(...last.map((g) => radii[g]!));
+    if (!best || outer < best.outer - 1e-6) best = { tiers, rings, outer };
+  }
+  const { tiers, rings, outer } = best!;
+  const centers: { x: number; z: number }[] = new Array(n);
+  const tier: number[] = new Array(n);
+  const angles: number[][] = [];
+  tiers.forEach((order, t) => {
+    const ang = place(order, rings[t]!)!;
+    angles.push(ang);
+    order.forEach((g, i) => {
+      const c = rings[t]! + setback + radii[g]!;
+      centers[g] = { x: c * Math.cos(ang[i]!), z: c * Math.sin(ang[i]!) };
+      tier[g] = t;
+    });
+  });
+  // A spoke in each gap of the inner tier, at the bearing that keeps farthest
+  // from the groves either side; only where it keeps `lane` from every grove.
+  const first = tiers[0]!;
+  const reach = rings[rings.length - 1]!;
+  const clearOf = (a: number) => {
+    const ux = Math.cos(a), uz = Math.sin(a);
+    let worst = Infinity;
+    centers.forEach((c, g) => {
+      const along = c.x * ux + c.z * uz;
+      if (along < 0) return;
+      const d = along <= reach ? Math.abs(c.x * uz - c.z * ux) : Math.hypot(c.x - ux * reach, c.z - uz * reach);
+      worst = Math.min(worst, d - radii[g]!);
+    });
+    return worst;
+  };
+  const open: number[] = [];
+  const firstAng = angles[0]!;
+  for (let i = 0; i < first.length; i++) {
+    const a0 = firstAng[i]!, a1 = i + 1 < first.length ? firstAng[i + 1]! : firstAng[0]! + 2 * Math.PI;
+    let bestA = 0, bestC = -Infinity;
+    for (let s = 1; s < 64; s++) {
+      const a = a0 + ((a1 - a0) * s) / 64;
+      const c = clearOf(a);
+      if (c > bestC) { bestC = c; bestA = a; }
+    }
+    if (bestC >= lane) open.push(Math.atan2(Math.sin(bestA), Math.cos(bestA)));
+  }
+  // Keep the most even `spokes` of the open gaps: try evenly spaced bearings at
+  // every turn of the wheel, take the open gap nearest each, and keep the set
+  // that strays least from even.
+  const want = Math.min(opts.spokes, open.length);
+  let spokes = open;
+  if (want < open.length) {
+    let bestErr = Infinity;
+    for (let s = 0; s < 128; s++) {
+      const used = new Set<number>();
+      let err = 0;
+      for (let j = 0; j < want; j++) {
+        const target = (2 * Math.PI * (s / 128 + j)) / want;
+        let pick = -1, d = Infinity;
+        open.forEach((a, i) => {
+          const e = Math.abs(Math.atan2(Math.sin(a - target), Math.cos(a - target)));
+          if (!used.has(i) && e < d) { d = e; pick = i; }
+        });
+        used.add(pick);
+        err = Math.max(err, d);
       }
-      d += 1;
+      if (err < bestErr) {
+        bestErr = err;
+        spokes = open.filter((_, i) => used.has(i));
+      }
     }
   }
-  return placed.map(({ x, z }) => ({ x, z }));
-}
-
-/**
- * Shortest walk from a to b that stays outside the disc of radius `r` at the
- * origin: the straight line if it clears the disc, otherwise tangent, arc,
- * tangent. Points inside the disc are treated as on its edge.
- */
-export function walkAround(ax: number, az: number, bx: number, bz: number, r: number): number {
-  const dx = bx - ax, dz = bz - az;
-  const len = Math.hypot(dx, dz);
-  const t = clamp(-(ax * dx + az * dz) / (len * len || 1), 0, 1);
-  if (r <= 0 || Math.hypot(ax + dx * t, az + dz * t) >= r) return len;
-  const ra = Math.max(r, Math.hypot(ax, az)), rb = Math.max(r, Math.hypot(bx, bz));
-  const between = Math.abs(Math.atan2(ax * bz - az * bx, ax * bx + az * bz));
-  const arc = Math.max(0, between - Math.acos(r / ra) - Math.acos(r / rb));
-  return Math.sqrt(ra * ra - r * r) + Math.sqrt(rb * rb - r * r) + r * arc;
-}
-
-/**
- * Visiting order for a closed loop through the points: start from `order` and
- * apply 2-opt (reverse any stretch whose reversal shortens the loop) until
- * nothing improves, alternating with or-opt (move one stop to a better gap).
- * The result never crosses itself. With `clear`, a leg that
- * would cut the disc of that radius at the origin costs the walk around it,
- * so the loop keeps off the hub.
- */
-export function loopOrder(pts: { x: number; z: number }[], order: number[], clear = 0): number[] {
-  const o = [...order];
-  const n = o.length;
-  const d = (a: number, b: number) => walkAround(pts[o[a]!]!.x, pts[o[a]!]!.z, pts[o[b]!]!.x, pts[o[b]!]!.z, clear);
-  for (let improved = true, guard = 0; improved && guard < 100; guard++) {
-    improved = false;
-    for (let i = 0; i < n - 1; i++) {
-      for (let j = i + 2; j < n; j++) {
-        const i2 = i + 1, j2 = (j + 1) % n;
-        if (j2 === i) continue;
-        if (d(i, j) + d(i2, j2) < d(i, i2) + d(j, j2) - 1e-9) {
-          for (let a = i2, b = j; a < b; a++, b--) [o[a], o[b]] = [o[b]!, o[a]!];
-          improved = true;
-        }
-      }
-    }
-    // Or-opt: move one stop into a better gap, which no reversal can do.
-    for (let k = 0; k < n && n > 3; k++) {
-      const p = (k - 1 + n) % n, q = (k + 1) % n;
-      const saved = d(p, k) + d(k, q) - d(p, q);
-      let best = -1, gain = 1e-9;
-      for (let i = 0; i < n; i++) {
-        const i2 = (i + 1) % n;
-        if (i === k || i2 === k) continue;
-        const g = saved - (d(i, k) + d(k, i2) - d(i, i2));
-        if (g > gain) { gain = g; best = i; }
-      }
-      if (best < 0) continue;
-      const [v] = o.splice(k, 1);
-      o.splice(best < k ? best + 1 : best, 0, v!);
-      improved = true;
-    }
-  }
-  return o;
+  return { centers, tier, rings, spokes, outer };
 }
 
 export function fibonacciAnnulus(
