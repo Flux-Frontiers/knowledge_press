@@ -114,11 +114,11 @@ their feet.
 The bundled catalog is a snapshot. Chunk counts are **not** produced in the
 browser — they come from DocKG (`SELECT COUNT(*) FROM nodes WHERE kind='chunk'`
 on each book's `graph.sqlite`). Hamlet's 420 is that count. To rebuild the
-snapshot after ingest, run this in a gutenberg_kg checkout, where the script
-lives:
+snapshot after ingest, run this in a gutenberg_kg checkout (it writes into a
+sibling knowledge_press checkout; `--out` or `KNOWLEDGE_PRESS_DIR` moves it):
 
 ```bash
-python scripts/export_web_catalog.py
+gutenkg export-web-catalog
 ```
 
 Each grove draws as one textured bark mesh for its species and one instanced

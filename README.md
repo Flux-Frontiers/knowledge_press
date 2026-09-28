@@ -26,7 +26,7 @@ either license.
 
 Nothing here builds a corpus. The app searches the packs that
 `gutenkg export-swift` writes, and the web forest's catalog is written by
-`scripts/export_web_catalog.py`; both live in gutenberg_kg. The Makefile looks
+`gutenkg export-web-catalog`; both are gutenberg_kg commands. The Makefile looks
 for a gutenberg_kg checkout next to this one; point it elsewhere with
 `GUTENBERG_KG_DIR=/path/to/gutenberg_kg`.
 

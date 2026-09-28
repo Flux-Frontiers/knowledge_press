@@ -20,7 +20,7 @@ The sky is done (see Shipped); weather is the next world pass.
 | Jump to a tree from the press | The press list opens a book or jumps to its grove; the lantern query and the **B** list already land at the tree. |
 | Ambient audio | Wind, wet leaves, a distant press. Unlock on first gesture. |
 | Breadcrumb lanterns | Optional trail of your own lights so a long wander still has a way home. |
-| Live corpus ingest | `python scripts/export_web_catalog.py`, in gutenberg_kg, counts `kind='chunk'` nodes in each book's `graph.sqlite` and rewrites the TypeScript catalog. The web forest does not re-chunk. |
+| Live corpus ingest | `gutenkg export-web-catalog`, in gutenberg_kg, counts `kind='chunk'` nodes in each book's `graph.sqlite` and rewrites the TypeScript catalog. The web forest does not re-chunk. |
 
 ## Shipped
 
