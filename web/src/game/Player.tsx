@@ -69,6 +69,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       const a = sampleActions();
       let throttle = a.throttle;
       let steer = a.steer;
+      let tourBrake = false;
       const mode = useGame.getState().travelMode;
       if (mode !== "circuit") tourState.tour = null;
       else if (forest.ringPath.length > 1) {
@@ -78,13 +79,14 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           useGame.getState().setToast("Free drive");
         } else {
           tourState.tour ??= planTour(forest, sim.x, sim.z, sim.yaw);
-          const c = steerTour(tourState.tour, sim.x, sim.z, sim.yaw, sim.speed);
+          const c = steerTour(tourState.tour, sim.x, sim.z, sim.yaw, sim.speed, dt);
           steer = c.steer;
           if (throttle === 0) throttle = c.throttle;
+          tourBrake = c.brake;
           useGame.getState().selectGrove(c.genre);
         }
       }
-      stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake });
+      stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake || tourBrake });
       pitch.current = clamp(pitch.current + a.pitch * 1.1 * dt, -0.45, 0.75);
       // Held arrows pan up to ~110° either way; released, the view eases back ahead.
       look.current = a.look ? clamp(look.current + a.look * 1.6 * dt, -1.9, 1.9) : look.current * Math.exp(-3 * dt);
