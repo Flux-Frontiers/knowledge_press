@@ -172,6 +172,21 @@ struct ConversationStore: Sendable {
         _ = try? rebuildIndex()
     }
 
+    /// Remove every conversation, then refresh the index.
+    ///
+    /// Only directories named by a UUID go: the same rule `rebuildIndex()`
+    /// uses to decide what counts as a conversation, so anything else that
+    /// ends up beside them is left alone.
+    func deleteAll() throws {
+        let contents =
+            (try? FileManager.default.contentsOfDirectory(
+                at: directory, includingPropertiesForKeys: nil)) ?? []
+        for url in contents where UUID(uuidString: url.lastPathComponent) != nil {
+            try FileManager.default.removeItem(at: url)
+        }
+        _ = try? rebuildIndex()
+    }
+
     /// Write a turn's illustration beside its conversation.
     ///
     /// :returns: The path to record on the turn, relative to the conversation

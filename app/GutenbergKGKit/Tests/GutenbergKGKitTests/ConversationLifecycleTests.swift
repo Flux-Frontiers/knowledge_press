@@ -185,6 +185,47 @@ struct ConversationLifecycleTests {
         }
     }
 
+    @Test("delete all clears the buffer and every saved conversation")
+    func deleteAllClearsEverything() async throws {
+        try await withModel { model, store in
+            model.turns = [completedTurn("circles of Hell")]
+            model.persistActiveConversation()
+            await model.pendingPersist?.value
+            model.newConversation()
+            await model.pendingPersist?.value
+            model.turns = [completedTurn("pillar of salt")]
+            model.persistActiveConversation()
+            await model.pendingPersist?.value
+            #expect(model.conversations.count == 2)
+
+            model.deleteAllConversations()
+            #expect(model.turns.isEmpty)
+            #expect(model.activeConversation == nil)
+            #expect(model.conversations.isEmpty)
+            await model.pendingPersist?.value
+
+            #expect(model.conversations.isEmpty)
+            let saved = try store.summaries()
+            #expect(saved.isEmpty)
+        }
+    }
+
+    @Test("ask again appends the same question in the same scope as a new turn")
+    func askAgainRepeatsTheQuestion() async throws {
+        try await withModel { model, _ in
+            let first = completedTurn("circles of Hell", corpus: "world-literature")
+            model.turns = [first]
+
+            model.askAgain(first.id)
+            defer { model.cancel() }
+
+            #expect(model.turns.count == 2)
+            #expect(model.turns.last?.question == "circles of Hell")
+            #expect(model.turns.last?.corpus == "world-literature")
+            #expect(model.turns.last?.id != first.id)
+        }
+    }
+
     @Test("rename refuses an empty title and keeps the old one")
     func renameRefusesEmpty() async throws {
         try await withModel { model, store in

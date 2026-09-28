@@ -205,9 +205,11 @@ public struct PadRootView: View {
             .navigationSplitViewColumnWidth(min: 260, ideal: 300)
             .popover(isPresented: $showingSettings) {
                 NavigationStack {
-                    // The sidebar owns engine and scope on this shell, so
-                    // Settings does not show a second copy of them.
-                    SettingsView(showsEngineAndScope: false)
+                    // The sidebar carries engine and scope too, for the quick
+                    // per-chat switch; Settings keeps them so a reader who
+                    // opens it in portrait, sidebar hidden, still finds them.
+                    // Both bind to the same model state, so they agree.
+                    SettingsView()
                         .navigationTitle("Settings")
                         .toolbarTitleDisplayMode(.inline)
                 }
