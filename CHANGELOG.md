@@ -17,7 +17,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   app for a simulator, installs it with the corpus, sets a dark 9:41 status
   bar and launches it; `make ios-sim-screenshot` writes a screenshot at the
   exact size App Store Connect wants for that device. `SIM` names the
-  simulator, `SIM_APPEARANCE` the appearance.
+  simulator, `SIM_APPEARANCE` the appearance. `make ios-sim-kill` shuts every
+  booted simulator down afterward; left running, each one is a full iOS
+  userland that outlives Xcode and holds tens of GB.
 - **`docs/APP_STORE_LISTING.md`** holds the store listing text: name,
   subtitle, promotional text, description, keywords, review notes and URLs.
 - **The Mac app ships with the corpus.** `make mac-build` stages the exported
