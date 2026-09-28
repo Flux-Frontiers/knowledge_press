@@ -30,3 +30,6 @@ renders/tests/
 .tscodekg/*
 !.tscodekg/snapshots/
 .kgcache/
+
+# Simulator screenshots (make ios-sim-screenshot)
+screenshots/

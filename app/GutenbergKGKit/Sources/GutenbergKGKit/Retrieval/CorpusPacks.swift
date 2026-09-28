@@ -7,6 +7,7 @@
 // embedder and searched with another returns ranked, fluent, wrong passages.
 // So the manifest names the embedder, and nothing opens until they agree.
 
+import CoreML
 import Foundation
 
 /// `manifest.json`, as `gutenkg export-swift` writes it.
@@ -112,8 +113,17 @@ public final class CorpusPacks: @unchecked Sendable {
         // The embedder is checked against the manifest before any pack opens:
         // a mismatch here is the difference between "no results" and "wrong
         // results", and only one of those is survivable.
+        // The simulator's Core ML has no MPSGraph engine (Xcode 27 beta logs
+        // "Espresso compiled without MPSGraph engine" at load) and the vectors
+        // its fallback produced matched nothing. CPU only there; devices keep
+        // every compute unit.
+        let configuration = MLModelConfiguration()
+        #if targetEnvironment(simulator)
+            configuration.computeUnits = .cpuOnly
+        #endif
         let embedder = try BGEEmbedder(
-            directory: directory, requiredModel: manifest.embedder.model)
+            directory: directory, requiredModel: manifest.embedder.model,
+            configuration: configuration)
 
         var packs: [PassagePack] = []
         for entry in manifest.packs where entry.name != "core.pack" {

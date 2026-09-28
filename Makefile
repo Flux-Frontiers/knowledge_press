@@ -40,7 +40,7 @@
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build web-preview web-kill
+.PHONY: ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release web-install web-dev web-test web-build web-preview web-kill
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -157,6 +157,63 @@ ios-launch:
 
 ios-deploy: ios-install-corpus ios-verify-corpus ios-launch
 	@echo "Corpus installed and app relaunched. Settings > Corpus should say 'on this device'."
+
+# ---------------------------------------------------------------------------
+# Simulator, for App Store screenshots. The device targets above use devicectl,
+# which does not talk to simulators; simctl does the same three jobs here:
+# install the app, copy the corpus into its data container, and launch it.
+# The status bar is overridden to Apple's own 9:41 / full-signal look, so the
+# screenshots need no cropping and come out at the exact size App Store
+# Connect wants for that device. On-device answers work in the simulator when
+# this Mac has Apple Intelligence turned on.
+#
+#   make ios-sim SIM="iPhone 17 Pro Max"      # 6.9" iPhone slot
+#   make ios-sim SIM="iPad Pro 13-inch (M5)"  # 13" iPad slot
+#   make ios-sim-screenshot                   # -> screenshots/<SIM>-<time>.png
+#   SIM_APPEARANCE=light for a light-mode set; dark is the default.
+# ---------------------------------------------------------------------------
+
+SIM ?= iPhone 17 Pro Max
+IOS_SIM_APP = app/ios/build/sim/Build/Products/Debug-iphonesimulator/KnowledgePress.app
+
+ios-sim-build: ios-generate
+	cd app/ios && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj -scheme KnowledgePress \
+	  -destination "platform=iOS Simulator,name=$(SIM)" -derivedDataPath build/sim \
+	  CODE_SIGNING_ALLOWED=NO build
+
+# Xcode 27 replaced Simulator.app with DeviceHub.app; older Xcodes keep
+# Simulator.app under Developer/Applications. Open whichever exists.
+ios-sim-boot:
+	@xcrun simctl boot "$(SIM)" 2>/dev/null || true
+	@apps="$$(xcode-select -p)/../Applications"; \
+	  if [ -d "$$apps/DeviceHub.app" ]; then open "$$apps/DeviceHub.app"; \
+	  else open "$$(xcode-select -p)/Applications/Simulator.app"; fi
+	@xcrun simctl bootstatus "$(SIM)" -b >/dev/null
+
+# Copies the whole export, embedder included, into the app's container. The
+# app must be installed first so the container exists.
+ios-sim-install-corpus: ios-sim-boot
+	@test -f "$(IOS_CORPUS_DIR)/manifest.json" \
+	  || { echo "No corpus at $(IOS_CORPUS_DIR) -- run 'gutenkg export-swift --verify' in $(GUTENBERG_KG_DIR) first."; exit 1; }
+	@xcrun simctl install "$(SIM)" "$(IOS_SIM_APP)"
+	@dest="$$(xcrun simctl get_app_container "$(SIM)" $(IOS_BUNDLE_ID) data)/$(IOS_CONTAINER_PATH)"; \
+	  mkdir -p "$$dest" && cp -R "$(IOS_CORPUS_DIR)/." "$$dest/" && du -sh "$$dest"
+
+SIM_APPEARANCE ?= dark
+
+ios-sim-launch: ios-sim-boot
+	@xcrun simctl ui "$(SIM)" appearance $(SIM_APPEARANCE)
+	@xcrun simctl status_bar "$(SIM)" override --time 9:41 --batteryState charged --batteryLevel 100 \
+	  --cellularMode active --cellularBars 4 --wifiMode active --wifiBars 3
+	@xcrun simctl launch --terminate-running-process "$(SIM)" $(IOS_BUNDLE_ID) >/dev/null
+
+ios-sim: ios-sim-build ios-sim-install-corpus ios-sim-launch
+	@echo "$(SIM) is up with the corpus. Settings > Corpus should say 'on this device'."
+
+ios-sim-screenshot:
+	@mkdir -p screenshots
+	@out="screenshots/$$(echo '$(SIM)' | tr ' ' '-')-$$(date +%H%M%S).png"; \
+	  xcrun simctl io "$(SIM)" screenshot "$$out" >/dev/null 2>&1 && echo "$$out"
 
 # App build number (CFBundleVersion) for every xcodebuild below: the git commit
 # count, which only grows, so each App Store Connect upload outranks the last
