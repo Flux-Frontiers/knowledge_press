@@ -4,6 +4,10 @@ name: Web
 # to web/ so an app-only change does not spend a runner here, and vice versa.
 # A push or manual run on main also publishes web/dist to GitHub Pages at
 # https://flux-frontiers.github.io/knowledge_press/.
+#
+# The reader's book text is not in git: `make web-books-publish` uploads it as
+# books.tar.gz on the draft `book-text` release, and every build unpacks it into
+# web/public/books, so a pull request proves the download works too.
 
 on:
   push:
@@ -28,6 +32,9 @@ jobs:
   web:
     name: Web Build
     runs-on: ubuntu-latest
+    # Write, because a draft release is invisible to a read-only token.
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: web
@@ -40,6 +47,14 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
       - run: npm test
+      - name: Fetch the book text
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download book-text --repo "$GITHUB_REPOSITORY" --pattern books.tar.gz --dir "$RUNNER_TEMP"
+          mkdir -p public/books
+          tar -xzf "$RUNNER_TEMP/books.tar.gz" -C public/books
+          echo "$(ls public/books | wc -l) books"
       - run: npm run build
       - uses: actions/upload-pages-artifact@v4
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

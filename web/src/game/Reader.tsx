@@ -2,55 +2,46 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Book } from "./catalog";
 import { useGame } from "./store";
-import { getChapter, getChapters, type Chapter, type ChapterText } from "./worker";
+import { getBook, type Chapter } from "./bookText";
 
 /** The chapter each book was left at, for this session. */
 const lastChapter = new Map<string, number>();
 
 type Load<T> = { state: "loading" } | { state: "error"; message: string } | { state: "ready"; value: T };
 
-/** A book's text from the GutenbergKG worker: a chapter picker, the chapter, and previous / next. */
+/** A book's text from its static books/<slug>.json: a chapter picker, the chapter, and previous / next. */
 export function ReaderPanel({ book }: { book: Book }) {
   const close = () => useGame.getState().openReader(null);
   const [chapters, setChapters] = useState<Load<Chapter[]>>({ state: "loading" });
   const [index, setIndex] = useState(() => lastChapter.get(book.slug) ?? 0);
-  const [text, setText] = useState<Load<ChapterText>>({ state: "loading" });
   const [attempt, setAttempt] = useState(0);
   const page = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const abort = new AbortController();
+    let live = true;
     setChapters({ state: "loading" });
-    getChapters(book.genre, book.book, abort.signal).then(
+    getBook(book.slug).then(
       (value) => {
+        if (!live) return;
         setChapters({ state: "ready", value });
-        // A chapter remembered from a longer listing (the worker rebuilt) would strand the pager.
+        // A chapter remembered from a longer listing (the text re-exported) would strand the pager.
         setIndex((i) => Math.max(0, Math.min(i, value.length - 1)));
       },
-      (e: unknown) => { if (!abort.signal.aborted) setChapters({ state: "error", message: String((e as Error).message ?? e) }); },
+      (e: unknown) => { if (live) setChapters({ state: "error", message: String((e as Error).message ?? e) }); },
     );
-    return () => abort.abort();
-  }, [book.genre, book.book, attempt]);
+    return () => { live = false; };
+  }, [book.slug, attempt]);
 
   const list = chapters.state === "ready" ? chapters.value : [];
   const current = list[Math.min(index, list.length - 1)];
 
   useEffect(() => {
     if (!current) return;
-    const abort = new AbortController();
-    setText({ state: "loading" });
     lastChapter.set(book.slug, index);
-    getChapter(book.genre, book.book, current.id, abort.signal).then(
-      (value) => {
-        setText({ state: "ready", value });
-        page.current?.scrollTo({ top: 0 });
-      },
-      (e: unknown) => { if (!abort.signal.aborted) setText({ state: "error", message: String((e as Error).message ?? e) }); },
-    );
-    return () => abort.abort();
-  }, [book.slug, book.genre, book.book, current, index]);
+    page.current?.scrollTo({ top: 0 });
+  }, [book.slug, current, index]);
 
-  const failure = chapters.state === "error" ? chapters.message : text.state === "error" ? text.message : null;
+  const failure = chapters.state === "error" ? chapters.message : null;
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-bg/60 p-2 sm:p-6" onClick={close}>
@@ -78,7 +69,7 @@ export function ReaderPanel({ book }: { book: Book }) {
             Chapter
             <select value={Math.min(index, list.length - 1)} onChange={(e) => setIndex(Number(e.target.value))}
               className="min-w-0 flex-1 truncate rounded-md border border-border bg-bg p-2 text-fg">
-              {list.map((c, i) => <option key={c.id} value={i}>{c.title}</option>)}
+              {list.map((c, i) => <option key={i} value={i}>{c.title}</option>)}
             </select>
           </label>
         ) : null}
@@ -88,20 +79,19 @@ export function ReaderPanel({ book }: { book: Book }) {
             <div className="grid gap-3 text-sm leading-relaxed text-muted">
               <p className="text-fg">The book could not be fetched: {failure}.</p>
               <p>
-                Reading needs the GutenbergKG worker (<code className="text-fg">make up</code> in gutenberg_kg) and the
-                forest served by <code className="text-fg">npm run dev</code> or <code className="text-fg">npm run preview</code>,
-                which pass <code className="text-fg">/worker</code> through to it. The published site cannot reach a worker.
+                The forest reads each book from <code className="text-fg">books/{book.slug}.json</code>. Run{" "}
+                <code className="text-fg">make web-books</code> to write them for a local checkout.
               </p>
               <p className="font-display text-lg text-fg/90">{book.excerpt}</p>
               <button type="button" onClick={() => setAttempt((n) => n + 1)}
                 className="min-h-11 justify-self-start rounded-md bg-primary px-4 text-primary-fg">Try again</button>
             </div>
           ) : chapters.state === "ready" && list.length === 0 ? (
-            <p className="text-sm text-muted">The worker has no chapters for this book.</p>
-          ) : text.state === "ready" ? (
+            <p className="text-sm text-muted">This book has no chapters.</p>
+          ) : current ? (
             <div className="mx-auto max-w-[65ch] font-display text-lg leading-relaxed text-fg/95 sm:text-xl">
-              {list.length > 1 ? <h3 className="mb-4 text-2xl font-semibold">{text.value.title}</h3> : null}
-              {text.value.text.split(/\n\s*\n/).map((para, i) => (
+              {list.length > 1 ? <h3 className="mb-4 text-2xl font-semibold">{current.title}</h3> : null}
+              {current.text.split(/\n\s*\n/).map((para, i) => (
                 <p key={i} className="mb-4 whitespace-pre-line">{para.trim()}</p>
               ))}
             </div>

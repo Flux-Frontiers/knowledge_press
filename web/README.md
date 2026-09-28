@@ -26,11 +26,11 @@ npm run dev
 
 Open the URL Vite prints. Click **Start driving**.
 
-To read books in the forest (**Open the book** on a tree's card), run the
-GutenbergKG worker too. The dev and preview servers proxy `/worker` to it at
-`http://localhost:8000`; the static build on GitHub Pages has no proxy and
-cannot read. Setup, phones and iPads, and troubleshooting are in
-**[Reading books in the forest: a local worker](../docs/LOCAL_WORKER.md)**.
+To read books in the forest (**Open the book** on a tree's card), run
+`make web-books` from the repository root first. It writes each book's text to
+`public/books/<slug>.json`, which the reader fetches; the published site gets
+the same files at build time. Details are in
+**[Reading books in the forest](../docs/BOOK_TEXT.md)**.
 
 | Key | Action |
 | --- | --- |
@@ -130,7 +130,7 @@ raise the caps in `growTree.ts` if you want denser Hamlet-scale skeletons.
 
 ```
 catalog.ts, catalogPart1-6.ts, catalogTypes.ts
-               253 books: genre, chunks, excerpt, tags, worker key, diary periods
+               253 books: genre, chunks, excerpt, tags, corpus folder, diary periods
 growTree.ts    space colonization + pipe-model radii + leaf points; diary year limbs
 species.ts     genre -> tree species: habit, bark, leaf outline, foliage shift
 forest.ts      hub-and-spoke grove layout (crown-aware placement), roads, tour loop, home
@@ -155,8 +155,8 @@ Trees.tsx      per-grove textured bark meshes + instanced species leaves
 World.tsx      ground, roads, lantern trail, fog, plinth
 Signposts.tsx  grove signposts and exhibit plaques
 HUD.tsx        plaque, minimap jump, atlas, book list, lantern query, press, tour caption
-Reader.tsx     reads a book's chapters from the worker
-worker.ts      the GutenbergKG worker client, through the /worker proxy
+Reader.tsx     a book's chapters, previous / next
+bookText.ts    fetches books/<slug>.json, once per book
 StartScreen.tsx, PauseOverlay.tsx, TouchControls.tsx   start, settings, on-screen controls
 store.ts, preferences.ts   game state and saved settings (localStorage)
 quests.ts, screenshot.ts   quest hints; screenshots without the HUD
@@ -172,5 +172,5 @@ genre, chunk count, excerpt, tags). `forest.ts` already sizes a tree from
 Vite 8 · React 19 · Three 0.186 · R3F 9 · Zustand 5 · Tailwind 4
 
 Excerpts are public-domain Gutenberg text. No accounts, and the forest itself
-needs no server; only reading a book needs the local worker. The press saves
+needs no server; book text is static JSON beside the page. The press saves
 to `localStorage`.
