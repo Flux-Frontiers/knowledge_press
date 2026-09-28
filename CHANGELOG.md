@@ -105,6 +105,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   hub-and-spoke layout, the tour's stops and narration, species, diary
   limbs, where the sky gets its location, the wind sculptures and the
   reader, and FEATURES moves the sky to Shipped and weather to Next.
+- **The privacy page covers the web forest.** It described only the app.
+  A new section says what the Knowledge Press Forest keeps in the browser,
+  that it asks for the location to place the sky (rounded to 0.1 degree,
+  kept in the browser), what reading aloud and reading books involve, and
+  that GitHub Pages and Google Fonts see each visitor's IP address. Effective
+  2026-09-28.
 - **The forest credits the right authors.** The web catalog is regenerated
   from gutenberg_kg's corrected metadata: The Count of Monte Cristo is by
   Alexandre Dumas and Auguste Maquet rather than Maquet alone, The Federalist
