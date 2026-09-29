@@ -53,7 +53,14 @@ export type CorpusTree = {
   foliage: { count: number; pos: Float32Array; scale: Float32Array; quat: Float32Array; shade: Uint8Array };
 };
 
-export function growCorpusTree(sources: LimbSource[], barkAspect: number): CorpusTree {
+/**
+ * The redwood's own bark (CorpusRedwood.tsx draws it): an image twice as tall
+ * as wide, one repeat 2.4 m around the trunk, so its ridges run about 30 cm
+ * apart. The book trees' 0.9 m tile blurred to noise on a trunk this thick.
+ */
+export const REDWOOD_BARK = { aspect: 2, tile: 2.4 };
+
+export function growCorpusTree(sources: LimbSource[]): CorpusTree {
   const rng = mulberry32(seedFromKey("corpus-redwood"));
   const totalChunks = sources.reduce((s, t) => s + t.book.chunks, 0);
   const height = REDWOOD_HEIGHT_PER_LOG2 * Math.log2(1 + totalChunks);
@@ -158,7 +165,7 @@ export function growCorpusTree(sources: LimbSource[], barkAspect: number): Corpu
   const bark: BarkBuffers = { pos: [], normal: [], uv: [], index: [] };
   const count = emitBark(
     { skeleton: { nodes: Float32Array.from(nodes), parents: Int32Array.from(parents), radii: Float32Array.from(radii), n: parents.length } },
-    0, 0, bark, barkAspect,
+    0, 0, bark, REDWOOD_BARK.aspect, REDWOOD_BARK.tile,
   );
   return {
     height,

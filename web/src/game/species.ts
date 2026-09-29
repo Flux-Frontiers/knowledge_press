@@ -78,6 +78,9 @@ export function envelopeWidth(env: Envelope, s: number): number {
 
 export type Species = {
   name: SpeciesName;
+  /** For the grove's signpost: the tree's common and scientific names. */
+  common: string;
+  latin: string;
   /** Height / width of the bark image (textures/bark/<name>_color.jpg). */
   barkAspect: number;
   leaf: LeafShape;
@@ -135,47 +138,56 @@ const PINE_HALF: [number, number][] = (() => {
 export const SPECIES: Species[] = [
   {
     // English oak: short bole, broad low dome, long gnarled horizontal limbs.
-    name: "oak", barkAspect: 2, leaf: { shape: "outline", half: OAK_HALF, smooth: true }, foliageShift: [0, 0, 0],
+    name: "oak", common: "English oak", latin: "Quercus robur",
+    barkAspect: 2, leaf: { shape: "outline", half: OAK_HALF, smooth: true }, foliageShift: [0, 0, 0],
     habit: { envelope: "dome", whorl: 1, droop: 0.05, leader: 0, width: 1.55, clearBole: 0.22, spread: 1.1, lift: 0.6, tropism: 0.02, influence: 16, step: 1.1, jitter: 0.24, pipeExp: 2 },
   },
   {
     // Horse chestnut: a full rounded ellipsoid on a medium bole.
-    name: "chestnut", barkAspect: 1, leaf: { shape: "ovate", width: 0.36 }, foliageShift: [0.01, 0.04, -0.03],
+    name: "chestnut", common: "Horse chestnut", latin: "Aesculus hippocastanum",
+    barkAspect: 1, leaf: { shape: "ovate", width: 0.36 }, foliageShift: [0.01, 0.04, -0.03],
     habit: { envelope: "ellipsoid", whorl: 1, droop: 0.08, leader: 0.15, width: 1.15, clearBole: 0.28, spread: 1, lift: 1, tropism: 0.14, influence: 12, step: 1, jitter: 0.14, pipeExp: 2.2 },
   },
   {
     // Fir: a narrow cone from near the ground, flat sprays, a fast-tapering stem.
-    name: "fir", barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12],
+    name: "fir", common: "Silver fir", latin: "Abies alba",
+    barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12],
     habit: { envelope: "cone", whorl: 1, droop: 0.05, leader: 0.92, width: 0.95, clearBole: 0.1, spread: 0.7, lift: -0.3, tropism: 0.3, influence: 12, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
   },
   {
     // London plane: a long clean bole under a tall egg-shaped crown of long, rising limbs.
-    name: "plane", barkAspect: 1, leaf: { shape: "outline", half: PLANE_HALF, smooth: false }, foliageShift: [-0.01, 0.02, 0.05],
+    name: "plane", common: "London plane", latin: "Platanus × acerifolia",
+    barkAspect: 1, leaf: { shape: "outline", half: PLANE_HALF, smooth: false }, foliageShift: [-0.01, 0.02, 0.05],
     habit: { envelope: "ovoid", whorl: 1, droop: 0, leader: 0.3, width: 1.05, clearBole: 0.38, spread: 1, lift: 1.2, tropism: 0.24, influence: 18, step: 1.15, jitter: 0.1, pipeExp: 2.1 },
   },
   {
     // Blackthorn: a low, dense, twiggy thicket-tree that spreads upward from low down.
-    name: "blackthorn", barkAspect: 1, leaf: { shape: "ovate", width: 0.7 }, foliageShift: [0.02, -0.1, -0.1],
+    name: "blackthorn", common: "Blackthorn", latin: "Prunus spinosa",
+    barkAspect: 1, leaf: { shape: "ovate", width: 0.7 }, foliageShift: [0.02, -0.1, -0.1],
     habit: { envelope: "vase", whorl: 1, droop: 0, leader: 0, width: 1.3, clearBole: 0.12, spread: 1.25, lift: 0.8, tropism: 0.1, influence: 10, step: 0.7, jitter: 0.18, pipeExp: 2.5 },
   },
   {
     // Stone pine: a tall bare stem under a flat-topped parasol of tufts.
-    name: "pine", barkAspect: 1, leaf: { shape: "outline", half: PINE_HALF, smooth: false }, foliageShift: [0.04, -0.08, -0.08],
+    name: "pine", common: "Stone pine", latin: "Pinus pinea",
+    barkAspect: 1, leaf: { shape: "outline", half: PINE_HALF, smooth: false }, foliageShift: [0.04, -0.08, -0.08],
     habit: { envelope: "umbrella", whorl: 1, droop: 0, leader: 0.45, width: 1.45, clearBole: 0.5, spread: 1.1, lift: 0.4, tropism: 0.12, influence: 14, step: 1.1, jitter: 0.12, pipeExp: 2.2 },
   },
   {
     // Silver birch: a slender stem, a narrow open crown, fine twigs that hang at the ends.
-    name: "birch", barkAspect: 1, leaf: { shape: "ovate", width: 0.5 }, foliageShift: [0.02, 0.06, 0.07],
+    name: "birch", common: "Silver birch", latin: "Betula pendula",
+    barkAspect: 1, leaf: { shape: "ovate", width: 0.5 }, foliageShift: [0.02, 0.06, 0.07],
     habit: { envelope: "ovoid", whorl: 1, droop: 0.45, leader: 0.7, width: 0.75, clearBole: 0.25, spread: 0.9, lift: 0.6, tropism: 0.3, influence: 9, step: 0.85, jitter: 0.1, pipeExp: 2.7 },
   },
   {
     // Weeping willow: a short stout trunk, arching limbs, curtains of twigs to the ground.
-    name: "willow", barkAspect: 1, leaf: { shape: "ovate", width: 0.16 }, foliageShift: [0.03, 0.02, 0.06],
+    name: "willow", common: "Weeping willow", latin: "Salix babylonica",
+    barkAspect: 1, leaf: { shape: "ovate", width: 0.16 }, foliageShift: [0.03, 0.02, 0.06],
     habit: { envelope: "dome", whorl: 1, droop: 2.5, leader: 0.45, width: 1.3, clearBole: 0.5, spread: 1.2, lift: -0.9, tropism: 0.2, influence: 12, step: 1, jitter: 0.12, pipeExp: 2.3 },
   },
   {
     // Lombardy poplar: a tall narrow spindle of steeply rising branches.
-    name: "poplar", barkAspect: 1, leaf: { shape: "ovate", width: 0.62 }, foliageShift: [-0.01, 0.05, 0.02],
+    name: "poplar", common: "Lombardy poplar", latin: "Populus nigra ‘Italica’",
+    barkAspect: 1, leaf: { shape: "ovate", width: 0.62 }, foliageShift: [-0.01, 0.05, 0.02],
     habit: { envelope: "spindle", whorl: 1, droop: 0, leader: 0.85, width: 0.42, clearBole: 0.08, spread: 0.7, lift: 1.2, tropism: 0.7, influence: 8, step: 0.9, jitter: 0.08, pipeExp: 2.4 },
   },
 ];

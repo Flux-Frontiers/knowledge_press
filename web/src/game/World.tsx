@@ -11,6 +11,7 @@ import type { Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./forest";
 import { disc, ribbon, type FlatMesh } from "./roads";
 import { CorpusRedwood } from "./CorpusRedwood";
+import { FlameOfKnowledge } from "./FlameOfKnowledge";
 import { Mysterium } from "./Mysterium";
 import { Signposts } from "./Signposts";
 import { SEASONS, type SeasonName } from "./seasons";
@@ -23,6 +24,7 @@ const dummy = new Object3D();
 
 const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit }>> = {
   mysterium: Mysterium,
+  flame: FlameOfKnowledge,
   helix: HelixSculpture,
   darrieus: DarrieusSculpture,
   savonius: SavoniusSculpture,
@@ -126,7 +128,7 @@ function brickMaterial() {
 }
 
 /**
- * Spokes sit lowest, the ring above them, junction plazas on top, so each join
+ * Spokes and exhibit spurs sit lowest, the ring above them, junction plazas on top, so each join
  * is covered by the next layer instead of z-fighting.
  */
 function Roads({ forest, circuit }: { forest: Forest; circuit: boolean }) {
@@ -135,6 +137,7 @@ function Roads({ forest, circuit }: { forest: Forest; circuit: boolean }) {
     const ring: FlatMesh = { pos: [], uv: [], index: [] };
     for (const line of forest.roadLines) {
       if (line.kind === "spoke") ribbon(line, 2.8, 0.035, spokes);
+      else if (line.kind === "spur") ribbon(line, 2.4, 0.035, spokes);
       else ribbon(line, 3.4, 0.045, ring);
     }
     for (const p of forest.plazas) disc(p.x, p.z, p.r, 0.055, ring);
