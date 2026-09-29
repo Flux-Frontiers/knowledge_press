@@ -14,7 +14,7 @@ export const TOUR_ABOUT =
   "Each of its {books} books is a tree, taller the longer it is, and the trees gather into {groves} groves by genre.";
 
 /** How to take over. */
-export const TOUR_TIPS = "Steer at any time to take the wheel.";
+export const TOUR_TIPS = "You can take over at any time: just turn or brake.";
 
 /** Said in place of the three above on every tour after the first on this device. */
 export const TOUR_WELCOME_BACK = "Welcome back. Off around the ring we go.";
