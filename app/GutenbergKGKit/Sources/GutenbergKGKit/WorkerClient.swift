@@ -94,8 +94,12 @@ public actor WorkerClient {
 
     /// The image backends this worker can use, for the Settings picker.
     /// An older worker without the op answers with an error, which throws.
-    public func listImageBackends() async throws -> ImageBackendList {
-        try await post(["op": "image_backends"])
+    ///
+    /// `timeout` is short for the availability check, which gates a button:
+    /// waiting out `post`'s 60s to learn a host is down would leave it
+    /// disabled and unexplained.
+    public func listImageBackends(timeout: TimeInterval = 60) async throws -> ImageBackendList {
+        try await post(["op": "image_backends"], timeout: timeout)
     }
 
     /// Rewrite corpus prose into an image-generation prompt.

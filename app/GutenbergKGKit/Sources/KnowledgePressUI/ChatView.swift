@@ -10,6 +10,14 @@ struct ChatView: View {
     @Environment(AppModel.self) private var model
     @State private var draft = ""
     @FocusState private var inputFocused: Bool
+    @Environment(\.scenePhase) private var scenePhase
+
+    /// What should trigger another Render availability check: the address
+    /// changing, or the app coming back to the foreground.
+    private struct AvailabilityCheck: Equatable {
+        let url: String
+        let active: Bool
+    }
 
     /// The Mac window carries the title in its own chrome and the settings in
     /// the sidebar; the phone needs both inline.
@@ -44,6 +52,13 @@ struct ChatView: View {
             }
             Divider()
             inputBar
+        }
+        .task(id: AvailabilityCheck(url: model.workerURLString, active: scenePhase == .active)) {
+            guard scenePhase == .active else { return }
+            // Debounce: the address field re-keys this on every keystroke.
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled else { return }
+            await model.refreshImageBackends()
         }
     }
 

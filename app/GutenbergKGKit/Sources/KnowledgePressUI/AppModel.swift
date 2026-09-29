@@ -158,6 +158,8 @@ public final class AppModel {
         get { storedWorkerURL }
         set {
             storedWorkerURL = newValue
+            // What was learned about the old address says nothing about this one.
+            renderProbe = .checking
             AppModel.defaults.set(newValue, forKey: AppModel.workerURLKey)
         }
     }
@@ -331,16 +333,66 @@ public final class AppModel {
         return ""
     }
 
-    /// Fetch the available image backends. A stored choice the worker no
-    /// longer offers falls back to Auto, so a render never asks for a backend
-    /// that will fail.
+    /// Whether Render can work right now.
+    ///
+    /// Rendering always goes through the worker, and the app has no default
+    /// worker, so most readers cannot render at all. The button is hidden
+    /// for them, and disabled with a reason for a worker that is set but
+    /// down or has no image backend.
+    public enum RenderAvailability: Equatable, Sendable {
+        /// No worker address is set.
+        case unconfigured
+        case checking
+        case available
+        case unavailable(String)
+    }
+
+    /// The last probe result. Read through ``renderAvailability``, which
+    /// folds in whether an address is set at all.
+    private var renderProbe: RenderAvailability = .checking
+
+    public var renderAvailability: RenderAvailability {
+        hasWorkerURL ? renderProbe : .unconfigured
+    }
+
+    /// How long the availability check waits before calling the worker down.
+    static let availabilityTimeout: TimeInterval = 5
+
+    /// Ask the worker which image backends it can use, and record whether
+    /// Render can work.
+    ///
+    /// A worker too old to know the op answers with an application error.
+    /// It is up, and its default backend may well work, so that leaves Render
+    /// enabled rather than taking the feature away from it.
+    ///
+    /// A stored backend choice the worker no longer offers falls back to
+    /// Auto, so a render never asks for a backend that will fail. That
+    /// happens only when the worker answered: an unreachable one says
+    /// nothing about the choice, and this runs on every foreground.
     func refreshImageBackends() async {
-        let list = try? await client.listImageBackends()
-        imageBackends = (list?.backends ?? []).filter(\.available)
-        if imageBackendChoice != Self.imageAuto,
-            !imageBackends.contains(where: { $0.key == imageBackendChoice })
-        {
-            imageBackendChoice = Self.imageAuto
+        guard hasWorkerURL else { return }
+        if renderProbe != .available { renderProbe = .checking }
+        do {
+            let list = try await client.listImageBackends(timeout: Self.availabilityTimeout)
+            imageBackends = list.backends.filter(\.available)
+            if imageBackendChoice != Self.imageAuto,
+                !imageBackends.contains(where: { $0.key == imageBackendChoice })
+            {
+                imageBackendChoice = Self.imageAuto
+            }
+            renderProbe =
+                imageBackends.isEmpty
+                ? .unavailable("The worker has no image backend running.") : .available
+        } catch WorkerError.application {
+            imageBackends = []
+            renderProbe = .available
+        } catch is CancellationError {
+            return
+        } catch let error as URLError where error.code == .cancelled {
+            return
+        } catch {
+            imageBackends = []
+            renderProbe = .unavailable("Cannot reach the worker.")
         }
     }
 
@@ -963,6 +1015,10 @@ public final class AppModel {
                 turns[i].imageError =
                     (error as? WorkerError)?.errorDescription ?? error.localizedDescription
                 persistActiveConversation()
+                // A transport failure may mean the worker went away since the
+                // last check; a worker that answered with an error has not.
+                // Detached, so the spinner is not held for the check's timeout.
+                if !(error is WorkerError) { Task { await refreshImageBackends() } }
             }
         }
     }

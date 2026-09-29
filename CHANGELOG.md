@@ -13,6 +13,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Render is only offered when the worker can draw.** The button was always
+  enabled, but rendering goes through the worker, which most readers do not
+  have. It is now hidden when no worker address is set, and disabled with a
+  reason and a Retry button when the worker is unreachable or reports no
+  image backend. The check runs at launch, when the app returns to the
+  foreground, when the address changes, and after a render fails on the
+  network. It waits 5 seconds, not 60. A worker too old to report image
+  backends keeps Render enabled.
 - **The iPhone and iPad app lists all four orientations.** The iOS target
   declared Portrait, Landscape Left and Landscape Right and left out
   Portrait Upside Down, which iPad multitasking requires. App Store Connect
