@@ -11,8 +11,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.27.0] - 2026-09-28
+
+### Added
+
+- `scripts/synth_replay.py` and `scripts/make_tokenizer_fixture.py`, moved
+  here from gutenberg_kg because they serve the app.
+
 ### Changed
 
+- The README opens with the Knowledge Press lockup and names
+  `gutenkg export-web-catalog` instead of the retired script.
 - **The forest reads books without a worker, including on GitHub Pages.**
   Each book's chapters are a static `books/<slug>.json`, written by
   `gutenkg export-web-books` from the Swift packs (`make web-books`). The
