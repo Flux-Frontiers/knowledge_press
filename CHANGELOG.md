@@ -11,6 +11,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **The iPhone and iPad app lists all four orientations.** The iOS target
+  declared Portrait, Landscape Left and Landscape Right and left out
+  Portrait Upside Down, which iPad multitasking requires. App Store Connect
+  rejected the first delivery of 1.28.0 (build 720) with error 90474 until
+  it was added.
+
 ## [1.28.0] - 2026-09-28
 
 ### Added

@@ -88,7 +88,7 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 ## What's New (per version)
 
-### 1.25.0
+### 1.28.0
 
 First App Store release.
 

@@ -64,8 +64,11 @@ targets:
         # beyond HTTPS, which is exempt.
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
+        # All four are required for iPad multitasking (App Store Connect
+        # rejects an upload missing UpsideDown even on a portrait-first app).
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         # The worker is a Mac on the same network, over plain HTTP.
