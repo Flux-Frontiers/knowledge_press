@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
 import { useGame } from "./store";
+import { weather, weatherName } from "./weather";
 
 export function PauseOverlay() {
   const paused = useGame((s) => s.paused);
@@ -81,6 +82,10 @@ export function PauseOverlay() {
             <option value="clear">Clear</option><option value="light">Light</option>
             <option value="normal">Normal</option><option value="heavy">Heavy</option>
           </select>
+        </label>
+        <label className="flex items-center justify-between gap-4">
+          <span>Random weather<span className="block text-xs text-muted">Morning fog that burns off, and cloud{prefs.weather ? ` · now ${weatherName(weather).toLowerCase()}` : ""}</span></span>
+          <input type="checkbox" checked={prefs.weather} onChange={(e) => setPreferences({ weather: e.target.checked })} />
         </label>
       </div>
       <div className="rounded-md bg-bg p-3 text-sm leading-relaxed text-muted">

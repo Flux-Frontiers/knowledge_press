@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type ComponentType } from "react";
-import { BufferAttribute, BufferGeometry, CanvasTexture, Color, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
-import { ForestFloor, Sky, Sunlight, textureAnisotropy, useGroundTexture } from "./Environment";
+import { BufferAttribute, BufferGeometry, CanvasTexture, Color, type FogExp2, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
+import { ForestFloor, FOG_DAY, FOG_NIGHT, Sky, Sunlight, textureAnisotropy, useGroundTexture } from "./Environment";
 import { DAY_OVERRIDE } from "./daylight";
 import { FOG_SCALE } from "./preferences";
 
@@ -18,9 +18,12 @@ import { SEASONS, type SeasonName } from "./seasons";
 import { sim } from "./sim";
 import { useGame } from "./store";
 import { tourAhead, tourState } from "./tour";
+import { fogMix, stepWeather, weather, weatherAt, weatherOverride } from "./weather";
 import { DarrieusSculpture, DnaSculpture, HelixSculpture, SavoniusSculpture, WeatherMast } from "./WindSculptures";
 
 const dummy = new Object3D();
+const gray = new Color();
+const CLEAR = { fogDensity: 0, cloud: 0, kind: "clear" as const };
 
 const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit }>> = {
   mysterium: Mysterium,
@@ -50,6 +53,23 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
   const godEye = useGame((s) => s.preferences.camera === "god");
   const fogDensity = (season === "winter" ? 0.0077 : 0.0105) * (1 + (DAY_OVERRIDE.fogDensityScale - 1) * t) * FOG_SCALE[fogLevel]
     * (godEye ? GOD_EYE_FOG : 1);
+  const weatherOn = useGame((s) => s.preferences.weather);
+  const morning = sky.morning;
+  // What the weather adds to the fog is applied every frame, on the fog object itself,
+  // so a fog building or burning off never re-renders the forest.
+  const fog = useRef<FogExp2>(null);
+  const base = useRef({ density: fogDensity, color: fogColor, daylight: t });
+  base.current = { density: fogDensity, color: fogColor, daylight: t };
+  useFrame((_, dt) => {
+    const pinned = weatherOverride(window.location.search);
+    stepWeather(pinned ?? (weatherOn ? weatherAt(Date.now(), morning) : CLEAR), Math.min(dt, 5));
+    if (!fog.current) return;
+    const b = base.current;
+    const mix = fogMix(weather);
+    // Thick fog is gray-white, lit by the day, not the blue of the season's haze.
+    fog.current.density = b.density + weather.fogDensity;
+    fog.current.color.copy(b.color).lerp(gray.copy(FOG_NIGHT).lerp(FOG_DAY, b.daylight), mix);
+  });
   const ambientColor = useMemo(() => new Color(pal.ambient).lerp(new Color(DAY_OVERRIDE.ambient), t), [t, pal.ambient]);
   const hemiIntensity = 0.78 * (1 + (DAY_OVERRIDE.hemiIntensity - 1) * t);
   const detail = useGame((s) => s.preferences.detail);
@@ -67,7 +87,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
   return (
     <>
       <color attach="background" args={[skyColor]} />
-      <fogExp2 attach="fog" args={[fogColor, fogDensity]} />
+      <fogExp2 ref={fog} attach="fog" args={[fogColor, fogDensity]} />
       <hemisphereLight color={ambientColor} groundColor={groundColor} intensity={hemiIntensity} />
       <Sunlight light={sky.light} detail={detail} />
       <Sky sky={sky} season={season} />
