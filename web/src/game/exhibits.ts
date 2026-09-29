@@ -37,6 +37,8 @@ export const EXHIBITS: ExhibitSpec[] = [
   { id: "helix", label: "Helical Rotor", obstacle: 1.8, treeClearance: 8 },
   { id: "darrieus", label: "Darrieus Rotor", obstacle: 2.0, treeClearance: 8 },
   { id: "savonius", label: "Savonius Tower", obstacle: 1.8, treeClearance: 8 },
+  { id: "dna", label: "Double Helix", obstacle: 1.8, treeClearance: 8 },
+  { id: "mast", label: "Weather Mast", obstacle: 1.4, treeClearance: 8 },
 ];
 
 /** Keep exhibits out from under the redwood's crown and apart from one another. */

@@ -54,7 +54,7 @@ test("wind rotors turn over their own plaza: overhead of the cart, never out ove
   const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
   const { rotorEnvelope, PLINTH_TOP } = require(`${process.env.FOREST_TEST_BUILD}/windRotors.js`);
   const f = getForest();
-  for (const id of ["helix", "darrieus", "savonius"]) {
+  for (const id of ["helix", "darrieus", "savonius", "dna", "mast"]) {
     const e = f.exhibits.find((x) => x.id === id);
     assert.ok(e, `${id} placed`);
     const { reach, lowest } = rotorEnvelope(id);
@@ -114,4 +114,43 @@ test("every grove's signpost names its tree species", () => {
     assert.ok(s.common && s.latin, `${s.name} has no names`);
     assert.match(s.latin, /^[A-Z][a-z]+ /, `${s.name}: ${s.latin}`);
   }
+});
+
+test("the double helix is B-DNA: right-handed, 10.5 pairs a turn, minor groove narrower, spelling KNOWLEDGE", () => {
+  const { DNA, DNA_SEQUENCE, PAIR, decodeBases, dnaPairs, dnaStrand } = require(`${process.env.FOREST_TEST_BUILD}/windRotors.js`);
+  assert.equal(decodeBases(DNA_SEQUENCE), "KNOWLEDGE");
+  const pairs = dnaPairs();
+  assert.equal(pairs.length, 36);
+  for (const { bases: [p, q] } of pairs) assert.equal(PAIR[p], q, `${p} pairs with ${q}`);
+  // Right-handed: climbing +y, each strand turns positively about +y (z toward x).
+  for (const s of [0, 1]) {
+    const f = dnaStrand(s);
+    for (let i = 1; i < f.length; i++) {
+      const [x0, y0, z0] = f[i - 1].c, [x1, y1, z1] = f[i].c;
+      assert.ok(y1 > y0);
+      assert.ok(z0 * (x1 - x0) - x0 * (z1 - z0) > 0, `strand ${s} turns left-handed at ${i}`);
+    }
+  }
+  // One turn is 10.5 rises.
+  const bearing = (p) => Math.atan2(p[0], p[2]);
+  const step = ((bearing(pairs[1].a) - bearing(pairs[0].a)) + 2 * Math.PI) % (2 * Math.PI);
+  assert.ok(Math.abs(step - (2 * Math.PI) / 10.5) < 1e-9);
+  // The two backbones sit 12/34 of a turn apart: the narrow side is the minor groove.
+  const gap = ((bearing(pairs[0].b) - bearing(pairs[0].a)) + 2 * Math.PI) % (2 * Math.PI);
+  assert.ok(Math.abs(gap - DNA.minorGroove * 2 * Math.PI) < 1e-9 && gap < Math.PI);
+});
+
+test("the weather mast reads the forest's wind: heading near the prevailing sway, sock filling with the gust", () => {
+  const { windHeading, gust, sockFill } = require(`${process.env.FOREST_TEST_BUILD}/windRotors.js`);
+  const prevailing = Math.atan2(0.37, 0.93);
+  let lo = Infinity, hi = -Infinity;
+  for (let t = 0; t < 2000; t += 0.5) {
+    const d = windHeading(t) - prevailing;
+    assert.ok(Math.abs(d) <= 0.42 + 1e-9, `veers ${d.toFixed(2)} rad at ${t}`);
+    const f = sockFill(gust(t, 0));
+    lo = Math.min(lo, f);
+    hi = Math.max(hi, f);
+  }
+  // Slack in the lulls, full in the strongest gusts.
+  assert.ok(lo < 0.05 && hi > 0.95, `sock ranges ${lo.toFixed(2)} to ${hi.toFixed(2)}`);
 });

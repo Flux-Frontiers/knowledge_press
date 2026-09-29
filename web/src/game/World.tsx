@@ -18,7 +18,7 @@ import { SEASONS, type SeasonName } from "./seasons";
 import { sim } from "./sim";
 import { useGame } from "./store";
 import { tourAhead, tourState } from "./tour";
-import { DarrieusSculpture, HelixSculpture, SavoniusSculpture } from "./WindSculptures";
+import { DarrieusSculpture, DnaSculpture, HelixSculpture, SavoniusSculpture, WeatherMast } from "./WindSculptures";
 
 const dummy = new Object3D();
 
@@ -28,6 +28,8 @@ const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit }>> = {
   helix: HelixSculpture,
   darrieus: DarrieusSculpture,
   savonius: SavoniusSculpture,
+  dna: DnaSculpture,
+  mast: WeatherMast,
 };
 const TRAIL_N = 20;
 
