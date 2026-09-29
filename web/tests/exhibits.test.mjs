@@ -54,7 +54,7 @@ test("wind rotors turn over their own plaza: overhead of the cart, never out ove
   const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
   const { rotorEnvelope, PLINTH_TOP } = require(`${process.env.FOREST_TEST_BUILD}/windRotors.js`);
   const f = getForest();
-  for (const id of ["helix", "darrieus", "savonius"]) {
+  for (const id of ["helix", "darrieus", "savonius", "dna", "mast"]) {
     const e = f.exhibits.find((x) => x.id === id);
     assert.ok(e, `${id} placed`);
     const { reach, lowest } = rotorEnvelope(id);
@@ -65,4 +65,92 @@ test("wind rotors turn over their own plaza: overhead of the cart, never out ove
     const toRoad = Math.hypot(e.roadX - e.x, e.roadZ - e.z);
     assert.ok(reach < toRoad - 1.7 - 1.05, `${id} overhangs the road: ${reach.toFixed(2)} m of ${toRoad.toFixed(2)} m`);
   }
+});
+
+test("exhibits stand at the end of side spokes off the rings, spread round the forest", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const f = getForest();
+  const rings = f.roadLines.filter((l) => l.kind === "ring").map((l) => Math.hypot(...l.pts[0]));
+  const spurs = f.roadLines.filter((l) => l.kind === "spur");
+  assert.equal(spurs.length, f.exhibits.length);
+  const segDist = (x, z, ax, az, bx, bz) => {
+    const dx = bx - ax, dz = bz - az;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz || 1)));
+    return Math.hypot(x - ax - dx * t, z - az - dz * t);
+  };
+  for (const e of f.exhibits) {
+    const [[px, pz], [ex, ez]] = e.spur;
+    // Leaves a ring from its centreline and ends inside the exhibit's plaza.
+    assert.ok(rings.some((R) => Math.abs(Math.hypot(px, pz) - R) < 1e-6), `${e.id} spur starts off the ring`);
+    assert.ok(Math.hypot(ex - e.x, ez - e.z) < e.plazaR, `${e.id} spur stops short of its plaza`);
+    // Long enough to read as a road of its own.
+    assert.ok(Math.hypot(e.roadX - px, e.roadZ - pz) >= 1.7 + 7 - 1e-6, `${e.id} spur is a stub`);
+    // Clear of every trunk.
+    for (const t of f.trees) {
+      assert.ok(segDist(t.x, t.z, px, pz, e.roadX, e.roadZ) - t.trunkRadius >= 2.75 - 1e-6, `${e.id} spur runs into ${t.book.slug}`);
+    }
+    // Only the spur reaches the plaza: every other road passes well clear.
+    for (const r of f.roads) {
+      if (r.kind === "spur") continue;
+      assert.ok(segDist(e.x, e.z, r.ax, r.az, r.bx, r.bz) > e.plazaR + 3, `${e.id} plaza touches a ${r.kind}`);
+    }
+    // The approach lands on the spur, not the ring.
+    const { exhibitApproach } = require(`${process.env.FOREST_TEST_BUILD}/exhibits.js`);
+    const a = exhibitApproach(e);
+    assert.ok(segDist(a.x, a.z, px, pz, ex, ez) < 0.01, `${e.id} approach is off its spur`);
+  }
+  // Spread round the rings: no two exhibits closer than half an even share of the compass.
+  const bearings = f.exhibits.map((e) => Math.atan2(e.z, e.x));
+  const share = (2 * Math.PI) / bearings.length;
+  for (let i = 0; i < bearings.length; i++) for (let j = i + 1; j < bearings.length; j++) {
+    const d = Math.abs(bearings[i] - bearings[j]) % (2 * Math.PI);
+    assert.ok(Math.min(d, 2 * Math.PI - d) > share / 2, `${f.exhibits[i].id} and ${f.exhibits[j].id} crowd one side`);
+  }
+});
+
+test("every grove's signpost names its tree species", () => {
+  const { SPECIES } = require(`${process.env.FOREST_TEST_BUILD}/species.js`);
+  for (const s of SPECIES) {
+    assert.ok(s.common && s.latin, `${s.name} has no names`);
+    assert.match(s.latin, /^[A-Z][a-z]+ /, `${s.name}: ${s.latin}`);
+  }
+});
+
+test("the double helix is B-DNA: right-handed, 10.5 pairs a turn, minor groove narrower, spelling KNOWLEDGE", () => {
+  const { DNA, DNA_SEQUENCE, PAIR, decodeBases, dnaPairs, dnaStrand } = require(`${process.env.FOREST_TEST_BUILD}/windRotors.js`);
+  assert.equal(decodeBases(DNA_SEQUENCE), "KNOWLEDGE");
+  const pairs = dnaPairs();
+  assert.equal(pairs.length, 36);
+  for (const { bases: [p, q] } of pairs) assert.equal(PAIR[p], q, `${p} pairs with ${q}`);
+  // Right-handed: climbing +y, each strand turns positively about +y (z toward x).
+  for (const s of [0, 1]) {
+    const f = dnaStrand(s);
+    for (let i = 1; i < f.length; i++) {
+      const [x0, y0, z0] = f[i - 1].c, [x1, y1, z1] = f[i].c;
+      assert.ok(y1 > y0);
+      assert.ok(z0 * (x1 - x0) - x0 * (z1 - z0) > 0, `strand ${s} turns left-handed at ${i}`);
+    }
+  }
+  // One turn is 10.5 rises.
+  const bearing = (p) => Math.atan2(p[0], p[2]);
+  const step = ((bearing(pairs[1].a) - bearing(pairs[0].a)) + 2 * Math.PI) % (2 * Math.PI);
+  assert.ok(Math.abs(step - (2 * Math.PI) / 10.5) < 1e-9);
+  // The two backbones sit 12/34 of a turn apart: the narrow side is the minor groove.
+  const gap = ((bearing(pairs[0].b) - bearing(pairs[0].a)) + 2 * Math.PI) % (2 * Math.PI);
+  assert.ok(Math.abs(gap - DNA.minorGroove * 2 * Math.PI) < 1e-9 && gap < Math.PI);
+});
+
+test("the weather mast reads the forest's wind: heading near the prevailing sway, sock filling with the gust", () => {
+  const { windHeading, gust, sockFill } = require(`${process.env.FOREST_TEST_BUILD}/windRotors.js`);
+  const prevailing = Math.atan2(0.37, 0.93);
+  let lo = Infinity, hi = -Infinity;
+  for (let t = 0; t < 2000; t += 0.5) {
+    const d = windHeading(t) - prevailing;
+    assert.ok(Math.abs(d) <= 0.42 + 1e-9, `veers ${d.toFixed(2)} rad at ${t}`);
+    const f = sockFill(gust(t, 0));
+    lo = Math.min(lo, f);
+    hi = Math.max(hi, f);
+  }
+  // Slack in the lulls, full in the strongest gusts.
+  assert.ok(lo < 0.05 && hi > 0.95, `sock ranges ${lo.toFixed(2)} to ${hi.toFixed(2)}`);
 });

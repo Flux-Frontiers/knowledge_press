@@ -54,7 +54,7 @@ export type RoadSeg = {
   az: number;
   bx: number;
   bz: number;
-  kind: "spoke" | "ring";
+  kind: RoadLine["kind"];
 };
 
 export type Waypoint = {
@@ -107,8 +107,11 @@ export type Chunk = {
   leafCount: number;
 };
 
-/** A road centreline in the ground plane; `closed` joins the last point to the first. */
-export type RoadLine = { kind: "spoke" | "ring"; pts: [number, number][]; closed: boolean };
+/**
+ * A road centreline in the ground plane; `closed` joins the last point to the
+ * first. A spur is a short side spoke off a ring, out to an exhibit.
+ */
+export type RoadLine = { kind: "spoke" | "ring" | "spur"; pts: [number, number][]; closed: boolean };
 
 export type Forest = {
   trees: TreeSite[];
@@ -465,15 +468,6 @@ function buildForest(leafMultiplier: number): Forest {
   const lastRing = wheel.rings[wheel.rings.length - 1]!;
   const roadLines: RoadLine[] = wheel.spokes.map((a) => ({ kind: "spoke", pts: spokeLine(a, HUB_PLAZA_R - 1, lastRing), closed: false }));
   wheel.rings.forEach((_, t) => roadLines.push({ kind: "ring", pts: lap(t, tourSpoke), closed: true }));
-  const roads: RoadSeg[] = [];
-  for (const line of roadLines) {
-    const n = line.pts.length;
-    for (let i = 0; i < (line.closed ? n : n - 1); i++) {
-      const [ax, az] = line.pts[i]!;
-      const [bx, bz] = line.pts[(i + 1) % n]!;
-      roads.push({ ax, az, bx, bz, kind: line.kind });
-    }
-  }
 
   // The tour loop: each ring in turn, joined by the first spoke, out and back.
   const loop: [number, number][] = [];
@@ -498,9 +492,26 @@ function buildForest(leafMultiplier: number): Forest {
   }
   const circuit = [...stopIndex.entries()].sort((a, b) => a[1] - b[1]).map(([wp]) => wp);
 
-  const corpusTree = growCorpusTree(trees, SPECIES.find((s) => s.name === "fir")!.barkAspect);
-  const exhibits = placeExhibits({ specs: EXHIBITS, roadLines, trees, worldRadius });
+  const corpusTree = growCorpusTree(trees);
   const STOP_R = 4;
+  // Each exhibit at the end of a spur off a ring, clear of the stops' signposts and the junctions.
+  const exhibits = placeExhibits({
+    specs: EXHIBITS, roadLines, trees, worldRadius,
+    avoid: [
+      ...circuit.map((wp) => ({ x: wp.x, z: wp.z, r: STOP_R + 12 })),
+      ...wheel.spokes.flatMap((a) => wheel.rings.map((R) => ({ x: R * Math.cos(a), z: R * Math.sin(a), r: JUNCTION_R + 6 }))),
+    ],
+  });
+  for (const e of exhibits) roadLines.push({ kind: "spur", pts: e.spur, closed: false });
+  const roads: RoadSeg[] = [];
+  for (const line of roadLines) {
+    const n = line.pts.length;
+    for (let i = 0; i < (line.closed ? n : n - 1); i++) {
+      const [ax, az] = line.pts[i]!;
+      const [bx, bz] = line.pts[(i + 1) % n]!;
+      roads.push({ ax, az, bx, bz, kind: line.kind });
+    }
+  }
   const plazas = [
     { x: 0, z: 0, r: HUB_PLAZA_R },
     ...circuit.map((wp) => ({ x: wp.x, z: wp.z, r: STOP_R })),

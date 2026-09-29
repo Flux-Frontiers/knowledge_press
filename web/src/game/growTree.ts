@@ -660,10 +660,11 @@ const BARK_TILE = 0.9;
  * vertices per section, a duplicated seam vertex for UV continuity, quads
  * between rings. Each chain follows the thickest child; the other children
  * start new chains at the fork. Rings are parallel-transported so the bark
- * does not twist. `aspect` is the bark image's height / width. Returns the
- * number of vertices added.
+ * does not twist. `aspect` is the bark image's height / width, and `tile` the
+ * width in metres one repeat of it spans around a trunk. Returns the number
+ * of vertices added.
  */
-export function emitBark(grown: Pick<GrownTree, "skeleton">, originX: number, originZ: number, out: BarkBuffers, aspect: number): number {
+export function emitBark(grown: Pick<GrownTree, "skeleton">, originX: number, originZ: number, out: BarkBuffers, aspect: number, tile = BARK_TILE): number {
   const { nodes, parents, radii, n } = grown.skeleton;
   const children: number[][] = Array.from({ length: n }, () => []);
   for (let i = 1; i < n; i++) if (parents[i]! >= 0) children[parents[i]!]!.push(i);
@@ -705,7 +706,7 @@ export function emitBark(grown: Pick<GrownTree, "skeleton">, originX: number, or
     };
     const r0 = ringRadius(isTrunk ? 1 : 0);
     const R = r0 >= 0.2 ? 12 : r0 >= 0.07 ? 7 : 5;
-    const around = Math.max(1, Math.round((2 * Math.PI * r0) / BARK_TILE));
+    const around = Math.max(1, Math.round((2 * Math.PI * r0) / tile));
     const vScale = 1 / (aspect * ((2 * Math.PI * r0) / around)); // keep the tile's aspect
     const first = out.pos.length / 3;
 

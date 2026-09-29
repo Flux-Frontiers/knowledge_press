@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DoubleSide, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, RepeatWrapping, RGBADepthPacking, SRGBColorSpace, TextureLoader } from "three";
+import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DoubleSide, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, RepeatWrapping, RGBADepthPacking, SRGBColorSpace } from "three";
 import { COARSE_POINTER, textureAnisotropy } from "./Environment";
 import { HUB_PLAQUE_DIR, HUB_PLAQUE_DIST, type Forest } from "./forest";
 import type { SeasonName } from "./seasons";
-import { makePlaqueTexture } from "./Signposts";
+import { Lectern } from "./Signposts";
 import { useGame } from "./store";
 import { UplightFixtures, useUplitMaterials } from "./Uplights";
 
@@ -16,17 +16,81 @@ const FOLIAGE: Record<SeasonName, string> = {
   winter: "#4a5d52",
 };
 
-/** Fir bark (CC0, public/textures/bark), warmed to a redwood's cinnamon. */
+/** Seamless value noise on a gx by gy lattice, smoothly interpolated; u and v in [0, 1). */
+function tiledNoise(u: number, v: number, gx: number, gy: number, seed: number): number {
+  const hash = (i: number, j: number) => {
+    let h = (((i % gx) + gx) % gx) * 374761393 + (((j % gy) + gy) % gy) * 668265263 + seed * 2147483647;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+  };
+  const x = u * gx, y = v * gy;
+  const i = Math.floor(x), j = Math.floor(y);
+  const fx = x - i, fy = y - j;
+  const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+  const a = hash(i, j), b = hash(i + 1, j), c = hash(i, j + 1), d = hash(i + 1, j + 1);
+  return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+}
+
+/**
+ * Redwood bark, drawn once: long fibrous ridges between deep furrows that
+ * wander as they climb, cinnamon on the ridges and near-black in the cracks.
+ * A height field gives both the colour and the normal map, and every term is
+ * periodic, so the tile repeats without a seam (REDWOOD_BARK sets its size).
+ */
 function redwoodBark() {
-  const loader = new TextureLoader();
-  const load = (map: string, srgb = false) => {
-    const tex = loader.load(`textures/bark/fir_${map}.jpg`);
+  const W = 256, H = 512, RIDGES = 8;
+  const height = new Float32Array(W * H);
+  for (let y = 0; y < H; y++) {
+    const v = y / H;
+    for (let x = 0; x < W; x++) {
+      const u = x / W;
+      // Furrows meander: whole-number frequencies in both directions keep the tile seamless.
+      const wander = 0.22 * Math.sin(2 * Math.PI * (2 * v + u)) + 0.14 * Math.sin(2 * Math.PI * (3 * v - 2 * u) + 1.3)
+        + 0.5 * (tiledNoise(u, v, 8, 3, 1) - 0.5);
+      const t = (((u * RIDGES + wander) % 1) + 1) % 1;
+      const ridge = Math.pow(Math.sin(Math.PI * t), 0.55);
+      // Fibres: noise stretched up the trunk, fine across it.
+      const fibre = tiledNoise(u, v, 96, 10, 2) * 0.6 + tiledNoise(u, v, 48, 5, 3) * 0.4;
+      height[y * W + x] = ridge * (0.72 + 0.28 * fibre) - 0.12 * tiledNoise(u, v, 16, 4, 4);
+    }
+  }
+  const color = document.createElement("canvas");
+  const normal = document.createElement("canvas");
+  color.width = normal.width = W;
+  color.height = normal.height = H;
+  const cctx = color.getContext("2d")!, nctx = normal.getContext("2d")!;
+  const cimg = cctx.createImageData(W, H), nimg = nctx.createImageData(W, H);
+  const at = (x: number, y: number) => height[((y + H) % H) * W + ((x + W) % W)]!;
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const h = Math.max(0, at(x, y));
+      const k = (y * W + x) * 4;
+      const tone = Math.pow(h, 1.3);
+      // Furrow (38, 17, 11) to cinnamon ridge (156, 74, 44), greying a little on the most weathered tops.
+      const grey = Math.max(0, h - 0.82) * 1.6;
+      cimg.data[k] = 38 + (156 - 38) * tone + (150 - 156) * grey;
+      cimg.data[k + 1] = 17 + (74 - 17) * tone + (118 - 74) * grey;
+      cimg.data[k + 2] = 11 + (44 - 11) * tone + (100 - 44) * grey;
+      cimg.data[k + 3] = 255;
+      // Tangent-space normal, +v up the image (textures load flipped).
+      const dx = (at(x + 1, y) - at(x - 1, y)) * 3.2, dy = (at(x, y + 1) - at(x, y - 1)) * 3.2;
+      const len = Math.hypot(dx, dy, 1);
+      nimg.data[k] = ((-dx / len) * 0.5 + 0.5) * 255;
+      nimg.data[k + 1] = ((dy / len) * 0.5 + 0.5) * 255;
+      nimg.data[k + 2] = ((1 / len) * 0.5 + 0.5) * 255;
+      nimg.data[k + 3] = 255;
+    }
+  }
+  cctx.putImageData(cimg, 0, 0);
+  nctx.putImageData(nimg, 0, 0);
+  const wrap = (c: HTMLCanvasElement, srgb: boolean) => {
+    const tex = new CanvasTexture(c);
     tex.wrapS = tex.wrapT = RepeatWrapping;
     tex.anisotropy = textureAnisotropy(8);
     if (srgb) tex.colorSpace = SRGBColorSpace;
     return tex;
   };
-  return new MeshStandardMaterial({ map: load("color", true), normalMap: load("normal"), color: "#e0936a", roughness: 0.95, metalness: 0 });
+  return new MeshStandardMaterial({ map: wrap(color, true), normalMap: wrap(normal, false), roughness: 0.95, metalness: 0 });
 }
 
 /**
@@ -79,8 +143,6 @@ function pointer(on: boolean) {
 function RedwoodPlaque({ forest }: { forest: Forest }) {
   const c = forest.corpusTree;
   const byline = `${c.limbs} books · ${c.totalChunks.toLocaleString("en-US")} chunks · ${Math.round(c.height)} m`;
-  const tex = useMemo(() => makePlaqueTexture("The Corpus Redwood", byline, REDWOOD_BODY), [byline]);
-  useEffect(() => () => tex.dispose(), [tex]);
   const x = Math.cos(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
   const z = Math.sin(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
   // Tapping the plaque lists every book, as tapping the tree does.
@@ -88,19 +150,7 @@ function RedwoodPlaque({ forest }: { forest: Forest }) {
     <group position={[x, 0, z]} rotation={[0, Math.atan2(x, z), 0]}
       onClick={(e) => { e.stopPropagation(); useGame.getState().openCatalog(null); }}
       onPointerOver={() => pointer(true)} onPointerOut={() => pointer(false)}>
-      {[-1.25, 1.25].map((px) => (
-        // 1.3 m, not the board's 1.55 m centre: the board tilts back, and a taller
-        // post came out through its face at either end, over the text.
-        <mesh key={px} position={[px, 0.65, 0]}>
-          <cylinderGeometry args={[0.07, 0.09, 1.3, 6]} />
-          <meshStandardMaterial color="#4a3a2a" roughness={0.9} />
-        </mesh>
-      ))}
-      {/* Tilted back like a lectern so it reads from the cart. */}
-      <mesh position={[0, 1.55, 0.05]} rotation={[-0.35, 0, 0]}>
-        <boxGeometry args={[3.0, 1.5, 0.06]} />
-        <meshStandardMaterial map={tex} roughness={0.7} />
-      </mesh>
+      <Lectern title="The Corpus Redwood" byline={byline} body={REDWOOD_BODY} />
     </group>
   );
 }

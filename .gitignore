@@ -45,3 +45,8 @@ screenshots/
 
 # Book text for the forest reader (make web-books); published as a release asset.
 web/public/books/
+
+# The Flame of Knowledge's scan sources (16 MB and 11 MB). The web's slim
+# GLB, web/public/models/flame_of_knowledge.glb, is exported from the .blend.
+assets/meshy_dad_sculpture_12feet.blend
+assets/Meshy_dad_sculpture.glb
