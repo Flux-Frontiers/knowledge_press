@@ -153,9 +153,10 @@ struct AssistantTurnView: View {
 
     /// "🎨 Render" — chat.py's illustration button, one tap instead of two:
     /// rewrite-then-imagine both happen inside `AppModel.renderImage(for:)`.
-    /// Always network-only, so failure here (no worker, worker unreachable)
-    /// is ordinary and shown inline rather than gated on reachability
-    /// upfront — the same thing chat.py does.
+    /// Always network-only, so the button follows
+    /// `AppModel.renderAvailability`: hidden with no worker set, disabled
+    /// with the reason when the worker is down. A failure that still gets
+    /// through (a timeout mid-render) is shown inline.
     @ViewBuilder
     private var renderSection: some View {
         if turn.isRenderingImage {
@@ -177,18 +178,37 @@ struct AssistantTurnView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-        } else {
+        } else if model.renderAvailability != .unconfigured {
             HStack(spacing: 8) {
                 Button("🎨 Render", systemImage: "photo") {
                     model.renderImage(for: turn.id)
                 }
                 .font(.caption)
+                .disabled(model.renderAvailability != .available)
+                renderStatus
                 if let error = turn.imageError {
                     Label(error, systemImage: "exclamationmark.triangle")
                         .font(.caption2)
                         .foregroundStyle(.orange)
                 }
             }
+        }
+    }
+
+    /// Why Render is disabled, with a way to check again.
+    @ViewBuilder
+    private var renderStatus: some View {
+        switch model.renderAvailability {
+        case .checking:
+            ProgressView().controlSize(.small)
+        case .unavailable(let why):
+            Label(why, systemImage: "exclamationmark.triangle")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Button("Retry") { Task { await model.refreshImageBackends() } }
+                .font(.caption2)
+        case .available, .unconfigured:
+            EmptyView()
         }
     }
 
