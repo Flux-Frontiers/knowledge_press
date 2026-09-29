@@ -151,8 +151,8 @@ export const BOOKS_PART2: Book[] = [
     author: "Benvenuto Cellini",
     genre: "biography",
     genreLabel: "Biography",
-    chunks: 2480,
-    excerpt: "The words of that great man so heartened me, that I set myself to work at once with eagerness upon the model; and when I had finished it, a painter who was intimate with Michel Agnolo, called Giuliano Bugiardini, brought me the drawing of Atlas. [2] On the same occasion I…",
+    chunks: 2484,
+    excerpt: "However, to prevent your thinking that I want to save myself the trouble of so slight a matter, I will gladly sketch you something; but meanwhile speak to Benvenuto, and let him also make a model; he can then execute the better of the two designs.” Federigo Ginori came to me,…",
     tags: ["biography"],
   },
   {
