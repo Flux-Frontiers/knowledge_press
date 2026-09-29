@@ -119,7 +119,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
             lapSaid.current = false;
             // Set off with the welcome: the whole background the first time, a line after that.
             if (!preferences.silent) {
-              const lines = tourIntro({ books: forest.trees.length, groves: forest.groves.length, exhibits: forest.exhibits.length }, tourHeard());
+              const lines = tourIntro({ books: forest.trees.length, groves: forest.groves.length }, tourHeard());
               markTourHeard();
               noteLines(lines);
               if (preferences.narrate) lines.forEach((line, i) => speak(line, i > 0));

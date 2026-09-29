@@ -5,28 +5,27 @@ const require = createRequire(import.meta.url);
 globalThis.window ??= { localStorage: { getItem: () => null, setItem() {} } };
 const build = process.env.FOREST_TEST_BUILD;
 const script = () => require(`${build}/tourScript.js`);
-const FACTS = { books: 253, groves: 19, exhibits: 7 };
+const FACTS = { books: 253, groves: 19 };
 
 test("the welcome fills in the forest's numbers and leaves no placeholder", () => {
   const { tourIntro } = script();
   const text = tourIntro(FACTS, false).join(" ");
   assert.match(text, /\b253 books\b/);
   assert.match(text, /\b19 groves\b/);
-  assert.match(text, /\b7 exhibits\b/);
   assert.doesNotMatch(text, /[{}]/);
 });
 
 test("the first tour gets the background, later ones a line", () => {
-  const { tourIntro, TOUR_WELCOME, TOUR_ABOUT, TOUR_REDWOOD, TOUR_TIPS, TOUR_WELCOME_BACK } = script();
+  const { tourIntro, TOUR_WELCOME, TOUR_WELCOME_BACK } = script();
   const first = tourIntro(FACTS, false), again = tourIntro(FACTS, true);
-  assert.equal(first.length, 4);
-  assert.ok(first[0] === TOUR_WELCOME && first[1].length > 100 && TOUR_REDWOOD && TOUR_TIPS && TOUR_ABOUT);
+  assert.equal(first.length, 3);
+  assert.equal(first[0], TOUR_WELCOME);
   assert.deepEqual(again, [TOUR_WELCOME_BACK]);
 });
 
 test("every line reads cleanly aloud: plain ASCII, whole sentences, no stray spaces", () => {
   const s = script();
-  const lines = ["TOUR_WELCOME", "TOUR_ABOUT", "TOUR_REDWOOD", "TOUR_TIPS", "TOUR_WELCOME_BACK", "TOUR_LAP_DONE", "TOUR_FAREWELL"].map((k) => [k, s[k]]);
+  const lines = ["TOUR_WELCOME", "TOUR_ABOUT", "TOUR_TIPS", "TOUR_WELCOME_BACK", "TOUR_LAP_DONE", "TOUR_FAREWELL"].map((k) => [k, s[k]]);
   for (const [name, line] of lines) {
     assert.equal(typeof line, "string", name);
     assert.match(line, /^[\x20-\x7e]+$/, `${name} has a non-ASCII character`);
@@ -35,11 +34,11 @@ test("every line reads cleanly aloud: plain ASCII, whole sentences, no stray spa
   }
 });
 
-test("the full welcome takes well under a minute to say", () => {
+test("the full welcome is short enough to finish before the first grove", () => {
   const { tourIntro } = script();
   const words = tourIntro(FACTS, false).join(" ").split(/\s+/).length;
-  // About 150 words a minute at the speech rate in use.
-  assert.ok(words > 60 && words < 130, `${words} words`);
+  // About 150 words a minute at the speech rate in use: 45 words is 18 seconds.
+  assert.ok(words > 25 && words <= 45, `${words} words`);
 });
 
 test("the welcome is only remembered once given, and a blocked store is harmless", () => {
@@ -58,9 +57,9 @@ test("the numbers in the welcome are the real forest's", () => {
   const { getForest } = require(`${build}/forest.js`);
   const { tourIntro } = script();
   const f = getForest();
-  const text = tourIntro({ books: f.trees.length, groves: f.groves.length, exhibits: f.exhibits.length }, false).join(" ");
+  const text = tourIntro({ books: f.trees.length, groves: f.groves.length }, false).join(" ");
   assert.ok(f.trees.length === 253 && text.includes("253 books"), `${f.trees.length} trees`);
-  assert.ok(text.includes(`${f.groves.length} groves`) && text.includes(`${f.exhibits.length} exhibits`));
+  assert.ok(text.includes(`${f.groves.length} groves`));
 });
 
 test("the tour counts a lap once every grove has been visited and the ring starts over", () => {
