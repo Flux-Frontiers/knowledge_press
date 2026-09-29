@@ -11,6 +11,32 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **A real night sky in the web forest.** The 750 random points are replaced
+  by the 5,080 stars of magnitude 6 or brighter in the Yale Bright Star
+  Catalogue. One matrix (precession, sidereal time, latitude) puts them where
+  they stand for the sky's clock and place, the same math that places the sun
+  and moon. Size follows magnitude and color follows B-V, and stars fade
+  toward the horizon. `web/scripts/build-stars.mjs` regenerates the catalog
+  from VizieR.
+- **Random weather** (Settings, Environment; off by default). Morning fog
+  that builds and burns off, from mist to pea soup, rolled per 12 minutes of
+  wall-clock time and likeliest when the sky is at dawn. Fog color, the sky,
+  sun strength, shadows and stars follow it. `?weather=clear`, `clouds`,
+  `mist`, `fog` or `soup` pins it for testing.
+- **A welcome for the ring tour.** The first tour on a device opens with a
+  short greeting, a line on how the forest is made, and how to take over;
+  later tours say a line. It shows as a caption and is read aloud when
+  narration is on. The tour also says when it has been round every grove and
+  says goodbye when you take the wheel. The copy is a set of named variables
+  in `tourScript.ts`.
+
+### Fixed
+
+- **Console warning about `PCFSoftShadowMap`.** The canvas asked for a shadow
+  type three r186 removed; it now asks for the one that replaced it.
+
 ## [1.28.1] - 2026-09-29
 
 ### Fixed

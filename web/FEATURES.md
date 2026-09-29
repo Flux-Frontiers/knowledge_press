@@ -6,11 +6,14 @@ doesn’t get lost. New work lands on `main` by pull request.
 ## Next
 
 ### Weather
-The sky is done (see Shipped); weather is the next world pass.
+Fog and random morning weather are done (see Shipped). What is left:
 
-- **Weather** as a first-class layer: clear, high haze, rain, snow (winter
-  already drops the canopy — snow should actually fall), and wind that moves
-  the leaves. Tied to season, overridable from the HUD like Spring/Summer.
+- **Clouds** drawn in the sky dome: noise on the view direction, drifting,
+  lit from the sun's direction. The weather already carries a cloud cover
+  value that dims the sun and stars; only the drawing is missing.
+- **Rain and snow** (winter already drops the canopy; snow should actually
+  fall), and wind that moves the leaves. Tied to season, overridable from the
+  HUD like Spring/Summer.
 
 ### Press levels
 A rank for how much of the forest you have pressed, and a way to start over.
@@ -67,6 +70,9 @@ A rank for how much of the forest you have pressed, and a way to start over.
 | Look around with arrows or the right stick; touch stick and look strip | `input.ts`, `TouchControls.tsx` |
 | Seasons (canopy density, palettes) | `seasons.ts` |
 | Sky clock: sun, moon phase and stars for the live time and place, or dawn / day / dusk / night | `sky.ts`, `Environment.tsx`, `daylight.ts` |
+| Real star field: the 5,080 naked-eye stars of the Yale Bright Star Catalogue, placed by precession, sidereal time and latitude | `starCatalog.ts`, `stars.ts`, `sky.ts`, `scripts/build-stars.mjs` |
+| Random weather: morning fog that builds and burns off, mist to pea soup, gray sky, dimmed sun and stars (setting, off by default; `?weather=` pins it) | `weather.ts`, `World.tsx`, `Environment.tsx`, `PauseOverlay.tsx` |
+| Tour welcome, background, end-of-ring and farewell lines, editable as variables | `tourScript.ts`, `Player.tsx`, `HUD.tsx` |
 | Night floodlights on the redwood and exhibits | `Uplights.tsx` |
 | Lantern query over titles, tags, excerpts | `HUD.tsx`, `Trees.tsx` |
 | Grove atlas, minimap jump, home return | `HUD.tsx` |
