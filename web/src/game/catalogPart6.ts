@@ -74,8 +74,8 @@ export const BOOKS_PART6: Book[] = [
     author: "Various",
     genre: "sacred-texts",
     genreLabel: "Sacred Texts",
-    chunks: 285,
-    excerpt: "They fall into blind darkness who worship the Unmanifested and they fall into greater darkness who worship the manifested.",
+    chunks: 321,
+    excerpt: "Therefore the wise man sees Him in every manifested form. They who have a true conception of God are never separated from Him. They exist in Him and He in them.",
     tags: ["sacred-texts"],
   },
   {
@@ -415,8 +415,8 @@ export const BOOKS_PART6: Book[] = [
     author: "Dante Alighieri",
     genre: "world-literature",
     genreLabel: "World Literature",
-    chunks: 1437,
-    excerpt: "Sitteth Peschiera, fortress fair and strong, To front the Brescians and the Bergamasks, Where round about the bank descendeth lowest. There of necessity must fall whatever In bosom of Benaco cannot stay, And grows a river down through verdant pastures. Soon as the water doth…",
+    chunks: 1440,
+    excerpt: "Passing that way the virgin pitiless Land in the middle of the fen descried, Untilled and naked of inhabitants; There to escape all human intercourse, She with her servants stayed, her arts to practise And lived, and left her empty body there. The men, thereafter, who were…",
     tags: ["world-literature"],
   },
 ];

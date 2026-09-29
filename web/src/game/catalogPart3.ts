@@ -96,8 +96,8 @@ export const BOOKS_PART3: Book[] = [
     author: "Joseph Conrad",
     genre: "english-literature",
     genreLabel: "English Literature",
-    chunks: 510,
-    excerpt: "Strings of dusty niggers with splay feet arrived and departed; a stream of manufactured goods, rubbishy cottons, beads, and brass-wire sent into the depths of darkness, and in return came a precious trickle of ivory. “I had to wait in the station for ten days—an eternity. I…",
+    chunks: 511,
+    excerpt: "He had been out nearly three years; and, later, I could not help asking him how he managed to sport such linen. He had just the faintest blush, and said modestly, ‘I’ve been teaching one of the native women about the station. It was difficult. She had a distaste for the…",
     tags: ["english-literature"],
   },
   {
@@ -195,8 +195,8 @@ export const BOOKS_PART3: Book[] = [
     author: "Thomas Hardy",
     genre: "english-literature",
     genreLabel: "English Literature",
-    chunks: 2050,
-    excerpt: "That’s more real than the other—hey? I have a little to do here at this stile.” The man turned, as he spoke, to an opening at the roadside leading into a pasture. “If you’ll wait a moment,” he added, “I shall not be long.” As he had her basket she could not well do otherwise;…",
+    chunks: 2055,
+    excerpt: "He asked in a business-like manner if he should take her basket, which she permitted him to do, walking beside him. “It is early to be astir this Sabbath morn!” he said cheerfully. “Yes,” said Tess. “When most people are at rest from their week’s work.” She also assented to…",
     tags: ["english-literature"],
   },
   {
@@ -305,8 +305,8 @@ export const BOOKS_PART3: Book[] = [
     author: "Henry James",
     genre: "english-literature",
     genreLabel: "English Literature",
-    chunks: 565,
-    excerpt: "Grose. This picture comes back to me in the general train—the impression, as I received it on my return, of the wide white panelled space, bright in the lamplight and with its portraits and red carpet, and of the good surprised look of my friend, which immediately told me she…",
+    chunks: 569,
+    excerpt: "Agitation, in the interval, certainly had held me and driven me, for I must, in circling about the place, have walked three miles; but I was to be, later on, so much more overwhelmed that this mere dawn of alarm was a comparatively human chill. The most singular part of it,…",
     tags: ["english-literature"],
   },
   {
@@ -372,7 +372,7 @@ export const BOOKS_PART3: Book[] = [
     genre: "french-literature",
     genreLabel: "French Literature",
     chunks: 486,
-    excerpt: "In three months time, having lost all his money, and being grown tired of my company, he sold me to a Jew, named Don Issachar, who traded to Holland and Portugal, and had a strong passion for women. This Jew was much attached to my person, but could not triumph over it; I…",
+    excerpt: "Hitherto I had imagined that nothing could equal the beauty of Thunder-ten-Tronckh Castle; but I found I was mistaken. \"The Grand Inquisitor, seeing me one day at Mass, stared long at me, and sent to tell me that he wished to speak on private matters. I was conducted to his…",
     tags: ["french-literature"],
   },
   {
