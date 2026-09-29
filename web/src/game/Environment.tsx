@@ -1,8 +1,9 @@
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
+import { AdditiveBlending, BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
 import type { Forest } from "./forest";
 import type { SkyState } from "./sky";
+import { starBuffers } from "./stars";
 import { mulberry32 } from "./math";
 import type { SeasonName } from "./seasons";
 import { sim } from "./sim";
@@ -55,19 +56,18 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
     // In case the map finished loading before the material existed to hear it.
     if (moonMap.image) u.moonReady.value = 1;
   }, [sky, season, uniforms, moonMap]);
-  const stars = useMemo(() => {
-    const random = mulberry32(917);
-    const positions = new Float32Array(750 * 3);
-    for (let i = 0; i < 750; i++) {
-      const y = 0.12 + random() * 0.88;
-      const angle = random() * Math.PI * 2;
-      const r = Math.sqrt(1 - y * y);
-      positions.set([Math.cos(angle) * r * 240, y * 240, Math.sin(angle) * r * 240], i * 3);
-    }
-    return positions;
-  }, []);
+  const starBuf = useMemo(() => starBuffers(), []);
+  const starMaterial = useRef<ShaderMaterial>(null);
+  const starUniforms = useMemo(() => ({ equToWorld: { value: new Matrix3() }, opacity: { value: 0 }, pixelRatio: { value: 1 } }), []);
+  const gl = useThree((s) => s.gl);
   // Stars come out as the sky darkens, not at a switch.
-  const starOpacity = 0.8 * (1 - sky.daylight) ** 2;
+  const starOpacity = 0.9 * (1 - sky.daylight) ** 2;
+  useEffect(() => {
+    const u = (starMaterial.current?.uniforms ?? starUniforms) as typeof starUniforms;
+    u.equToWorld.value.set(...(sky.starMatrix as [number, number, number, number, number, number, number, number, number]));
+    u.opacity.value = starOpacity;
+    u.pixelRatio.value = gl.getPixelRatio();
+  }, [sky.starMatrix, starOpacity, starUniforms, gl]);
   useFrame(({ camera }) => dome.current?.position.copy(camera.position));
   return (
     <group ref={dome}>
@@ -126,9 +126,35 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
               #include <colorspace_fragment>
             }`} />
       </mesh>
-      <points visible={starOpacity > 0.01}>
-        <bufferGeometry><bufferAttribute attach="attributes-position" args={[stars, 3]} /></bufferGeometry>
-        <pointsMaterial color="#e4edff" size={0.65} sizeAttenuation transparent opacity={starOpacity} depthWrite={false} fog={false} />
+      <points visible={starOpacity > 0.01} frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[starBuf.dir, 3]} />
+          <bufferAttribute attach="attributes-mag" args={[starBuf.mag, 1]} />
+          <bufferAttribute attach="attributes-tint" args={[starBuf.color, 3]} />
+        </bufferGeometry>
+        <shaderMaterial ref={starMaterial} transparent depthWrite={false} blending={AdditiveBlending} uniforms={starUniforms}
+          vertexShader={`uniform mat3 equToWorld; uniform float pixelRatio;
+            attribute float mag; attribute vec3 tint;
+            varying vec3 vTint; varying float vLevel;
+            void main() {
+              // The catalog's equatorial direction, turned to where it stands now.
+              vec3 d = equToWorld * position;
+              // Brighter stars are bigger and stronger; ones near the horizon
+              // are dimmed by the air and vanish below it.
+              float bright = clamp(6.0 - mag, 0.0, 7.5);
+              gl_PointSize = clamp(1.3 + 0.7 * bright, 1.3, 6.0) * pixelRatio;
+              vLevel = clamp(0.45 + 0.13 * bright, 0.45, 1.0) * smoothstep(0.0, 0.12, d.y);
+              vTint = tint;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(d * 240.0, 1.0);
+            }`}
+          fragmentShader={`uniform float opacity;
+            varying vec3 vTint; varying float vLevel;
+            void main() {
+              float r = length(gl_PointCoord - 0.5) * 2.0;
+              float a = smoothstep(1.0, 0.0, r);
+              gl_FragColor = vec4(vTint * a * a * vLevel * opacity, 1.0);
+              #include <colorspace_fragment>
+            }`} />
       </points>
     </group>
   );
