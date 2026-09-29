@@ -1003,7 +1003,10 @@ Assets, so the honest number is the one that keeps that door open.
 - **`PrivacyInfo.xcprivacy`** -- required at submission since 2024, in both
   `app/ios` and `app/macos`. Every answer in it is "no", which is the product
   rather than an oversight; the one declaration is `CA92.1`, this app reading
-  its own `UserDefaults`.
+  its own `UserDefaults`. Keep the file free of XML comments: one with a double
+  hyphen made the manifest not well-formed, and App Store Connect rejected
+  build 720 with ITMS-91056 although `plutil -lint` passed.
+  `scripts/check_privacy_manifest.py`, run by pre-commit, parses it strictly.
 - **`ITSAppUsesNonExemptEncryption: false`** in `Info.plist`. Without it every
   upload stops to ask the export-compliance question by hand. False is
   correct: nothing here encrypts beyond HTTPS, which is exempt.

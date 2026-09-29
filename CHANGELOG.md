@@ -18,6 +18,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   Portrait Upside Down, which iPad multitasking requires. App Store Connect
   rejected the first delivery of 1.28.0 (build 720) with error 90474 until
   it was added.
+- **The privacy manifests are well-formed XML.** A comment in
+  `PrivacyInfo.xcprivacy` contained a double hyphen, which XML forbids;
+  `plutil` accepted it, but App Store Connect rejected build 720 with
+  ITMS-91056. The comments are gone from the iOS and macOS manifests, and a
+  pre-commit hook, `scripts/check_privacy_manifest.py`, now parses both
+  strictly.
 
 ## [1.28.0] - 2026-09-28
 
