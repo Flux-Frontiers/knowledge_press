@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.28.1] - 2026-09-29
+
 ### Fixed
 
 - **Render is only offered when the worker can draw.** The button was always

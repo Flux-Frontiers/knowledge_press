@@ -1,6 +1,6 @@
 {
   "format": "1.0",
-  "last_update": "2026-09-29T02:31:44.132083+00:00",
+  "last_update": "2026-09-29T20:39:35.818542+00:00",
   "snapshots": [
     {
       "key": "2026-09-26T05:26:58.392840+00:00",
@@ -263,6 +263,52 @@
         "method_count": 28,
         "docstring_coverage": 0.065,
         "snapshot_count": 5,
+        "vector_backend": "sqlite-vec",
+        "critical_issues": 7,
+        "complexity_median": 2.0
+      },
+      "deltas": {
+        "vs_previous": null,
+        "vs_baseline": {
+          "nodes": 1658,
+          "edges": 4090
+        }
+      }
+    },
+    {
+      "key": "1.28.1",
+      "branch": "main",
+      "timestamp": "2026-09-29T20:39:35.814748+00:00",
+      "version": "1.28.1",
+      "subject": "repo:knowledge_press",
+      "tool": "tscode-kg",
+      "tool_version": "0.7.0",
+      "file": "1.28.1.json",
+      "metrics": {
+        "db_path": ".tscodekg/graph.sqlite",
+        "total_nodes": 1973,
+        "meaningful_nodes": 1973,
+        "total_edges": 4901,
+        "node_counts": {
+          "class": 9,
+          "function": 1810,
+          "interface": 1,
+          "method": 28,
+          "module": 75,
+          "type_alias": 50
+        },
+        "edge_counts": {
+          "CALLS": 2769,
+          "CONTAINS": 1898,
+          "IMPORTS": 229,
+          "INHERITS": 5
+        },
+        "module_count": 75,
+        "class_count": 9,
+        "function_count": 1810,
+        "method_count": 28,
+        "docstring_coverage": 0.065,
+        "snapshot_count": 6,
         "vector_backend": "sqlite-vec",
         "critical_issues": 7,
         "complexity_median": 2.0

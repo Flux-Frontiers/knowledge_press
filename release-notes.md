@@ -1,43 +1,28 @@
-# Release Notes -- v1.28.0
+# Release Notes -- v1.28.1
 
-> Released: 2026-09-28
-
-### Added
-
-- **The Flame of Knowledge**, a sculpture by George B. Suchanek, about 1964,
-  scanned from his plaster model. It stands 8.5 m tall in polished silver,
-  with its own reflection map, and its plaque tells its story. The web loads
-  a geometry-only GLB (`web/public/models/flame_of_knowledge.glb`, 589 KB);
-  the scan sources stay out of git.
-- **Double Helix**, B-DNA on a spike, turning in the gusts: right-handed,
-  10.5 base pairs a turn, the strands offset for the minor and major
-  grooves, rungs in sequencing-trace colors. One strand spells KNOWLEDGE at
-  two bits a base.
-- **Weather Mast**: a cup anemometer, a vane and a wind sock that read the
-  forest's own wind. The vane and sock follow a slowly veering heading about
-  the axis the leaves sway on, and the sock lifts in the gusts.
-- Each grove's signpost carries a plate naming its tree species, common and
-  scientific.
-- Signs are lit at night: gooseneck lamps over each grove signpost, exhibit
-  plaque and the redwood's plaque, with the board washed brightest under the
-  lamps and a pool of light on the ground. No real lights are added.
-- A plan for press levels and a press reset, in `web/FEATURES.md`.
-
-### Changed
-
-- **Exhibits stand at the end of side spokes off the ring roads**, each on
-  its own plaza, spread round the forest instead of bunched by the hub.
-- The corpus redwood has its own bark, deep furrows between fibrous ridges
-  at trunk scale, in place of fir bark tiled too small to read.
-- The Flame, the helix and the Helical Rotor take a softer floodlight at
-  night, fading up their height, so they no longer outshine the forest.
+> Released: 2026-09-29
 
 ### Fixed
 
-- The reader's book text is rebuilt from the corrected corpus: 25 books
-  whose chapters are numbered with bare roman numerals (My Antonia, Tess,
-  Candide, The Possessed, the Upanishads and others) now split at every
-  chapter instead of running several together.
+- **Render is only offered when the worker can draw.** The button was always
+  enabled, but rendering goes through the worker, which most readers do not
+  have. It is now hidden when no worker address is set, and disabled with a
+  reason and a Retry button when the worker is unreachable or reports no
+  image backend. The check runs at launch, when the app returns to the
+  foreground, when the address changes, and after a render fails on the
+  network. It waits 5 seconds, not 60. A worker too old to report image
+  backends keeps Render enabled.
+- **The iPhone and iPad app lists all four orientations.** The iOS target
+  declared Portrait, Landscape Left and Landscape Right and left out
+  Portrait Upside Down, which iPad multitasking requires. App Store Connect
+  rejected the first delivery of 1.28.0 (build 720) with error 90474 until
+  it was added.
+- **The privacy manifests are well-formed XML.** A comment in
+  `PrivacyInfo.xcprivacy` contained a double hyphen, which XML forbids;
+  `plutil` accepted it, but App Store Connect rejected build 720 with
+  ITMS-91056. The comments are gone from the iOS and macOS manifests, and a
+  pre-commit hook, `scripts/check_privacy_manifest.py`, now parses both
+  strictly.
 
 ---
 

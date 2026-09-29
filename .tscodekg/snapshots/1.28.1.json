@@ -1,0 +1,105 @@
+{
+  "key": "1.28.1",
+  "branch": "main",
+  "timestamp": "2026-09-29T20:39:35.814748+00:00",
+  "version": "1.28.1",
+  "subject": "repo:knowledge_press",
+  "tool": "tscode-kg",
+  "tool_version": "0.7.0",
+  "tree_hash": "0b0602aeefc6d6db3be70a629c3aaa109931cbf5",
+  "metrics": {
+    "db_path": ".tscodekg/graph.sqlite",
+    "total_nodes": 1973,
+    "meaningful_nodes": 1973,
+    "total_edges": 4901,
+    "node_counts": {
+      "class": 9,
+      "function": 1810,
+      "interface": 1,
+      "method": 28,
+      "module": 75,
+      "type_alias": 50
+    },
+    "edge_counts": {
+      "CALLS": 2769,
+      "CONTAINS": 1898,
+      "IMPORTS": 229,
+      "INHERITS": 5
+    },
+    "module_count": 75,
+    "class_count": 9,
+    "function_count": 1810,
+    "method_count": 28,
+    "docstring_coverage": 0.065,
+    "snapshot_count": 6,
+    "vector_backend": "sqlite-vec",
+    "critical_issues": 7,
+    "complexity_median": 2.0
+  },
+  "hotspots": [
+    {
+      "name": "fn:web/src/game/WindSculptures.tsx:useWindMaterials",
+      "callers": 5,
+      "callees": 3
+    },
+    {
+      "name": "fn:web/src/game/WindSculptures.tsx:useSpinners",
+      "callers": 4,
+      "callees": 3
+    },
+    {
+      "name": "fn:web/src/game/tour.ts:next",
+      "callers": 3,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/speech.ts:synth",
+      "callers": 3,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/sky.ts:toDays",
+      "callers": 3,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/sky.ts:sunPosition",
+      "callers": 3,
+      "callees": 3
+    },
+    {
+      "name": "fn:web/src/game/WindSculptures.tsx:useBlades",
+      "callers": 3,
+      "callees": 4
+    },
+    {
+      "name": "fn:web/src/game/Signposts.tsx:canvasTexture",
+      "callers": 2,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/CorpusRedwood.tsx:pointer",
+      "callers": 2,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/HUD.tsx:jumpHome",
+      "callers": 2,
+      "callees": 0
+    }
+  ],
+  "issues": [
+    "[WARN] 918 orphaned declarations: `$f`, `$i`, `$k`, `$l`, `Ad` (and 913 more) \u2014 zero callers detected; verify these aren't dead code",
+    "[LOW] Low JSDoc coverage (6.8%) \u2014 semantic query quality will be poor; undocumented nodes embed only identifiers, not natural language",
+    "[WARN] `service_worker_bin_prod.js` has 572 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `offscreendocument_main.js` has 541 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `offscreen_compiled.js` has 243 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `bindings_main.js` has 97 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `craw_background.js` has 56 declarations \u2014 consider splitting into focused modules"
+  ],
+  "vs_previous": null,
+  "vs_baseline": {
+    "nodes": 1658,
+    "edges": 4090
+  }
+}
