@@ -40,6 +40,14 @@ repos:
         language: system
         pass_filenames: false
         files: '^(web/package(-lock)?\.json|app/(ios|macos)/project\.yml|app/GutenbergKGKit/Sources/KnowledgePressUI/AppVersion\.swift|CITATION\.cff|README\.md|CHANGELOG\.md|release-notes\.md|scripts/check_version\.py)$'
+      # plutil accepts a manifest that App Store Connect rejects (ITMS-91056),
+      # so this parses it with expat, as strictly as Apple appears to.
+      - id: check-privacy-manifest
+        name: privacy manifests are valid
+        entry: python3 scripts/check_privacy_manifest.py
+        language: system
+        pass_filenames: false
+        files: '^(app/(ios|macos)/PrivacyInfo\.xcprivacy|scripts/check_privacy_manifest\.py)$'
       # `npm run build` starts with `tsc --noEmit`; only the typecheck is
       # worth running at commit time. Needs `make web-install` once.
       - id: web-typecheck
