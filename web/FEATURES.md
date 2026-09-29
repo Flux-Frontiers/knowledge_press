@@ -12,6 +12,39 @@ The sky is done (see Shipped); weather is the next world pass.
   already drops the canopy — snow should actually fall), and wind that moves
   the leaves. Tied to season, overridable from the HUD like Spring/Summer.
 
+### Press levels
+A rank for how much of the forest you have pressed, and a way to start over.
+
+- **Ranks** from the printing trade, by books pressed:
+
+  | Rank | Books pressed |
+  | --- | --- |
+  | Reader | 0 |
+  | Printer's Devil | 1 |
+  | Apprentice | 5 |
+  | Compositor | 12 |
+  | Journeyman | 25 |
+  | Pressman | 50 |
+  | Master Printer | 100 |
+  | Keeper of the Press | every book in the catalog |
+
+- **Derived, not stored.** `levelFor(library)` in a new `levels.ts` computes
+  the rank from `store.library`, so there is nothing new to save and no way
+  for a saved rank to drift from the books behind it.
+- **Shown** as a chip beside the press count in the HUD, with a progress bar
+  to the next rank in the press panel (L). Pressing the book that crosses a
+  threshold shows a level-up toast in place of the usual "Pressed" one.
+- **Reset the press** from the press panel: a button, then a confirm step
+  that says what will go. It empties `library` and `grovesVisited`, which
+  also clears the quests, and keeps the season, clock, place and
+  preferences. A new `resetPress()` store action does it and persists.
+- **Tests** (`tests/levels.test.mjs`): each threshold and the ones either
+  side of it; the top rank is exactly the catalog size; `resetPress` empties
+  the library and visited groves, keeps the preferences, and writes the save.
+- **Later, maybe:** weight by leaves pressed instead of books, so a long
+  novel counts for more than a sonnet; show "3 of 12 pressed" on each grove's
+  signpost plate.
+
 ## Later
 
 | Feature | Notes |
