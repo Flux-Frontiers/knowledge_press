@@ -88,3 +88,15 @@ test("the tour loop turns smoothly: no corner sharper than 40 degrees between sa
   }
   assert.ok(worst < (40 * Math.PI) / 180, `the loop turns ${((worst * 180) / Math.PI).toFixed(0)} degrees at one sample`);
 });
+
+test("a grove's stop counts as arrived, though it lies outside the grove's radius", () => {
+  const { atGroveStop, groveApproach } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const grove = { genre: "drama", label: "Drama", x: 120, z: 0, radius: 30 };
+  const forest = { groves: [grove] };
+  const stop = groveApproach(grove);
+  assert.ok(Math.hypot(grove.x - stop.x, grove.z - stop.z) > grove.radius, "the stop is outside the grove");
+  assert.equal(atGroveStop(forest, "drama", stop.x, stop.z), true);
+  assert.equal(atGroveStop(forest, "drama", stop.x - 8, stop.z), true);
+  assert.equal(atGroveStop(forest, "drama", stop.x - 40, stop.z), false);
+  assert.equal(atGroveStop(forest, "no-such-grove", stop.x, stop.z), false);
+});

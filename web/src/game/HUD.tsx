@@ -428,7 +428,8 @@ export function HUD({ forest }: { forest: Forest }) {
 
 function jumpToGrove(g: Grove) {
   const wp = groveApproach(g);
-  useGame.getState().selectGrove(g.genre);
+  // Arriving, not navigating: no trail to a grove the cart is about to stand at.
+  useGame.getState().selectGrove(null);
   useGame.getState().requestJump({ x: wp.x, z: wp.z, yaw: wp.yaw }, `${g.label} grove`);
 }
 
