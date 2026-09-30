@@ -43,6 +43,28 @@ export function ReaderPanel({ book }: { book: Book }) {
 
   const failure = chapters.state === "error" ? chapters.message : null;
 
+  // Left and Right turn the chapter; Up and Down scroll the page. The close
+  // button holds focus, so the page never gets the keys itself. A focused
+  // chapter menu keeps them: Left and Right step its options natively.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select")) return;
+      if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
+        if (e.repeat) return;
+        const next = index + (e.code === "ArrowLeft" ? -1 : 1);
+        if (next >= 0 && next < list.length) setIndex(next);
+        e.preventDefault();
+      } else if (e.code === "ArrowUp" || e.code === "ArrowDown") {
+        const pane = page.current;
+        if (pane) pane.scrollBy({ top: (e.code === "ArrowUp" ? -1 : 1) * pane.clientHeight * 0.4, behavior: "smooth" });
+        e.preventDefault();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [index, list.length]);
+
   return (
     <div className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-bg/60 p-2 sm:p-6" onClick={close}>
       <article

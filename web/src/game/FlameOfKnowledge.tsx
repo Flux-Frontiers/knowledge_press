@@ -7,7 +7,7 @@ import { useGame } from "./store";
 import { UplightFixtures, useUplitMaterials } from "./Uplights";
 
 /**
- * The Flame of Knowledge: a sculpture by George B. Suchanek, about 1964,
+ * The Flame of Knowledge: a sculpture by George B. Suchanek, 1964,
  * scanned from his plaster model. The mesh is
  * public/models/flame_of_knowledge.glb, exported from
  * assets/meshy_dad_sculpture_12feet.blend as geometry only (decimated to ~31k
@@ -24,7 +24,7 @@ const FLAME_HEIGHT = 8.5;
 const PLINTH_TOP = 1.0;
 
 const FLAME_BODY =
-  "George B. Suchanek modeled this piece in plaster around 1964. There is no straight line " +
+  "George B. Suchanek modeled this piece in plaster in 1964. There is no straight line " +
   "in it. Two forms rise from a narrow base, part around an open heart, and meet again at the " +
   "tip, as a flame parts and closes. They are also a figure: a pair of legs, stylized, " +
   "graceful and feminine. A flame is the old sign for knowledge, a light that can be handed " +
@@ -110,7 +110,7 @@ export function FlameOfKnowledge({ exhibit }: { exhibit: Exhibit }) {
   return (
     <group position={[exhibit.x, 0, exhibit.z]}>
       {/* To one side, so the whole flame shows from the spur. */}
-      <ExhibitPlaque exhibit={exhibit} title="The Flame of Knowledge" byline="George B. Suchanek · about 1964" body={FLAME_BODY} aside={0.9} />
+      <ExhibitPlaque exhibit={exhibit} title="The Flame of Knowledge" byline="George B. Suchanek · 1964" body={FLAME_BODY} aside={0.9} />
       <UplightFixtures radius={r + 0.35} count={3} pool={2.2} />
       {/* The cart collides with the lowest step (exhibit.obstacle). */}
       <mesh position={[0, 0.25, 0]} material={m.stone} castShadow receiveShadow>

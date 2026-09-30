@@ -67,7 +67,8 @@ A rank for how much of the forest you have pressed, and a way to start over.
 | Diaries as year limbs spiralling up the trunk, entries along them by date | `growTree.ts` |
 | Hub-and-spoke groves on two ring roads, 253-book catalog | `forest.ts`, `catalog.ts` |
 | WASD lantern cart; cameras behind, high, in the cart and god's eye (C) | `Player.tsx`, `sim.ts` |
-| Look around with arrows or the right stick; touch stick and look strip | `input.ts`, `TouchControls.tsx` |
+| Look around with arrows or the right stick; on touch, a second stick that tilts and pans | `input.ts`, `TouchControls.tsx` |
+| A genre mark on each stop plaza, the seal's construction with a glyph per genre; the glyph beside each genre in the list and atlas | `genreMarks.ts`, `GroveMarks.tsx`, `GenreGlyph.tsx` |
 | Seasons (canopy density, palettes) | `seasons.ts` |
 | Sky clock: sun, moon phase and stars for the live time and place, or dawn / day / dusk / night | `sky.ts`, `Environment.tsx`, `daylight.ts` |
 | Real star field: the 5,080 naked-eye stars of the Yale Bright Star Catalogue, placed by precession, sidereal time and latitude | `starCatalog.ts`, `stars.ts`, `sky.ts`, `scripts/build-stars.mjs` |

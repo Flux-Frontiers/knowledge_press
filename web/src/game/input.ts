@@ -30,8 +30,8 @@ let injectedKeys: string[] | null = null;
 let injectedSteer: number | null = null;
 let touchThrottle = 0;
 let touchSteer = 0;
-let touchBrake = false;
 let touchPitch = 0;
+let touchLook = 0;
 let prevInteract = false;
 
 export function isInputTarget(target: EventTarget | null): boolean {
@@ -51,8 +51,7 @@ function onKeyUp(e: KeyboardEvent) {
 
 export function resetInput() {
   keys.clear();
-  touchThrottle = touchSteer = touchPitch = 0;
-  touchBrake = false;
+  touchThrottle = touchSteer = touchPitch = touchLook = 0;
   prevInteract = false;
   injectedKeys = null;
   injectedSteer = null;
@@ -108,13 +107,14 @@ export function setTouchAxes(throttle: number, steer: number) {
   touchSteer = steer;
 }
 
-/** Touch look strip: -1 (tilt down) to 1 (tilt up), a rate like the Up/Down keys. */
-export function setTouchPitch(pitch: number) {
+/**
+ * Touch look stick, as rates like the arrow keys: `pitch` -1 (tilt down) to
+ * 1 (tilt up), `look` -1 (pan right) to 1 (pan left). The tilt holds where
+ * it is left; the pan eases back to ahead once the stick is released.
+ */
+export function setTouchLook(pitch: number, look: number) {
   touchPitch = pitch;
-}
-
-export function setTouchBrake(brake: boolean) {
-  touchBrake = brake;
+  touchLook = look;
 }
 
 function held(code: string): boolean {
@@ -157,7 +157,7 @@ export function sampleActions(): Actions {
     throttle: 0,
     steer: 0,
     boost: false,
-    brake: touchBrake,
+    brake: false,
     interact: false,
     interactDown: false,
     pitch: 0,
@@ -180,6 +180,7 @@ export function sampleActions(): Actions {
   actions.throttle += touchThrottle;
   actions.steer += touchSteer;
   actions.pitch += touchPitch;
+  actions.look += touchLook;
 
   pollGamepad(actions);
 
