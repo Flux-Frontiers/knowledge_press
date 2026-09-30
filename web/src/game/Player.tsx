@@ -6,6 +6,7 @@ import { resetInput, sampleActions } from "./input";
 import { clamp } from "./math";
 import { forwardOf, sim, stepVehicle, teleportSim } from "./sim";
 import { hush, speak, speaking } from "./speech";
+import { markTourHeard, TOUR_FAREWELL, TOUR_LAP_DONE, tourHeard, tourIntro } from "./tourScript";
 import { planTour, steerTour, tourState, tourStop } from "./tour";
 import { useGame } from "./store";
 
@@ -35,6 +36,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   /** Pan off the cart's heading, radians, left positive. */
   const look = useRef(0);
   const lastMarked = useRef<string | null>(null);
+  /** The ring's end has been announced on this tour. */
+  const lapSaid = useRef(false);
 
   const paused = useGame((s) => s.paused);
   const collect = useGame((s) => s.collect);
@@ -73,11 +76,35 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       let steer = a.steer;
       let tourBrake = false;
       const mode = useGame.getState().travelMode;
+      /** Show a tour caption for a while, and drop it once it has had its time (unless replaced). */
+      const note = (text: string) => {
+        game.setTourNote(text);
+        const ms = Math.max(8000, text.split(/\s+/).length * 400);
+        window.setTimeout(() => { if (useGame.getState().tourNote === text) useGame.getState().setTourNote(null); }, ms);
+      };
+      /** Show several lines in turn, each for about as long as it takes to say, while this tour lasts. */
+      const noteLines = (lines: string[]) => {
+        const tour = tourState.tour;
+        let at = 0;
+        for (const line of lines) {
+          window.setTimeout(() => {
+            if (tourState.tour === tour && !useGame.getState().tourStop) useGame.getState().setTourNote(line);
+          }, at);
+          at += Math.max(3000, line.split(/\s+/).length * 400);
+        }
+        window.setTimeout(() => { if (lines.includes(useGame.getState().tourNote ?? "")) useGame.getState().setTourNote(null); }, at);
+      };
       const endTour = () => {
+        const wasTouring = Boolean(tourState.tour);
         tourState.tour = null;
+        game.setTourNote(null);
         if (game.tourStop) {
           game.setTourStop(null);
           hush();
+        }
+        // Taking the wheel is not a jump elsewhere: say goodbye.
+        if (wasTouring && !useGame.getState().jump && preferences.narrate && !preferences.silent) {
+          speak(TOUR_FAREWELL);
         }
       };
       if (mode !== "circuit") endTour();
@@ -87,7 +114,17 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           useGame.getState().setTravelMode("free");
           useGame.getState().setToast("Free drive");
         } else {
-          tourState.tour ??= planTour(forest, sim.x, sim.z, sim.yaw);
+          if (!tourState.tour) {
+            tourState.tour = planTour(forest, sim.x, sim.z, sim.yaw);
+            lapSaid.current = false;
+            // Set off with the welcome: the whole background the first time, a line after that.
+            if (!preferences.silent) {
+              const lines = tourIntro({ books: forest.trees.length, groves: forest.groves.length }, tourHeard());
+              markTourHeard();
+              noteLines(lines);
+              if (preferences.narrate) lines.forEach((line, i) => speak(line, i > 0));
+            }
+          }
           const c = steerTour(tourState.tour, sim.x, sim.z, sim.yaw, sim.speed, dt, speaking());
           steer = c.steer;
           if (throttle === 0) throttle = c.throttle;
@@ -96,8 +133,18 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           const stop = tourStop(tourState.tour);
           if (stop !== game.tourStop) {
             game.setTourStop(stop);
+            if (stop) game.setTourNote(null);
             const said = stop ? forest.groves.find((g) => g.genre === stop)?.narration : undefined;
-            if (said && preferences.narrate && !preferences.silent) speak(said);
+            // Queued, so a stop reached during the welcome waits for it.
+            if (said && preferences.narrate && !preferences.silent) speak(said, true);
+          }
+          // Every grove visited and the ring starting over: say so once.
+          if (tourState.tour.laps > 0 && !lapSaid.current) {
+            lapSaid.current = true;
+            if (!preferences.silent) {
+              note(TOUR_LAP_DONE);
+              if (preferences.narrate) speak(TOUR_LAP_DONE, true);
+            }
           }
           useGame.getState().selectGrove(c.genre);
         }

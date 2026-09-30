@@ -17,17 +17,21 @@ function englishVoice(s: SpeechSynthesis): SpeechSynthesisVoice | undefined {
 
 let active = false;
 
-/** Speak `text`, cutting off anything still being said. */
-export function speak(text: string): void {
+/**
+ * Speak `text`, cutting off anything still being said.
+ *
+ * :param queue: Say it after whatever is being said instead of cutting it off.
+ */
+export function speak(text: string, queue = false): void {
   const s = synth();
   if (!s) return;
-  s.cancel();
+  if (!queue) s.cancel();
   const u = new SpeechSynthesisUtterance(text);
   const voice = englishVoice(s);
   if (voice) u.voice = voice;
   u.lang = voice?.lang ?? "en-US";
   u.rate = 0.95;
-  u.onend = u.onerror = () => { if (s.speaking === false) active = false; };
+  u.onend = u.onerror = () => { if (!s.speaking && !s.pending) active = false; };
   active = true;
   s.speak(u);
 }

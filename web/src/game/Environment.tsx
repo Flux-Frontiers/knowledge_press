@@ -1,8 +1,10 @@
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
+import { AdditiveBlending, BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
 import type { Forest } from "./forest";
 import type { SkyState } from "./sky";
+import { starBuffers } from "./stars";
+import { fogMix, overcast, weather } from "./weather";
 import { mulberry32 } from "./math";
 import type { SeasonName } from "./seasons";
 import { sim } from "./sim";
@@ -15,6 +17,10 @@ import { useGame } from "./store";
  * lit side faces, come from where the two actually are. Both discs are drawn
  * about eight times their true size so they read from the cart.
  */
+/** Fog gray, in the dark and in the day. */
+export const FOG_NIGHT = new Color("#2b323a");
+export const FOG_DAY = new Color("#d3d9db");
+
 export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
   const dome = useRef<Object3D>(null);
   const material = useRef<ShaderMaterial>(null);
@@ -38,6 +44,9 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
     moonFraction: { value: 0 },
     moonMap: { value: moonMap },
     moonReady: { value: 0 },
+    fogTint: { value: new Color() },
+    fogMix: { value: 0 },
+    clearAir: { value: 1 },
   }), [moonMap]);
   // Written through the material, not `uniforms`: the material holds its own
   // copy, sharing the Color and Vector3 objects but not plain numbers, so a
@@ -55,19 +64,29 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
     // In case the map finished loading before the material existed to hear it.
     if (moonMap.image) u.moonReady.value = 1;
   }, [sky, season, uniforms, moonMap]);
-  const stars = useMemo(() => {
-    const random = mulberry32(917);
-    const positions = new Float32Array(750 * 3);
-    for (let i = 0; i < 750; i++) {
-      const y = 0.12 + random() * 0.88;
-      const angle = random() * Math.PI * 2;
-      const r = Math.sqrt(1 - y * y);
-      positions.set([Math.cos(angle) * r * 240, y * 240, Math.sin(angle) * r * 240], i * 3);
-    }
-    return positions;
-  }, []);
+  // Fog and cloud gray the sky toward the fog's color and hide the sun, moon and stars.
+  useFrame(() => {
+    const u = material.current?.uniforms as typeof uniforms | undefined;
+    if (!u) return;
+    const mix = fogMix(weather);
+    u.fogTint.value.copy(FOG_NIGHT).lerp(FOG_DAY, sky.daylight);
+    u.fogMix.value = mix;
+    u.clearAir.value = 1 - overcast(weather);
+    // Unlike the dome, stars are drawn as points, so they dim on their own uniform.
+    const s = starMaterial.current?.uniforms as typeof starUniforms | undefined;
+    if (s) s.opacity.value = 0.9 * (1 - sky.daylight) ** 2 * (1 - overcast(weather)) ** 2;
+  });
+  const starBuf = useMemo(() => starBuffers(), []);
+  const starMaterial = useRef<ShaderMaterial>(null);
+  const starUniforms = useMemo(() => ({ equToWorld: { value: new Matrix3() }, opacity: { value: 0 }, pixelRatio: { value: 1 } }), []);
+  const gl = useThree((s) => s.gl);
   // Stars come out as the sky darkens, not at a switch.
-  const starOpacity = 0.8 * (1 - sky.daylight) ** 2;
+  const starOpacity = 0.9 * (1 - sky.daylight) ** 2;
+  useEffect(() => {
+    const u = (starMaterial.current?.uniforms ?? starUniforms) as typeof starUniforms;
+    u.equToWorld.value.set(...(sky.starMatrix as [number, number, number, number, number, number, number, number, number]));
+    u.pixelRatio.value = gl.getPixelRatio();
+  }, [sky.starMatrix, starUniforms, gl]);
   useFrame(({ camera }) => dome.current?.position.copy(camera.position));
   return (
     <group ref={dome}>
@@ -80,6 +99,7 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
             uniform vec3 zenith; uniform vec3 horizon; uniform float daylight; uniform float warmth;
             uniform vec3 sunDir; uniform vec3 moonDir; uniform float moonFraction;
             uniform sampler2D moonMap; uniform float moonReady;
+            uniform vec3 fogTint; uniform float fogMix; uniform float clearAir;
             void main() {
               vec3 d = normalize(direction);
               vec3 col = mix(horizon, zenith, pow(max(d.y, 0.0), 0.4));
@@ -88,8 +108,10 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
               vec2 sh = normalize(sunDir.xz + vec2(1e-5));
               float toward = 0.35 + 0.65 * pow(max(dot(dh, sh), 0.0), 3.0);
               col = mix(col, vec3(.98, .55, .30), warmth * toward * pow(1.0 - max(d.y, 0.0), 3.0) * 0.75);
+              // Fog and cloud: the whole sky goes to the fog's color, and the discs are lost in it.
+              col = mix(col, fogTint, fogMix);
               float sun = max(dot(d, sunDir), 0.0);
-              float sunUp = smoothstep(-0.05, 0.02, sunDir.y);
+              float sunUp = smoothstep(-0.05, 0.02, sunDir.y) * clearAir;
               col += vec3(1., .55, .28) * pow(sun, 6.) * .3 * warmth * sunUp;
               col += vec3(1., .8, .5) * pow(sun, 32.) * .28 * daylight * sunUp;
               // Mixed in, not added, so a low sun stays orange instead of clipping to white.
@@ -98,7 +120,7 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
               // Disc coordinates and the map lookup run for every pixel, outside the branch,
               // so the texture's mipmap derivatives stay defined.
               float md = dot(d, moonDir);
-              float moonUp = smoothstep(-0.03, 0.03, moonDir.y);
+              float moonUp = smoothstep(-0.03, 0.03, moonDir.y) * clearAir;
               vec3 right = normalize(cross(moonDir, vec3(0.0, 1.0, 0.0)) + vec3(1e-4, 0.0, 0.0));
               vec3 up = cross(right, moonDir);
               vec2 p = vec2(dot(d, right), dot(d, up)) / 0.0374;
@@ -126,9 +148,35 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
               #include <colorspace_fragment>
             }`} />
       </mesh>
-      <points visible={starOpacity > 0.01}>
-        <bufferGeometry><bufferAttribute attach="attributes-position" args={[stars, 3]} /></bufferGeometry>
-        <pointsMaterial color="#e4edff" size={0.65} sizeAttenuation transparent opacity={starOpacity} depthWrite={false} fog={false} />
+      <points visible={starOpacity > 0.01} frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[starBuf.dir, 3]} />
+          <bufferAttribute attach="attributes-mag" args={[starBuf.mag, 1]} />
+          <bufferAttribute attach="attributes-tint" args={[starBuf.color, 3]} />
+        </bufferGeometry>
+        <shaderMaterial ref={starMaterial} transparent depthWrite={false} blending={AdditiveBlending} uniforms={starUniforms}
+          vertexShader={`uniform mat3 equToWorld; uniform float pixelRatio;
+            attribute float mag; attribute vec3 tint;
+            varying vec3 vTint; varying float vLevel;
+            void main() {
+              // The catalog's equatorial direction, turned to where it stands now.
+              vec3 d = equToWorld * position;
+              // Brighter stars are bigger and stronger; ones near the horizon
+              // are dimmed by the air and vanish below it.
+              float bright = clamp(6.0 - mag, 0.0, 7.5);
+              gl_PointSize = clamp(1.3 + 0.7 * bright, 1.3, 6.0) * pixelRatio;
+              vLevel = clamp(0.45 + 0.13 * bright, 0.45, 1.0) * smoothstep(0.0, 0.12, d.y);
+              vTint = tint;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(d * 240.0, 1.0);
+            }`}
+          fragmentShader={`uniform float opacity;
+            varying vec3 vTint; varying float vLevel;
+            void main() {
+              float r = length(gl_PointCoord - 0.5) * 2.0;
+              float a = smoothstep(1.0, 0.0, r);
+              gl_FragColor = vec4(vTint * a * a * vLevel * opacity, 1.0);
+              #include <colorspace_fragment>
+            }`} />
       </points>
     </group>
   );
@@ -166,6 +214,10 @@ export function Sunlight({ light: l, detail }: { light: SkyState["light"]; detai
     target.position.set(sim.x, 0, sim.z);
     light.current.position.set(sim.x + dir.x * 80, dir.y * 80, sim.z + dir.z * 80);
     target.updateMatrixWorld();
+    // Fog and cloud take the sun's strength and soften its shadows.
+    const o = overcast(weather);
+    light.current.intensity = l.intensity * (1 - 0.7 * o);
+    light.current.shadow.intensity = l.shadow * (1 - o);
   });
   return <>
     <primitive object={target} />

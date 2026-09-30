@@ -13,6 +13,8 @@ export type Preferences = {
   silent: boolean;
   /** Fog density; see FOG_SCALE. */
   fog: FogLevel;
+  /** Random weather: morning fogs that burn off, up to pea soup, and drifting cloud (weather.ts). */
+  weather: boolean;
   /** Riding the ring, read each grove's summary aloud at its stop. */
   narrate: boolean;
 };
@@ -46,6 +48,7 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     stats: value?.stats === true,
     silent: value?.silent === true,
     fog: value?.fog && value.fog in FOG_SCALE ? value.fog : "normal",
+    weather: value?.weather === true,
     narrate: value?.narrate === true,
   };
 }

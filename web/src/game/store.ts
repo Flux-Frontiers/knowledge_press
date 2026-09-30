@@ -148,6 +148,8 @@ export type GameStore = {
   travelMode: TravelMode;
   /** The grove the tour is pulled up at (its caption shows), or null. */
   tourStop: string | null;
+  /** What the tour is saying outside a grove stop (welcome, end of the ring): its caption, or null. */
+  tourNote: string | null;
   jump: JumpPose | null;
   play: () => void;
   pause: (v?: boolean) => void;
@@ -180,6 +182,7 @@ export type GameStore = {
   openReader: (slug: string | null) => void;
   setTravelMode: (m: TravelMode) => void;
   setTourStop: (genre: string | null) => void;
+  setTourNote: (note: string | null) => void;
   toggleCircuit: () => void;
   requestJump: (pose: JumpPose, toast?: string) => void;
   clearJump: () => void;
@@ -247,6 +250,7 @@ export const useGame = create<GameStore>((set, get) => ({
   toggleCleanView: () => set({ cleanView: !get().cleanView }),
   travelMode: "free",
   tourStop: null,
+  tourNote: null,
   jump: null,
   play: () => set({ playing: true, paused: false }),
   pause: (v) => {
@@ -323,6 +327,7 @@ export const useGame = create<GameStore>((set, get) => ({
   setTravelMode: (travelMode) =>
     set(travelMode === "free" && get().travelMode === "circuit" ? { travelMode, selectedGrove: null } : { travelMode }),
   setTourStop: (tourStop) => { if (get().tourStop !== tourStop) set({ tourStop }); },
+  setTourNote: (tourNote) => { if (get().tourNote !== tourNote) set({ tourNote }); },
   toggleCircuit: () => {
     const next = get().travelMode === "circuit" ? "free" : "circuit";
     set({

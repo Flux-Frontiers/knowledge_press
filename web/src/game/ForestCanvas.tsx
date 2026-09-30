@@ -18,7 +18,8 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
 
   return (
     <Canvas
-      shadows={detail ? "soft" : false}
+      // "percentage" is PCFShadowMap, which three r186 makes soft itself; "soft" asks for the removed PCFSoftShadowMap.
+      shadows={detail ? "percentage" : false}
       camera={{ position: [forest.spawn.x, 6.2, forest.spawn.z + 10], fov: 58, near: 0.12, far: 560 }}
       dpr={[1, PHONE ? 1 : COARSE_POINTER ? 1.25 : 1.5]}
       gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}

@@ -23,6 +23,8 @@ export type Tour = {
   stops: { k: number; genre: string; x: number; z: number }[];
   /** The stop the cart is heading for. */
   next: number;
+  /** Times the cart has been through every grove and started round again. */
+  laps: number;
   /** Pulled up at a stop: braking, turning to the sign, holding, turning back. */
   dwell: { phase: "brake" | "face" | "hold" | "back"; left: number } | null;
 };
@@ -118,7 +120,7 @@ export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circui
       const sign = forest.signs.find((sg) => sg.genre === g);
       return { k, genre: g, x: sign?.x ?? pts[k]![0], z: sign?.z ?? pts[k]![1] };
     });
-  return { pts, genre, loopStart, i: 0, stops, next: 0, dwell: null };
+  return { pts, genre, loopStart, i: 0, stops, next: 0, laps: 0, dwell: null };
 }
 
 /** Route points from `from` forward to `to`, following the loop. */
@@ -202,6 +204,7 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
     if (!turn.done) return { steer: turn.steer, ...hold };
     t.dwell = null;
     t.next = (t.next + 1) % t.stops.length;
+    if (t.next === 0) t.laps++;
   }
   let best = t.i, bestD = Math.hypot(t.pts[t.i]![0] - x, t.pts[t.i]![1] - z);
   for (let k = 1, j = t.i; k <= SEARCH; k++) {

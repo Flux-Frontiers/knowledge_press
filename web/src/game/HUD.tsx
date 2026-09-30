@@ -66,6 +66,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const silent = useGame((s) => s.preferences.silent);
   const tourStop = useGame((s) => s.tourStop);
   const touring = tourStop ? forest.groves.find((g) => g.genre === tourStop) : undefined;
+  const tourNote = useGame((s) => s.tourNote);
   const setPreferences = useGame((s) => s.setPreferences);
 
   // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
@@ -296,6 +297,11 @@ export function HUD({ forest }: { forest: Forest }) {
               <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">{touring.label}</h2>
               {/* The heading already names the grove; the spoken text starts with it. */}
               <p className="mt-2 text-sm leading-relaxed text-fg/90">{touring.narration.replace(`${touring.label}: `, "").replace(/^./, (c) => c.toUpperCase())}</p>
+            </article>
+          ) : tourNote && !silent ? (
+            <article className="rounded-lg border border-border bg-surface/94 p-3 sm:p-4" aria-live="polite">
+              <p className="flex items-center gap-2 text-xs tracking-wide text-muted uppercase">On the ring</p>
+              <p className="mt-1 text-sm leading-relaxed text-fg/90">{tourNote}</p>
             </article>
           ) : atRedwood ? (
             <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">

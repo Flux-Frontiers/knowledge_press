@@ -60,6 +60,41 @@ export function moonPosition(date: Date, place: Place): BodyPosition {
   return horizontal(d, place, c.ra, c.dec);
 }
 
+/**
+ * The 3x3 (row-major) that turns a J2000 equatorial unit vector
+ * (cos dec cos ra, cos dec sin ra, sin dec) into the world direction
+ * `bodyDirection` gives, for this moment and place. It is the rotation to the
+ * date (IAU 1976 precession: the equinox has moved about 0.37 degrees since 2000) followed by the turn
+ * of local sidereal time and latitude, so the stars stand where the sun and
+ * moon's own hour angle puts them. Proper motion and nutation are under an
+ * arcminute and left out.
+ */
+export function equatorialToWorld(date: Date, place: Place): number[] {
+  const d = toDays(date);
+  const T = d / 36525;
+  const AS = RAD / 3600;
+  const zeta = (2306.2181 * T + 0.30188 * T * T) * AS;
+  const z = (2306.2181 * T + 1.09468 * T * T) * AS;
+  const th = (2004.3109 * T - 0.42665 * T * T) * AS;
+  const [cz, sz, cq, sq, ch, sh] = [Math.cos(zeta), Math.sin(zeta), Math.cos(z), Math.sin(z), Math.cos(th), Math.sin(th)];
+  const P = [
+    cz * ch * cq - sz * sq, -sz * ch * cq - cz * sq, -sh * cq,
+    cz * ch * sq + sz * cq, -sz * ch * sq + cz * cq, -sh * sq,
+    cz * sh, -sz * sh, ch,
+  ];
+  const phi = RAD * place.lat;
+  const theta = siderealTime(d, RAD * -place.lon);
+  const [ct, st, cp, sp] = [Math.cos(theta), Math.sin(theta), Math.cos(phi), Math.sin(phi)];
+  const M = [
+    -st, ct, 0,
+    cp * ct, cp * st, sp,
+    sp * ct, sp * st, -cp,
+  ];
+  const out: number[] = [];
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) out.push(M[r * 3]! * P[c]! + M[r * 3 + 1]! * P[3 + c]! + M[r * 3 + 2]! * P[6 + c]!);
+  return out;
+}
+
 /** Lit fraction of the disc (0 new, 1 full), and phase through the month (0 new, 0.5 full). */
 export function moonIllumination(date: Date): { fraction: number; phase: number } {
   const d = toDays(date);
@@ -193,6 +228,13 @@ export type SkyState = {
   moonFraction: number;
   moonPhase: number;
   /**
+   * 0 to 1, how much this is a morning sky: the sun rising, from the last hour or
+   * two of darkness until it is well up. Fog is likeliest then (weather.ts).
+   */
+  morning: number;
+  /** `equatorialToWorld` for this moment: where the fixed stars stand. */
+  starMatrix: number[];
+  /**
    * The one directional light: the sun by day, the moon by night, faint
    * starlight with neither up. `shadow` is how strongly it casts shadows, 0 to 1.
    */
@@ -207,6 +249,8 @@ export function skyState(at: Date, place: Place): SkyState {
   const moonDir = bodyDirection(moon);
   const alt = sun.altitude;
   const daylight = smoothstep(-8 * RAD, 8 * RAD, alt);
+  const rising = sunPosition(new Date(at.valueOf() + STEP), place).altitude > alt;
+  const morning = rising ? smoothstep(-20 * RAD, -6 * RAD, alt) * (1 - smoothstep(12 * RAD, 35 * RAD, alt)) : 0;
   const warmth = smoothstep(-6 * RAD, 0, alt) * (1 - smoothstep(2 * RAD, 14 * RAD, alt));
   // Whichever gives more light is the light, so twilight hands over without a jump.
   const sunI = 2.4 * smoothstep(-4 * RAD, 6 * RAD, alt);
@@ -225,5 +269,5 @@ export function skyState(at: Date, place: Place): SkyState {
     const n = Math.hypot(0.3, 1, 0.2);
     light = { dir: [0.3 / n, 1 / n, 0.2 / n], color: "#7f93b8", intensity: starI, shadow: 0 };
   }
-  return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, light };
+  return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, morning, starMatrix: equatorialToWorld(at, place), light };
 }
