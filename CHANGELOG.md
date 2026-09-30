@@ -17,6 +17,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   full round stick like the drive stick: up and down tilt and hold, left and
   right look around and ease back to ahead on release, as the arrow keys do.
 
+- **The species under each genre in the book list**, common and Latin
+  names, so the list says what the trees are.
 - **Arrow keys in the reader.** Left and Right turn to the previous or next
   chapter; Up and Down scroll the page.
 - **Reset all settings** (Pause, at the bottom). Puts the preferences, season
@@ -47,6 +49,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **The splash describes the species.** It no longer mentions space
   colonization; it says that each genre grows as a real species with that
   tree's bark, leaf and habit, and names four of the nine.
+- **The Flame of Knowledge is dated 1964**, not "about 1964", on its plaque.
 - **The touch Brake button is gone.** Letting go of the drive stick already
   stops the cart in about a second, and steering or reversing hops off the
   tour. Space and the gamepad's left trigger still brake.
