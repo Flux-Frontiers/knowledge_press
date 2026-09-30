@@ -35,3 +35,37 @@ test("leaving the ring puts the lantern trail away; a grove jump keeps it", () =
   st().requestJump({ x: 0, z: 0, yaw: 0 }); // atlas jump: trail should lead there
   assert.equal(st().selectedGrove, "letters");
 });
+
+test("reset puts every setting back, forgets the tour welcome, and forgets the pressed books", () => {
+  const store = new Map([["kpf-tour-heard", "1"]]);
+  globalThis.window = {
+    localStorage: {
+      getItem: (k) => store.get(k) ?? null,
+      setItem: (k, v) => { store.set(k, v); },
+      removeItem: (k) => { store.delete(k); },
+    },
+  };
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const { tourHeard } = require(`${process.env.FOREST_TEST_BUILD}/tourScript.js`);
+  const st = () => useGame.getState();
+  st().setPreferences({ camera: "god", narrate: true, weather: true, fog: "heavy" });
+  st().setSeason("winter");
+  st().toggleTimeOfDay();
+  st().collect("hamlet", "Hamlet");
+  assert.deepEqual(st().library, ["hamlet"]);
+  assert.equal(tourHeard(), true);
+  st().resetSettings();
+  assert.equal(st().preferences.camera, "follow");
+  assert.equal(st().preferences.narrate, false);
+  assert.equal(st().preferences.weather, false);
+  assert.equal(st().preferences.fog, "normal");
+  assert.equal(st().season, "summer");
+  assert.equal(st().timeMode, "live");
+  assert.equal(tourHeard(), false);
+  assert.deepEqual(st().library, []);
+  assert.equal(st().lastReadSlug, null);
+  const saved = JSON.parse(store.get("kpf-library-v1"));
+  assert.equal(saved.season, "summer");
+  assert.equal(saved.preferences.camera, "follow");
+  assert.deepEqual(saved.library, []);
+});

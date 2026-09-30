@@ -10,6 +10,7 @@ export function PauseOverlay() {
   const setPreferences = useGame((s) => s.setPreferences);
   const season = useGame((s) => s.season);
   const setSeason = useGame((s) => s.setSeason);
+  const resetSettings = useGame((s) => s.resetSettings);
   const dialog = useRef<HTMLDialogElement>(null);
   const back = useRef<HTMLButtonElement>(null);
 
@@ -94,6 +95,10 @@ export function PauseOverlay() {
         <p><span className="text-fg">G</span> groves · <span className="text-fg">B</span> books · <span className="text-fg">H</span> home · <span className="text-fg">Q</span> guided tour</p>
         <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. Gamepad: left stick to drive, right stick to look around, A to read, LT to brake, RT to hurry.</p>
       </div>
+      <button type="button" className="mt-5 min-h-11 w-full rounded-md border border-border text-muted"
+        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome and your pressed books? Your visited groves are kept.")) resetSettings(); }}>
+        Reset all settings
+      </button>
       <button ref={back} type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
     </dialog>
   );

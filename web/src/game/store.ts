@@ -4,6 +4,7 @@ import { effectiveTime, moonPhaseName, nextSunEvent, skyState, timeZonePlace, ty
 import type { SeasonName } from "./seasons";
 import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
+import { clearTourHeard } from "./tourScript";
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -99,6 +100,12 @@ export type GameStore = {
   playing: boolean;
   preferences: Preferences;
   setPreferences: (patch: Partial<Preferences>) => void;
+  /**
+   * Put every setting back as on a first visit: the Pause preferences, the
+   * season, the clock, the tour's full welcome, and the books pressed. The
+   * groves visited stay.
+   */
+  resetSettings: () => void;
   paused: boolean;
   season: SeasonName;
   /** Night or day as the sky now looks, derived from `sky`: what the lamps and glows switch on. */
@@ -213,6 +220,12 @@ export const useGame = create<GameStore>((set, get) => ({
   setPreferences: (patch) => {
     const preferences = readPreferences({ ...get().preferences, ...patch });
     set({ preferences });
+    persist(get());
+  },
+  resetSettings: () => {
+    clearTourHeard();
+    set({ preferences: readPreferences(), season: "summer", timeMode: "live", library: [], lastReadSlug: null, libraryOpen: false });
+    set(readSky("live", get().place));
     persist(get());
   },
   paused: false,
