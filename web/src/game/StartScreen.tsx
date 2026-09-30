@@ -26,9 +26,13 @@ export function StartScreen({
         </h1>
         <p className="font-display mt-1 text-xl italic text-primary sm:text-2xl">Forest</p>
         <p className="mt-5 max-w-xl text-base leading-relaxed text-muted">
-          Two hundred fifty-three public-domain books, grown as trees. Trunk is the work,
-          limbs are the sections, leaves are the passages. Space colonization draws every
-          branch toward the text — the canopy is the book’s shape, not a decoration.
+          Two hundred fifty-three public-domain books, grown as trees. The trunk is the work,
+          the limbs are its sections, the leaves are its passages, so a long book stands taller
+          and a book with more chapters carries more limbs. Each genre grows as a real species,
+          with the bark, leaf and growth habit of the tree it is named for: English oak for
+          philosophy, silver fir for science fiction and natural history, weeping willow for
+          Shakespeare and drama, silver birch for letters and diaries, and five more. The aim
+          is a forest of recognizable trees, not diagrams.
         </p>
         <ul className="mt-6 grid gap-2 text-sm text-muted sm:grid-cols-2">
           <li className="rounded-md border border-border bg-surface px-3 py-2">W / S — drive · A / D — steer · arrows look around</li>

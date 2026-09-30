@@ -84,7 +84,7 @@ test("trunk collision resolves even at its exact centre; world edge contains the
   assert.ok(Math.hypot(sim.x, sim.z) <= 1000);
 });
 
-test("input reset clears held keyboard, touch axes, brake and interaction edges", () => {
+test("input reset clears held keyboard, touch axes, look and interaction edges", () => {
   input.setInjectedKeys(["KeyW", "Space", "KeyE"]);
   let actions = input.sampleActions();
   assert.equal(actions.throttle, 1);
@@ -92,9 +92,10 @@ test("input reset clears held keyboard, touch axes, brake and interaction edges"
   assert.equal(actions.interact, true);
   assert.equal(input.sampleActions().interact, false);
   input.setTouchAxes(1, 1);
-  input.setTouchBrake(true);
-  input.setTouchPitch(1);
-  assert.equal(input.sampleActions().pitch, 1, "the touch look strip tilts like Up");
+  input.setTouchLook(1, -0.5);
+  const touched = input.sampleActions();
+  assert.equal(touched.pitch, 1, "the touch look stick tilts like Up");
+  assert.equal(touched.look, -0.5, "and pans like Right");
   input.resetInput();
   assert.deepEqual(input.sampleActions(), { throttle: 0, steer: 0, boost: false, brake: false, interact: false, interactDown: false, pitch: 0, look: 0 });
   // Up/Down look; only W/S drive.

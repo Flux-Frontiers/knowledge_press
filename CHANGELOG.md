@@ -21,6 +21,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   every setting, and troubleshooting. The start screen and the settings link
   to it. `make docs` builds it locally; the Web workflow builds it with
   `--strict`, so a broken link fails the build.
+- **A look stick on touch.** The right-hand strip that only tilted is now a
+  full round stick like the drive stick: up and down tilt and hold, left and
+  right look around and ease back to ahead on release, as the arrow keys do.
+- **Genre marks.** A round mark on the paved stop ahead of each grove, on
+  the press seal's construction: the grove's color in the band, the cream
+  rule, and a glyph for the genre in the ink disc, its top toward the grove.
+  Twenty glyphs, a sternwheeler for American literature to Yorick for
+  Shakespeare. The same glyph stands beside each genre in the book list and
+  the atlas, in place of the colored dot.
+- **The species under each genre in the book list**, common and Latin
+  names, so the list says what the trees are.
+- **Arrow keys in the reader.** Left and Right turn to the previous or next
+  chapter; Up and Down scroll the page.
 - **Reset all settings** (Pause, at the bottom). Puts the preferences, season
   and clock back as on a first visit, clears the books you have pressed, and
   forgets the ring tour's welcome, so the next tour gives it in full again.
@@ -43,6 +56,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   narration is on. The tour also says when it has been round every grove and
   says goodbye when you take the wheel. The copy is a set of named variables
   in `tourScript.ts`.
+
+### Changed
+
+- **The splash describes the species.** It no longer mentions space
+  colonization; it says that each genre grows as a real species with that
+  tree's bark, leaf and habit, and names four of the nine.
+- **The Flame of Knowledge is dated 1964**, not "about 1964", on its plaque.
+- **The touch Brake button is gone.** Letting go of the drive stick already
+  stops the cart in about a second, and steering or reversing hops off the
+  tour. Space and the gamepad's left trigger still brake.
 
 ### Fixed
 
