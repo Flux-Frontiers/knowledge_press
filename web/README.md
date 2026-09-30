@@ -48,6 +48,8 @@ the same files at build time. Details are in
 | **L** | open the press (collected books) |
 | **Esc** | settings (camera, pace, look sensitivity, leaf detail, fog, narration, silent mode, geometry readout) |
 
+With a book open: **Left / Right** turn the chapter, **Up / Down** scroll the page, **Esc** closes it.
+
 Tap a grove's signpost, or its dot on the minimap, to list that grove's books;
 jump to any one of them, or to the grove itself. The cart is **not** locked to rails
 unless you take the tour. The groves stand on two circular brick ring roads,

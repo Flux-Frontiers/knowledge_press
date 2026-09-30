@@ -17,6 +17,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   full round stick like the drive stick: up and down tilt and hold, left and
   right look around and ease back to ahead on release, as the arrow keys do.
 
+- **Arrow keys in the reader.** Left and Right turn to the previous or next
+  chapter; Up and Down scroll the page.
 - **Reset all settings** (Pause, at the bottom). Puts the preferences, season
   and clock back as on a first visit, clears the books you have pressed, and
   forgets the ring tour's welcome, so the next tour gives it in full again.
