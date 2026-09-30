@@ -69,6 +69,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The opening screen scrolls, so Start driving is always reachable.** The
+  start screen sat inside an `overflow-hidden`, `touch-action: none` shell
+  with no scroller of its own, so on a short window or a phone the button
+  fell below the fold and could not be reached. The screen is now its own
+  vertical scroller.
 - **The ring tour is heard on iPhone and iPad.** Safari ignores speech until
   the page has spoken once from a tap, and the tour narrates from the render
   loop, so with narration on the tour was silent. The first tap, click or key

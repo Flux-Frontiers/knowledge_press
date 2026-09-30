@@ -17,9 +17,12 @@ export function StartScreen({
   const library = useGame((s) => s.library);
 
   return (
-    <div className="absolute inset-0 z-20 flex flex-col bg-bg text-fg">
-      <div className="pointer-events-none absolute inset-0 opacity-80 start-wash" />
-      <div className="relative mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col justify-center px-5 py-10 sm:px-8">
+    <div
+      className="absolute inset-0 z-20 flex flex-col overflow-y-auto overscroll-contain bg-bg text-fg"
+      style={{ touchAction: "pan-y" }}
+    >
+      <div className="pointer-events-none fixed inset-0 opacity-80 start-wash" />
+      <div className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center px-5 py-10 sm:px-8">
         <p className="text-xs font-medium tracking-[0.22em] text-muted uppercase">GutenbergKG · Flux Frontiers</p>
         <h1 className="font-display mt-3 text-4xl leading-tight text-fg sm:text-6xl">
           The Knowledge Press
