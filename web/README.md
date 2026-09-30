@@ -13,7 +13,8 @@ See **[FEATURES.md](FEATURES.md)** for the backlog. Next: weather.
 ## Play it
 
 The latest `main` build is live at
-**https://flux-frontiers.github.io/knowledge_press/**.
+**https://flux-frontiers.github.io/knowledge_press/**, with the
+[user guide](https://flux-frontiers.github.io/knowledge_press/docs/) beside it.
 
 ## Run it
 

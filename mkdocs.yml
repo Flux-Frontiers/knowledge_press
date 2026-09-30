@@ -1,0 +1,67 @@
+# The Knowledge Press documentation: the forest user guide and the app notes.
+# Built into web/dist/docs by the Web workflow, so it is published beside the
+# forest at https://flux-frontiers.github.io/knowledge_press/docs/. The
+# forest itself is the Pages root, which is why this is not the fleet's
+# docs.yml: that would replace the game with the guide.
+
+site_name: The Knowledge Press
+site_description: The user guide for the Knowledge Press Forest, and notes on the iOS and macOS app.
+site_url: https://flux-frontiers.github.io/knowledge_press/docs/
+repo_url: https://github.com/Flux-Frontiers/knowledge_press
+repo_name: Flux-Frontiers/knowledge_press
+edit_uri: edit/main/docs/
+copyright: "&copy; 2026 Eric G. Suchanek, PhD, Flux-Frontiers"
+
+theme:
+  name: material
+  logo: assets/seal.svg
+  favicon: assets/seal.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      accent: green
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: green
+      accent: green
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.keys
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Forest guide:
+      - Getting started: forest/getting-started.md
+      - The forest: forest/the-forest.md
+      - Driving and the tour: forest/driving.md
+      - Reading and the press: forest/reading.md
+      - Finding books: forest/finding.md
+      - Sky, seasons and weather: forest/sky.md
+      - Settings: forest/settings.md
+      - Troubleshooting: forest/troubleshooting.md
+  - The app:
+      - Inside the app: APP_INTERNALS.md
+      - App Store listing: APP_STORE_LISTING.md
+  - Book text: BOOK_TEXT.md

@@ -1,0 +1,3 @@
+# The user guide's build. `make docs-install` puts it in .venv-docs; the Web
+# workflow installs it with pip before building the guide into web/dist/docs.
+mkdocs-material==9.6.14

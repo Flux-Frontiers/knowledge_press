@@ -13,10 +13,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A user guide for the forest**, built from `docs/` with mkdocs-material
+  and published beside the forest at
+  [knowledge_press/docs](https://flux-frontiers.github.io/knowledge_press/docs/):
+  getting started and the controls, what the trees and groves mean, driving
+  and the tour, reading and the press, finding books, the sky and weather,
+  every setting, and troubleshooting. The start screen and the settings link
+  to it. `make docs` builds it locally; the Web workflow builds it with
+  `--strict`, so a broken link fails the build.
 - **A look stick on touch.** The right-hand strip that only tilted is now a
   full round stick like the drive stick: up and down tilt and hold, left and
   right look around and ease back to ahead on release, as the arrow keys do.
-
 - **Genre marks.** A round mark on the paved stop ahead of each grove, on
   the press seal's construction: the grove's color in the band, the cream
   rule, and a glyph for the genre in the ink disc, its top toward the grove.

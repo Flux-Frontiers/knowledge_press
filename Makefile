@@ -55,6 +55,22 @@ GUTENBERG_KG_DIR ?= ../gutenberg_kg
 # The web forest (web/)
 # ---------------------------------------------------------------------------
 
+# The user guide: docs/*.md rendered by mkdocs-material into site/, as the Web
+# workflow renders it into web/dist/docs beside the forest. --strict fails on
+# a broken link, so a bad link stops here rather than on the published site.
+DOCS_VENV ?= .venv-docs
+
+.PHONY: docs docs-install docs-serve
+
+docs-install:
+	python3 -m venv $(DOCS_VENV) && $(DOCS_VENV)/bin/pip install -q -r docs/requirements.txt
+
+docs:
+	$(DOCS_VENV)/bin/mkdocs build --strict
+
+docs-serve:
+	$(DOCS_VENV)/bin/mkdocs serve
+
 web-install:
 	cd web && npm install
 

@@ -27,6 +27,12 @@ this repo holds the ways to read it.
 The names and artwork are covered by [`TRADEMARK.md`](TRADEMARK.md), not by
 either license.
 
+## Documentation
+
+The [Forest user guide](https://flux-frontiers.github.io/knowledge_press/docs/)
+and the app notes are built from `docs/` by mkdocs and published beside the
+forest. `make docs-install` then `make docs` builds them locally into `site/`.
+
 ## Where the corpus comes from
 
 Nothing here builds a corpus. The app searches the packs that
