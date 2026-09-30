@@ -9,6 +9,10 @@
 //                           written byte-identical to its iOS and splash copies,
 //                           plus the proof strip
 //   press-seal-macos.svg -> the ten macOS sizes, with alpha
+//   web/public/favicon.svg -> the web forest's PNG favicon, 32 px with alpha,
+//                           for browsers that skip an SVG icon
+//   press-seal.svg       -> also the 180 px apple-touch-icon, opaque, which
+//                           iOS rounds itself for a home-screen bookmark
 
 import AppKit
 import UniformTypeIdentifiers
@@ -76,3 +80,9 @@ for pt in [16, 32, 128, 256, 512] {
               "\(macSet)/AppIcon-\(pt)x\(pt)@\(scale)x.png")
     }
 }
+
+let favicon = load("web/public/favicon.svg")
+write(png(32, 32, alpha: true) { favicon.draw(in: NSRect(x: 0, y: 0, width: 32, height: 32)) },
+      "web/public/favicon-32.png")
+write(png(180, 180, alpha: false) { seal.draw(in: NSRect(x: 0, y: 0, width: 180, height: 180)) },
+      "web/public/apple-touch-icon.png")

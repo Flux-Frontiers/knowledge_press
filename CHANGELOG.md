@@ -69,6 +69,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The forest has PNG icons beside its SVG favicon**: a 32 px favicon for
+  browsers that skip an SVG icon, and a 180 px `apple-touch-icon` for iOS
+  home-screen bookmarks. Without them those kept showing the old tree icon.
+  `make icons` renders both from the seal.
 - **The opening screen scrolls, so Start driving is always reachable.** The
   start screen sat inside an `overflow-hidden`, `touch-action: none` shell
   with no scroller of its own, so on a short window or a phone the button
