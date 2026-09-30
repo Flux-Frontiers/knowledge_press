@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Reset all settings** (Pause, at the bottom). Puts the preferences, season
+  and clock back as on a first visit, clears the books you have pressed, and
+  forgets the ring tour's welcome, so the next tour gives it in full again.
+  It asks first. The groves visited are kept.
 - **A real night sky in the web forest.** The 750 random points are replaced
   by the 5,080 stars of magnitude 6 or brighter in the Yale Bright Star
   Catalogue. One matrix (precession, sidereal time, latitude) puts them where

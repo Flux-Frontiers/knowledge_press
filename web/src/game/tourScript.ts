@@ -64,3 +64,12 @@ export function markTourHeard(): void {
     /* private mode / quota */
   }
 }
+
+/** Forget the welcome, so the next tour gives it in full again. */
+export function clearTourHeard(): void {
+  try {
+    window.localStorage.removeItem(HEARD_KEY);
+  } catch {
+    /* private mode / quota */
+  }
+}
