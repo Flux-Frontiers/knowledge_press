@@ -1,5 +1,17 @@
 # Reading and the press
 
+## What appears as you approach
+
+| You approach | What happens |
+| --- | --- |
+| A tree | Its card appears once you slow down within about 7 m. |
+| The corpus redwood | A card about the redwood appears within 16 m of the hub. Dismiss it and it stays away until you drive more than 20 m from the hub. |
+| An exhibit's plaque or a grove's signpost | Nothing appears on its own. Tap the plaque to read it at reading size, or tap the signpost to list the grove's books. |
+| A grove's stop on the guided tour | The tour shows a caption about the grove for 5 seconds. See [Driving and the tour](driving.md#take-the-guided-tour). |
+
+Silent mode turns off the cards and captions that appear on their own. Tapping
+always works.
+
 ## Read a tree
 
 Drive up to a tree. Within about 7 m of the trunk, and with the cart slowed,

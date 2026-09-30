@@ -75,8 +75,8 @@ are gold diamonds on the minimap and entries in the atlas.
 | Double Helix | B-DNA, right-handed, on a spike |
 | Weather Mast | An instrument mast that reads the forest's wind |
 
-Each exhibit has a plaque. Drive up to it and tap the plaque to read it at
-reading size.
+Each exhibit has a plaque standing between the piece and the road. Tap the
+plaque to read it at reading size; it does not open on its own.
 
 ## The corpus
 
