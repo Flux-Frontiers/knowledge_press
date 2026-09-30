@@ -3,7 +3,10 @@ name: Web
 # The web forest: typecheck, node tests and a production build. Path-filtered
 # to web/ so an app-only change does not spend a runner here, and vice versa.
 # A push or manual run on main also publishes web/dist to GitHub Pages at
-# https://flux-frontiers.github.io/knowledge_press/.
+# https://flux-frontiers.github.io/knowledge_press/, with the user guide
+# (docs/, mkdocs.yml) rendered into web/dist/docs beside it: the forest is the
+# Pages root, so the guide rides along rather than having a docs workflow of
+# its own.
 #
 # The reader's book text is not in git: `make web-books-publish` uploads it as
 # books.tar.gz on the draft `book-text` release, and every build unpacks it into
@@ -15,12 +18,16 @@ on:
     paths:
       - "web/**"
       - "!web/**.md"
+      - "docs/**"
+      - "mkdocs.yml"
       - ".github/workflows/web.yml"
   pull_request:
     branches: [main]
     paths:
       - "web/**"
       - "!web/**.md"
+      - "docs/**"
+      - "mkdocs.yml"
       - ".github/workflows/web.yml"
   workflow_dispatch:
 
@@ -56,6 +63,17 @@ jobs:
           tar -xzf "$RUNNER_TEMP/books.tar.gz" -C public/books
           echo "$(ls public/books | wc -l) books"
       - run: npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+      # --strict fails the build on a broken link or a page missing from the nav.
+      - name: Build the user guide
+        working-directory: ${{ github.workspace }}
+        run: |
+          pip install -q -r docs/requirements.txt
+          mkdocs build --strict --site-dir web/dist/docs
       - uses: actions/upload-pages-artifact@v4
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:

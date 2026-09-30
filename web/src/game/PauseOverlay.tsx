@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
 import { unlockSpeech } from "./speech";
+import { USER_GUIDE_URL } from "./links";
 import { useGame } from "./store";
 import { weather, weatherName } from "./weather";
 
@@ -100,7 +101,10 @@ export function PauseOverlay() {
         <p><span className="text-fg">G</span> groves · <span className="text-fg">B</span> books · <span className="text-fg">H</span> home · <span className="text-fg">Q</span> guided tour</p>
         <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. Gamepad: left stick to drive, right stick to look around, A to read, LT to brake, RT to hurry.</p>
       </div>
-      <button type="button" className="mt-5 min-h-11 w-full rounded-md border border-border text-muted"
+      <p className="mt-4 text-center text-sm text-muted">
+        <a href={USER_GUIDE_URL} target="_blank" rel="noopener" className="text-primary underline">Read the user guide</a>
+      </p>
+      <button type="button" className="mt-3 min-h-11 w-full rounded-md border border-border text-muted"
         onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome and your pressed books? Your visited groves are kept.")) resetSettings(); }}>
         Reset all settings
       </button>

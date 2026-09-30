@@ -50,3 +50,5 @@ web/public/books/
 # GLB, web/public/models/flame_of_knowledge.glb, is exported from the .blend.
 assets/meshy_dad_sculpture_12feet.blend
 assets/Meshy_dad_sculpture.glb
+.venv-docs/
+site/

@@ -1,5 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
+import { USER_GUIDE_URL } from "./links";
 import { useGame } from "./store";
 
 export function StartScreen({
@@ -37,6 +38,9 @@ export function StartScreen({
           <li className="rounded-md border border-border bg-surface px-3 py-2">Space — brake · Q — guided tour</li>
           <li className="rounded-md border border-border bg-surface px-3 py-2">C — camera · Esc — settings</li>
         </ul>
+        <p className="mt-3 text-sm text-muted">
+          The <a href={USER_GUIDE_URL} target="_blank" rel="noopener" className="text-primary underline">user guide</a> covers the rest.
+        </p>
 
         <div className="mt-7 flex flex-wrap gap-2">
           {SEASON_ORDER.map((name) => (

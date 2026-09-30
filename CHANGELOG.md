@@ -13,6 +13,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A user guide for the forest**, built from `docs/` with mkdocs-material
+  and published beside the forest at
+  [knowledge_press/docs](https://flux-frontiers.github.io/knowledge_press/docs/):
+  getting started and the controls, what the trees and groves mean, driving
+  and the tour, reading and the press, finding books, the sky and weather,
+  every setting, and troubleshooting. The start screen and the settings link
+  to it. `make docs` builds it locally; the Web workflow builds it with
+  `--strict`, so a broken link fails the build.
 - **Reset all settings** (Pause, at the bottom). Puts the preferences, season
   and clock back as on a first visit, clears the books you have pressed, and
   forgets the ring tour's welcome, so the next tour gives it in full again.
