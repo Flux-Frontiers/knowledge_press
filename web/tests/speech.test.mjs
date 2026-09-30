@@ -4,10 +4,11 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
 const spoken = [];
+let resumed = 0;
 const listeners = new Map();
 globalThis.SpeechSynthesisUtterance = class { constructor(text) { this.text = text; } };
 globalThis.window = {
-  speechSynthesis: { speak: (u) => spoken.push(u), cancel() {}, getVoices: () => [], speaking: false, pending: false },
+  speechSynthesis: { resume() { resumed++; }, speak: (u) => spoken.push(u), cancel() {}, getVoices: () => [], speaking: false, pending: false },
   addEventListener: (type, fn) => listeners.set(type, fn),
   removeEventListener: (type, fn) => { if (listeners.get(type) === fn) listeners.delete(type); },
 };
@@ -27,4 +28,13 @@ test("unlocking again does not speak again", () => {
   const { unlockSpeech } = speech();
   unlockSpeech();
   assert.equal(spoken.length, 1);
+});
+
+test("turning narration on primes again, and resumes a paused engine", () => {
+  const { unlockSpeech } = speech();
+  const before = resumed;
+  unlockSpeech(true);
+  assert.equal(spoken.length, 2);
+  assert.equal(spoken[1].volume, 0);
+  assert.equal(resumed, before + 1);
 });

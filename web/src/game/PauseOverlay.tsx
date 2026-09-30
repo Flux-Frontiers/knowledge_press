@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
+import { unlockSpeech } from "./speech";
 import { useGame } from "./store";
 import { weather, weatherName } from "./weather";
 
@@ -58,7 +59,11 @@ export function PauseOverlay() {
           </select>
         </label>
         <label className="flex items-center justify-between gap-4">Read each grove aloud on the ring
-          <input type="checkbox" checked={prefs.narrate} onChange={(e) => setPreferences({ narrate: e.target.checked })} />
+          <input type="checkbox" checked={prefs.narrate} onChange={(e) => {
+            setPreferences({ narrate: e.target.checked });
+            // Speech is only allowed from a tap, and this is one.
+            if (e.target.checked) unlockSpeech(true);
+          }} />
         </label>
         <label className="flex items-center justify-between gap-4">Silent mode · no pop-up cards
           <input type="checkbox" checked={prefs.silent} onChange={(e) => setPreferences({ silent: e.target.checked })} />
