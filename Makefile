@@ -60,7 +60,7 @@ GUTENBERG_KG_DIR ?= ../gutenberg_kg
 # a broken link, so a bad link stops here rather than on the published site.
 DOCS_VENV ?= .venv-docs
 
-.PHONY: docs docs-install docs-serve
+.PHONY: docs docs-install docs-serve docs-gallery
 
 docs-install:
 	python3 -m venv $(DOCS_VENV) && $(DOCS_VENV)/bin/pip install -q -r docs/requirements.txt
@@ -70,6 +70,10 @@ docs:
 
 docs-serve:
 	$(DOCS_VENV)/bin/mkdocs serve
+
+# The gallery's tree portraits, from a running dev server (make web-dev).
+docs-gallery:
+	cd web && npm i --no-save puppeteer-core && node scripts/gallery.mjs
 
 web-install:
 	cd web && npm install

@@ -6,6 +6,7 @@ import { StartScreen } from "./StartScreen";
 import { TouchControls } from "./TouchControls";
 import { installControlsTest } from "./controlsTest";
 import { treeFromSearch } from "./deepLink";
+import { commonFrame, portraitPose, shotSlug, treeExtent, type Extent, type Frame } from "./portrait";
 import { getForest, treeApproach, type Forest } from "./forest";
 import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
@@ -100,6 +101,44 @@ export function ForestApp() {
   // `?tree=<slug>` opens the drive beside that book's tree instead of at home.
   const linked = useMemo(() => (forest ? treeFromSearch(window.location.search, forest.trees) : undefined), [forest]);
 
+  // `?shot=<slug>`: the tree alone, at midday in summer, for the book gallery (portrait.ts).
+  // `window.__shot(slug)` aims at another tree without regrowing the forest.
+  const shot = useGame((s) => s.portrait);
+  useEffect(() => {
+    const first = shotSlug(window.location.search);
+    if (!forest || !first) return;
+    const extentOf = (slug: string) => {
+      const t = forest.trees.find((tr) => tr.book.slug === slug);
+      return t ? treeExtent(forest.chunks[t.chunk]!.bark.pos, t.woodStart, t.woodCount, t.x, t.z) : null;
+    };
+    const aim = (slug: string, frame?: Frame): boolean => {
+      const tree = forest.trees.findIndex((t) => t.book.slug === slug);
+      if (tree < 0) return false;
+      window.__shotReady = false;
+      const t = forest.trees[tree]!;
+      useGame.getState().setPortrait({ ...portraitPose(t, extentOf(slug)!, Math.PI / 2, frame), tree });
+      return true;
+    };
+    const st = useGame.getState();
+    // Every leaf drawn: changing the level regrows the forest and runs this again,
+    // so the shot API is installed only on the forest that will be photographed.
+    if (st.preferences.leaves !== "ultra") {
+      st.setPreferences({ leaves: "ultra" });
+      return;
+    }
+    st.setPreferences({ camera: "follow", fog: "light", weather: false, motion: false });
+    st.setSeason("summer");
+    const time = new URLSearchParams(window.location.search).get("time");
+    st.setTimeMode(time === "dawn" || time === "dusk" ? time : "day");
+    resetSim(forest);
+    aim(first);
+    play();
+    window.__shot = aim;
+    window.__shotExtent = extentOf;
+    window.__shotFrame = (slugs) => commonFrame(slugs.map(extentOf).filter((e): e is Extent => e !== null));
+    return () => { window.__shot = undefined; window.__shotExtent = undefined; window.__shotFrame = undefined; };
+  }, [forest, play]);
+
   useEffect(() => {
     if (!forest) return;
     const params = new URLSearchParams(window.location.search);
@@ -165,13 +204,13 @@ export function ForestApp() {
       ) : (
         <div className="absolute inset-0 start-wash" />
       )}
-      {playing && forest ? (
+      {playing && forest && !shot ? (
         <>
           <HUD forest={forest} />
           <TouchControls />
           <PauseOverlay />
         </>
-      ) : (
+      ) : shot ? null : (
         <StartScreen
           ready={Boolean(forest)}
           growing={!forest}
