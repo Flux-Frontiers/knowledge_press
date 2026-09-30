@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ForestCanvas } from "./ForestCanvas";
 import { HUD } from "./HUD";
 import { PauseOverlay } from "./PauseOverlay";
 import { StartScreen } from "./StartScreen";
 import { TouchControls } from "./TouchControls";
 import { installControlsTest } from "./controlsTest";
-import { getForest, type Forest } from "./forest";
+import { treeFromSearch } from "./deepLink";
+import { getForest, treeApproach, type Forest } from "./forest";
 import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
 import { LEAF_SCALE } from "./preferences";
@@ -96,6 +97,9 @@ export function ForestApp() {
     return () => window.clearTimeout(t);
   }, [leafScale, GROW_VERSION]);
 
+  // `?tree=<slug>` opens the drive beside that book's tree instead of at home.
+  const linked = useMemo(() => (forest ? treeFromSearch(window.location.search, forest.trees) : undefined), [forest]);
+
   useEffect(() => {
     if (!forest) return;
     const params = new URLSearchParams(window.location.search);
@@ -171,10 +175,17 @@ export function ForestApp() {
         <StartScreen
           ready={Boolean(forest)}
           growing={!forest}
+          opensAt={linked?.book.title}
           onEnter={() => {
             if (forest) {
               resetSim(forest);
               play();
+              if (linked) {
+                const st = useGame.getState();
+                st.pickSearch(linked.book.slug);
+                st.pinTree(linked.book.slug);
+                st.requestJump(treeApproach(linked, forest.home.x, forest.home.z), linked.book.title);
+              }
             }
           }}
         />

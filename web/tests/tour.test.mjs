@@ -100,3 +100,13 @@ test("a grove's stop counts as arrived, though it lies outside the grove's radiu
   assert.equal(atGroveStop(forest, "drama", stop.x - 40, stop.z), false);
   assert.equal(atGroveStop(forest, "no-such-grove", stop.x, stop.z), false);
 });
+
+test("?tree=<slug> names a tree by its catalog slug, and anything else names none", () => {
+  const { treeFromSearch } = require(`${process.env.FOREST_TEST_BUILD}/deepLink.js`);
+  const trees = [{ book: { slug: "hamlet" } }, { book: { slug: "moby_dick" } }];
+  assert.equal(treeFromSearch("?tree=hamlet", trees), trees[0]);
+  assert.equal(treeFromSearch("?weather=fog&tree=Moby_Dick", trees), trees[1]);
+  assert.equal(treeFromSearch("?tree=no_such_book", trees), undefined);
+  assert.equal(treeFromSearch("?tree=", trees), undefined);
+  assert.equal(treeFromSearch("", trees), undefined);
+});

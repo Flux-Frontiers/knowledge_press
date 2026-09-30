@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Link to a tree.** `?tree=<slug>`, for example `?tree=hamlet`, starts the
+  drive beside that book's tree with its card open and the lantern trail
+  pointing at it. The start screen names the tree. An unknown slug is
+  ignored.
 - **A user guide for the forest**, built from `docs/` with mkdocs-material
   and published beside the forest at
   [knowledge_press/docs](https://flux-frontiers.github.io/knowledge_press/docs/):

@@ -41,3 +41,18 @@ read it, and pick a book to jump to it.
 
 The press (++l++) lists the books you have read. Each entry jumps to its
 tree or opens the book.
+
+## Link to a tree
+
+Add `?tree=` and a book's slug to the forest's address, and the drive starts
+beside that book's tree, with its card open and a lantern trail pointing at
+it, instead of at home. The slug is the book's name in the catalog, usually its
+title in lower case with underscores, such as `moby_dick`. For example:
+
+```
+https://flux-frontiers.github.io/knowledge_press/?tree=hamlet
+```
+
+The start screen says which tree it will open beside. A slug the forest does
+not know is ignored, and you start at home as usual. The book gallery links
+every book it shows this way.
