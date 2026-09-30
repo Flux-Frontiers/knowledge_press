@@ -69,6 +69,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Go to the grove no longer leaves a lantern trail behind.** The jump lands
+  on the grove's stop, which is outside its radius, and the trail only
+  cleared once the cart was inside the grove, so it led you back to where you
+  had started. A jump now selects nothing, and a trail clears on reaching the
+  stop.
 - **The forest has PNG icons beside its SVG favicon**: a 32 px favicon for
   browsers that skip an SVG icon, and a 180 px `apple-touch-icon` for iOS
   home-screen bookmarks. Without them those kept showing the old tree icon.

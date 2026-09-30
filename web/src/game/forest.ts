@@ -192,6 +192,20 @@ export function groveByGenre(forest: Forest, genre: string): Grove | undefined {
   return forest.groves.find((g) => g.genre === genre);
 }
 
+/**
+ * Whether (x, z) is at a grove's stop, on the ring road ahead of it. A jump
+ * to the grove lands here, outside the grove's radius, so "inside the grove"
+ * is the wrong test for having arrived.
+ *
+ * :param within: How near counts as there, m.
+ */
+export function atGroveStop(forest: Forest, genre: string, x: number, z: number, within = 9): boolean {
+  const g = groveByGenre(forest, genre);
+  if (!g) return false;
+  const wp = groveApproach(g);
+  return Math.hypot(wp.x - x, wp.z - z) < within;
+}
+
 /** Trunks in a grove stand at least this far apart, for driving room. */
 const MIN_TRUNK_GAP = 7.5;
 /** Clear air kept between neighbouring trees' wood (crown shyness). */

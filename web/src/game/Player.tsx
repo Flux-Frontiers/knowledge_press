@@ -1,7 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
-import { treesNear, type Forest } from "./forest";
+import { atGroveStop, treesNear, type Forest } from "./forest";
 import { resetInput, sampleActions } from "./input";
 import { clamp } from "./math";
 import { forwardOf, sim, stepVehicle, teleportSim } from "./sim";
@@ -231,6 +231,11 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         bestD = d;
         bestSlug = t.book.slug;
       }
+    }
+
+    // Standing at the stop the trail was leading to is arriving too: a jump lands there, outside the grove.
+    if (game.travelMode === "free" && game.selectedGrove && atGroveStop(forest, game.selectedGrove, sim.x, sim.z, TRAIL_ARRIVED)) {
+      game.selectGrove(null);
     }
 
     for (const grove of forest.groves) {
