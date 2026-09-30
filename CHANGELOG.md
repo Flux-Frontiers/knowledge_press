@@ -38,6 +38,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The ring tour is heard on iPhone and iPad.** Safari ignores speech until
+  the page has spoken once from a tap, and the tour narrates from the render
+  loop, so with narration on the tour was silent. The first tap, click or key
+  press anywhere now speaks one silent utterance to open the gate, and
+  turning narration on does it again, and the utterance being spoken is now
+  kept referenced, since Safari can drop one nothing points to. Speech is
+  also muted by Silent Mode, unlike video, so an iPad with narration on that
+  says nothing may just be muted.
 - **Console warning about `PCFSoftShadowMap`.** The canvas asked for a shadow
   type three r186 removed; it now asks for the one that replaced it.
 

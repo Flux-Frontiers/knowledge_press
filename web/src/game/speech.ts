@@ -16,6 +16,8 @@ function englishVoice(s: SpeechSynthesis): SpeechSynthesisVoice | undefined {
 }
 
 let active = false;
+/** The utterance in flight: Safari can drop an utterance nothing refers to, and its end event with it. */
+let held: SpeechSynthesisUtterance | null = null;
 
 /**
  * Speak `text`, cutting off anything still being said.
@@ -32,8 +34,51 @@ export function speak(text: string, queue = false): void {
   u.lang = voice?.lang ?? "en-US";
   u.rate = 0.95;
   u.onend = u.onerror = () => { if (!s.speaking && !s.pending) active = false; };
+  held = u;
   active = true;
   s.speak(u);
+}
+
+let unlocked = false;
+
+/**
+ * Prime speech from inside a user gesture.
+ *
+ * iOS and iPadOS Safari ignore `speak()` until the page has spoken once from
+ * a tap. The tour narrates from the render loop, never from a tap, so
+ * without this an iPad tour is silent however the narration setting is set.
+ * A silent utterance is enough to open the gate.
+ *
+ * :param force: Prime again even if it has been done. Once was not enough on
+ *     an iPad Pro, so turning narration on does it afresh; it also clears a
+ *     paused engine, which Safari can leave behind.
+ */
+export function unlockSpeech(force = false): void {
+  if (unlocked && !force) return;
+  const s = synth();
+  if (!s) return;
+  unlocked = true;
+  s.resume();
+  const u = new SpeechSynthesisUtterance(" ");
+  u.volume = 0;
+  s.speak(u);
+}
+
+/**
+ * Unlock speech on the first tap, click or key press anywhere on the page.
+ *
+ * :returns: A function that removes the listeners.
+ */
+export function unlockSpeechOnGesture(): () => void {
+  if (typeof window === "undefined") return () => {};
+  const events = ["touchend", "click", "keydown"] as const;
+  const remove = () => events.forEach((e) => window.removeEventListener(e, onGesture, true));
+  function onGesture() {
+    unlockSpeech();
+    remove();
+  }
+  events.forEach((e) => window.addEventListener(e, onGesture, true));
+  return remove;
 }
 
 /** Stop speaking at once. */

@@ -10,6 +10,7 @@ import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
 import { LEAF_SCALE } from "./preferences";
 import { resetSim } from "./sim";
+import { unlockSpeechOnGesture } from "./speech";
 import { useGame } from "./store";
 
 /**
@@ -54,7 +55,8 @@ export function ForestApp() {
     setMounted(true);
     const unbind = bindInput();
     installControlsTest();
-    return () => unbind?.();
+    const unlockSpeech = unlockSpeechOnGesture();
+    return () => { unbind?.(); unlockSpeech(); };
   }, []);
 
   // Grow in a worker, regrowing when leaf complexity changes; only the first
