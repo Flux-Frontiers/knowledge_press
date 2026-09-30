@@ -12,6 +12,7 @@ import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./fo
 import { disc, ribbon, type FlatMesh } from "./roads";
 import { CorpusRedwood } from "./CorpusRedwood";
 import { FlameOfKnowledge } from "./FlameOfKnowledge";
+import { GroveMarks } from "./GroveMarks";
 import { Mysterium } from "./Mysterium";
 import { Signposts } from "./Signposts";
 import { SEASONS, type SeasonName } from "./seasons";
@@ -103,6 +104,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
       {detail && <ForestFloor forest={forest} season={season} />}
       <LanternTrail forest={forest} selectedGrove={selectedGrove} query={query} searchPick={searchPick} />
       <Signposts forest={forest} />
+      <GroveMarks forest={forest} />
 
       {forest.groves.map((g) => {
         const on = selectedGrove === g.genre;

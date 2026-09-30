@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest, type Grove, type TreeSite } from "./forest";
+import { GenreGlyph } from "./GenreGlyph";
 import { SPECIES, speciesFor } from "./species";
 import { QUESTS, questProgress } from "./quests";
 import { saveScreenshot } from "./screenshot";
@@ -609,7 +610,7 @@ function AtlasPanel({ forest }: { forest: Forest }) {
                     (on ? "bg-primary/15" : "hover:bg-bg")
                   }
                 >
-                  <span className="size-2.5 shrink-0 rounded-full" style={{ background: g.color }} />
+                  <GenreGlyph genre={g.genre} className="size-6 shrink-0" style={{ color: g.color }} />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium leading-snug">{g.label}</span>
                     <span className="block text-xs text-muted">
@@ -766,11 +767,11 @@ function CatalogPanel({ forest }: { forest: Forest }) {
             <section key={grove.genre} className="mb-3">
               <h3 className="sticky top-0 bg-surface px-1 py-1 text-xs tracking-wide text-muted uppercase">
                 <span className="flex items-center gap-2">
-                  <span className="size-2.5 rounded-full" style={{ background: grove.color }} />
+                  <GenreGlyph genre={grove.genre} className="size-4 shrink-0" style={{ color: grove.color }} />
                   {grove.label} · {trees.length}
                 </span>
                 {/* The grove's species, so the list says what the trees are. */}
-                <span className="block pl-[1.125rem] text-[11px] tracking-normal normal-case text-faint">
+                <span className="block pl-6 text-[11px] tracking-normal normal-case text-faint">
                   {SPECIES[speciesFor(grove.genre)]!.common} · <i>{SPECIES[speciesFor(grove.genre)]!.latin}</i>
                 </span>
               </h3>

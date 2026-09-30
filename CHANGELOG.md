@@ -17,6 +17,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   full round stick like the drive stick: up and down tilt and hold, left and
   right look around and ease back to ahead on release, as the arrow keys do.
 
+- **Genre marks.** A round mark on the paved stop ahead of each grove, on
+  the press seal's construction: the grove's color in the band, the cream
+  rule, and a glyph for the genre in the ink disc, its top toward the grove.
+  Twenty glyphs, a sternwheeler for American literature to Yorick for
+  Shakespeare. The same glyph stands beside each genre in the book list and
+  the atlas, in place of the colored dot.
 - **The species under each genre in the book list**, common and Latin
   names, so the list says what the trees are.
 - **Arrow keys in the reader.** Left and Right turn to the previous or next
