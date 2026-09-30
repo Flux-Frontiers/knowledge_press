@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A look stick on touch.** The right-hand strip that only tilted is now a
+  full round stick like the drive stick: up and down tilt and hold, left and
+  right look around and ease back to ahead on release, as the arrow keys do.
+
 - **Reset all settings** (Pause, at the bottom). Puts the preferences, season
   and clock back as on a first visit, clears the books you have pressed, and
   forgets the ring tour's welcome, so the next tour gives it in full again.
@@ -35,6 +39,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   narration is on. The tour also says when it has been round every grove and
   says goodbye when you take the wheel. The copy is a set of named variables
   in `tourScript.ts`.
+
+### Changed
+
+- **The splash describes the species.** It no longer mentions space
+  colonization; it says that each genre grows as a real species with that
+  tree's bark, leaf and habit, and names four of the nine.
+- **The touch Brake button is gone.** Letting go of the drive stick already
+  stops the cart in about a second, and steering or reversing hops off the
+  tour. Space and the gamepad's left trigger still brake.
 
 ### Fixed
 
