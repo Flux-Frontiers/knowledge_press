@@ -140,7 +140,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
             // Queued, so a stop reached during the welcome waits for it.
             if (said && preferences.narrate && !preferences.silent) speak(said, true);
           }
-          // Every grove visited and the ring starting over: say so once.
+          // Every grove visited and the cart turning for home: say so once.
           if (tourState.tour.laps > 0 && !lapSaid.current) {
             lapSaid.current = true;
             if (!preferences.silent) {
@@ -148,7 +148,13 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
               if (preferences.narrate) speak(TOUR_LAP_DONE, true);
             }
           }
-          useGame.getState().selectGrove(c.genre);
+          useGame.getState().selectGrove(c.genre || null);
+          // Back at the redwood: the tour is over, and the cart is the rider's.
+          if (tourState.tour.done) {
+            endTour();
+            useGame.getState().setTravelMode("free");
+            useGame.getState().setToast("Tour over · back at the redwood");
+          }
         }
       }
       stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake || tourBrake });

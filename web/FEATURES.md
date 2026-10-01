@@ -79,11 +79,13 @@ A rank for how much of the forest you have pressed, and a way to start over.
 | Grove atlas, minimap jump, home return | `HUD.tsx` |
 | Corpus redwood at the hub, with its own ridged bark; book list popup (B), start at home | `corpusTree.ts`, `CorpusRedwood.tsx`, `HUD.tsx` |
 | Exhibits on side spokes off the rings, spread round the forest: Kepler's Mysterium, three wind rotors, a DNA double helix, a weather mast | `exhibits.ts`, `Mysterium.tsx`, `WindSculptures.tsx`, `windRotors.ts` |
+| Armillary sundial for 39° N: style on the celestial pole, hour ring square to it, the style's shadow computed from the sky's sun | `sundialGeometry.ts`, `Sundial.tsx` |
+| Compass rose inlaid in the hub plaza round the redwood, north to the forest's north | `compassRoseArt.ts`, `CompassRose.tsx` |
 | The Flame of Knowledge: George B. Suchanek's sculpture, scanned from his plaster model, in silver | `FlameOfKnowledge.tsx`, `public/models/` |
 | Crown-aware tree placement: no branch passes through another tree | `forest.ts` |
 | Silent mode; lantern trail clears on arrival | `preferences.ts`, `Player.tsx` |
 | Carriage roads: two circular rings, up to six straight spokes, plazas where they meet | `forest.ts`, `roads.ts`, `World.tsx` |
-| Guided tour (Q) along the roads by pure pursuit, lanterns lighting the road ahead; steer to hop off | `tour.ts`, `Player.tsx`, `World.tsx` |
+| Guided tour (Q) along the roads by pure pursuit, lanterns lighting the road ahead, ending back at the redwood; steer to hop off | `tour.ts`, `Player.tsx`, `World.tsx` |
 | Tour stops 5 s at each grove's signpost with a generated caption, read aloud if chosen | `tour.ts`, `narration.ts`, `speech.ts`, `HUD.tsx` |
 | Named grove signposts with the grove's tree species; signs and plaques lit at night | `Signposts.tsx`, `species.ts` |
 | Denser skeletons (raised attractor / node caps) | `growTree.ts` |

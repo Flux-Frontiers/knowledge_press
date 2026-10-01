@@ -13,6 +13,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **An armillary sundial**, an eighth exhibit: a brass equatorial ring dial
+  built for 39° N. Its rod points at the celestial pole (true north, 39° up),
+  the hour ring stands square to it with IV to VIII engraved inside, and a
+  horizon ring carries the compass points. The rod's shadow on the ring is
+  computed from the sky's own sun, so it reads local solar time through the
+  day and thins away at the equinoxes as a real ring dial's does. It is drawn
+  only with the sun up and fades under fog and cloud.
+- **A compass rose** inlaid in the hub plaza around the corpus redwood:
+  sixteen points radiating from the trunk, a degree bezel, north in red. Its
+  north is the forest's north.
 - **An app guide** for the iPhone, iPad and Mac app, beside the forest guide:
   getting started on each device, asking a question and choosing a scope,
   reading an answer and its sources, the answer engines, Browse, chats and
@@ -74,6 +84,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **The guided tour ends at the redwood.** After the last grove it says so,
+  drives back in along the spoke and pulls up at home facing the tree, and
+  the cart is the rider's again. It used to go round the rings forever.
+- **The tour sweeps onto the ring.** Riding out from the redwood, the cart
+  used to crawl for some seconds before the first junction and turn sharply;
+  the spoke now joins the ring by a curve, as the loop's other corners do.
+- **Junction plazas are smaller**: 3 m, down from 6 m, just enough paving
+  for the tour's turn.
 - **A new lantern cart**: an oak book wagon with open rails, a row of books
   and a stack, tall spoked wheels, and a brass lantern on an iron hook, in
   place of the box cart. Same size, and the wheels now roll at the rate the

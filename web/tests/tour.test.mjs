@@ -21,8 +21,9 @@ function driveTour(f, x, z, yaw) {
   const { planTour, steerTour } = require(`${process.env.FOREST_TEST_BUILD}/tour.js`);
   teleportSim(x, z, yaw);
   const tour = planTour(f, sim.x, sim.z, sim.yaw);
-  // Every route point is on the brick.
-  for (const [px, pz] of tour.pts) assert.ok(roadDistance(f, px, pz) < 0.05, `route point ${px.toFixed(1)}, ${pz.toFixed(1)} is off the road`);
+  // Every route point is on the brick: within a hand's breadth of a centreline (the
+  // rounded turns' tangent points sit a few centimetres off it) or on a plaza.
+  for (const [px, pz] of tour.pts) assert.ok(roadDistance(f, px, pz) < 0.25, `route point ${px.toFixed(1)}, ${pz.toFixed(1)} is off the road`);
   const stops = new Set();
   // Seconds spent standing still facing each grove's signpost.
   const faced = new Map();
@@ -61,7 +62,7 @@ test("the guided tour keeps to the road, from home and from the hub end of a spo
     const { tour, onRoad, worst, stops, faced } = driveTour(f, s.x, s.z, s.yaw);
     if (s.name === "spoke") assert.ok(tour.loopStart > 0, "a start on a spoke rides the spoke out to the ring");
     // The inner ring comes first: its stops before any on the outer ring.
-    const radii = tour.stops.map((st) => Math.round(Math.hypot(...tour.pts[st.k])));
+    const radii = tour.stops.map((st) => f.circuit.find((wp) => wp.genre === st.genre)).map((wp) => Math.round(Math.hypot(wp.x, wp.z)));
     const inner = Math.min(...radii);
     const firstOuter = radii.findIndex((r) => r > inner);
     assert.ok(radii.slice(firstOuter).every((r) => r > inner), `${s.name}: stops by ring radius ${radii.join(", ")}`);

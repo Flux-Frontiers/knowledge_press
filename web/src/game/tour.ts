@@ -5,7 +5,8 @@ import { wrapAngle, yawToward } from "./sim";
 /**
  * The guided tour as a route along the roads: from wherever the cart is, out
  * the nearest spoke to the first ring it meets (unless the loop is nearer),
- * then around the tour loop forever. The cart follows it by pure pursuit: it steers for the route
+ * then around the tour loop through every grove, and back in to the redwood,
+ * where it ends. The cart follows it by pure pursuit: it steers for the route
  * point LOOKAHEAD metres past the one it has reached, so it keeps to the brick
  * instead of cutting across the grass toward a point somewhere ahead. At each
  * grove stop it pulls up, turns to face the grove's signpost, holds there for
@@ -23,8 +24,16 @@ export type Tour = {
   stops: { k: number; genre: string; x: number; z: number }[];
   /** The stop the cart is heading for. */
   next: number;
-  /** Times the cart has been through every grove and started round again. */
+  /** 1 once the cart has been through every grove; it then heads for home. */
   laps: number;
+  /** Where the tour ends, and the ring junction on home's spoke that the way back runs through. */
+  home: { x: number; z: number; junction: [number, number] };
+  /** Every grove visited: the route is now the way back to the redwood, and does not repeat. */
+  ending: boolean;
+  /** Pulling up at home: braking, then turning to the redwood. */
+  arrive: "brake" | "face" | null;
+  /** Home again, facing the redwood: the tour is over. */
+  done: boolean;
   /** Pulled up at a stop: braking, turning to the sign, holding, turning back. */
   dwell: { phase: "brake" | "face" | "hold" | "back"; left: number } | null;
 };
@@ -35,11 +44,13 @@ export const DWELL = 5;
 /** How many points ahead progress may jump in one step (samples are ~2 m apart). */
 const SEARCH = 6;
 const CRUISE = 0.42;
+/** A corner onto the loop is rounded from this far before it, as the loop's own are (forest.ts). */
+const TURN_R = 3.5;
 
 /** The route shared by the cart (Player) and the lanterns that light it (World). */
 export const tourState: { tour: Tour | null } = { tour: null };
 
-export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circuit" | "signs">, x: number, z: number, yaw: number): Tour {
+export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circuit" | "signs" | "home">, x: number, z: number, yaw: number): Tour {
   const ring = forest.ringPath;
   const nearestRing = (px: number, pz: number) => {
     let k = 0, best = Infinity;
@@ -87,6 +98,25 @@ export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circui
   // The loop runs the inner ring first; follow it, unless the cart is already
   // on the loop heading clearly the other way, when turning round would be a U-turn.
   const n = ring.length;
+  // Off a spoke, sweep onto the ring: the spoke gives way TURN_R short of the
+  // corner to a curve that meets the loop TURN_R past it, as the loop's own turns do.
+  const ringR = Math.min(...forest.roadLines.filter((l) => l.kind === "ring").map((l) => Math.hypot(...l.pts[0]!))
+    .filter((R) => Math.abs(R - Math.hypot(jx, jz)) < 2.5), Infinity);
+  if (pts.length && Number.isFinite(ringR)) {
+    const r0 = Math.hypot(jx, jz) || 1;
+    const cx = (jx / r0) * ringR, cz = (jz / r0) * ringR;
+    const far = (p: [number, number]) => Math.hypot(p[0] - cx, p[1] - cz);
+    if (far(pts[0]!) > TURN_R + 1) {
+      while (far(pts[pts.length - 1]!) < TURN_R) pts.pop();
+      const a: [number, number] = [cx - (jx / r0) * TURN_R, cz - (jz / r0) * TURN_R];
+      for (let k = 0; k < n && far([ring[join]!.x, ring[join]!.z]) <= TURN_R + 0.01; k++) join = (join + 1) % n;
+      const b = ring[join]!;
+      for (let step = 0; step < 6; step++) {
+        const u = step / 6;
+        pts.push([(1 - u) ** 2 * a[0] + 2 * u * (1 - u) * cx + u * u * b.x, (1 - u) ** 2 * a[1] + 2 * u * (1 - u) * cz + u * u * b.z]);
+      }
+    }
+  }
   const fwd = ring[(join + 1) % n]!, at = ring[join]!;
   const along = ((fwd.x - at.x) * hx + (fwd.z - at.z) * hz) / ((Math.hypot(fwd.x - at.x, fwd.z - at.z) * Math.hypot(hx, hz)) || 1);
   const dir = !pts.length && along < -0.5 ? -1 : 1;
@@ -120,7 +150,46 @@ export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circui
       const sign = forest.signs.find((sg) => sg.genre === g);
       return { k, genre: g, x: sign?.x ?? pts[k]![0], z: sign?.z ?? pts[k]![1] };
     });
-  return { pts, genre, loopStart, i: 0, stops, next: 0, laps: 0, dwell: null };
+  // The way back: in along home's spoke from the innermost ring.
+  const h = forest.home;
+  const hr = Math.hypot(h.x, h.z) || 1;
+  const innerR = Math.min(...forest.roadLines.filter((l) => l.kind === "ring").map((l) => Math.hypot(...l.pts[0]!)));
+  const home = { x: h.x, z: h.z, junction: [(h.x / hr) * innerR, (h.z / hr) * innerR] as [number, number] };
+  return { pts, genre, loopStart, i: 0, stops, next: 0, laps: 0, dwell: null, home, ending: false, arrive: null, done: false };
+}
+
+/**
+ * Every grove is done: replace the route with the way home. On round the loop
+ * to the junction on home's spoke, then in along the spoke to home.
+ */
+function headHome(t: Tour): void {
+  const [jx, jz] = t.home.junction;
+  const R = Math.hypot(jx, jz), ux = jx / R, uz = jz / R;
+  const route: [number, number][] = [t.pts[t.i]!];
+  for (let j = next(t, t.i), guard = 0; guard < t.pts.length; j = next(t, j), guard++) {
+    const p = t.pts[j]!;
+    if (Math.hypot(p[0] - jx, p[1] - jz) < TURN_R) break;
+    route.push(p);
+  }
+  // Coming in along the spoke already, carry straight on; off the ring, sweep
+  // round the junction onto the spoke as the loop's own turns do.
+  const [lx, lz] = route[route.length - 1]!;
+  const lr = lx * ux + lz * uz;
+  const onSpoke = Math.abs(lx * uz - lz * ux) < 0.5 && lr > R;
+  const homeR = Math.hypot(t.home.x, t.home.z);
+  if (!onSpoke) {
+    const bx = ux * (R - TURN_R), bz = uz * (R - TURN_R);
+    for (let step = 1; step <= 6; step++) {
+      const u = step / 6;
+      route.push([(1 - u) ** 2 * lx + 2 * u * (1 - u) * jx + u * u * bx, (1 - u) ** 2 * lz + 2 * u * (1 - u) * jz + u * u * bz]);
+    }
+  }
+  for (let r = onSpoke ? lr - 2 : R - TURN_R - 2; r > homeR + 1; r -= 2) route.push([ux * r, uz * r]);
+  route.push([t.home.x, t.home.z]);
+  t.pts = route;
+  t.genre = route.map(() => "");
+  t.i = 0;
+  t.ending = true;
 }
 
 /** Route points from `from` forward to `to`, following the loop. */
@@ -130,6 +199,7 @@ function stepsTo(t: Tour, from: number, to: number): number {
 }
 
 function next(t: Tour, i: number): number {
+  if (t.ending) return Math.min(i + 1, t.pts.length - 1);
   return i + 1 < t.pts.length ? i + 1 : t.loopStart;
 }
 
@@ -138,6 +208,7 @@ function along(t: Tour, i: number, dist: number): number {
   let j = i, acc = 0;
   for (let guard = 0; acc < dist && guard < t.pts.length; guard++) {
     const n = next(t, j);
+    if (n === j) break;
     acc += Math.hypot(t.pts[n]![0] - t.pts[j]![0], t.pts[n]![1] - t.pts[j]![1]);
     j = n;
   }
@@ -154,6 +225,7 @@ function turnAhead(t: Tour, i: number, dist: number): number {
   let worst = 0, j = i, acc = 0;
   for (let guard = 0; acc < dist && guard < t.pts.length; guard++) {
     const n = next(t, j);
+    if (next(t, n) === n) break;
     acc += Math.hypot(t.pts[n]![0] - t.pts[j]![0], t.pts[n]![1] - t.pts[j]![1]);
     j = n;
     worst = Math.max(worst, Math.abs(wrapAngle(heading(j) - h0)));
@@ -181,6 +253,16 @@ export function tourStop(t: Tour): string | null {
  *   DWELL seconds and until this is false.
  */
 export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: number, dt: number, busy = false): { steer: number; throttle: number; brake: boolean; genre: string } {
+  if (t.done) return { steer: 0, throttle: 0, brake: true, genre: "" };
+  if (t.arrive) {
+    if (t.arrive === "brake") {
+      if (Math.abs(speed) < 0.05) t.arrive = "face";
+      return { steer: 0, throttle: 0, brake: true, genre: "" };
+    }
+    const turn = turnTo(yaw, yawToward(x, z, 0, 0), 0.04);
+    if (turn.done) t.done = true;
+    return { steer: turn.steer, throttle: 0, brake: true, genre: "" };
+  }
   const stop = t.stops[t.next];
   if (t.dwell && stop) {
     const d = t.dwell;
@@ -204,7 +286,10 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
     if (!turn.done) return { steer: turn.steer, ...hold };
     t.dwell = null;
     t.next = (t.next + 1) % t.stops.length;
-    if (t.next === 0) t.laps++;
+    if (t.next === 0) {
+      t.laps++;
+      headHome(t);
+    }
   }
   let best = t.i, bestD = Math.hypot(t.pts[t.i]![0] - x, t.pts[t.i]![1] - z);
   for (let k = 1, j = t.i; k <= SEARCH; k++) {
@@ -213,8 +298,15 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
     if (d < bestD) { bestD = d; best = j; }
   }
   t.i = best;
+  // Home is the end of the way back: pull up there.
+  const [ex, ez] = t.pts[t.pts.length - 1]!;
+  const toEnd = Math.hypot(ex - x, ez - z);
+  if (t.ending && t.i >= t.pts.length - 2 && toEnd < 1) {
+    t.arrive = "brake";
+    return { steer: 0, throttle: 0, brake: true, genre: "" };
+  }
   // Pull up at the next grove stop once progress reaches it.
-  const at = t.stops[t.next];
+  const at = t.ending ? undefined : t.stops[t.next];
   if (at && t.i >= t.loopStart && stepsTo(t, at.k, t.i) <= SEARCH) {
     t.dwell = { phase: "brake", left: DWELL };
     return { steer: 0, throttle: 0, brake: true, genre: at.genre };
@@ -237,6 +329,7 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
   let limit = (1.2 + 3 * Math.max(0, 1 - bend / 1.9)) * Math.max(0.45, 1 - Math.max(0, off - 0.5) / 2);
   // Ease off approaching the stop, so the cart pulls up rather than stands on the brake.
   if (at && t.i >= t.loopStart) limit = Math.min(limit, 0.8 + 0.35 * Math.hypot(t.pts[at.k]![0] - x, t.pts[at.k]![1] - z));
+  if (t.ending && t.i >= t.pts.length - 12) limit = Math.min(limit, 0.8 + 0.35 * toEnd);
   return {
     steer: clamp(err * 1.8, -1, 1),
     throttle: speed > limit ? 0 : CRUISE,

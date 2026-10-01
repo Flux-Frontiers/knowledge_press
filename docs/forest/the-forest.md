@@ -49,7 +49,7 @@ through another tree.
 The groves stand on two circular brick **ring roads**, the smaller groves
 outside the inner ring and the larger ones outside the outer. Up to six
 straight **spokes** run from the hub out through both rings. Where a spoke
-meets a ring there is a paved plaza.
+meets a ring there is a small paved plaza.
 
 Each grove has a **stop** on its ring, a paved disc with the grove's mark
 painted on it: a round seal in the grove's color with a glyph for the genre,
@@ -62,9 +62,13 @@ m taller for every doubling of the corpus, with one limb per book reaching
 toward that book's own tree. Its plaque lists every book. Home is on its
 plaza.
 
+A **compass rose** is inlaid in the hub's plaza around the redwood: sixteen
+points radiating from the trunk, with north in red. Its north is the
+forest's north, the same north the sun, the stars and the sundial use.
+
 ## Exhibits
 
-Seven exhibits stand in roadside glades on short spurs off the rings. They
+Eight exhibits stand in roadside glades on short spurs off the rings. They
 are gold diamonds on the minimap and entries in the atlas.
 
 | Exhibit | What it is |
@@ -74,6 +78,7 @@ are gold diamonds on the minimap and entries in the atlas.
 | Helical Rotor, Darrieus Rotor, Savonius Tower | Three wind sculptures, each a real vertical-axis rotor design, turning in the wind |
 | Double Helix | B-DNA, right-handed, on a spike |
 | Weather Mast | An instrument mast that reads the forest's wind |
+| Armillary Sundial | A brass ring dial built for 39° N. Its rod points at the celestial pole, and the rod's shadow on the hour ring tells local solar time |
 
 Each exhibit has a plaque standing between the piece and the road. Tap the
 plaque to read it at reading size; it does not open on its own.

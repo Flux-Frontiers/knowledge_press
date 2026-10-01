@@ -19,11 +19,11 @@ export const TOUR_TIPS = "You can take over at any time: just turn or brake.";
 /** Said in place of the three above on every tour after the first on this device. */
 export const TOUR_WELCOME_BACK = "Welcome back. Off around the ring we go.";
 
-/** Said once, when the cart has visited every grove and starts round again. */
+/** Said once, when the cart has visited every grove and turns for home. */
 export const TOUR_LAP_DONE =
-  "That was every grove on the ring. The tour keeps going round; take the wheel whenever you like.";
+  "That was every grove on the ring. Now back to the redwood, where the tour ends.";
 
-/** Said when the rider takes the wheel. */
+/** Said when the rider takes the wheel, or the tour hands it back at the redwood. */
 export const TOUR_FAREWELL = "You have the wheel. Ride the ring again any time.";
 
 export type TourFacts = { books: number; groves: number };
