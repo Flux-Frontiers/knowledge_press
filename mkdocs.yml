@@ -43,6 +43,8 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.highlight
   - pymdownx.keys
+  - pymdownx.tabbed:
+      alternate_style: true
   - tables
   - toc:
       permalink: true
@@ -62,7 +64,17 @@ nav:
       - Sky, seasons and weather: forest/sky.md
       - Settings: forest/settings.md
       - Troubleshooting: forest/troubleshooting.md
-  - The app:
+  - App guide:
+      - Getting started: app/getting-started.md
+      - Asking a question: app/asking.md
+      - Reading an answer: app/answers.md
+      - Answer engines: app/engines.md
+      - Browse and read the books: app/browse.md
+      - Your chats: app/chats.md
+      - Settings: app/settings.md
+      - What leaves your device: app/privacy.md
+      - Troubleshooting: app/troubleshooting.md
+  - Reference:
       - Inside the app: APP_INTERNALS.md
       - App Store listing: APP_STORE_LISTING.md
-  - Book text: BOOK_TEXT.md
+      - Book text: BOOK_TEXT.md

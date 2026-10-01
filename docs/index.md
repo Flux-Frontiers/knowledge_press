@@ -9,7 +9,8 @@ corpus of public-domain books in two ways:
   through the groves, read the books from their trees, and collect them in
   your press. The [Forest guide](forest/getting-started.md) covers it.
 - **The Knowledge Press app** for iPhone, iPad and Mac, which searches the
-  same corpus on the device and answers questions from it. [Inside the
+  same corpus on the device and answers questions from it. The [App
+  guide](app/getting-started.md) covers it; [Inside the
   app](APP_INTERNALS.md) describes how it is built.
 
 Both read the packs that `gutenkg export-swift` writes. The corpus, the
@@ -21,6 +22,8 @@ ingestion pipeline and the on-device pack format are documented on the
 | You want to | Read |
 | --- | --- |
 | Play the forest for the first time | [Getting started](forest/getting-started.md) |
+| Ask the app your first question | [Getting started with the app](app/getting-started.md) |
+| Find out why an answer stopped early | [App troubleshooting](app/troubleshooting.md#an-answer-stops-partway) |
 | Know what the trees, groves and roads mean | [The forest](forest/the-forest.md) |
 | Find a particular book | [Finding books](forest/finding.md) |
 | Hear the guided tour on an iPad | [Troubleshooting](forest/troubleshooting.md#the-tour-is-silent) |
