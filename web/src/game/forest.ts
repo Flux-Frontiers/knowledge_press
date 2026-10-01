@@ -79,9 +79,15 @@ const SPOKE_LANE = 2;
 const ROAD_STEP = 2;
 /** The most spokes from the hub. */
 const MAX_SPOKES = 6;
-/** Paved disc where a spoke meets a ring; the tour's turn there is rounded inside it. */
-const JUNCTION_R = 6;
-const TOUR_TURN_R = 5;
+/**
+ * Paved disc where a spoke meets a ring, as small as the tour allows. The
+ * tour's turn there is rounded with TOUR_TURN_R, which cuts 1.2 m inside the
+ * corner; with the cart's half-width that needs 2.3 m of paving from the crossing.
+ */
+const JUNCTION_R = 3;
+const TOUR_TURN_R = 3.5;
+/** Exhibit spurs keep this far from a junction (the old junction plaza, plus a verge). */
+const JUNCTION_CLEAR = 12;
 /** Bearing of the redwood's plaque from the hub; home looks back along it. */
 export const HUB_PLAQUE_DIR = Math.atan2(4.6, -4.2);
 export const HUB_PLAQUE_DIST = 7.2;
@@ -513,7 +519,7 @@ function buildForest(leafMultiplier: number): Forest {
     specs: EXHIBITS, roadLines, trees, worldRadius,
     avoid: [
       ...circuit.map((wp) => ({ x: wp.x, z: wp.z, r: STOP_R + 12 })),
-      ...wheel.spokes.flatMap((a) => wheel.rings.map((R) => ({ x: R * Math.cos(a), z: R * Math.sin(a), r: JUNCTION_R + 6 }))),
+      ...wheel.spokes.flatMap((a) => wheel.rings.map((R) => ({ x: R * Math.cos(a), z: R * Math.sin(a), r: JUNCTION_CLEAR }))),
     ],
   });
   for (const e of exhibits) roadLines.push({ kind: "spur", pts: e.spur, closed: false });

@@ -39,7 +39,8 @@ driving.
 
 ++q++, or the **Guided tour** button on touch, hands the cart to the tour.
 The cart follows the roads by itself: out the nearest spoke, around the inner
-ring, out along a spoke and around the outer ring, then back in. Lanterns
+ring, out along a spoke and around the outer ring, then back in to the
+redwood. Lanterns
 light the next 50 m of road ahead of it.
 
 At each grove's stop the cart pulls up facing the signpost for 5 seconds and
@@ -48,7 +49,8 @@ To hear the captions in the system voice, turn on **Read each grove aloud on
 the ring** in settings. The first tour on a device opens with a short
 welcome and a line on how the forest is made; later tours say a line.
 
-The tour says when it has been around every grove, then starts again.
+The tour says when it has been around every grove, then drives back to the
+redwood and ends there, facing it. The cart is yours again.
 
 To hop off, steer, brake, or reverse. ++q++ or **End tour** also ends it.
 The cart is yours again where you left it.

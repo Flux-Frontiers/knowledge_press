@@ -10,12 +10,14 @@ const GOD_EYE_FOG = 0.1;
 import type { Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./forest";
 import { disc, ribbon, type FlatMesh } from "./roads";
+import { CompassRose } from "./CompassRose";
 import { CorpusRedwood } from "./CorpusRedwood";
 import { Cart } from "./Cart";
 import { FlameOfKnowledge } from "./FlameOfKnowledge";
 import { GroveMarks } from "./GroveMarks";
 import { Mysterium } from "./Mysterium";
 import { Signposts } from "./Signposts";
+import { Sundial } from "./Sundial";
 import { SEASONS, type SeasonName } from "./seasons";
 import { sim } from "./sim";
 import { useGame } from "./store";
@@ -35,6 +37,7 @@ const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit }>> = {
   savonius: SavoniusSculpture,
   dna: DnaSculpture,
   mast: WeatherMast,
+  sundial: Sundial,
 };
 const TRAIL_N = 20;
 
@@ -113,6 +116,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
       {portrait ? null : (<>
         <LanternTrail forest={forest} selectedGrove={selectedGrove} query={query} searchPick={searchPick} />
         <Signposts forest={forest} />
+        <CompassRose forest={forest} />
         <GroveMarks forest={forest} />
 
         {forest.groves.map((g) => {

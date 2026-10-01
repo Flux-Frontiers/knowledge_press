@@ -62,7 +62,7 @@ test("the numbers in the welcome are the real forest's", () => {
   assert.ok(text.includes(`${f.groves.length} groves`));
 });
 
-test("the tour counts a lap once every grove has been visited and the ring starts over", () => {
+test("once every grove has been visited the tour drives back to the redwood and ends there, facing it", () => {
   const { getForest } = require(`${build}/forest.js`);
   const { sim, teleportSim, stepVehicle } = require(`${build}/sim.js`);
   const { planTour, steerTour } = require(`${build}/tour.js`);
@@ -79,4 +79,26 @@ test("the tour counts a lap once every grove has been visited and the ring start
   }
   assert.ok(firstLap > 0, "no lap in 40 minutes");
   assert.equal(tour.next, 0);
+  assert.ok(tour.ending && !tour.done);
+  // The way back keeps to the brick, and ends at home.
+  const paved = (x, z) => f.plazas.some((p) => Math.hypot(x - p.x, z - p.z) < p.r) || f.roads.some((r) => {
+    const dx = r.bx - r.ax, dz = r.bz - r.az;
+    const u = Math.max(0, Math.min(1, ((x - r.ax) * dx + (z - r.az) * dz) / (dx * dx + dz * dz || 1)));
+    return Math.hypot(x - r.ax - dx * u, z - r.az - dz * u) < (r.kind === "ring" ? 1.7 : 1.4);
+  });
+  let home = -1;
+  for (let i = 0; i < 300 * hz && home < 0; i++) {
+    const c = steerTour(tour, sim.x, sim.z, sim.yaw, sim.speed, 1 / hz);
+    stepVehicle(f, c.throttle, c.steer, false, 1 / hz, { brake: c.brake });
+    assert.ok(paved(sim.x, sim.z), `off the brick at ${sim.x.toFixed(1)}, ${sim.z.toFixed(1)} on the way home`);
+    if (tour.done) home = i / hz;
+  }
+  assert.ok(home > 0, "never got home");
+  assert.ok(Math.hypot(sim.x - f.home.x, sim.z - f.home.z) < 1.5, `stopped ${Math.hypot(sim.x - f.home.x, sim.z - f.home.z).toFixed(1)} m from home`);
+  assert.equal(sim.speed, 0);
+  const want = Math.atan2(sim.x, sim.z);
+  assert.ok(Math.abs(Math.atan2(Math.sin(want - sim.yaw), Math.cos(want - sim.yaw))) < 0.06, "not facing the redwood");
+  // Over: it stays put.
+  const c = steerTour(tour, sim.x, sim.z, sim.yaw, sim.speed, 1 / hz);
+  assert.ok(c.brake && c.throttle === 0);
 });

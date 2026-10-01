@@ -39,6 +39,8 @@ export const EXHIBITS: ExhibitSpec[] = [
   { id: "savonius", label: "Savonius Tower", obstacle: 1.8, treeClearance: 8 },
   { id: "dna", label: "Double Helix", obstacle: 1.8, treeClearance: 8 },
   { id: "mast", label: "Weather Mast", obstacle: 1.4, treeClearance: 8 },
+  // The armillary sundial (Sundial.tsx): rings up to 4 m across, over a plinth.
+  { id: "sundial", label: "Armillary Sundial", obstacle: 2.4, treeClearance: 8 },
 ];
 
 /** Keep exhibits out from under the redwood's crown and apart from one another. */
