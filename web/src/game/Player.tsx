@@ -1,6 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
+import { Cart, WHEEL_R } from "./Cart";
 import { atGroveStop, treesNear, type Forest } from "./forest";
 import { resetInput, sampleActions } from "./input";
 import { clamp } from "./math";
@@ -35,6 +36,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   const pitch = useRef(0);
   /** Pan off the cart's heading, radians, left positive. */
   const look = useRef(0);
+  const shotFrames = useRef({ portrait: null as unknown, n: 0 });
   const lastMarked = useRef<string | null>(null);
   /** The ring's end has been announced on this tour. */
   const lapSaid = useRef(false);
@@ -201,6 +203,21 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       const ahead = preferences.camera === "high" ? 2.6 : 10;
       lookAt.set(sim.x + v.x * ahead, sim.y + (preferences.camera === "high" ? 1.4 : FOLLOW_UP), sim.z + v.z * ahead);
     }
+    // A tree portrait (portrait.ts) overrides the chase camera entirely.
+    const portrait = game.portrait;
+    if (portrait) {
+      state.camera.position.set(...portrait.cam);
+      lookAt.set(...portrait.look);
+      cam.fov = portrait.fov;
+      cam.near = 1;
+      cam.far = GROUND_FAR * 2;
+      state.camera.lookAt(lookAt);
+      cam.updateProjectionMatrix();
+      const counter = shotFrames.current;
+      if (counter.portrait !== portrait) { counter.portrait = portrait; counter.n = 0; }
+      if (++counter.n === 45) window.__shotReady = true;
+      return;
+    }
     // Tilt by raising or lowering the look point over its horizontal distance.
     if (!godEye) {
       lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current);
@@ -218,7 +235,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       g.lookAt(sim.x + f.x, sim.y, sim.z + f.z);
       if (preferences.motion) g.rotateZ(-sim.steering * Math.min(Math.abs(sim.speed), 12) * 0.003);
     }
-    const spin = (sim.speed * dt) / 0.42;
+    const spin = (sim.speed * dt) / WHEEL_R;
     if (wheelL.current) wheelL.current.rotation.x += spin;
     if (wheelR.current) wheelR.current.rotation.x += spin;
 
@@ -265,59 +282,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
 
   return (
     <group ref={group}>
-      <mesh position={[0, 0.38, 0.05]} castShadow receiveShadow>
-        <boxGeometry args={[1.15, 0.32, 1.85]} />
-        <meshStandardMaterial color="#5a3d28" roughness={0.85} />
-      </mesh>
-      <mesh position={[0, 0.62, -0.15]}>
-        <boxGeometry args={[1.02, 0.22, 1.1]} />
-        <meshStandardMaterial color="#4a3322" roughness={0.8} />
-      </mesh>
-      <mesh position={[0, 0.78, -0.35]}>
-        <boxGeometry args={[0.42, 0.16, 0.32]} />
-        <meshStandardMaterial color="#7a2e2e" roughness={0.7} />
-      </mesh>
-      <mesh position={[0.22, 0.78, -0.12]}>
-        <boxGeometry args={[0.34, 0.14, 0.26]} />
-        <meshStandardMaterial color="#2e3a5a" roughness={0.7} />
-      </mesh>
-      <mesh position={[-0.2, 0.78, -0.08]}>
-        <boxGeometry args={[0.3, 0.12, 0.22]} />
-        <meshStandardMaterial color="#3d4a32" roughness={0.7} />
-      </mesh>
-      <mesh position={[0, 0.55, 0.95]}>
-        <boxGeometry args={[0.08, 0.7, 0.08]} />
-        <meshStandardMaterial color="#3a322c" />
-      </mesh>
-      <mesh position={[0, 1.02, 0.95]}>
-        <boxGeometry args={[0.18, 0.22, 0.18]} />
-        <meshStandardMaterial color={lanternColor} emissive={lanternColor} emissiveIntensity={1.4} />
-      </mesh>
-      <pointLight position={[0, 1.05, 0.95]} color="#f6e7c2" intensity={6.5} distance={18} decay={2} />
-      <group ref={wheelL} position={[-0.68, 0.32, 0.45]}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.32, 0.32, 0.14, 10]} />
-          <meshStandardMaterial color="#2a2420" roughness={0.95} />
-        </mesh>
-      </group>
-      <group ref={wheelR} position={[0.68, 0.32, 0.45]}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.32, 0.32, 0.14, 10]} />
-          <meshStandardMaterial color="#2a2420" roughness={0.95} />
-        </mesh>
-      </group>
-      <group position={[-0.68, 0.32, -0.55]}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.28, 0.28, 0.12, 10]} />
-          <meshStandardMaterial color="#2a2420" />
-        </mesh>
-      </group>
-      <group position={[0.68, 0.32, -0.55]}>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.28, 0.28, 0.12, 10]} />
-          <meshStandardMaterial color="#2a2420" />
-        </mesh>
-      </group>
+      <Cart lanternColor={lanternColor} wheelLeft={wheelL} wheelRight={wheelR} />
     </group>
   );
 }

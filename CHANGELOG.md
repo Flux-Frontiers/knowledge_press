@@ -13,6 +13,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A book gallery** in the user guide: sixteen trees, from Pepys's diary to
+  *A Modest Proposal*, each photographed alone from the same distance with
+  the cart beside it for scale, with what to notice and a link into the
+  forest beside it. `web/scripts/gallery.mjs` (`make docs-gallery`) renders
+  the pictures from the forest's `?shot=<slug>` mode.
+- **Link to a tree.** `?tree=<slug>`, for example `?tree=hamlet`, starts the
+  drive beside that book's tree with its card open and the lantern trail
+  pointing at it. The start screen names the tree. An unknown slug is
+  ignored.
 - **A user guide for the forest**, built from `docs/` with mkdocs-material
   and published beside the forest at
   [knowledge_press/docs](https://flux-frontiers.github.io/knowledge_press/docs/):
@@ -59,6 +68,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **A new lantern cart**: an oak book wagon with open rails, a row of books
+  and a stack, tall spoked wheels, and a brass lantern on an iron hook, in
+  place of the box cart. Same size, and the wheels now roll at the rate the
+  ground passes under them.
 - **The splash describes the species.** It no longer mentions space
   colonization; it says that each genre grows as a real species with that
   tree's bark, leaf and habit, and names four of the nine.

@@ -11,6 +11,7 @@ import type { Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./forest";
 import { disc, ribbon, type FlatMesh } from "./roads";
 import { CorpusRedwood } from "./CorpusRedwood";
+import { Cart } from "./Cart";
 import { FlameOfKnowledge } from "./FlameOfKnowledge";
 import { GroveMarks } from "./GroveMarks";
 import { Mysterium } from "./Mysterium";
@@ -84,6 +85,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
   const query = useGame((s) => s.query);
   const searchPick = useGame((s) => s.searchPick);
   const travelMode = useGame((s) => s.travelMode);
+  const portrait = useGame((s) => s.portrait);
 
   return (
     <>
@@ -99,30 +101,38 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
         <meshStandardMaterial color={season === "winter" ? "#c8d1ce" : groundColor} map={groundTexture} bumpMap={groundTexture} bumpScale={0.09} roughness={0.96} metalness={0} />
       </mesh>
 
-      <GroveGrounds forest={forest} ground={groundColor} winter={season === "winter"} />
-      <Roads forest={forest} circuit={travelMode === "circuit"} />
+      {/* The gallery's scale figure: the cart parked side-on beside the trunk. */}
+      {portrait ? (
+        <group position={[forest.trees[portrait.tree]!.x + 3.2, 0, forest.trees[portrait.tree]!.z + 1.2]} rotation={[0, Math.PI / 2, 0]}>
+          <Cart light={false} />
+        </group>
+      ) : null}
+      {portrait ? null : <GroveGrounds forest={forest} ground={groundColor} winter={season === "winter"} />}
+      {portrait ? null : <Roads forest={forest} circuit={travelMode === "circuit"} />}
       {detail && <ForestFloor forest={forest} season={season} />}
-      <LanternTrail forest={forest} selectedGrove={selectedGrove} query={query} searchPick={searchPick} />
-      <Signposts forest={forest} />
-      <GroveMarks forest={forest} />
+      {portrait ? null : (<>
+        <LanternTrail forest={forest} selectedGrove={selectedGrove} query={query} searchPick={searchPick} />
+        <Signposts forest={forest} />
+        <GroveMarks forest={forest} />
 
-      {forest.groves.map((g) => {
-        const on = selectedGrove === g.genre;
-        return (
-          <group key={g.genre} position={[g.x, 0, g.z]}>
-            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
-              <ringGeometry args={[2.2, on ? 3.1 : 2.7, 20]} />
-              <meshBasicMaterial color={g.color} transparent opacity={on ? 0.92 : 0.55} />
-            </mesh>
-          </group>
-        );
-      })}
+        {forest.groves.map((g) => {
+          const on = selectedGrove === g.genre;
+          return (
+            <group key={g.genre} position={[g.x, 0, g.z]}>
+              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.06, 0]}>
+                <ringGeometry args={[2.2, on ? 3.1 : 2.7, 20]} />
+                <meshBasicMaterial color={g.color} transparent opacity={on ? 0.92 : 0.55} />
+              </mesh>
+            </group>
+          );
+        })}
 
-      <CorpusRedwood forest={forest} season={season} />
-      {forest.exhibits.map((e) => {
-        const View = EXHIBIT_VIEWS[e.id];
-        return View ? <View key={e.id} exhibit={e} /> : null;
-      })}
+        <CorpusRedwood forest={forest} season={season} />
+        {forest.exhibits.map((e) => {
+          const View = EXHIBIT_VIEWS[e.id];
+          return View ? <View key={e.id} exhibit={e} /> : null;
+        })}
+      </>)}
 
     </>
   );

@@ -5,6 +5,7 @@ import type { SeasonName } from "./seasons";
 import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
 import { clearTourHeard } from "./tourScript";
+import type { Portrait } from "./portrait";
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -151,6 +152,11 @@ export type GameStore = {
   readingSlug: string | null;
   /** Hide the HUD's buttons, cards and search, leaving the map and the driving controls. */
   cleanView: boolean;
+  /** `?shot=`: a fixed camera on one tree, with no game on screen (portrait.ts). */
+  portrait: Portrait | null;
+  setPortrait: (portrait: Portrait | null) => void;
+  /** Hold the sky at a mode, without stepping through the others. */
+  setTimeMode: (mode: TimeMode) => void;
   toggleCleanView: () => void;
   travelMode: TravelMode;
   /** The grove the tour is pulled up at (its caption shows), or null. */
@@ -260,6 +266,12 @@ export const useGame = create<GameStore>((set, get) => ({
   plaque: null,
   readingSlug: null,
   cleanView: false,
+  portrait: null,
+  setPortrait: (portrait) => set({ portrait }),
+  setTimeMode: (timeMode) => {
+    set({ timeMode, ...readSky(timeMode, get().place) });
+    persist(get());
+  },
   toggleCleanView: () => set({ cleanView: !get().cleanView }),
   travelMode: "free",
   tourStop: null,

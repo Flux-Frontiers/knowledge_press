@@ -6,10 +6,13 @@ import { useGame } from "./store";
 export function StartScreen({
   ready,
   growing,
+  opensAt,
   onEnter,
 }: {
   ready: boolean;
   growing: boolean;
+  /** The title of the tree a `?tree=` link opens beside, if any. */
+  opensAt?: string;
   onEnter: () => void;
 }) {
   const season = useGame((s) => s.season);
@@ -78,6 +81,7 @@ export function StartScreen({
             <BookOpen className="size-4" strokeWidth={1.75} />
             {growing ? "Growing the forest…" : "Start driving"}
           </button>
+          {opensAt ? <p className="text-sm text-muted">Opens beside <span className="text-fg">{opensAt}</span></p> : null}
           {library.length > 0 ? (
             <p className="text-sm text-muted">
               {library.length} book{library.length === 1 ? "" : "s"} already in the press

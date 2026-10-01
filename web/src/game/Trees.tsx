@@ -96,6 +96,9 @@ export function Trees({
   }, [wind, windStrength]);
   useEffect(() => () => { materials.leaf.dispose(); materials.depth.dispose(); }, [materials]);
 
+  // A tree portrait (portrait.ts) shows one tree and nothing else of the forest.
+  const only = useGame((s) => s.portrait?.tree ?? null);
+
   const bark = useMemo(() => forest.chunks.map(({ bark: b }) => {
     const g = new BufferGeometry();
     g.setAttribute("position", new BufferAttribute(b.pos, 3));
@@ -106,6 +109,25 @@ export function Trees({
     g.computeBoundingSphere();
     return g;
   }), [forest]);
+  // The subject's own triangles: its grove's bark with the index cut down to the tree's vertex range.
+  const subjectBark = useMemo(() => {
+    if (only === null) return null;
+    const tree = forest.trees[only]!;
+    const source = bark[tree.chunk]!;
+    const index = forest.chunks[tree.chunk]!.bark.index;
+    const end = tree.woodStart + tree.woodCount;
+    const kept: number[] = [];
+    for (let i = 0; i < index.length; i += 3) {
+      const a = index[i]!;
+      if (a >= tree.woodStart && a < end) kept.push(a, index[i + 1]!, index[i + 2]!);
+    }
+    const g = new BufferGeometry();
+    for (const name of ["position", "normal", "uv", "color"]) g.setAttribute(name, source.getAttribute(name));
+    g.setIndex(kept);
+    g.computeBoundingSphere();
+    return g;
+  }, [forest, bark, only]);
+  useEffect(() => () => subjectBark?.dispose(), [subjectBark]);
   const barkMats = useMemo(() => SPECIES.map(barkMaterial), []);
   const leafGeoms = useMemo(() => SPECIES.map((s) => leafGeometry(s.leaf)), []);
   const leafRefs = useRef<(InstancedMesh | null)[]>([]);
@@ -129,18 +151,21 @@ export function Trees({
     const cutoff = density > 0 ? 2.6 / density : Infinity;
     forest.chunks.forEach((c, i) => {
       const g = chunkRefs.current[i];
-      if (g) g.visible = Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius < cutoff;
+      if (!g) return;
+      const subject = s.portrait ? forest.trees[s.portrait.tree]!.chunk : null;
+      g.visible = subject !== null ? i === subject : Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius < cutoff;
     });
   });
 
   const match = useMemo(() => {
+    if (only !== null) return new Set([only]);
     if (!q) return null;
     const set = new Set<number>();
     forest.trees.forEach((t, i) => {
       if (bookMatchesQuery(t.book, q)) set.add(i);
     });
     return set;
-  }, [forest, q]);
+  }, [forest, q, only]);
 
   useLayoutEffect(() => {
     // The season's wood colour tints the photo bark rather than replacing it.
@@ -169,7 +194,7 @@ export function Trees({
         const dim = match && !match.has(treeI);
         const visible = keepLeaf(i, palette.density) && !dim;
         dummy.position.set(pos[i * 3]!, pos[i * 3 + 1]!, pos[i * 3 + 2]!);
-        const s = visible ? 1 : match && dim ? 0.15 : 0;
+        const s = visible ? 1 : match && dim && only === null ? 0.15 : 0;
         dummy.scale.set(scale[i * 3]! * s, scale[i * 3 + 1]! * s, scale[i * 3 + 2]! * s);
         dummy.quaternion.set(quat[i * 4]!, quat[i * 4 + 1]!, quat[i * 4 + 2]!, quat[i * 4 + 3]!);
         dummy.updateMatrix();
@@ -184,7 +209,7 @@ export function Trees({
       // Bounds from the real instances, so frustum culling can skip this grove.
       mesh.computeBoundingSphere();
     });
-  }, [forest, palette, match]);
+  }, [forest, palette, match, only]);
 
   useLayoutEffect(() => {
     const mesh = ringRef.current;
@@ -192,7 +217,7 @@ export function Trees({
     forest.trees.forEach((t, i) => {
       dummy.position.set(t.x, 0.05, t.z);
       dummy.rotation.set(-Math.PI / 2, 0, 0);
-      const on = match ? match.has(i) : false;
+      const on = match && only === null ? match.has(i) : false;
       dummy.scale.set(on ? t.trunkRadius * 4.2 : 0.0001, on ? t.trunkRadius * 4.2 : 0.0001, 1);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
@@ -201,13 +226,14 @@ export function Trees({
     });
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [forest, match]);
+  }, [forest, match, only]);
 
   return (
     <group>
       {forest.chunks.map((chunk, ci) => (
-        <group key={`chunk-${ci}`} ref={(g) => { chunkRefs.current[ci] = g; }}>
-          <mesh geometry={bark[ci]} material={barkMats[chunk.species]} castShadow receiveShadow />
+        <group key={`chunk-${ci}`} ref={(g) => { chunkRefs.current[ci] = g; }}
+          visible={only === null || ci === forest.trees[only]!.chunk}>
+          <mesh geometry={subjectBark && ci === forest.trees[only!]!.chunk ? subjectBark : bark[ci]} material={barkMats[chunk.species]} castShadow receiveShadow />
           <instancedMesh ref={(m) => { leafRefs.current[ci] = m; }}
             args={[leafGeoms[chunk.species], materials.leaf, Math.max(1, chunk.leafCount)]} customDepthMaterial={materials.depth}
             castShadow={!COARSE_POINTER} receiveShadow />
