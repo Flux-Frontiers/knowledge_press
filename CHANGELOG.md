@@ -13,6 +13,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **An app guide** for the iPhone, iPad and Mac app, beside the forest guide:
+  getting started on each device, asking a question and choosing a scope,
+  reading an answer and its sources, the answer engines, Browse, chats and
+  export, every setting, what leaves the device, and troubleshooting. It
+  replaces "Inside the app" as the app section's front door; that page and
+  the store listing move to a Reference tab.
 - **A book gallery** in the user guide: sixteen trees, from Pepys's diary to
   *A Modest Proposal*, each photographed alone from the same distance with
   the cart beside it for scale, with what to notice and a link into the
