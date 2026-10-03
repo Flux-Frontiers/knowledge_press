@@ -41,6 +41,7 @@ the same files at build time. Details are in
 | **Up / Down** | tilt the camera up / down (gamepad: right stick) |
 | **Space** | brake |
 | **C** | camera: behind the cart, high view, in the cart, god's eye (the whole forest from above) |
+| **Wheel / pinch** | in god's eye, zoom toward the cursor; a tree's card offers **Fly there** |
 | **E** | read the nearest tree into the press |
 | **G** | grove atlas — jump to a genre or an exhibit |
 | **B** | every book — filter the corpus and jump to any tree |
@@ -154,6 +155,8 @@ Uplights.tsx   night floodlighting for the redwood and the exhibits
 sim.ts         cart pose, throttle, steer, trunk collision, teleport
 input.ts       keyboard, gamepad and touch actions
 Player.tsx     lantern cart + cameras (behind, high, in the cart, god's eye)
+godEye.ts      god's-eye zoom and the dive down to a tree
+GroveLabels.tsx  grove names over the groves, in god's eye only
 Trees.tsx      per-grove textured bark meshes + instanced species leaves
 World.tsx      ground, roads, lantern trail, fog, plinth
 Signposts.tsx  grove signposts and exhibit plaques
