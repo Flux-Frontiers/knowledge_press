@@ -6,6 +6,7 @@ import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
 import { clearTourHeard } from "./tourScript";
 import type { Portrait } from "./portrait";
+import type { GroundCamera } from "./godEye";
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -199,6 +200,13 @@ export type GameStore = {
   toggleCircuit: () => void;
   requestJump: (pose: JumpPose, toast?: string) => void;
   clearJump: () => void;
+  /** The ground camera last in use: where a dive from god's eye lands. */
+  groundCamera: GroundCamera;
+  /** A dive from god's eye down to the cart, under way (Player.tsx animates it). */
+  flight: { to: GroundCamera } | null;
+  /** Jump the cart to a pose and dive the god's-eye camera down to it. */
+  flyTo: (pose: JumpPose, toast?: string) => void;
+  endFlight: () => void;
 };
 
 const initial = loadSave();
@@ -225,12 +233,12 @@ export const useGame = create<GameStore>((set, get) => ({
   preferences: initial.preferences,
   setPreferences: (patch) => {
     const preferences = readPreferences({ ...get().preferences, ...patch });
-    set({ preferences });
+    set(preferences.camera === "god" ? { preferences } : { preferences, groundCamera: preferences.camera });
     persist(get());
   },
   resetSettings: () => {
     clearTourHeard();
-    set({ preferences: readPreferences(), season: "summer", timeMode: "live", library: [], lastReadSlug: null, libraryOpen: false });
+    set({ preferences: readPreferences(), groundCamera: "follow", season: "summer", timeMode: "live", library: [], lastReadSlug: null, libraryOpen: false });
     set(readSky("live", get().place));
     persist(get());
   },
@@ -373,4 +381,16 @@ export const useGame = create<GameStore>((set, get) => ({
     });
   },
   clearJump: () => set({ jump: null }),
+  groundCamera: initial.preferences.camera === "god" ? "follow" : initial.preferences.camera,
+  flight: null,
+  flyTo: (pose, toast) => {
+    get().requestJump(pose, toast);
+    set({ flight: { to: get().groundCamera } });
+  },
+  endFlight: () => {
+    const flight = get().flight;
+    if (!flight) return;
+    set({ flight: null });
+    get().setPreferences({ camera: flight.to });
+  },
 }));

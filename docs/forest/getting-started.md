@@ -31,6 +31,7 @@ plaque. The groves are out along the roads.
 | ++space++ | Brake. |
 | ++e++ | Read the nearest tree into the press. |
 | ++c++ | Next camera: behind the cart, high view, in the cart, god's eye. |
+| Mouse wheel | In god's eye, zoom toward the cursor. |
 | ++q++ | Start or end the guided tour. |
 | ++g++ | The grove atlas. |
 | ++b++ | Every book. |
@@ -51,6 +52,7 @@ On a phone or tablet the controls are on screen:
 - **Read:** reads the nearest tree into the press. It lights up when a tree
   is close enough.
 - **Guided tour:** starts the tour; the same button ends it.
+- **Pinch:** in god's eye, zooms toward the point between your fingers.
 
 Everything else is in the top bar: the lantern query, home, the atlas, every
 book, the screenshot button, the clock, and settings.

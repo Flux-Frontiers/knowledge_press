@@ -33,7 +33,17 @@ driving.
 | Behind the cart | The default. Follows a few meters behind, at head height. |
 | High view | Behind and above, looking down at the cart and the road ahead. |
 | In the cart | From the seat. The lantern is beside you. |
-| God's eye | The whole forest from above the hub. |
+| God's eye | The whole forest from above the hub, with each grove's name over it. |
+
+### Zoom and fly from god's eye
+
+In god's eye, scroll the mouse wheel or pinch with two fingers to zoom. The
+view zooms toward the point under the cursor, or between your fingers, from
+the whole forest down to about one grove.
+
+Click or tap a tree to show its card, then select **Fly there**. The cart is
+set down beside the tree and the camera dives to it, ending on the camera you
+used before god's eye.
 
 ## Take the guided tour
 
