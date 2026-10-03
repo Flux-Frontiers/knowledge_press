@@ -2,6 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type ComponentType } from "react";
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, type FogExp2, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
 import { ForestFloor, FOG_DAY, FOG_NIGHT, Sky, Sunlight, textureAnisotropy, useGroundTexture } from "./Environment";
+import { MeteorSky } from "./MeteorSky";
 import { DAY_OVERRIDE } from "./daylight";
 import { FOG_SCALE } from "./preferences";
 
@@ -97,6 +98,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
       <hemisphereLight color={ambientColor} groundColor={groundColor} intensity={hemiIntensity} />
       <Sunlight light={sky.light} detail={detail} />
       <Sky sky={sky} season={season} />
+      <MeteorSky sky={sky} />
       <directionalLight position={[-30, 20, -40]} intensity={0.2} color="#8aa0b8" />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>

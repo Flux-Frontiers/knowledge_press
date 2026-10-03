@@ -13,6 +13,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Meteors and the major meteor showers.** The night sky shows sporadic
+  meteors and, in season, the ten major annual showers, from Quadrantids to
+  Ursids, at the rates a dark sky would show: each shower's rate follows
+  its activity profile around the peak and the height of its radiant, and
+  its meteors fan out from the radiant's true place among the stars. Fast
+  meteors are brief and greenish, slow ones linger and run yellow. They
+  dim with twilight, fog and cloud as the stars do. `?meteors=perseids`
+  pins a shower to its peak and `?meteors=perseids:20` multiplies its rate.
+
 - **An armillary sundial**, an eighth exhibit: a brass equatorial ring dial
   built for 39° N. Its rod points at the celestial pole (true north, 39° up),
   the hour ring stands square to it with IV to VIII engraved inside, and a

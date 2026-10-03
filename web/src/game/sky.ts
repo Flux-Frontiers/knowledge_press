@@ -23,11 +23,28 @@ const rightAscension = (l: number, b: number) => Math.atan2(Math.sin(l) * Math.c
 const declination = (l: number, b: number) => Math.asin(Math.sin(b) * Math.cos(OBLIQUITY) + Math.cos(b) * Math.sin(OBLIQUITY) * Math.sin(l));
 const siderealTime = (d: number, lw: number) => RAD * (280.16 + 360.9856235 * d) - lw;
 
-function sunCoords(d: number) {
+/** The sun's ecliptic longitude, radians. */
+function sunLongitude(d: number) {
   const m = RAD * (357.5291 + 0.98560028 * d);
   const c = RAD * (1.9148 * Math.sin(m) + 0.02 * Math.sin(2 * m) + 0.0003 * Math.sin(3 * m));
-  const l = m + c + RAD * 102.9372 + Math.PI;
+  return m + c + RAD * 102.9372 + Math.PI;
+}
+
+function sunCoords(d: number) {
+  const l = sunLongitude(d);
   return { dec: declination(l, 0), ra: rightAscension(l, 0) };
+}
+
+/**
+ * The sun's ecliptic longitude, degrees in [0, 360): the calendar meteor
+ * showers are dated by, since the Earth crosses a stream at the same point of
+ * its orbit each year whatever the calendar says. It is in the J2000 frame,
+ * as the IMO's shower dates are, so the equinox of date reads about 0.36
+ * degrees short of 0 in 2026.
+ */
+export function solarLongitude(date: Date): number {
+  const deg = sunLongitude(toDays(date)) / RAD;
+  return ((deg % 360) + 360) % 360;
 }
 
 function moonCoords(d: number) {
@@ -234,6 +251,8 @@ export type SkyState = {
   morning: number;
   /** `equatorialToWorld` for this moment: where the fixed stars stand. */
   starMatrix: number[];
+  /** `solarLongitude` for this moment, degrees: which meteor showers are on. */
+  solarLon: number;
   /**
    * The one directional light: the sun by day, the moon by night, faint
    * starlight with neither up. `shadow` is how strongly it casts shadows, 0 to 1.
@@ -269,5 +288,5 @@ export function skyState(at: Date, place: Place): SkyState {
     const n = Math.hypot(0.3, 1, 0.2);
     light = { dir: [0.3 / n, 1 / n, 0.2 / n], color: "#7f93b8", intensity: starI, shadow: 0 };
   }
-  return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, morning, starMatrix: equatorialToWorld(at, place), light };
+  return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, morning, starMatrix: equatorialToWorld(at, place), solarLon: solarLongitude(at), light };
 }

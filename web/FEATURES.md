@@ -72,6 +72,7 @@ A rank for how much of the forest you have pressed, and a way to start over.
 | Seasons (canopy density, palettes) | `seasons.ts` |
 | Sky clock: sun, moon phase and stars for the live time and place, or dawn / day / dusk / night | `sky.ts`, `Environment.tsx`, `daylight.ts` |
 | Real star field: the 5,080 naked-eye stars of the Yale Bright Star Catalogue, placed by precession, sidereal time and latitude | `starCatalog.ts`, `stars.ts`, `sky.ts`, `scripts/build-stars.mjs` |
+| Meteors: sporadics and ten annual showers at real rates, from their radiants (`?meteors=` pins one) | `meteors.ts`, `MeteorSky.tsx`, `sky.ts` |
 | Random weather: morning fog that builds and burns off, mist to pea soup, gray sky, dimmed sun and stars (setting, off by default; `?weather=` pins it) | `weather.ts`, `World.tsx`, `Environment.tsx`, `PauseOverlay.tsx` |
 | Tour welcome, background, end-of-ring and farewell lines, editable as variables | `tourScript.ts`, `Player.tsx`, `HUD.tsx` |
 | Night floodlights on the redwood and exhibits | `Uplights.tsx` |
