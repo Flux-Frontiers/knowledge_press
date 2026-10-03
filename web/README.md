@@ -151,6 +151,7 @@ seasons.ts     canopy density + leaf / fog / ground palettes
 sky.ts         sun and moon positions for a time and place (after SunCalc)
 daylight.ts    daytime overrides on the season palette
 Environment.tsx  sky, sun, moon, stars and the shadow-casting light
+meteors.ts, MeteorSky.tsx   meteor showers: rates, radiants and trails
 Uplights.tsx   night floodlighting for the redwood and the exhibits
 sim.ts         cart pose, throttle, steer, trunk collision, teleport
 input.ts       keyboard, gamepad and touch actions

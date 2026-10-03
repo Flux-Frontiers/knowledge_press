@@ -13,13 +13,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Meteors and the major meteor showers.** The night sky shows sporadic
+  meteors and, in season, the ten major annual showers, from Quadrantids to
+  Ursids, at the rates a dark sky would show: each shower's rate follows
+  its activity profile around the peak and the height of its radiant, and
+  its meteors fan out from the radiant's true place among the stars. Fast
+  meteors are brief and greenish, slow ones linger and run yellow. They
+  dim with twilight, fog and cloud as the stars do. `?meteors=perseids`
+  pins a shower to its peak and `?meteors=perseids:20` multiplies its rate.
 - **God's eye zooms, and flies down to a tree.** The mouse wheel or a
   two-finger pinch zooms toward the point under the cursor or between the
   fingers, from the whole forest down to about one grove. Grove names float
   over each grove in this view only. A tree's card gains **Fly there**: the
   cart is set down at the tree and the camera dives from overhead to the
   camera you were using before god's eye, in about two and a half seconds.
-
 - **An armillary sundial**, an eighth exhibit: a brass equatorial ring dial
   built for 39° N. Its rod points at the celestial pole (true north, 39° up),
   the hour ring stands square to it with IV to VIII engraved inside, and a

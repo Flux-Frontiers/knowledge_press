@@ -31,6 +31,45 @@ from the Yale Bright Star Catalogue, placed for the clock's time and your
 place. Size follows brightness and color follows the star's own, and stars
 fade toward the horizon. Look up with ++up++ at night to see them.
 
+### Meteors
+
+Meteors cross the night sky at the rates a dark sky would show tonight. A
+few an hour are sporadic, from no shower. During a shower the rate climbs,
+and its meteors run outward from the shower's radiant, the point among the
+stars that the shower is named for. The radiant must be above the horizon
+for its shower to show, and the higher it stands the more meteors there
+are.
+
+Fast meteors are brief and white with a green cast; slow ones last longer
+and burn yellow. Like the stars, meteors are lost in twilight, fog and
+cloud.
+
+| Shower | Peak | Rate at peak (per hour) |
+| --- | --- | --- |
+| Quadrantids | 3 to 4 January | 110 |
+| Lyrids | 22 April | 18 |
+| Eta Aquariids | 6 May | 50 |
+| Southern Delta Aquariids | 30 July | 25 |
+| Perseids | 12 to 13 August | 100 |
+| Draconids | 8 October | 10 |
+| Orionids | 21 October | 20 |
+| Leonids | 17 November | 15 |
+| Geminids | 14 December | 150 |
+| Ursids | 22 December | 10 |
+
+The rates are zenithal hourly rates: a dark sky with the radiant overhead.
+A real night shows fewer, and so does the forest. Even at the Perseids'
+peak, expect a meteor every minute or two across the whole sky.
+
+To see a shower at its peak, add `?meteors=` to the address with the
+shower's name in lowercase, hyphenated (`perseids`, `eta-aquariids`,
+`delta-aquariids`). Add `:` and a number to multiply its rate. Set the
+clock to Night first. For example:
+
+```
+https://flux-frontiers.github.io/knowledge_press/?meteors=geminids:20
+```
+
 ## Seasons
 
 Pick a season on the start screen or under **Environment** in settings.
