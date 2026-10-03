@@ -66,6 +66,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const clean = useGame((s) => s.cleanView);
   const toggleCleanView = useGame((s) => s.toggleCleanView);
   const silent = useGame((s) => s.preferences.silent);
+  const godEye = useGame((s) => s.preferences.camera === "god" && !s.flight);
   const tourStop = useGame((s) => s.tourStop);
   const touring = tourStop ? forest.groves.find((g) => g.genre === tourStop) : undefined;
   const tourNote = useGame((s) => s.tourNote);
@@ -361,6 +362,12 @@ export function HUD({ forest }: { forest: Forest }) {
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-4 text-sm text-fg">
                   <BookOpen className="size-4" strokeWidth={1.75} /> Open the book
                 </button>
+                {godEye ? (
+                  <button type="button" onClick={() => flyToTree(nearby)}
+                    className="min-h-11 rounded-md border border-primary/60 px-4 text-sm text-fg">
+                    Fly there
+                  </button>
+                ) : null}
               </div>
             </article>
           ) : !silent && nextQuest && nextQuest.id !== questHintHidden ? (
@@ -440,6 +447,14 @@ function jumpToTree(t: TreeSite) {
   s.pinTree(t.book.slug);
   s.requestJump(treeApproach(t, s.x, s.z), t.book.title);
   (document.activeElement as HTMLElement | null)?.blur();
+}
+
+/** From god's eye: put the cart at the tree and dive the camera down to it. */
+function flyToTree(t: TreeSite) {
+  const s = useGame.getState();
+  s.selectGrove(null);
+  s.pinTree(t.book.slug);
+  s.flyTo(treeApproach(t, s.x, s.z), t.book.title);
 }
 
 function jumpHome(forest: Forest) {

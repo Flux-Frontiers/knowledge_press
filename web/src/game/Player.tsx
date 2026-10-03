@@ -4,6 +4,7 @@ import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
 import { atGroveStop, treesNear, type Forest } from "./forest";
 import { resetInput, sampleActions } from "./input";
+import { flightPose, FOLLOW_BACK, FOLLOW_UP, forestGodLimits, godPose, groundPose, resetGodView, type Vec3 } from "./godEye";
 import { clamp } from "./math";
 import { forwardOf, sim, stepVehicle, teleportSim } from "./sim";
 import { hush, speak, speaking } from "./speech";
@@ -15,12 +16,8 @@ const camPos = new Vector3();
 /** Within this of a picked tree, the cart has arrived (reading range plus a margin). */
 const TRAIL_ARRIVED = 9;
 const lookAt = new Vector3();
-/** The behind-the-cart camera: metres back and up from the cart. */
-const FOLLOW_BACK = 6.5;
-const FOLLOW_UP = 2.5;
-/** The god's-eye camera: this much margin around the world, and pulled south by this fraction of its height so the view is not straight down. */
-const GOD_MARGIN = 1.08;
-const GOD_TILT = 0.35;
+/** Where the god's-eye camera looks, eased like its position so a zoom glides. */
+const godLook = new Vector3();
 /** The camera's clip planes at ground level (ForestCanvas), and the god's-eye near plane. */
 const GROUND_NEAR = 0.12;
 const GROUND_FAR = 560;
@@ -40,6 +37,11 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   const lastMarked = useRef<string | null>(null);
   /** The ring's end has been announced on this tour. */
   const lapSaid = useRef(false);
+  /** The god's-eye view was on last frame. */
+  const wasGod = useRef(false);
+  /** A dive under way: where it left from, and how long it has been going. */
+  const flightFrom = useRef<{ cam: Vec3; look: Vec3 } | null>(null);
+  const flightT = useRef(0);
 
   const paused = useGame((s) => s.paused);
   const collect = useGame((s) => s.collect);
@@ -63,10 +65,17 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       teleportSim(jump.x, jump.z, jump.yaw);
       look.current = 0;
       useGame.getState().clearJump();
-      const f = forwardOf(sim.yaw);
-      state.camera.position.set(sim.x - f.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - f.z * FOLLOW_BACK);
-      lookAt.set(sim.x + f.x * 10, sim.y + FOLLOW_UP, sim.z + f.z * 10);
-      state.camera.lookAt(lookAt);
+      if (game.flight) {
+        // A dive from god's eye: the cart is already there, and the camera flies down to it.
+        pitch.current = 0;
+        flightFrom.current = { cam: state.camera.position.clone(), look: lookAt.clone() };
+        flightT.current = 0;
+      } else {
+        const f = forwardOf(sim.yaw);
+        state.camera.position.set(sim.x - f.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - f.z * FOLLOW_BACK);
+        lookAt.set(sim.x + f.x * 10, sim.y + FOLLOW_UP, sim.z + f.z * 10);
+        state.camera.lookAt(lookAt);
+      }
     }
 
     if (blocked) {
@@ -183,12 +192,32 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const inCart = preferences.camera === "cart";
     const godEye = preferences.camera === "god";
     const cam = state.camera as PerspectiveCamera;
-    if (godEye) {
-      // High over the hub, the whole world radius in the vertical field of view.
-      const height = (forest.worldRadius * GOD_MARGIN) / Math.tan(MathUtils.degToRad(cam.fov / 2));
-      camPos.set(0, height, height * GOD_TILT);
-      state.camera.position.lerp(camPos, 1 - Math.exp(-2.2 * dt));
-      lookAt.set(0, 0, 0);
+    const flight = game.flight;
+    const flying = Boolean(flight && flightFrom.current);
+    if (flight && flightFrom.current) {
+      flightT.current += dt;
+      const p = flightPose(flightFrom.current, groundPose(flight.to, sim.x, sim.y, sim.z, sim.yaw), flightT.current);
+      state.camera.position.set(p.cam.x, p.cam.y, p.cam.z);
+      lookAt.set(p.look.x, p.look.y, p.look.z);
+      // The clip planes come down with the camera, from god's eye's to the ground's.
+      cam.far = Math.max(GROUND_FAR, p.cam.y + forest.worldRadius * 2);
+      cam.near = clamp(p.cam.y * 0.01, GROUND_NEAR, GOD_NEAR);
+      if (p.done) {
+        flightFrom.current = null;
+        game.endFlight();
+      }
+    } else if (godEye) {
+      // Over the zoomed point (godEye.ts), the whole world in view until the wheel or a pinch says otherwise.
+      if (!wasGod.current) {
+        resetGodView(forestGodLimits(forest).max);
+        godLook.copy(lookAt);
+      }
+      const pose = godPose();
+      const k = 1 - Math.exp(-2.2 * dt);
+      camPos.set(pose.cam.x, pose.cam.y, pose.cam.z);
+      state.camera.position.lerp(camPos, k);
+      godLook.lerp(camPos.set(pose.look.x, pose.look.y, pose.look.z), k);
+      lookAt.copy(godLook);
       // Push both clip planes out: at ground level's 0.12 m near plane the depth
       // buffer cannot tell the roads from the ground a kilometre away.
       cam.far = state.camera.position.length() + forest.worldRadius * 2;
@@ -225,7 +254,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       return;
     }
     // Tilt by raising or lowering the look point over its horizontal distance.
-    if (!godEye) {
+    wasGod.current = godEye && !flying;
+    if (!godEye && !flying) {
       lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;

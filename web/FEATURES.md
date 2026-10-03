@@ -52,7 +52,6 @@ A rank for how much of the forest you have pressed, and a way to start over.
 
 | Feature | Notes |
 | --- | --- |
-| God's-eye zoom and a visible flight to a tree | The god's-eye camera shows the whole forest at one fixed height. Zoom in and out, and fly visibly to a picked tree. |
 | Jump to a tree from the press | The press list opens a book or jumps to its grove; the lantern query and the **B** list already land at the tree. |
 | Ambient audio | Wind, wet leaves, a distant press. Unlock on first gesture. |
 | Breadcrumb lanterns | Optional trail of your own lights so a long wander still has a way home. |
@@ -67,6 +66,7 @@ A rank for how much of the forest you have pressed, and a way to start over.
 | Diaries as year limbs spiralling up the trunk, entries along them by date | `growTree.ts` |
 | Hub-and-spoke groves on two ring roads, 253-book catalog | `forest.ts`, `catalog.ts` |
 | WASD lantern cart; cameras behind, high, in the cart and god's eye (C) | `Player.tsx`, `sim.ts` |
+| God's eye: wheel and pinch zoom toward the cursor, grove names, **Fly there** dives to a tree | `godEye.ts`, `ForestCanvas.tsx`, `GroveLabels.tsx`, `Player.tsx` |
 | Look around with arrows or the right stick; on touch, a second stick that tilts and pans | `input.ts`, `TouchControls.tsx` |
 | A genre mark on each stop plaza, the seal's construction with a glyph per genre; the glyph beside each genre in the list and atlas | `genreMarks.ts`, `GroveMarks.tsx`, `GenreGlyph.tsx` |
 | Seasons (canopy density, palettes) | `seasons.ts` |
