@@ -127,6 +127,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   golden-gate and corpus-copy commands use `../gutenberg_kg/bundles/...`, and
   the iPhone README's INSTALLATION.md link, which pointed at a file this repo
   does not have, goes to gutenberg_kg's copy.
+- **Version comments name the check that exists.** Both `project.yml` files
+  and `AppVersion.swift` said the app version tracks gutenberg-kg's and that
+  `tests/test_app_version.py` enforces it. That test left with the split; the
+  sites are kept in step by `scripts/check_version.py`.
 - **Go to the grove no longer leaves a lantern trail behind.** The jump lands
   on the grove's stop, which is outside its radius, and the trail only
   cleared once the cart was inside the grove, so it led you back to where you
