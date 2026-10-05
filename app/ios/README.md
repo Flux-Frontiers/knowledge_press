@@ -15,7 +15,8 @@ draws comes from the `KnowledgePressUI` target in
 | Passages | the installed corpus packs | no |
 | Browse | the same packs | no |
 
-With the packs installed the app is offline end to end. Build them on the Mac:
+With the packs installed the app is offline end to end. Build them on the Mac,
+in a `gutenberg_kg` checkout:
 
 ```sh
 gutenkg export-swift        # core.pack, gutenberg.pack + .vectors, diaries.pack + .vectors
@@ -34,13 +35,15 @@ before the ~800 MB download.
   for on-device answers. Older phones run everything else and show why the
   on-device engine is unavailable — they are not blocked from the app.
 - Xcode 26 (iOS 26 SDK) to build.
-- A worker reachable from the phone: `make up` at the repo root, then set the
-  worker URL in Settings to `http://<your-mac>.local:8000`. `localhost` is the
-  phone, not the Mac — the app cannot find your worker there. If the phone
-  cannot connect but `curl http://localhost:8000` works on the Mac, check
-  that only one container runtime is running (`make down-all`, then `make up`)
+- A worker reachable from the phone: `make up` at the root of a `gutenberg_kg`
+  checkout, then set the worker URL in Settings to
+  `http://<your-mac>.local:8000`. `localhost` is the phone, not the Mac — the
+  app cannot find your worker there. If the phone cannot connect but
+  `curl http://localhost:8000` works on the Mac, check that only one container
+  runtime is running (`make down-all`, then `make up`, both in `gutenberg_kg`)
   and that the app has Local Network access in iOS Settings. The full
-  checklist is in [INSTALLATION.md](../../docs/INSTALLATION.md#serving-phones-and-other-devices-on-your-lan).
+  checklist is in gutenberg_kg's
+  [INSTALLATION.md](https://github.com/Flux-Frontiers/gutenberg_kg/blob/main/docs/INSTALLATION.md#serving-phones-and-other-devices-on-your-lan).
 
 ## Build
 

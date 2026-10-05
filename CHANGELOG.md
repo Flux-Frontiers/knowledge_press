@@ -120,6 +120,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **App docs say which commands run in `gutenberg_kg`.** `app/RUNBOOK.md`,
+  `app/README.md` and `app/ios/README.md` still read as if the apps lived in
+  `gutenberg_kg`: `gutenkg export-swift`, `make up` and `bundles/` paths were
+  given "from the repo root". They now name the `gutenberg_kg` checkout, the
+  golden-gate and corpus-copy commands use `../gutenberg_kg/bundles/...`, and
+  the iPhone README's INSTALLATION.md link, which pointed at a file this repo
+  does not have, goes to gutenberg_kg's copy.
 - **Go to the grove no longer leaves a lantern trail behind.** The jump lands
   on the grove's stop, which is outside its radius, and the trail only
   cleared once the cart was inside the grove, so it led you back to where you
