@@ -39,8 +39,9 @@ app/
 | Passages | the installed corpus packs | yes |
 | Browse | the same packs | yes |
 
-With packs installed the app answers with the network off. Build them with
-`gutenkg export-swift` and `gutenkg export-embedder`, then copy the output into
+With packs installed the app answers with the network off. Build them in a
+`gutenberg_kg` checkout with `gutenkg export-swift` and
+`gutenkg export-embedder`, then copy the output into
 Application Support ▸ Corpus — see [On-device corpus packs](https://github.com/Flux-Frontiers/gutenberg_kg/blob/main/docs/ON_DEVICE.md) in gutenberg_kg.
 With no packs the app falls back to the worker, so nothing breaks before the
 first download.
@@ -68,11 +69,11 @@ The iPhone app builds from `app/ios` — see [ios/README.md](ios/README.md).
 
 ## Live smoke test
 
-Start the worker (`make up` or `make run` at repo root), then any client call
-against `http://localhost:8000` — e.g. `WorkerClient(baseURL:).stats()` —
-returns live corpus totals. The fixture JSON in
-`Tests/GutenbergKGKitTests/ModelDecodingTests.swift` is the worker-schema
-contract: update it in lockstep with `serve/handler.py`.
+Start the worker (`make up` or `make run` in a `gutenberg_kg` checkout), then
+any client call against `http://localhost:8000` — e.g.
+`WorkerClient(baseURL:).stats()` — returns live corpus totals. The fixture
+JSON in `Tests/GutenbergKGKitTests/ModelDecodingTests.swift` is the
+worker-schema contract: update it in lockstep with `serve/handler.py`.
 
 `ContextBudgeterTests` is the other contract worth keeping honest: it pins the
 prompt shape against `kg_utils/synthesis/_text.py`, so a change there should

@@ -18,6 +18,12 @@ catch. Both are fixed; the gate now checks rank order, not just membership.
 Do the steps in order. Steps 1–5 get the Mac app working, which is the fastest
 feedback loop; the iPhone (step 6) is the same code with a different shell.
 
+Steps 1 and 2 run in a `gutenberg_kg` checkout, the Python package that builds
+the corpus, not in this repo. Everything else runs from this repo's root and
+expects that checkout beside it at `../gutenberg_kg`, which is where the
+Makefile's `GUTENBERG_KG_DIR` points by default. The packs live in that
+checkout, under `bundles/gutenberg-all/swift/`.
+
 ---
 
 ## Status checklist
@@ -197,7 +203,7 @@ download, no image generation, no chat persistence.
 | macOS 26, Apple silicon | on-device answers | Apple Intelligence must be **on** in System Settings. Without it everything else still runs and the app says why the answer engine is off. |
 | Xcode 26 | building | `swift test` needs the full Xcode, not Command Line Tools. |
 | Xcode 27 (optional) | Private Cloud Compute answers | Only for the Private Cloud engine (step 5). Everything else builds and runs on Xcode 26 unchanged — `PrivateCloudSynthesis.swift` compiles itself out below Swift 6.4, which ships only with Xcode 27. |
-| A built bundle | steps 1–2 | `bundles/gutenberg-all/` — the output of `make build-corpus`. |
+| A built bundle | steps 1–2 | `bundles/gutenberg-all/` in a `gutenberg_kg` checkout -- the output of its `make build-corpus`. |
 | ~5 GB free | steps 1–2 | The export reads 5.7 GB and writes under 1 GB. |
 | iPhone 15 Pro or newer, iOS 26 | step 6 | The Simulator cannot run Foundation Models. |
 
@@ -221,7 +227,7 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 ## 1. Build the corpus packs
 
-From the repo root:
+From the root of your `gutenberg_kg` checkout:
 
 ```sh
 poetry install
@@ -407,7 +413,7 @@ containing only the files above.
 
 ```sh
 mkdir -p ~/Library/Application\ Support/Corpus
-cp -R bundles/gutenberg-all/swift/ ~/Library/Application\ Support/Corpus/
+cp -R ../gutenberg_kg/bundles/gutenberg-all/swift/ ~/Library/Application\ Support/Corpus/
 ```
 
 Check it landed:
@@ -483,7 +489,7 @@ Apple's own upgrade sheet.
 
 ```sh
 cd app/GutenbergKGKit
-GUTENBERG_PACKS=../../bundles/gutenberg-all/swift swift test
+GUTENBERG_PACKS=../../../gutenberg_kg/bundles/gutenberg-all/swift swift test
 ```
 
 This is the real check on the retrieval port. It replays the twelve golden
@@ -629,7 +635,7 @@ run, written out:
 DEVICE=$(xcrun devicectl list devices --json-output /dev/stdout \
   | python3 -c 'import json,sys; d=json.load(sys.stdin)["result"]["devices"]; c=lambda x: x.get("connectionProperties",{}); d=[x for x in d if c(x).get("tunnelState")!="unavailable" and c(x).get("transportType")!="sameMachine"]; d.sort(key=lambda x: c(x).get("tunnelState")!="connected"); print(d[0]["identifier"] if d else "")')
 
-cd bundles/gutenberg-all/swift
+cd ../gutenberg_kg/bundles/gutenberg-all/swift
 xcrun devicectl device copy to --device "$DEVICE" \
   --domain-type appDataContainer \
   --domain-identifier com.fluxfrontiers.knowledgepress \
