@@ -85,8 +85,8 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.fluxfrontiers.knowledgepress
-        # Tracks the gutenberg-kg package version (pyproject.toml);
-        # tests/test_app_version.py fails when they differ.
+        # The release version; scripts/check_version.py fails when it
+        # disagrees with web/package.json or the other version sites.
         MARKETING_VERSION: "1.28.1"
         # Overridden by the Makefile with `git rev-list --count HEAD`.
         CURRENT_PROJECT_VERSION: "1"

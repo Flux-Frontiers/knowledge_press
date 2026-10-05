@@ -10,8 +10,8 @@ import Foundation
 
 enum AppVersion {
     /// Mirrors `MARKETING_VERSION` in `app/ios/project.yml` and
-    /// `app/macos/project.yml`, which track the gutenberg-kg package version.
-    /// tests/test_app_version.py fails when any of the four differ -- this is
+    /// `app/macos/project.yml`, which carry the release version.
+    /// scripts/check_version.py fails when any version site differs -- this is
     /// the only version string a bare `swift run` can ever see.
     static let fallback = "1.28.1"
 
