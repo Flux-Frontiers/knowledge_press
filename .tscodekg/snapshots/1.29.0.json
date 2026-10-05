@@ -1,0 +1,105 @@
+{
+  "key": "1.29.0",
+  "branch": "chore/bump-1.29.0",
+  "timestamp": "2026-10-05T17:03:28.795287+00:00",
+  "version": "1.29.0",
+  "subject": "repo:knowledge_press",
+  "tool": "tscode-kg",
+  "tool_version": "0.7.0",
+  "tree_hash": "d71885490f680dc8d377a2359fc220532a0dbeaf",
+  "metrics": {
+    "db_path": ".tscodekg/graph.sqlite",
+    "total_nodes": 2830,
+    "meaningful_nodes": 2830,
+    "total_edges": 7209,
+    "node_counts": {
+      "class": 9,
+      "function": 2584,
+      "interface": 1,
+      "method": 28,
+      "module": 141,
+      "type_alias": 67
+    },
+    "edge_counts": {
+      "CALLS": 4185,
+      "CONTAINS": 2689,
+      "IMPORTS": 330,
+      "INHERITS": 5
+    },
+    "module_count": 141,
+    "class_count": 9,
+    "function_count": 2584,
+    "method_count": 28,
+    "docstring_coverage": 0.069,
+    "snapshot_count": 7,
+    "vector_backend": "sqlite-vec",
+    "critical_issues": 7,
+    "complexity_median": 23.0
+  },
+  "hotspots": [
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:m",
+      "callers": 77,
+      "callees": 2
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:E",
+      "callers": 31,
+      "callees": 1
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:w",
+      "callers": 27,
+      "callees": 3
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:h",
+      "callers": 25,
+      "callees": 13
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:v",
+      "callers": 25,
+      "callees": 2
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:C",
+      "callers": 25,
+      "callees": 2
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:T",
+      "callers": 23,
+      "callees": 0
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:_",
+      "callers": 23,
+      "callees": 1
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:O",
+      "callers": 22,
+      "callees": 5
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.13a4f30d.min.js:H",
+      "callers": 21,
+      "callees": 0
+    }
+  ],
+  "issues": [
+    "[WARN] 1241 orphaned declarations: `$f`, `$i`, `$k`, `$l`, `Ad` (and 1236 more) \u2014 zero callers detected; verify these aren't dead code",
+    "[LOW] Low JSDoc coverage (7.1%) \u2014 semantic query quality will be poor; undocumented nodes embed only identifiers, not natural language",
+    "[WARN] `service_worker_bin_prod.js` has 572 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `offscreendocument_main.js` has 541 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `bundle.13a4f30d.min.js` has 319 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `offscreen_compiled.js` has 243 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `wordcut.js` has 111 declarations \u2014 consider splitting into focused modules"
+  ],
+  "vs_previous": null,
+  "vs_baseline": {
+    "nodes": 2515,
+    "edges": 6398
+  }
+}

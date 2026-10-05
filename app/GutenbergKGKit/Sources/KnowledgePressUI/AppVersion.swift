@@ -13,7 +13,7 @@ enum AppVersion {
     /// `app/macos/project.yml`, which carry the release version.
     /// scripts/check_version.py fails when any version site differs -- this is
     /// the only version string a bare `swift run` can ever see.
-    static let fallback = "1.28.1"
+    static let fallback = "1.29.0"
 
     /// "v1.0" from a packaged build, "v1.0 (dev)" from `swift run`.
     ///
