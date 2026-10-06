@@ -72,6 +72,7 @@ of the corpus redwood.
 
 ## Take a screenshot
 
-The camera button in the top bar saves a picture of the forest without the
+The camera button in the top bar (on a phone, **Screenshot** in the
+three-dot menu) saves a picture of the forest without the
 controls over it. On a phone it offers the picture to share; on a desktop it
 downloads it.

@@ -11,6 +11,31 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **A one-row top bar on phones.** In portrait the button row wrapped three
+  deep and ran under the minimap. The bar now holds home, **Browse** and a
+  three-dot menu with the clock, silent mode, screenshot, clean view and
+  settings; from 640 px up every button stays in the bar. The minimap sits
+  under the bar instead of at a fixed offset, so the buttons cannot cover it.
+- **One Browse panel.** The grove atlas, the book list and the press are now
+  the Groves, Books and Press tabs of one panel, opened by **Browse** or by
+  G, B and L as before. The Browse button shows the press count.
+  The atlas's own Home and Ride the ring buttons are gone; the bar and the
+  tour button already have them.
+- **The behind-the-cart camera tilts up a little on a portrait screen.**
+  Looking level, a tall screen was half road and cart; it now rests about
+  8° up, so the cart sits at the bottom edge and more of the forest ahead
+  shows. The look stick still tilts from there.
+
+### Fixed
+
+- **Stuck touch sticks.** When iOS swallowed a stick's release (a touch
+  taken over by an edge swipe, the app backgrounded), the cart kept driving
+  and the stick ignored new touches. A new touch now always takes the stick,
+  and the owning finger lifting anywhere, every finger lifting, or the page
+  losing focus releases it.
+
 ## [1.29.0] - 2026-10-05
 
 ### Added

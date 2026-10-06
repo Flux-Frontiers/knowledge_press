@@ -14,7 +14,7 @@ field, puts the lanterns out.
 
 ## Jump to a grove
 
-++g++, or the atlas button in the top bar, opens the **grove atlas**: every
+++g++, or **Browse** in the top bar and then the **Groves** tab, lists every
 grove with its mark, its species and how many trees it holds, and every
 exhibit. Pick one to jump there. Groves you have visited are marked.
 
@@ -23,7 +23,7 @@ diamond to jump to it.
 
 ## Browse every book
 
-++b++, or the book button in the top bar, opens **Every book**: the whole
+++b++, or **Browse** in the top bar, opens the **Books** tab: the whole
 catalog grouped by grove, with each grove's mark and species at the top of
 its section. Type in the filter to narrow it by title, author or genre.
 Press ++enter++ to jump to the first book shown, or **Jump** beside any book.

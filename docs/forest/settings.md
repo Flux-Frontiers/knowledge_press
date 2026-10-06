@@ -1,6 +1,7 @@
 # Settings
 
-++esc++, or the settings button in the top bar, opens the settings. The cart
+++esc++, or the settings button in the top bar (on a phone, in the
+three-dot menu), opens the settings. The cart
 is parked while they are open. Every setting is saved in this browser.
 
 ## Driving and view

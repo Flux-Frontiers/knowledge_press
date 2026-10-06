@@ -8,7 +8,7 @@ export function TouchControls() {
   const nearbySlug = useGame((s) => s.nearbySlug);
   const pressed = useGame((s) => (s.nearbySlug ? s.library.includes(s.nearbySlug) : false));
   const nearbyDist = useGame((s) => s.nearbyDist);
-  const blocked = useGame((s) => s.paused || s.libraryOpen || s.atlasOpen);
+  const blocked = useGame((s) => s.paused || s.libraryOpen || s.atlasOpen || s.catalogOpen);
   const toggleCircuit = useGame((s) => s.toggleCircuit);
   const travelMode = useGame((s) => s.travelMode);
 
@@ -55,6 +55,38 @@ function Stick({ label, onMove, onRelease }: {
 }) {
   const pid = useRef<number | null>(null);
   const [thumb, setThumb] = useState({ x: 0, y: 0 });
+  const releaseRef = useRef(onRelease);
+  releaseRef.current = onRelease;
+
+  // iOS can swallow the release (a touch taken over by an edge swipe, the app
+  // backgrounded), which left the cart driving and the stick ignoring new
+  // touches. Watch the window too: the owning pointer ending anywhere, every
+  // finger lifting, or the page losing focus lets the stick go.
+  useEffect(() => {
+    const release = () => {
+      if (pid.current === null) return;
+      pid.current = null;
+      releaseRef.current();
+      setThumb({ x: 0, y: 0 });
+    };
+    const onPointerEnd = (e: PointerEvent) => { if (e.pointerId === pid.current) release(); };
+    const onTouchEnd = (e: TouchEvent) => { if (e.touches.length === 0) release(); };
+    const onHidden = () => { if (document.hidden) release(); };
+    window.addEventListener("pointerup", onPointerEnd);
+    window.addEventListener("pointercancel", onPointerEnd);
+    window.addEventListener("touchend", onTouchEnd);
+    window.addEventListener("touchcancel", onTouchEnd);
+    window.addEventListener("blur", release);
+    document.addEventListener("visibilitychange", onHidden);
+    return () => {
+      window.removeEventListener("pointerup", onPointerEnd);
+      window.removeEventListener("pointercancel", onPointerEnd);
+      window.removeEventListener("touchend", onTouchEnd);
+      window.removeEventListener("touchcancel", onTouchEnd);
+      window.removeEventListener("blur", release);
+      document.removeEventListener("visibilitychange", onHidden);
+    };
+  }, []);
 
   function fromEvent(e: React.PointerEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -79,7 +111,7 @@ function Stick({ label, onMove, onRelease }: {
       className="pointer-events-auto relative size-28 rounded-full border border-border bg-surface/80"
       style={{ touchAction: "none" }}
       onPointerDown={(e) => {
-        if (pid.current !== null) return;
+        // A new touch always takes the stick, so a release that never arrived cannot leave it dead.
         pid.current = e.pointerId;
         e.currentTarget.setPointerCapture(e.pointerId);
         fromEvent(e);
