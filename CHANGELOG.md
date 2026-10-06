@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Less over the forest on touch screens.** The Ride the ring and seasons
+  column is gone on touch, where the Guided tour button rides the ring and
+  Settings has the seasons; it stays on desktop. The keyboard hints are
+  hidden on touch too.
 - **A one-row top bar on phones.** In portrait the button row wrapped three
   deep and ran under the minimap. The bar now holds home, **Browse** and a
   three-dot menu with the clock, silent mode, screenshot, clean view and
@@ -35,6 +39,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   and the stick ignored new touches. A new touch now always takes the stick,
   and the owning finger lifting anywhere, every finger lifting, or the page
   losing focus releases it.
+- **Phone landscape layout.** On a phone on its side the book card was
+  stacked above the controls and rode up over the top bar. It now sits on
+  the left above the drive stick, without its excerpt, and the search field
+  sits on the bottom edge between the sticks.
 
 ## [1.29.0] - 2026-10-05
 
