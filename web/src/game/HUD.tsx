@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookMarked, BookOpen, Camera, Check, Clock, Compass, Eye, EyeOff, House, Library, Map, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Library, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -11,6 +11,7 @@ import { SEASON_ORDER, SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
 import { ReaderPanel } from "./Reader";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
+import type { TimeMode } from "./sky";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
 
@@ -50,15 +51,17 @@ export function HUD({ forest }: { forest: Forest }) {
   const toast = useGame((s) => s.toast);
   const stats = useGame((s) => s.stats);
   const libraryOpen = useGame((s) => s.libraryOpen);
-  const toggleLibrary = useGame((s) => s.toggleLibrary);
   const pause = useGame((s) => s.pause);
   const atlasOpen = useGame((s) => s.atlasOpen);
-  const toggleAtlas = useGame((s) => s.toggleAtlas);
   const selectedGrove = useGame((s) => s.selectedGrove);
   const travelMode = useGame((s) => s.travelMode);
   const toggleCircuit = useGame((s) => s.toggleCircuit);
   const catalogOpen = useGame((s) => s.catalogOpen);
   const toggleCatalog = useGame((s) => s.toggleCatalog);
+  const openCatalog = useGame((s) => s.openCatalog);
+  const browsing = atlasOpen || catalogOpen || libraryOpen;
+  const closeBrowse = () => useGame.setState({ atlasOpen: false, catalogOpen: false, libraryOpen: false });
+  const [menuOpen, setMenuOpen] = useState(false);
   const plaque = useGame((s) => s.plaque);
   const readingSlug = useGame((s) => s.readingSlug);
   const openReader = useGame((s) => s.openReader);
@@ -102,7 +105,7 @@ export function HUD({ forest }: { forest: Forest }) {
 
   return (
     <div className="pointer-events-none absolute inset-0 z-10 text-fg">
-      <header className="pointer-events-auto flex items-start justify-between gap-3 p-3 sm:p-4">
+      <header className="pointer-events-none flex items-start justify-between gap-3 p-3 sm:p-4">
         {clean ? null : (
           <div className="rounded-lg border border-border bg-surface/90 px-3 py-2">
             <p className="font-display text-lg leading-none">Knowledge Press</p>
@@ -120,102 +123,124 @@ export function HUD({ forest }: { forest: Forest }) {
             ) : null}
           </div>
         )}
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => { toggleCleanView(); (document.activeElement as HTMLElement | null)?.blur(); }}
-            className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-            aria-label={clean ? "Show the buttons again" : "Clean view: hide the buttons, keep the map"}
-            title={clean ? "Show the buttons" : "Clean view"}
-          >
-            {clean ? <Eye className="size-4" strokeWidth={1.75} /> : <EyeOff className="size-4" strokeWidth={1.75} />}
-          </button>
-          <button
-            type="button"
-            onClick={() => { saveScreenshot(COARSE_POINTER); (document.activeElement as HTMLElement | null)?.blur(); }}
-            className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-            aria-label="Save a screenshot of the forest" title="Screenshot"
-          >
-            <Camera className="size-4" strokeWidth={1.75} />
-          </button>
-          {clean ? null : (<>
+        <div className="ml-auto flex flex-col items-end gap-2">
+          {/* Phones keep Home, Browse and a menu in the bar; the other buttons join them from sm up. */}
+          <div className="pointer-events-auto relative flex flex-wrap items-center justify-end gap-2">
             <button
               type="button"
-              onClick={toggleTimeOfDay}
-              className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-              aria-label={timeTitle}
-              title={timeTitle}
+              onClick={() => { toggleCleanView(); (document.activeElement as HTMLElement | null)?.blur(); }}
+              className={"size-11 place-items-center rounded-md border border-border bg-surface " + (clean ? "grid" : "hidden sm:grid")}
+              aria-label={clean ? "Show the buttons again" : "Clean view: hide the buttons, keep the map"}
+              title={clean ? "Show the buttons" : "Clean view"}
             >
-              {timeMode === "live" ? (
-                <Clock className="size-4" strokeWidth={1.75} />
-              ) : timeMode === "dawn" ? (
-                <Sunrise className="size-4" strokeWidth={1.75} />
-              ) : timeMode === "day" ? (
-                <Sun className="size-4" strokeWidth={1.75} />
-              ) : timeMode === "dusk" ? (
-                <Sunset className="size-4" strokeWidth={1.75} />
-              ) : (
-                <Moon className="size-4" strokeWidth={1.75} />
-              )}
+              {clean ? <Eye className="size-4" strokeWidth={1.75} /> : <EyeOff className="size-4" strokeWidth={1.75} />}
             </button>
             <button
               type="button"
-              onClick={() => setPreferences({ silent: !silent })}
-              className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-              aria-label={silent ? "Silent mode on: turn pop-up cards back on" : "Turn on silent mode: no pop-up cards"}
-              title={silent ? "Silent · tap for pop-up cards" : "Pop-up cards · tap for silent"}
+              onClick={() => { saveScreenshot(COARSE_POINTER); (document.activeElement as HTMLElement | null)?.blur(); }}
+              className={"size-11 place-items-center rounded-md border border-border bg-surface " + (clean ? "grid" : "hidden sm:grid")}
+              aria-label="Save a screenshot of the forest" title="Screenshot"
             >
-              {silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
+              <Camera className="size-4" strokeWidth={1.75} />
             </button>
-            <button
-              type="button"
-              onClick={() => { jumpHome(forest); (document.activeElement as HTMLElement | null)?.blur(); }}
-              className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-              aria-label="Home: back to the corpus redwood" title="Home · H"
-            >
-              <House className="size-4" strokeWidth={1.75} />
-            </button>
-            <button
-              type="button"
-              onClick={toggleAtlas}
-              className={
-                "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm " +
-                (atlasOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
-              }
-              aria-label="Open grove atlas"
-            >
-              <Map className="size-4" strokeWidth={1.75} />
-              <span className="hidden sm:inline">Groves</span>
-            </button>
-            <button
-              type="button"
-              onClick={toggleCatalog}
-              className={
-                "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm " +
-                (catalogOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
-              }
-              aria-label="Browse every book" title="Every book · B"
-            >
-              <Library className="size-4" strokeWidth={1.75} />
-              <span className="hidden sm:inline">Books</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => pause(true)}
-              className="grid size-11 place-items-center rounded-md border border-border bg-surface"
-              aria-label="Controls and settings" title="Controls and settings · Esc"
-            >
-              <Settings2 className="size-4" strokeWidth={1.75} />
-            </button>
-            <button
-              type="button"
-              onClick={toggleLibrary}
-              className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm"
-            >
-              <BookMarked className="size-4" strokeWidth={1.75} />
-              <span className="tabular-nums">{library.length}</span>
-            </button>
-          </>)}
+            {clean ? null : (<>
+              <button
+                type="button"
+                onClick={toggleTimeOfDay}
+                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
+                aria-label={timeTitle}
+                title={timeTitle}
+              >
+                <TimeIcon mode={timeMode} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreferences({ silent: !silent })}
+                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
+                aria-label={silent ? "Silent mode on: turn pop-up cards back on" : "Turn on silent mode: no pop-up cards"}
+                title={silent ? "Silent · tap for pop-up cards" : "Pop-up cards · tap for silent"}
+              >
+                {silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
+              </button>
+              <button
+                type="button"
+                onClick={() => { jumpHome(forest); (document.activeElement as HTMLElement | null)?.blur(); }}
+                className="grid size-11 place-items-center rounded-md border border-border bg-surface"
+                aria-label="Home: back to the corpus redwood" title="Home · H"
+              >
+                <House className="size-4" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
+                onClick={() => (browsing ? closeBrowse() : openCatalog(null))}
+                className={
+                  "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm " +
+                  (browsing ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
+                }
+                aria-label={`Browse the groves, every book and your press (${library.length} collected)`}
+                title="Groves · G, Books · B, Press · L"
+              >
+                <Library className="size-4" strokeWidth={1.75} />
+                <span className="hidden sm:inline">Browse</span>
+                {library.length ? <span className="tabular-nums">{library.length}</span> : null}
+              </button>
+              <button
+                type="button"
+                onClick={() => pause(true)}
+                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
+                aria-label="Controls and settings" title="Controls and settings · Esc"
+              >
+                <Settings2 className="size-4" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(!menuOpen)}
+                className={
+                  "grid size-11 place-items-center rounded-md border sm:hidden " +
+                  (menuOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
+                }
+                aria-label="More: time of day, silent mode, screenshot, clean view, settings"
+                aria-expanded={menuOpen}
+              >
+                <Ellipsis className="size-4" strokeWidth={1.75} />
+              </button>
+              {menuOpen ? (<>
+                <div className="fixed inset-0 z-30 sm:hidden" onClick={() => setMenuOpen(false)} aria-hidden />
+                <ul className="absolute top-full right-0 z-40 mt-2 w-60 rounded-lg border border-border bg-surface py-1 sm:hidden">
+                  <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
+                  <MenuItem icon={silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
+                    label={silent ? "Silent · no pop-up cards" : "Pop-up cards on"} onClick={() => setPreferences({ silent: !silent })} />
+                  <MenuItem icon={<Camera className="size-4" strokeWidth={1.75} />} label="Screenshot"
+                    onClick={() => { setMenuOpen(false); saveScreenshot(COARSE_POINTER); }} />
+                  <MenuItem icon={<EyeOff className="size-4" strokeWidth={1.75} />} label="Clean view"
+                    onClick={() => { setMenuOpen(false); toggleCleanView(); }} />
+                  <MenuItem icon={<Settings2 className="size-4" strokeWidth={1.75} />} label="Controls and settings"
+                    onClick={() => { setMenuOpen(false); pause(true); }} />
+                </ul>
+              </>) : null}
+            </>)}
+          </div>
+
+          {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it. */}
+          <div className="pointer-events-auto w-28 sm:w-40">
+            <Minimap forest={forest} x={x} z={z} yaw={yaw} pins={query.trim() ? results : []} picked={searchPick} />
+            {selected ? (
+              <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
+                <span
+                  className="inline-block size-2 rounded-full"
+                  style={{ background: selected.color }}
+                />
+                <span className="truncate">{selected.label}</span>
+                <span
+                  className="ml-auto inline-block size-0 border-x-4 border-b-[7px] border-x-transparent border-b-fg"
+                  style={{ transform: `rotate(${bearing}rad)` }}
+                  aria-hidden
+                />
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-faint">Tap a grove for its books</p>
+            )}
+          </div>
         </div>
       </header>
 
@@ -268,26 +293,6 @@ export function HUD({ forest }: { forest: Forest }) {
           ) : null}
         </div>
       </>)}
-
-      <div className="pointer-events-auto absolute top-36 right-3 w-28 sm:top-20 sm:w-40">
-        <Minimap forest={forest} x={x} z={z} yaw={yaw} pins={query.trim() ? results : []} picked={searchPick} />
-        {selected ? (
-          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
-            <span
-              className="inline-block size-2 rounded-full"
-              style={{ background: selected.color }}
-            />
-            <span className="truncate">{selected.label}</span>
-            <span
-              className="ml-auto inline-block size-0 border-x-4 border-b-[7px] border-x-transparent border-b-fg"
-              style={{ transform: `rotate(${bearing}rad)` }}
-              aria-hidden
-            />
-          </p>
-        ) : (
-          <p className="mt-1 text-xs text-faint">Tap a grove for its books</p>
-        )}
-      </div>
 
       {clean ? null : (<>
         <div className="book-dock pointer-events-auto absolute bottom-24 left-3 right-3 mx-auto max-w-lg sm:bottom-6 sm:left-4 sm:right-auto sm:max-w-[min(32rem,calc(50%-12rem))]">
@@ -424,12 +429,27 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
       ) : null}
 
-      {libraryOpen ? <LibraryPanel forest={forest} /> : null}
-      {atlasOpen ? <AtlasPanel forest={forest} /> : null}
-      {catalogOpen ? <CatalogPanel forest={forest} /> : null}
+      {browsing ? <BrowsePanel forest={forest} /> : null}
       {plaque ? <PlaquePanel plaque={plaque} /> : null}
       {reading ? <ReaderPanel key={reading.book.slug} book={reading.book} /> : null}
     </div>
+  );
+}
+
+function TimeIcon({ mode }: { mode: TimeMode }) {
+  const Icon = { live: Clock, dawn: Sunrise, day: Sun, dusk: Sunset, night: Moon }[mode];
+  return <Icon className="size-4" strokeWidth={1.75} />;
+}
+
+function MenuItem({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+  return (
+    <li>
+      <button type="button" onClick={onClick}
+        className="flex min-h-11 w-full items-center gap-3 px-3 text-left text-sm hover:bg-bg">
+        {icon}
+        {label}
+      </button>
+    </li>
   );
 }
 
@@ -550,167 +570,154 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
   );
 }
 
-function AtlasPanel({ forest }: { forest: Forest }) {
-  const grovesVisited = useGame((s) => s.grovesVisited);
-  const selectedGrove = useGame((s) => s.selectedGrove);
-  const toggleAtlas = useGame((s) => s.toggleAtlas);
-  const travelMode = useGame((s) => s.travelMode);
-  const toggleCircuit = useGame((s) => s.toggleCircuit);
+/** The groves, every book and the press as tabs of one panel; G, B and L open their tabs. */
+function BrowsePanel({ forest }: { forest: Forest }) {
+  const atlasOpen = useGame((s) => s.atlasOpen);
+  const libraryOpen = useGame((s) => s.libraryOpen);
+  const library = useGame((s) => s.library);
+  const tab = atlasOpen ? "groves" : libraryOpen ? "press" : "books";
+  const close = () => useGame.setState({ atlasOpen: false, catalogOpen: false, libraryOpen: false });
+  const tabs = [
+    { id: "groves", label: "Groves", open: () => useGame.getState().toggleAtlas() },
+    { id: "books", label: "Books", open: () => useGame.getState().openCatalog(null) },
+    { id: "press", label: `Press · ${library.length}`, open: () => useGame.getState().toggleLibrary() },
+  ] as const;
 
   return (
     <div
-      className="pointer-events-auto absolute inset-0 z-30 flex items-start justify-end bg-bg/45 p-3 sm:p-6"
-      onClick={toggleAtlas}
+      className="pointer-events-auto absolute inset-0 z-30 flex items-start justify-center bg-bg/45 p-3 sm:p-6"
+      onClick={close}
     >
       <div
-        className="flex max-h-[74vh] w-full max-w-md flex-col rounded-xl border border-border bg-surface p-4"
+        className="flex max-h-[84vh] w-full max-w-xl flex-col rounded-xl border border-border bg-surface p-4"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-display text-2xl">Grove atlas</h2>
+          <div role="tablist" className="flex gap-1 rounded-md bg-bg p-1">
+            {tabs.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.id}
+                onClick={tab === t.id ? undefined : t.open}
+                className={
+                  "min-h-10 rounded-sm px-3 text-sm tabular-nums " +
+                  (tab === t.id ? "bg-primary text-primary-fg" : "text-muted")
+                }
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
           <button
             type="button"
-            onClick={toggleAtlas}
+            onClick={close}
             className="grid size-11 place-items-center rounded-md text-muted"
-            aria-label="Close atlas"
+            aria-label="Close"
           >
             <X className="size-5" strokeWidth={1.75} />
           </button>
         </div>
-        <p className="mt-1 text-sm text-muted">
-          Jump a grove, or ride the ring. The cart stays yours — steer to hop off.
-        </p>
-        <div className="mt-3 flex gap-2">
-          <button
-            type="button"
-            onClick={() => jumpHome(forest)}
-            className="min-h-11 flex-1 rounded-md border border-border bg-bg px-3 text-sm"
-          >
-            Home
-          </button>
-          <button
-            type="button"
-            onClick={() => { toggleCircuit(); useGame.getState().setAtlasOpen(false); (document.activeElement as HTMLElement | null)?.blur(); }}
-            className={
-              "min-h-11 flex-1 rounded-md px-3 text-sm " +
-              (travelMode === "circuit" ? "bg-primary text-primary-fg" : "border border-border bg-bg")
-            }
-          >
-            {travelMode === "circuit" ? "Stop the ring" : "Ride the ring"}
-          </button>
-        </div>
-        <ul className="mt-3 min-h-0 flex-1 space-y-1 overflow-auto">
-          {forest.exhibits.map((e) => (
-            <li key={e.id}>
-              <button type="button" onClick={() => jumpToExhibit(e)}
-                className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-left hover:bg-bg">
-                <span className="size-2.5 shrink-0 rotate-45 bg-[#c9a24a]" />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium leading-snug">{e.label}</span>
-                  <span className="block text-xs text-muted">Exhibit</span>
-                </span>
-                <span className="text-xs text-primary">Jump</span>
-              </button>
-            </li>
-          ))}
-          {forest.groves.map((g) => {
-            const visited = grovesVisited.includes(g.genre);
-            const on = selectedGrove === g.genre;
-            return (
-              <li key={g.genre}>
-                <button
-                  type="button"
-                  onClick={() => jumpToGrove(g)}
-                  className={
-                    "flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-left " +
-                    (on ? "bg-primary/15" : "hover:bg-bg")
-                  }
-                >
-                  <GenreGlyph genre={g.genre} className="size-6 shrink-0" style={{ color: g.color }} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium leading-snug">{g.label}</span>
-                    <span className="block text-xs text-muted">
-                      {g.bookCount} trees{visited ? " · visited" : ""}
-                    </span>
-                  </span>
-                  <span className="text-xs text-primary">Jump</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        {tab === "groves" ? <GrovesTab forest={forest} /> : tab === "press" ? <PressTab forest={forest} /> : <BooksTab forest={forest} />}
       </div>
     </div>
   );
 }
 
-function LibraryPanel({ forest }: { forest: Forest }) {
+function GrovesTab({ forest }: { forest: Forest }) {
+  const grovesVisited = useGame((s) => s.grovesVisited);
+  const selectedGrove = useGame((s) => s.selectedGrove);
+
+  return (<>
+    <p className="mt-2 text-sm text-muted">Jump to an exhibit or a grove. The cart stays yours; steer to hop off.</p>
+    <ul className="mt-3 min-h-0 flex-1 space-y-1 overflow-auto">
+      {forest.exhibits.map((e) => (
+        <li key={e.id}>
+          <button type="button" onClick={() => jumpToExhibit(e)}
+            className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-left hover:bg-bg">
+            <span className="size-2.5 shrink-0 rotate-45 bg-[#c9a24a]" />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-medium leading-snug">{e.label}</span>
+              <span className="block text-xs text-muted">Exhibit</span>
+            </span>
+            <span className="text-xs text-primary">Jump</span>
+          </button>
+        </li>
+      ))}
+      {forest.groves.map((g) => {
+        const visited = grovesVisited.includes(g.genre);
+        const on = selectedGrove === g.genre;
+        return (
+          <li key={g.genre}>
+            <button
+              type="button"
+              onClick={() => jumpToGrove(g)}
+              className={
+                "flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-left " +
+                (on ? "bg-primary/15" : "hover:bg-bg")
+              }
+            >
+              <GenreGlyph genre={g.genre} className="size-6 shrink-0" style={{ color: g.color }} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-medium leading-snug">{g.label}</span>
+                <span className="block text-xs text-muted">
+                  {g.bookCount} trees{visited ? " · visited" : ""}
+                </span>
+              </span>
+              <span className="text-xs text-primary">Jump</span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  </>);
+}
+
+function PressTab({ forest }: { forest: Forest }) {
   const library = useGame((s) => s.library);
-  const toggleLibrary = useGame((s) => s.toggleLibrary);
   const collected = forest.trees.filter((t) => library.includes(t.book.slug));
 
-  return (
-    <div
-      className="pointer-events-auto absolute inset-0 z-30 flex items-end justify-end bg-bg/45 p-3 sm:p-6"
-      onClick={toggleLibrary}
-    >
-      <div
-        className="flex max-h-[70vh] w-full max-w-md flex-col rounded-xl border border-border bg-surface p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-display text-2xl">The press</h2>
-          <button
-            type="button"
-            onClick={toggleLibrary}
-            className="grid size-11 place-items-center rounded-md text-muted"
-            aria-label="Close press"
-          >
-            <X className="size-5" strokeWidth={1.75} />
-          </button>
-        </div>
-        <p className="mt-1 text-sm text-muted">
-          {collected.length} collected of {forest.trees.length}
-        </p>
-        <ul className="mt-3 min-h-0 flex-1 space-y-2 overflow-auto">
-          {collected.length === 0 ? (
-            <li className="text-sm text-faint">Drive to a tree and press E.</li>
-          ) : (
-            collected.map((t) => (
-              <li key={t.book.slug} className="flex items-start justify-between gap-3 border-b border-border pb-2">
-                <div>
-                  <p className="font-medium leading-snug">{t.book.title}</p>
-                  <p className="text-xs text-muted">
-                    {t.book.author} · {t.book.genreLabel}
-                  </p>
-                </div>
-                <div className="flex shrink-0 gap-3">
-                  <button type="button" className="text-xs text-primary" onClick={() => useGame.getState().openReader(t.book.slug)}>
-                    Open
-                  </button>
-                  <button
-                    type="button"
-                    className="text-xs text-primary"
-                    onClick={() => {
-                      const g = forest.groves.find((gr) => gr.genre === t.book.genre);
-                      if (g) jumpToGrove(g);
-                    }}
-                  >
-                    Grove
-                  </button>
-                </div>
-              </li>
-            ))
-          )}
-        </ul>
-      </div>
-    </div>
-  );
+  return (<>
+    <p className="mt-2 text-sm text-muted">
+      {collected.length} collected of {forest.trees.length}
+    </p>
+    <ul className="mt-3 min-h-0 flex-1 space-y-2 overflow-auto">
+      {collected.length === 0 ? (
+        <li className="text-sm text-faint">Drive to a tree and press E.</li>
+      ) : (
+        collected.map((t) => (
+          <li key={t.book.slug} className="flex items-start justify-between gap-3 border-b border-border pb-2">
+            <div>
+              <p className="font-medium leading-snug">{t.book.title}</p>
+              <p className="text-xs text-muted">
+                {t.book.author} · {t.book.genreLabel}
+              </p>
+            </div>
+            <div className="flex shrink-0 gap-3">
+              <button type="button" className="text-xs text-primary" onClick={() => useGame.getState().openReader(t.book.slug)}>
+                Open
+              </button>
+              <button
+                type="button"
+                className="text-xs text-primary"
+                onClick={() => {
+                  const g = forest.groves.find((gr) => gr.genre === t.book.genre);
+                  if (g) jumpToGrove(g);
+                }}
+              >
+                Grove
+              </button>
+            </div>
+          </li>
+        ))
+      )}
+    </ul>
+  </>);
 }
 
 /** Every book in the corpus, grouped by grove: filter, then jump to its tree. */
-function CatalogPanel({ forest }: { forest: Forest }) {
-  const toggleCatalog = useGame((s) => s.toggleCatalog);
+function BooksTab({ forest }: { forest: Forest }) {
   const library = useGame((s) => s.library);
   const genre = useGame((s) => s.catalogGenre);
   const only = genre ? forest.groves.find((g) => g.genre === genre) : undefined;
@@ -727,92 +734,72 @@ function CatalogPanel({ forest }: { forest: Forest }) {
     .filter((s) => s.trees.length);
   const shown = sections.reduce((n, s) => n + s.trees.length, 0);
 
-  return (
-    <div
-      className="pointer-events-auto absolute inset-0 z-30 flex items-start justify-center bg-bg/45 p-3 sm:p-6"
-      onClick={toggleCatalog}
-    >
-      <div
-        className="flex max-h-[84vh] w-full max-w-xl flex-col rounded-xl border border-border bg-surface p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-display text-2xl">{only ? only.label : "Every book"}</h2>
-          <button
-            type="button"
-            onClick={toggleCatalog}
-            className="grid size-11 place-items-center rounded-md text-muted"
-            aria-label="Close the book list"
-          >
-            <X className="size-5" strokeWidth={1.75} />
-          </button>
-        </div>
-        {only ? (
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => jumpToGrove(only)}
-              className="min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg">
-              Go to the grove
-            </button>
-            <button type="button" onClick={() => useGame.getState().openCatalog(null)}
-              className="min-h-11 rounded-md border border-border bg-bg px-4 text-sm">
-              All {forest.trees.length} books
-            </button>
-          </div>
-        ) : (
-          <p className="mt-1 text-sm text-muted tabular-nums">
-            {q ? `${shown} of ${forest.trees.length}` : `${forest.trees.length} books`} · {forest.corpusTree.totalChunks.toLocaleString("en-US")} chunks. Pick one to jump to its tree.
-          </p>
-        )}
-        <label className="mt-3 flex items-center gap-2 rounded-md border border-border bg-bg px-3 py-2">
-          <Search className="size-4 shrink-0 text-muted" strokeWidth={1.75} />
-          <input
-            autoFocus={!COARSE_POINTER}
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            onKeyDown={(e) => {
-              const first = sections[0]?.trees[0];
-              if (e.key === "Enter" && first) jumpToTree(first);
-            }}
-            placeholder="Filter by title, author, genre"
-            className="min-h-7 w-full bg-transparent text-sm text-fg outline-none placeholder:text-faint"
-          />
-        </label>
-        <div className="mt-3 min-h-0 flex-1 overflow-auto">
-          {sections.length === 0 ? <p className="px-1 text-sm text-faint">No book matches.</p> : null}
-          {sections.map(({ grove, trees }) => (
-            <section key={grove.genre} className="mb-3">
-              <h3 className="sticky top-0 bg-surface px-1 py-1 text-xs tracking-wide text-muted uppercase">
-                <span className="flex items-center gap-2">
-                  <GenreGlyph genre={grove.genre} className="size-4 shrink-0" style={{ color: grove.color }} />
-                  {grove.label} · {trees.length}
-                </span>
-                {/* The grove's species, so the list says what the trees are. */}
-                <span className="block pl-6 text-[11px] tracking-normal normal-case text-faint">
-                  {SPECIES[speciesFor(grove.genre)]!.common} · <i>{SPECIES[speciesFor(grove.genre)]!.latin}</i>
-                </span>
-              </h3>
-              <ul>
-                {trees.map((t) => (
-                  <li key={t.book.slug}>
-                    <button type="button" onClick={() => jumpToTree(t)}
-                      className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-1.5 text-left hover:bg-bg">
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm leading-snug">{t.book.title}</span>
-                        <span className="block truncate text-xs text-muted">
-                          {t.book.author} · {t.book.chunks.toLocaleString("en-US")} chunks{library.includes(t.book.slug) ? " · in the press" : ""}
-                        </span>
-                      </span>
-                      <span className="shrink-0 text-xs text-primary">Jump</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+  return (<>
+    {only ? (<>
+      <h2 className="mt-2 font-display text-2xl">{only.label}</h2>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <button type="button" onClick={() => jumpToGrove(only)}
+          className="min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg">
+          Go to the grove
+        </button>
+        <button type="button" onClick={() => useGame.getState().openCatalog(null)}
+          className="min-h-11 rounded-md border border-border bg-bg px-4 text-sm">
+          All {forest.trees.length} books
+        </button>
       </div>
+    </>) : (
+      <p className="mt-2 text-sm text-muted tabular-nums">
+        {q ? `${shown} of ${forest.trees.length}` : `${forest.trees.length} books`} · {forest.corpusTree.totalChunks.toLocaleString("en-US")} chunks. Pick one to jump to its tree.
+      </p>
+    )}
+    <label className="mt-3 flex items-center gap-2 rounded-md border border-border bg-bg px-3 py-2">
+      <Search className="size-4 shrink-0 text-muted" strokeWidth={1.75} />
+      <input
+        autoFocus={!COARSE_POINTER}
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        onKeyDown={(e) => {
+          const first = sections[0]?.trees[0];
+          if (e.key === "Enter" && first) jumpToTree(first);
+        }}
+        placeholder="Filter by title, author, genre"
+        className="min-h-7 w-full bg-transparent text-sm text-fg outline-none placeholder:text-faint"
+      />
+    </label>
+    <div className="mt-3 min-h-0 flex-1 overflow-auto">
+      {sections.length === 0 ? <p className="px-1 text-sm text-faint">No book matches.</p> : null}
+      {sections.map(({ grove, trees }) => (
+        <section key={grove.genre} className="mb-3">
+          <h3 className="sticky top-0 bg-surface px-1 py-1 text-xs tracking-wide text-muted uppercase">
+            <span className="flex items-center gap-2">
+              <GenreGlyph genre={grove.genre} className="size-4 shrink-0" style={{ color: grove.color }} />
+              {grove.label} · {trees.length}
+            </span>
+            {/* The grove's species, so the list says what the trees are. */}
+            <span className="block pl-6 text-[11px] tracking-normal normal-case text-faint">
+              {SPECIES[speciesFor(grove.genre)]!.common} · <i>{SPECIES[speciesFor(grove.genre)]!.latin}</i>
+            </span>
+          </h3>
+          <ul>
+            {trees.map((t) => (
+              <li key={t.book.slug}>
+                <button type="button" onClick={() => jumpToTree(t)}
+                  className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 py-1.5 text-left hover:bg-bg">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm leading-snug">{t.book.title}</span>
+                    <span className="block truncate text-xs text-muted">
+                      {t.book.author} · {t.book.chunks.toLocaleString("en-US")} chunks{library.includes(t.book.slug) ? " · in the press" : ""}
+                    </span>
+                  </span>
+                  <span className="shrink-0 text-xs text-primary">Jump</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
     </div>
-  );
+  </>);
 }
 
 /** An exhibit's plaque at reading size, in the plaque's own cream, ink and brass (makePlaqueTexture). */

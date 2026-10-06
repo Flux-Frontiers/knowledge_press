@@ -49,8 +49,9 @@ generated first; see [Book text](../BOOK_TEXT.md).
 
 ## The press
 
-The press is the list of books you have read. ++l++, or **The press** in the
-top bar, opens it. Each entry opens the book or jumps to its tree.
+The press is the list of books you have read. ++l++, or the **Press** tab under
+**Browse** in the top bar, opens it. The Browse button shows how many books
+the press holds. Each entry opens the book or jumps to its tree.
 
 A book stays in the press until you reset it. The count is saved in this
 browser; see [Where your progress lives](getting-started.md#where-your-progress-lives).

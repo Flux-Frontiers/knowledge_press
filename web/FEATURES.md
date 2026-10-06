@@ -77,7 +77,7 @@ A rank for how much of the forest you have pressed, and a way to start over.
 | Tour welcome, background, end-of-ring and farewell lines, editable as variables | `tourScript.ts`, `Player.tsx`, `HUD.tsx` |
 | Night floodlights on the redwood and exhibits | `Uplights.tsx` |
 | Lantern query over titles, tags, excerpts | `HUD.tsx`, `Trees.tsx` |
-| Grove atlas, minimap jump, home return | `HUD.tsx` |
+| Browse panel (groves, every book, the press), minimap jump, home return, phone menu | `HUD.tsx` |
 | Corpus redwood at the hub, with its own ridged bark; book list popup (B), start at home | `corpusTree.ts`, `CorpusRedwood.tsx`, `HUD.tsx` |
 | Exhibits on side spokes off the rings, spread round the forest: Kepler's Mysterium, three wind rotors, a DNA double helix, a weather mast | `exhibits.ts`, `Mysterium.tsx`, `WindSculptures.tsx`, `windRotors.ts` |
 | Armillary sundial for 39° N: style on the celestial pole, hour ring square to it, the style's shadow computed from the sky's sun | `sundialGeometry.ts`, `Sundial.tsx` |

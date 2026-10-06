@@ -16,6 +16,8 @@ const camPos = new Vector3();
 /** Within this of a picked tree, the cart has arrived (reading range plus a margin). */
 const TRAIL_ARRIVED = 9;
 const lookAt = new Vector3();
+/** Upward tilt, radians, the behind-the-cart camera rests at on a portrait screen. */
+const PORTRAIT_TILT = 0.14;
 /** Where the god's-eye camera looks, eased like its position so a zoom glides. */
 const godLook = new Vector3();
 /** The camera's clip planes at ground level (ForestCanvas), and the god's-eye near plane. */
@@ -256,7 +258,9 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     // Tilt by raising or lowering the look point over its horizontal distance.
     wasGod.current = godEye && !flying;
     if (!godEye && !flying) {
-      lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current);
+      // On a portrait screen the level chase view is half road and cart; rest it tilted up a little.
+      const rest = preferences.camera === "follow" && cam.aspect < 1 ? PORTRAIT_TILT : 0;
+      lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current + rest);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;
     }

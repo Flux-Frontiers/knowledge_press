@@ -2,8 +2,8 @@
 
 ## The clock
 
-The sky follows a clock with five modes. Tap the clock in the top bar to
-step through them.
+The sky follows a clock with five modes. Tap the clock in the top bar (on a
+phone, **Time of day** in the three-dot menu) to step through them.
 
 | Mode | The sky |
 | --- | --- |

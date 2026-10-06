@@ -43,11 +43,11 @@ the same files at build time. Details are in
 | **C** | camera: behind the cart, high view, in the cart, god's eye (the whole forest from above) |
 | **Wheel / pinch** | in god's eye, zoom toward the cursor; a tree's card offers **Fly there** |
 | **E** | read the nearest tree into the press |
-| **G** | grove atlas — jump to a genre or an exhibit |
-| **B** | every book — filter the corpus and jump to any tree |
+| **G** | Browse, Groves tab — jump to a genre or an exhibit |
+| **B** | Browse, Books tab — filter the corpus and jump to any tree |
 | **Q** | take the guided tour of the ring roads (steer to hop off) |
 | **H** | return home, in front of the corpus redwood |
-| **L** | open the press (collected books) |
+| **L** | Browse, Press tab (collected books) |
 | **Esc** | settings (camera, pace, look sensitivity, leaf detail, fog, narration, silent mode, geometry readout) |
 
 With a book open: **Left / Right** turn the chapter, **Up / Down** scroll the page, **Esc** closes it.

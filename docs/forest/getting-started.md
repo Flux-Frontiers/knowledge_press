@@ -33,9 +33,9 @@ plaque. The groves are out along the roads.
 | ++c++ | Next camera: behind the cart, high view, in the cart, god's eye. |
 | Mouse wheel | In god's eye, zoom toward the cursor. |
 | ++q++ | Start or end the guided tour. |
-| ++g++ | The grove atlas. |
-| ++b++ | Every book. |
-| ++l++ | The press: the books you have read. |
+| ++g++ | Browse: the groves and exhibits. |
+| ++b++ | Browse: every book. |
+| ++l++ | Browse: the press, the books you have read. |
 | ++h++ | Home, in front of the corpus redwood. |
 | ++esc++ | Settings. With a panel open, closes it. |
 
@@ -54,8 +54,9 @@ On a phone or tablet the controls are on screen:
 - **Guided tour:** starts the tour; the same button ends it.
 - **Pinch:** in god's eye, zooms toward the point between your fingers.
 
-Everything else is in the top bar: the lantern query, home, the atlas, every
-book, the screenshot button, the clock, and settings.
+Everything else is in the top bar: home, **Browse** (groves, every book and
+the press), and the three-dot menu, which holds the clock, silent mode, the
+screenshot button, clean view and settings.
 
 ### Gamepad
 
@@ -71,8 +72,9 @@ book, the screenshot button, the clock, and settings.
 
 - **Top left:** the lantern query. Type a word to light the groves that
   match it. See [Finding books](finding.md#light-the-groves-with-a-query).
-- **Top right:** home, the atlas, every book, the screenshot button and
-  settings.
+- **Top right:** home, **Browse** (groves, every book and the press), the
+  screenshot button, the clock and settings. On a phone the bar keeps home
+  and Browse, and the rest move to the three-dot menu.
 - **The clock:** the sky's time. Tap it to step through live, dawn, day,
   dusk and night. See [Sky, seasons and weather](sky.md).
 - **The minimap:** the roads, the groves as colored dots, the exhibits as
