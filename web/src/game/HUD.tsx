@@ -326,7 +326,7 @@ export function HUD({ forest }: { forest: Forest }) {
               <p className="text-sm text-muted tabular-nums">
                 {forest.corpusTree.limbs} books · {forest.corpusTree.totalChunks.toLocaleString("en-US")} chunks · {Math.round(forest.corpusTree.height)} m
               </p>
-              <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">
+              <p className="card-extra mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">
                 One limb per book, each reaching toward its own tree. Browse them all and jump to any one.
               </p>
               <button type="button" onClick={toggleCatalog}
@@ -347,10 +347,10 @@ export function HUD({ forest }: { forest: Forest }) {
               <p className="text-xs tracking-wide text-muted uppercase">{nearby.book.genreLabel}</p>
               <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">{nearby.book.title}</h2>
               <p className="text-sm text-muted">{nearby.book.author}</p>
-              <p className="mt-1 hidden text-xs text-faint tabular-nums sm:block">
+              <p className="card-extra mt-1 hidden text-xs text-faint tabular-nums sm:block">
                 {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
               </p>
-              <p className="mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
+              <p className="card-extra mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {pressed ? (
                   <p className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-primary/60 px-4 text-sm text-fg">
@@ -418,7 +418,7 @@ export function HUD({ forest }: { forest: Forest }) {
           ))}
         </div>
 
-        <p className="absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
+        <p className="key-hints absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
           WASD drive · Arrows look · Space brake · E read · B books · C camera · Esc settings
         </p>
       </>)}
