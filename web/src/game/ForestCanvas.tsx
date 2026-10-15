@@ -1,7 +1,7 @@
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, type RefObject } from "react";
 import { ACESFilmicToneMapping, PerspectiveCamera, Raycaster, Vector2 } from "three";
-import { COARSE_POINTER, PHONE } from "./Environment";
+import { COARSE_POINTER, EXPOSURE, PHONE } from "./Environment";
 import { pickTree, type Forest, type TreeSite } from "./forest";
 import { forestGodLimits, godPose, zoomGodView } from "./godEye";
 import { GroveLabels } from "./GroveLabels";
@@ -28,7 +28,7 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
       onCreated={({ gl }) => {
         gl.setClearColor("#16213e");
         gl.toneMapping = ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.1;
+        gl.toneMappingExposure = EXPOSURE;
       }}
       onPointerDown={() => (document.activeElement as HTMLElement | null)?.blur()}
       onPointerMissed={(e) => {

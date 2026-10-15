@@ -43,6 +43,27 @@
   }
 }
 
+/* The start screen over the live forest: dark at the foot where the title sits, clear above (after art_techno). */
+.start-screen {
+  background: linear-gradient(to top, rgb(17 21 30 / 0.78) 0%, rgb(17 21 30 / 0.45) 28%, rgb(17 21 30 / 0) 55%);
+}
+.start-screen h1 { text-shadow: 0 2px 24px rgb(0 0 0 / 0.55); }
+.start-screen p { text-shadow: 0 1px 2px rgb(0 0 0 / 0.7), 0 0 12px rgb(17 21 30 / 0.5); }
+.start-keys kbd {
+  display: inline-block;
+  min-width: 1.5rem;
+  margin-right: 2px;
+  padding: 1px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: rgb(26 32 48 / 0.8);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  text-align: center;
+}
+.forest-fade-in { animation: forest-fade-in 1.6s ease-out both; }
+@keyframes forest-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
 .start-wash {
   background:
     radial-gradient(1200px 600px at 70% -10%, color-mix(in oklab, var(--color-primary) 14%, transparent), transparent 60%),
@@ -60,9 +81,30 @@
   }
 }
 
-.forest-settings::backdrop {
+.forest-settings::backdrop,
+.about::backdrop {
   background: rgb(8 16 22 / 70%);
   backdrop-filter: blur(8px);
+}
+
+/* About (About.tsx, NightSky.tsx): headings, the species list and the two-column key lists. */
+.about-body > * + * { margin-top: 0.75rem; }
+.about-body h3 {
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+}
+.about-body b, .about-body dt, .about-species span { color: var(--color-fg); font-weight: 600; }
+.about-body code { font-size: 0.8125rem; color: var(--color-fg); white-space: nowrap; }
+.about-species { display: grid; gap: 0.25rem; }
+.about-species li { display: flex; flex-wrap: wrap; gap: 0 0.5rem; }
+.about-species em { font-style: normal; }
+.about-keys { display: grid; gap: 0.5rem; }
+.about-keys > div { display: grid; grid-template-columns: 9rem 1fr; gap: 0.75rem; }
+@media (max-width: 479px) {
+  .about-keys > div { grid-template-columns: 1fr; gap: 0; }
 }
 
 input[type="range"], input[type="checkbox"] { accent-color: var(--color-primary); }

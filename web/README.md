@@ -37,6 +37,7 @@ the same files at build time. Details are in
 | --- | --- |
 | **W / S** | throttle / reverse |
 | **A / D** | steer left / right |
+| **Drag** | look around, with the mouse or a finger; the view eases back ahead on release, the tilt stays |
 | **Left / Right** | look left / right; the view eases back ahead on release (gamepad: right stick) |
 | **Up / Down** | tilt the camera up / down (gamepad: right stick) |
 | **Space** | brake |
@@ -48,6 +49,7 @@ the same files at build time. Details are in
 | **Q** | take the guided tour of the ring roads (steer to hop off) |
 | **H** | return home, in front of the corpus redwood |
 | **L** | Browse, Press tab (collected books) |
+| **?** | About: the forest, every control, and tonight's sky (moon, meteors, planets, Polaris) |
 | **Esc** | settings (camera, pace, look sensitivity, leaf detail, fog, narration, silent mode, geometry readout) |
 
 With a book open: **Left / Right** turn the chapter, **Up / Down** scroll the page, **Esc** closes it.

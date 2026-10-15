@@ -8,11 +8,17 @@ that fetch the page and the book text.
 
 ## Start driving
 
-1. Open the forest. The start screen grows the trees while you read it; on a
-   phone this takes a few seconds.
-2. Pick a season if you want one other than the current choice. **Winter**
-   drops the leaves so you can see the wood.
-3. Press **Start driving**.
+1. Open the forest. The trees grow while the start screen shows a picture of
+   the forest, which takes a few seconds on a phone; then the live forest
+   fades in behind the title, the camera slowly circling the redwood.
+2. Press **Start driving**, or **Guided tour** to let the cart drive the
+   ring and stop at each grove. **About** says what the forest is, lists
+   every control, and tells you what is in tonight's sky.
+
+The forest opens in the season of today's date where you are, under your own
+sky right now. To change the season, use **Environment** in settings; **Winter**
+drops the leaves so you can see the wood. To change the time, tap the clock in
+the top bar.
 
 You start at home, on the plaza in front of the corpus redwood, facing its
 plaque. The groves are out along the roads.
@@ -25,6 +31,7 @@ plaque. The groves are out along the roads.
 | --- | --- |
 | ++w++ / ++s++ | Drive forward / reverse. Release to stop. |
 | ++a++ / ++d++ | Steer left / right. The cart turns in place when stopped. |
+| Drag | Look around: drag the forest left, right, up or down. The view eases back to straight ahead when you let go; the tilt stays. |
 | ++left++ / ++right++ | Look left / right. The view eases back to straight ahead when you release. |
 | ++up++ / ++down++ | Tilt the view up / down. It stays where you leave it. |
 | ++shift++ | Hurry. |
@@ -37,6 +44,7 @@ plaque. The groves are out along the roads.
 | ++b++ | Browse: every book. |
 | ++l++ | Browse: the press, the books you have read. |
 | ++h++ | Home, in front of the corpus redwood. |
+| ++"?"++ | About the forest and tonight's sky. |
 | ++esc++ | Settings. With a panel open, closes it. |
 
 With a book open in the reader, ++left++ and ++right++ turn the chapter and
@@ -47,8 +55,9 @@ With a book open in the reader, ++left++ and ++right++ turn the chapter and
 On a phone or tablet the controls are on screen:
 
 - **Left stick:** drag up to drive, down to reverse, sideways to steer.
-- **Right stick:** drag up or down to tilt the view, left or right to look
-  around. Tilt holds; the sideways look eases back when you let go.
+- **Drag anywhere else:** look around. Drag up or down to tilt the view,
+  left or right to look to the side. Tilt holds; the sideways look eases
+  back when you let go.
 - **Read:** reads the nearest tree into the press. It lights up when a tree
   is close enough.
 - **Guided tour:** starts the tour; the same button ends it.
@@ -56,7 +65,8 @@ On a phone or tablet the controls are on screen:
 
 Everything else is in the top bar: home, **Browse** (groves, every book and
 the press), and the three-dot menu, which holds the clock, silent mode, the
-screenshot button, clean view and settings.
+screenshot button, clean view, settings, About and **Exit to the start
+screen**. On a wider screen these are buttons in the bar; Exit is the last.
 
 ### Gamepad
 
@@ -84,8 +94,8 @@ screenshot button, clean view and settings.
 
 ## Where your progress lives
 
-The books in your press, the groves you have visited, the season, the clock
-and your settings are saved in this browser only. They do not follow you to
+The books in your press, the groves you have visited and your settings are
+saved in this browser only. They do not follow you to
 another device or another browser, and a private window forgets them when it
 closes. **Reset all settings** in settings clears them; see
 [Settings](settings.md#reset-all-settings).

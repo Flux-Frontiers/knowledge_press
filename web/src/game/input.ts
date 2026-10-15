@@ -23,6 +23,11 @@ export type Actions = {
   pitch: number;
   /** Camera pan, -1 (right) to 1 (left), like steer; the view eases back to ahead on release. */
   look: number;
+  /** Pixels dragged across the forest since the last frame, x right and y down. */
+  dragX: number;
+  dragY: number;
+  /** A drag is holding the view, so it does not ease back yet. */
+  dragging: boolean;
 };
 
 const keys = new Set<string>();
@@ -30,8 +35,9 @@ let injectedKeys: string[] | null = null;
 let injectedSteer: number | null = null;
 let touchThrottle = 0;
 let touchSteer = 0;
-let touchPitch = 0;
-let touchLook = 0;
+let dragX = 0;
+let dragY = 0;
+let dragging = false;
 let prevInteract = false;
 
 export function isInputTarget(target: EventTarget | null): boolean {
@@ -51,7 +57,9 @@ function onKeyUp(e: KeyboardEvent) {
 
 export function resetInput() {
   keys.clear();
-  touchThrottle = touchSteer = touchPitch = touchLook = 0;
+  touchThrottle = touchSteer = 0;
+  dragX = dragY = 0;
+  dragging = false;
   prevInteract = false;
   injectedKeys = null;
   injectedSteer = null;
@@ -107,14 +115,15 @@ export function setTouchAxes(throttle: number, steer: number) {
   touchSteer = steer;
 }
 
-/**
- * Touch look stick, as rates like the arrow keys: `pitch` -1 (tilt down) to
- * 1 (tilt up), `look` -1 (pan right) to 1 (pan left). The tilt holds where
- * it is left; the pan eases back to ahead once the stick is released.
- */
-export function setTouchLook(pitch: number, look: number) {
-  touchPitch = pitch;
-  touchLook = look;
+/** A drag across the forest moved by (dx, dy) pixels: it looks around. */
+export function addDragLook(dx: number, dy: number) {
+  dragX += dx;
+  dragY += dy;
+}
+
+/** Whether a drag is holding the view; once let go, the pan eases back to ahead. */
+export function setDragging(on: boolean) {
+  dragging = on;
 }
 
 function held(code: string): boolean {
@@ -162,7 +171,11 @@ export function sampleActions(): Actions {
     interactDown: false,
     pitch: 0,
     look: 0,
+    dragX,
+    dragY,
+    dragging,
   };
+  dragX = dragY = 0;
 
   if (held("KeyW")) actions.throttle += 1;
   if (held("KeyS")) actions.throttle -= 1;
@@ -179,8 +192,6 @@ export function sampleActions(): Actions {
 
   actions.throttle += touchThrottle;
   actions.steer += touchSteer;
-  actions.pitch += touchPitch;
-  actions.look += touchLook;
 
   pollGamepad(actions);
 

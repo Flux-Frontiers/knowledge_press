@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { About } from "./About";
 import { ForestCanvas } from "./ForestCanvas";
 import { HUD } from "./HUD";
 import { PauseOverlay } from "./PauseOverlay";
@@ -10,31 +11,11 @@ import { commonFrame, portraitPose, shotSlug, treeExtent, type Extent, type Fram
 import { getForest, treeApproach, type Forest } from "./forest";
 import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
+import { requestPlace } from "./location";
 import { LEAF_SCALE } from "./preferences";
 import { resetSim } from "./sim";
 import { unlockSpeechOnGesture } from "./speech";
 import { useGame } from "./store";
-
-/**
- * The browser's location, for true sunrise and sunset, rounded to 0.1 degree
- * and kept only in this browser's save. Asked for when play starts; with a place
- * already saved it is refreshed only if permission is already granted, so the
- * prompt does not come back every visit. Browsers allow it only on a secure
- * origin, so over plain http on the LAN the sky keeps to the time zone.
- */
-function requestPlace() {
-  if (typeof navigator === "undefined" || !navigator.geolocation || !window.isSecureContext) return;
-  const ask = () => navigator.geolocation.getCurrentPosition(
-    ({ coords }) => useGame.getState().setPlace({ lat: Math.round(coords.latitude * 10) / 10, lon: Math.round(coords.longitude * 10) / 10 }),
-    () => {},
-    { enableHighAccuracy: false, maximumAge: 6 * 3600000, timeout: 20000 },
-  );
-  if (!useGame.getState().place) {
-    ask();
-    return;
-  }
-  navigator.permissions?.query({ name: "geolocation" }).then((p) => { if (p.state === "granted") ask(); }).catch(() => {});
-}
 
 export function ForestApp() {
   const [mounted, setMounted] = useState(false);
@@ -43,6 +24,7 @@ export function ForestApp() {
   const play = useGame((s) => s.play);
   const setToast = useGame((s) => s.setToast);
   const toast = useGame((s) => s.toast);
+  const nightStill = useGame((s) => s.sky.daylight < 0.5);
 
   // The sky follows the clock: sun and moon move a few hundredths of a degree between ticks.
   useEffect(() => {
@@ -50,7 +32,8 @@ export function ForestApp() {
     return () => window.clearInterval(id);
   }, []);
   useEffect(() => {
-    if (playing) requestPlace();
+    // For true sunrise and sunset (location.ts).
+    if (playing) requestPlace(useGame.getState().place, useGame.getState().setPlace);
   }, [playing]);
 
   useEffect(() => {
@@ -155,9 +138,11 @@ export function ForestApp() {
     function onKey(e: KeyboardEvent) {
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
       const st = useGame.getState();
+      // About: ? anywhere, the start screen too. Its dialog handles Escape itself.
+      if (e.key === "?" && !st.paused && !st.readingSlug && !isInputTarget(e.target)) { st.toggleHelp(); return; }
       if (!st.playing) return;
       if (e.code === "Escape") {
-        if (st.paused) return; // The settings dialog handles Escape itself.
+        if (st.paused || st.helpOpen) return; // The settings and About dialogs handle Escape themselves.
         if (st.readingSlug) st.openReader(null);
         else if (st.plaque) st.openPlaque(null);
         else if (st.catalogOpen) st.setCatalogOpen(false);
@@ -183,7 +168,8 @@ export function ForestApp() {
     }
     window.addEventListener("keydown", onKey);
     function onBlur() {
-      if (useGame.getState().playing) useGame.getState().pause(true);
+      // Not over About: its location button's permission prompt takes the focus.
+      if (useGame.getState().playing && !useGame.getState().helpOpen) useGame.getState().pause(true);
     }
     window.addEventListener("blur", onBlur);
     return () => {
@@ -197,13 +183,15 @@ export function ForestApp() {
       const button = (e.target as HTMLElement).closest("button");
       if (button && !button.closest("dialog")) button.blur();
     }} className="relative h-dvh w-full overflow-hidden bg-bg text-fg" style={{ touchAction: "none" }}>
-      {mounted && forest && playing ? (
-        <div className="absolute inset-0">
+      {/* While the forest grows, a still of the start screen's circle, by day or by night as the sky is now
+          (public/start, rendered from the forest itself); the live forest then fades in over it. */}
+      <div className="absolute inset-0 start-wash" />
+      {shot ? null : <img src={nightStill ? "start/night.webp" : "start/day.webp"} alt="" className="absolute inset-0 size-full object-cover" />}
+      {mounted && forest ? (
+        <div className="forest-fade-in absolute inset-0">
           <ForestCanvas forest={forest} />
         </div>
-      ) : (
-        <div className="absolute inset-0 start-wash" />
-      )}
+      ) : null}
       {playing && forest && !shot ? (
         <>
           <HUD forest={forest} />
@@ -215,11 +203,13 @@ export function ForestApp() {
           ready={Boolean(forest)}
           growing={!forest}
           opensAt={linked?.book.title}
-          onEnter={() => {
+          onEnter={(tour) => {
             if (forest) {
               resetSim(forest);
               play();
-              if (linked) {
+              // The tour sets off from home; a `?tree=` link is for driving there.
+              if (tour) useGame.getState().toggleCircuit();
+              else if (linked) {
                 const st = useGame.getState();
                 st.pickSearch(linked.book.slug);
                 st.pinTree(linked.book.slug);
@@ -229,6 +219,7 @@ export function ForestApp() {
           }}
         />
       )}
+      {shot ? null : <About />}
     </main>
   );
 }

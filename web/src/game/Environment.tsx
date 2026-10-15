@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { AdditiveBlending, BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
 import type { Forest } from "./forest";
 import type { SkyState } from "./sky";
+import { planetPositions } from "./planets";
 import { starBuffers } from "./stars";
 import { fogMix, overcast, weather } from "./weather";
 import { mulberry32 } from "./math";
@@ -17,6 +18,9 @@ import { useGame } from "./store";
  * lit side faces, come from where the two actually are. Both discs are drawn
  * about eight times their true size so they read from the cart.
  */
+/** The renderer's exposure (ForestCanvas); the start screen lifts it at night (Player). */
+export const EXPOSURE = 1.1;
+
 /** Fog gray, in the dark and in the day. */
 export const FOG_NIGHT = new Color("#2b323a");
 export const FOG_DAY = new Color("#d3d9db");
@@ -72,21 +76,40 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
     u.fogTint.value.copy(FOG_NIGHT).lerp(FOG_DAY, sky.daylight);
     u.fogMix.value = mix;
     u.clearAir.value = 1 - overcast(weather);
-    // Unlike the dome, stars are drawn as points, so they dim on their own uniform.
-    const s = starMaterial.current?.uniforms as typeof starUniforms | undefined;
-    if (s) s.opacity.value = 0.9 * (1 - sky.daylight) ** 2 * (1 - overcast(weather)) ** 2;
+    // Unlike the dome, stars and planets are drawn as points, so they dim on their own uniform.
+    for (const m of [starMaterial, planetMaterial]) {
+      const s = m.current?.uniforms as StarUniforms | undefined;
+      if (s) s.opacity.value = 0.9 * (1 - sky.daylight) ** 2 * (1 - overcast(weather)) ** 2;
+    }
   });
   const starBuf = useMemo(() => starBuffers(), []);
+  // The planets for the moment shown: steady points among the stars, a little larger than the
+  // brightest of them, through the same twilight limit. Recomputed every ten minutes of sky
+  // time: planets barely move in that.
+  const planetTick = Math.round(sky.time / 600000);
+  const planetBuf = useMemo(() => {
+    const ps = planetPositions(new Date(planetTick * 600000));
+    return { dir: new Float32Array(ps.flatMap((q) => q.dir)), mag: new Float32Array(ps.map((q) => q.mag)), tint: new Float32Array(ps.flatMap((q) => q.tint)) };
+  }, [planetTick]);
   const starMaterial = useRef<ShaderMaterial>(null);
-  const starUniforms = useMemo(() => ({ equToWorld: { value: new Matrix3() }, opacity: { value: 0 }, pixelRatio: { value: 1 } }), []);
+  const planetMaterial = useRef<ShaderMaterial>(null);
+  const starUniforms = useMemo(starUniformSet, []);
+  const planetUniforms = useMemo(starUniformSet, []);
   const gl = useThree((s) => s.gl);
-  // Stars come out as the sky darkens, not at a switch.
+  // Stars come out as the sky darkens, not at a switch, and the brightest first: twilight
+  // washes out the faint stars long before the bright ones, so the limiting magnitude falls
+  // from 6 in full dark to about 2.4 with the sun 2 degrees down (dusk and dawn).
   const starOpacity = 0.9 * (1 - sky.daylight) ** 2;
+  const starLimit = 6 - 12 * sky.daylight;
   useEffect(() => {
-    const u = (starMaterial.current?.uniforms ?? starUniforms) as typeof starUniforms;
-    u.equToWorld.value.set(...(sky.starMatrix as [number, number, number, number, number, number, number, number, number]));
-    u.pixelRatio.value = gl.getPixelRatio();
-  }, [sky.starMatrix, starUniforms, gl]);
+    for (const [m, fallback] of [[starMaterial, starUniforms], [planetMaterial, planetUniforms]] as const) {
+      const u = (m.current?.uniforms ?? fallback) as StarUniforms;
+      u.equToWorld.value.set(...(sky.starMatrix as [number, number, number, number, number, number, number, number, number]));
+      u.pixelRatio.value = gl.getPixelRatio();
+      u.limit.value = starLimit;
+      u.moonDir.value.set(...sky.moonDir);
+    }
+  }, [sky.starMatrix, sky.moonDir, starLimit, starUniforms, planetUniforms, planetTick, gl]);
   useFrame(({ camera }) => dome.current?.position.copy(camera.position));
   return (
     <group ref={dome}>
@@ -155,7 +178,7 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
           <bufferAttribute attach="attributes-tint" args={[starBuf.color, 3]} />
         </bufferGeometry>
         <shaderMaterial ref={starMaterial} transparent depthWrite={false} blending={AdditiveBlending} uniforms={starUniforms}
-          vertexShader={`uniform mat3 equToWorld; uniform float pixelRatio;
+          vertexShader={`uniform mat3 equToWorld; uniform float pixelRatio; uniform float limit; uniform vec3 moonDir;
             attribute float mag; attribute vec3 tint;
             varying vec3 vTint; varying float vLevel;
             void main() {
@@ -165,7 +188,37 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
               // are dimmed by the air and vanish below it.
               float bright = clamp(6.0 - mag, 0.0, 7.5);
               gl_PointSize = clamp(1.3 + 0.7 * bright, 1.3, 6.0) * pixelRatio;
-              vLevel = clamp(0.45 + 0.13 * bright, 0.45, 1.0) * smoothstep(0.0, 0.12, d.y);
+              vLevel = clamp(0.45 + 0.13 * bright, 0.45, 1.0) * smoothstep(0.0, 0.12, d.y) * smoothstep(limit + 0.6, limit - 0.6, mag);
+              // Behind the moon's disc (the dome's 0.0374 rad, a little wider for the sprite's glow).
+              vLevel *= step(dot(d, moonDir), cos(0.0374 * 1.15));
+              vTint = tint;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(d * 240.0, 1.0);
+            }`}
+          fragmentShader={`uniform float opacity;
+            varying vec3 vTint; varying float vLevel;
+            void main() {
+              float r = length(gl_PointCoord - 0.5) * 2.0;
+              float a = smoothstep(1.0, 0.0, r);
+              gl_FragColor = vec4(vTint * a * a * vLevel * opacity, 1.0);
+              #include <colorspace_fragment>
+            }`} />
+      </points>
+      <points key={planetTick} visible={starOpacity > 0.01} frustumCulled={false}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[planetBuf.dir, 3]} />
+          <bufferAttribute attach="attributes-mag" args={[planetBuf.mag, 1]} />
+          <bufferAttribute attach="attributes-tint" args={[planetBuf.tint, 3]} />
+        </bufferGeometry>
+        <shaderMaterial ref={planetMaterial} transparent depthWrite={false} blending={AdditiveBlending} uniforms={planetUniforms}
+          vertexShader={`uniform mat3 equToWorld; uniform float pixelRatio; uniform float limit; uniform vec3 moonDir;
+            attribute float mag; attribute vec3 tint;
+            varying vec3 vTint; varying float vLevel;
+            void main() {
+              vec3 d = equToWorld * position;
+              float bright = clamp(6.0 - mag, 0.0, 7.5);
+              gl_PointSize = clamp(2.0 + 0.8 * bright, 2.0, 8.0) * pixelRatio;
+              vLevel = clamp(0.6 + 0.12 * bright, 0.6, 1.15) * smoothstep(0.0, 0.12, d.y) * smoothstep(limit + 0.6, limit - 0.6, mag);
+              vLevel *= step(dot(d, moonDir), cos(0.0374 * 1.15));
               vTint = tint;
               gl_Position = projectionMatrix * modelViewMatrix * vec4(d * 240.0, 1.0);
             }`}
@@ -181,6 +234,12 @@ export function Sky({ sky, season }: { sky: SkyState; season: SeasonName }) {
     </group>
   );
 }
+
+/** Uniforms for the star and planet points: one set per material. */
+function starUniformSet() {
+  return { equToWorld: { value: new Matrix3() }, opacity: { value: 0 }, pixelRatio: { value: 1 }, limit: { value: 6 }, moonDir: { value: new Vector3(0, -1, 0) } };
+}
+type StarUniforms = ReturnType<typeof starUniformSet>;
 
 /** Tablets and phones: fewer pixels and a smaller shadow map keep the frame rate up. */
 export const COARSE_POINTER = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;

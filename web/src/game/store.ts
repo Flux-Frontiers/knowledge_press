@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import type { TimeOfDay } from "./daylight";
 import { effectiveTime, moonPhaseName, nextSunEvent, skyState, timeZonePlace, type Place, type SkyState, type TimeMode } from "./sky";
-import type { SeasonName } from "./seasons";
+import { seasonFor, type SeasonName } from "./seasons";
 import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
 import { clearTourHeard } from "./tourScript";
@@ -15,8 +15,6 @@ type SaveBlob = {
   version: number;
   library: string[];
   grovesVisited: string[];
-  season: SeasonName;
-  timeMode: TimeMode;
   /** The browser's location, rounded to 0.1 degree, once it has been given. */
   place: Place | null;
   preferences: Preferences;
@@ -29,8 +27,6 @@ function loadSave(): SaveBlob {
     version: SAVE_VERSION,
     library: [],
     grovesVisited: [],
-    season: "summer",
-    timeMode: "live",
     place: null,
     preferences: readPreferences(),
   };
@@ -38,24 +34,13 @@ function loadSave(): SaveBlob {
   try {
     const raw = window.localStorage.getItem(SAVE_KEY);
     if (!raw) return defaults;
-    const parsed = JSON.parse(raw) as Partial<SaveBlob> & { timeOfDay?: TimeOfDay };
+    const parsed = JSON.parse(raw) as Partial<SaveBlob>;
     return {
       ...defaults,
       ...parsed,
       version: SAVE_VERSION,
       library: Array.isArray(parsed.library) ? parsed.library : [],
       grovesVisited: Array.isArray(parsed.grovesVisited) ? parsed.grovesVisited : [],
-      season:
-        parsed.season === "spring" ||
-        parsed.season === "summer" ||
-        parsed.season === "autumn" ||
-        parsed.season === "winter"
-          ? parsed.season
-          : "summer",
-      // Saves from before the clock kept only a day/night flag; night stays night.
-      timeMode: typeof parsed.timeMode === "string" && Object.hasOwn(TIME_CYCLE, parsed.timeMode)
-        ? parsed.timeMode as TimeMode
-        : parsed.timeOfDay === "night" ? "night" : "live",
       place: parsed.place && Number.isFinite(parsed.place.lat) && Number.isFinite(parsed.place.lon) ? parsed.place : null,
       preferences: readPreferences(parsed.preferences),
     };
@@ -67,8 +52,6 @@ function loadSave(): SaveBlob {
 function persist(s: {
   library: string[];
   grovesVisited: string[];
-  season: SeasonName;
-  timeMode: TimeMode;
   place: Place | null;
   preferences: Preferences;
 }) {
@@ -77,8 +60,6 @@ function persist(s: {
       version: SAVE_VERSION,
       library: s.library,
       grovesVisited: s.grovesVisited,
-      season: s.season,
-      timeMode: s.timeMode,
       place: s.place,
       preferences: s.preferences,
     };
@@ -104,8 +85,8 @@ export type GameStore = {
   setPreferences: (patch: Partial<Preferences>) => void;
   /**
    * Put every setting back as on a first visit: the Pause preferences, the
-   * season, the clock, the tour's full welcome, and the books pressed. The
-   * groves visited stay.
+   * season and the clock (back to the date's season and Live), the tour's
+   * full welcome, and the books pressed. The groves visited stay.
    */
   resetSettings: () => void;
   paused: boolean;
@@ -166,6 +147,8 @@ export type GameStore = {
   tourNote: string | null;
   jump: JumpPose | null;
   play: () => void;
+  /** Back to the start screen: every panel closed, any tour ended, the camera circling the redwood. */
+  exit: () => void;
   pause: (v?: boolean) => void;
   setSeason: (s: SeasonName) => void;
   /** Cycle the clock: live, then fixed day, then fixed night. */
@@ -211,6 +194,14 @@ export type GameStore = {
 
 const initial = loadSave();
 
+/**
+ * Each visit opens on the real season for the date and place, with the clock
+ * on Live; settings or the bar can change either until the page is reloaded.
+ */
+const autoSeason = (place: Place | null) => seasonFor(new Date(), place ?? timeZonePlace(new Date()));
+/** A season was picked this visit, so the place arriving later does not change it. */
+let seasonPicked = false;
+
 /** What the sky shows: the moment the mode picks, the sun and moon there, and what the HUD says of them. */
 function readSky(mode: TimeMode, place: Place | null, now = new Date()) {
   const where = place ?? timeZonePlace(now);
@@ -238,15 +229,16 @@ export const useGame = create<GameStore>((set, get) => ({
   },
   resetSettings: () => {
     clearTourHeard();
-    set({ preferences: readPreferences(), groundCamera: "follow", season: "summer", timeMode: "live", library: [], lastReadSlug: null, libraryOpen: false });
+    seasonPicked = false;
+    set({ preferences: readPreferences(), groundCamera: "follow", season: autoSeason(get().place), timeMode: "live", library: [], lastReadSlug: null, libraryOpen: false });
     set(readSky("live", get().place));
     persist(get());
   },
   paused: false,
-  season: initial.season,
-  timeMode: initial.timeMode,
+  season: autoSeason(initial.place),
+  timeMode: "live",
   place: initial.place,
-  ...readSky(initial.timeMode, initial.place),
+  ...readSky("live", initial.place),
   query: "",
   searchPick: null,
   library: initial.library,
@@ -276,32 +268,38 @@ export const useGame = create<GameStore>((set, get) => ({
   cleanView: false,
   portrait: null,
   setPortrait: (portrait) => set({ portrait }),
-  setTimeMode: (timeMode) => {
-    set({ timeMode, ...readSky(timeMode, get().place) });
-    persist(get());
-  },
+  setTimeMode: (timeMode) => set({ timeMode, ...readSky(timeMode, get().place) }),
   toggleCleanView: () => set({ cleanView: !get().cleanView }),
   travelMode: "free",
   tourStop: null,
   tourNote: null,
   jump: null,
   play: () => set({ playing: true, paused: false }),
+  exit: () => {
+    resetInput();
+    set({
+      playing: false, paused: false, travelMode: "free", tourStop: null, tourNote: null,
+      libraryOpen: false, atlasOpen: false, catalogOpen: false, helpOpen: false, plaque: null, readingSlug: null,
+      jump: null, flight: null, query: "", searchPick: null, pinnedSlug: null, cardSlug: null, nearbySlug: null,
+      selectedGrove: null, toast: null, cleanView: false,
+    });
+  },
   pause: (v) => {
     resetInput();
     set({ paused: v ?? !get().paused });
   },
   setSeason: (season) => {
+    seasonPicked = true;
     set({ season });
-    persist({ ...get(), season });
   },
   toggleTimeOfDay: () => {
     const timeMode = TIME_CYCLE[get().timeMode];
     set({ timeMode, ...readSky(timeMode, get().place) });
-    persist(get());
   },
   tickSky: () => set(readSky(get().timeMode, get().place)),
   setPlace: (place) => {
-    set({ place, ...readSky(get().timeMode, place) });
+    // A place in the other hemisphere turns the season half a year, unless one was picked.
+    set({ place, ...(seasonPicked ? {} : { season: autoSeason(place) }), ...readSky(get().timeMode, place) });
     persist(get());
   },
   setQuery: (query) => set({ query, searchPick: null }),

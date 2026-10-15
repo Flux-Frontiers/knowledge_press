@@ -1,9 +1,10 @@
-import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useEffect, useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
+import { EXPOSURE } from "./Environment";
 import { atGroveStop, treesNear, type Forest } from "./forest";
-import { resetInput, sampleActions } from "./input";
+import { addDragLook, resetInput, sampleActions, setDragging } from "./input";
 import { flightPose, FOLLOW_BACK, FOLLOW_UP, forestGodLimits, godPose, groundPose, resetGodView, type Vec3 } from "./godEye";
 import { clamp } from "./math";
 import { forwardOf, sim, stepVehicle, teleportSim } from "./sim";
@@ -24,6 +25,17 @@ const godLook = new Vector3();
 const GROUND_NEAR = 0.12;
 const GROUND_FAR = 560;
 const GOD_NEAR = 2;
+/** Radians of turn or tilt per pixel dragged across the forest. */
+const DRAG_LOOK = 0.0042;
+/** A press that moves farther than this, in pixels, is a drag, not a click. */
+const DRAG_CLICK = 6;
+/** The start screen's slow circle round the redwood: radius and eye height, m, and radians a second. */
+const ORBIT_R = 46;
+const ORBIT_UP = 8;
+const ORBIT_RATE = 0.03;
+/** The start screen's circle is this much brighter by day, and by START_NIGHT_LIFT more in full dark: behind the title, night reads as black otherwise. */
+const START_DAY_LIFT = 1.25;
+const START_NIGHT_LIFT = 1.0;
 
 export function Player({ forest, playing }: { forest: Forest; playing: boolean }) {
   const group = useRef<Group>(null);
@@ -44,6 +56,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   /** A dive under way: where it left from, and how long it has been going. */
   const flightFrom = useRef<{ cam: Vec3; look: Vec3 } | null>(null);
   const flightT = useRef(0);
+  /** Last frame was the start screen's circle, so the first played frame puts the camera behind the cart. */
+  const wasStart = useRef(true);
 
   const paused = useGame((s) => s.paused);
   const collect = useGame((s) => s.collect);
@@ -52,12 +66,79 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   const setPose = useGame((s) => s.setPose);
 
   const lanternColor = useMemo(() => "#f3e6c2", []);
+  const gl = useThree((s) => s.gl);
+  const playingRef = useRef(playing);
+  playingRef.current = playing;
+
+  // Drag anywhere on the forest to look around: no button, no stick. One pointer
+  // owns the look at a time; a new press always takes it, so a release that never
+  // arrived cannot leave it dead. Not in god's eye (the wheel and a pinch zoom
+  // there), during a dive, or with a panel open.
+  useEffect(() => {
+    const el = gl.domElement;
+    let drag: { id: number; x: number; y: number; moved: number } | null = null;
+    /** When the last drag that moved ended, ms; the click that follows it is not a click. */
+    let draggedAt = -Infinity;
+    const canLook = () => {
+      const g = useGame.getState();
+      return playingRef.current && !g.paused && !g.helpOpen && !g.flight && !g.portrait && g.preferences.camera !== "god";
+    };
+    const end = () => {
+      if (drag && drag.moved > DRAG_CLICK) draggedAt = performance.now();
+      drag = null;
+      setDragging(false);
+    };
+    const down = (e: PointerEvent) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      if (!canLook()) return;
+      drag = { id: e.pointerId, x: e.clientX, y: e.clientY, moved: 0 };
+      setDragging(true);
+      try { el.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
+    };
+    const move = (e: PointerEvent) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      drag.x = e.clientX;
+      drag.y = e.clientY;
+      drag.moved += Math.hypot(dx, dy);
+      if (canLook()) addDragLook(dx, dy);
+    };
+    const up = (e: PointerEvent) => { if (drag && e.pointerId === drag.id) end(); };
+    // A look that ends over a signpost or the redwood is not a click on it. Only
+    // the forest's own click, right after the drag: a touch drag sends no click
+    // at all, and the next tap on a button must not be lost.
+    const click = (e: MouseEvent) => {
+      if (performance.now() - draggedAt > 300 || !(e.target instanceof Node) || !el.contains(e.target)) return;
+      draggedAt = -Infinity;
+      e.stopPropagation();
+    };
+    const hidden = () => { if (document.hidden) end(); };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    el.addEventListener("lostpointercapture", up);
+    window.addEventListener("click", click, true);
+    window.addEventListener("blur", end);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      el.removeEventListener("pointerdown", down);
+      el.removeEventListener("pointermove", move);
+      el.removeEventListener("pointerup", up);
+      el.removeEventListener("pointercancel", up);
+      el.removeEventListener("lostpointercapture", up);
+      window.removeEventListener("click", click, true);
+      window.removeEventListener("blur", end);
+      document.removeEventListener("visibilitychange", hidden);
+      end();
+    };
+  }, [gl]);
 
   useFrame((state, delta) => {
     const dt = Math.min(delta, 0.1);
     const game = useGame.getState();
     const { preferences, jump } = game;
-    const blocked = !playing || paused || game.libraryOpen || game.atlasOpen || game.catalogOpen || Boolean(game.plaque) || Boolean(game.readingSlug) || Boolean(document.activeElement?.matches("input, textarea, select, [contenteditable=true]"));
+    const blocked = !playing || paused || game.helpOpen || game.libraryOpen || game.atlasOpen || game.catalogOpen || Boolean(game.plaque) || Boolean(game.readingSlug) || Boolean(document.activeElement?.matches("input, textarea, select, [contenteditable=true]"));
     if (blocked) {
       sim.speed = sim.lat = sim.steering = 0;
       if (!wasBlocked.current) resetInput();
@@ -169,9 +250,11 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         }
       }
       stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake || tourBrake });
-      pitch.current = clamp(pitch.current + a.pitch * 1.1 * dt, -0.45, 0.75);
-      // Held arrows pan up to ~110° either way; released, the view eases back ahead.
-      look.current = a.look ? clamp(look.current + a.look * 1.6 * dt, -1.9, 1.9) : look.current * Math.exp(-3 * dt);
+      // A drag turns the view with the hand, as a mouse look does: right looks right, down looks down.
+      pitch.current = clamp(pitch.current + a.pitch * 1.1 * dt - a.dragY * DRAG_LOOK, -0.45, 0.75);
+      // Held arrows or a drag pan up to ~110° either way; let go, the view eases back ahead.
+      look.current = clamp(look.current + a.look * 1.6 * dt - a.dragX * DRAG_LOOK, -1.9, 1.9);
+      if (!a.look && !a.dragging) look.current *= Math.exp(-3 * dt);
 
       if (a.interact) {
         const near = treesNear(forest, sim.x, sim.z, 6.8);
@@ -196,7 +279,24 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const cam = state.camera as PerspectiveCamera;
     const flight = game.flight;
     const flying = Boolean(flight && flightFrom.current);
-    if (flight && flightFrom.current) {
+    if (playing && wasStart.current) {
+      // Leaving the start screen: land behind the cart rather than glide in from the circle.
+      wasStart.current = false;
+      state.gl.toneMappingExposure = EXPOSURE;
+      state.camera.position.set(sim.x - v.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - v.z * FOLLOW_BACK);
+    }
+    if (!playing) {
+      // The start screen: the camera circles the redwood slowly behind the title,
+      // in today's season and sky. A tour left by Exit is over.
+      wasStart.current = true;
+      tourState.tour = null;
+      state.gl.toneMappingExposure = EXPOSURE * (START_DAY_LIFT + START_NIGHT_LIFT * (1 - game.sky.daylight));
+      const a = state.clock.elapsedTime * ORBIT_RATE;
+      state.camera.position.set(Math.sin(a) * ORBIT_R, ORBIT_UP, Math.cos(a) * ORBIT_R);
+      lookAt.set(0, forest.corpusTree.height * 0.3, 0);
+      cam.far = GROUND_FAR;
+      cam.near = GROUND_NEAR;
+    } else if (flight && flightFrom.current) {
       flightT.current += dt;
       const p = flightPose(flightFrom.current, groundPose(flight.to, sim.x, sim.y, sim.z, sim.yaw), flightT.current);
       state.camera.position.set(p.cam.x, p.cam.y, p.cam.z);
@@ -256,8 +356,9 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       return;
     }
     // Tilt by raising or lowering the look point over its horizontal distance.
-    wasGod.current = godEye && !flying;
-    if (!godEye && !flying) {
+    // Not on the start screen: god's eye set up there would skip its reset on entering.
+    wasGod.current = playing && godEye && !flying;
+    if (playing && !godEye && !flying) {
       // On a portrait screen the level chase view is half road and cart; rest it tilted up a little.
       const rest = preferences.camera === "follow" && cam.aspect < 1 ? PORTRAIT_TILT : 0;
       lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current + rest);
