@@ -1,6 +1,6 @@
 {
   "format": "1.0",
-  "last_update": "2026-10-05T17:03:28.796362+00:00",
+  "last_update": "2026-10-15T03:28:05.564059+00:00",
   "snapshots": [
     {
       "key": "2026-09-26T05:26:58.392840+00:00",
@@ -364,6 +364,52 @@
         "vs_baseline": {
           "nodes": 2515,
           "edges": 6398
+        }
+      }
+    },
+    {
+      "key": "1.30.0",
+      "branch": "main",
+      "timestamp": "2026-10-15T03:28:05.562943+00:00",
+      "version": "1.30.0",
+      "subject": "repo:knowledge_press",
+      "tool": "tscode-kg",
+      "tool_version": "0.7.0",
+      "file": "1.30.0.json",
+      "metrics": {
+        "db_path": ".tscodekg/graph.sqlite",
+        "total_nodes": 2860,
+        "meaningful_nodes": 2860,
+        "total_edges": 7299,
+        "node_counts": {
+          "class": 9,
+          "function": 2605,
+          "interface": 1,
+          "method": 28,
+          "module": 146,
+          "type_alias": 71
+        },
+        "edge_counts": {
+          "CALLS": 4223,
+          "CONTAINS": 2714,
+          "IMPORTS": 357,
+          "INHERITS": 5
+        },
+        "module_count": 146,
+        "class_count": 9,
+        "function_count": 2605,
+        "method_count": 28,
+        "docstring_coverage": 0.076,
+        "snapshot_count": 8,
+        "vector_backend": "sqlite-vec",
+        "critical_issues": 7,
+        "complexity_median": 23.0
+      },
+      "deltas": {
+        "vs_previous": null,
+        "vs_baseline": {
+          "nodes": 2545,
+          "edges": 6488
         }
       }
     }
