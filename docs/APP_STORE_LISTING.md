@@ -103,9 +103,19 @@ First App Store release.
 App Review rejected build 725 (1.28.0) and asked for a screen recording and
 written answers, and for the answers to stay in the Notes field for future
 submissions. The block below is what went into Notes and the reply on
-2026-10-05 (about 3,400 characters; the field holds 4,000). Paste it
+2026-10-05 (about 3,500 characters; the field holds 4,000). Paste it
 unchanged unless the app has changed, and keep item 3 in step with the build
 being submitted.
+
+A reply in App Review messages does not resubmit a rejected build. On
+2026-10-06 the build went back for review this way: **Edit** on the rejected
+item, Notes replaced with the block below under a one-line lead, the
+recording attached under Attachment, **Save**, **Update Review**, then
+**Resubmit to App Review**. The lead used then:
+
+```text
+Resubmitted after the 2.1.0 rejection of October 1. The requested screen recording and answers are below and in our App Review reply of October 5; the recording is also under Attachment.
+```
 
 ```text
 1. Screen recording
@@ -116,6 +126,7 @@ The Knowledge Press is a library of 253 public-domain books (philosophy, literat
 
 3. Setup and main features
 No login, account, or sample files are needed. The library is bundled in the app; nothing is downloaded.
+After a 3-second title screen, the Chat tab offers sample questions; tap one to see an answer with its sources.
 - Ask: type a question on the main screen, for example "What does Marcus Aurelius say about anger?". The answer appears with its source passages; tap a passage to read it in full. This works in airplane mode.
 - Browse: open Browse to see the library by genre, search by author, open any book, and read it chapter by chapter. The diaries open by date.
 - Settings: choose the answer engine (On-device is the default), and tune how many passages are read.
