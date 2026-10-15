@@ -16,7 +16,8 @@ const N = MAX_METEORS * TRAIL_POINTS;
  * background, and each shower in season from its radiant among the stars.
  * They show as the stars do, through darkness and clear air, so a meteor at
  * dusk is lost in the twilight as a real one is. `?meteors=perseids` pins a
- * shower to its peak, and `?meteors=perseids:20` shows twenty times its rate.
+ * shower to its peak, `?meteors=perseids:20` shows twenty times its rate, and
+ * `?meteors=10` ten times tonight's whole sky.
  */
 export function MeteorSky({ sky }: { sky: SkyState }) {
   const group = useRef<Group>(null);
@@ -25,7 +26,7 @@ export function MeteorSky({ sky }: { sky: SkyState }) {
   const live = useRef<Meteor[]>([]);
   const pin = useMemo(() => meteorOverride(window.location.search), []);
   const sources = useMemo(
-    () => meteorSources(pin ? pin.shower.peak : sky.solarLon, sky.starMatrix),
+    () => meteorSources(pin?.shower ? pin.shower.peak : sky.solarLon, sky.starMatrix),
     [pin, sky.solarLon, sky.starMatrix],
   );
   const buffers = useMemo(() => ({ dir: new Float32Array(N * 3), level: new Float32Array(N), size: new Float32Array(N), tint: new Float32Array(N * 3) }), []);

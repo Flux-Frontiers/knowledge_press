@@ -32,7 +32,7 @@ is parked while they are open. Every setting is saved in this browser.
 
 | Setting | What it does |
 | --- | --- |
-| Season | Spring, summer, autumn or winter. |
+| Season | Spring, summer, autumn or winter. Each visit starts in the season of the date; a choice here lasts until you reload. |
 | Fog | Clear, light, normal or heavy standing haze. |
 | Random weather | Morning fog that burns off, and cloud. Off by default. See [Fog and weather](sky.md#fog-and-weather). |
 
@@ -41,7 +41,7 @@ is parked while they are open. Every setting is saved in this browser.
 **Reset all settings**, at the bottom, asks first, then:
 
 - Puts every setting above back to its default.
-- Sets the season to summer and the clock to live.
+- Sets the season to the date's and the clock to live.
 - Empties the press.
 - Forgets the tour's welcome, so the next tour gives it in full again.
 

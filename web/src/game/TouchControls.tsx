@@ -1,6 +1,6 @@
 import { bookBySlug } from "./catalog";
 import { useEffect, useRef, useState } from "react";
-import { setTouchAxes, setTouchLook, stickAxes } from "./input";
+import { setTouchAxes, stickAxes } from "./input";
 import { useGame } from "./store";
 
 export function TouchControls() {
@@ -14,8 +14,7 @@ export function TouchControls() {
 
   useEffect(() => {
     setTouchAxes(0, 0);
-    setTouchLook(0, 0);
-    return () => { setTouchAxes(0, 0); setTouchLook(0, 0); };
+    return () => setTouchAxes(0, 0);
   }, [blocked]);
 
   if (blocked) return null;
@@ -24,21 +23,16 @@ export function TouchControls() {
       <Stick label="Drag to drive: up forward, down reverse, left or right to steer"
         onMove={(x, y) => { const a = stickAxes(x, y); setTouchAxes(a.throttle, a.steer); }}
         onRelease={() => setTouchAxes(0, 0)} />
-      <div className="pointer-events-auto flex items-end gap-2">
-        <div className="flex flex-col items-end gap-2">
-          <button type="button" className="min-h-11 rounded-full border border-border bg-surface px-4 text-sm" onClick={toggleCircuit}>
-            {travelMode === "circuit" ? "End tour" : "Guided tour"}
-          </button>
-          <button type="button" disabled={!nearbySlug || nearbyDist >= 6.8}
-            className="min-h-14 min-w-14 rounded-full border border-border bg-primary px-4 text-sm font-medium text-primary-fg disabled:opacity-40"
-            onClick={() => { if (nearbySlug && nearbyDist < 6.8) collect(nearbySlug, bookBySlug(nearbySlug)?.title ?? "Book"); }}>
-            {pressed ? "In press" : "Read"}
-          </button>
-        </div>
-        {/* Look stick: up and down tilt and hold; left and right pan and ease back on release, like the arrow keys. */}
-        <Stick label="Drag to look: up or down to tilt, left or right to look around"
-          onMove={(x, y) => setTouchLook(-y, -x)}
-          onRelease={() => setTouchLook(0, 0)} />
+      {/* No look stick: a drag anywhere else on the forest looks around (Player.tsx). */}
+      <div className="pointer-events-auto flex flex-col items-end gap-2">
+        <button type="button" className="min-h-11 rounded-full border border-border bg-surface px-4 text-sm" onClick={toggleCircuit}>
+          {travelMode === "circuit" ? "End tour" : "Guided tour"}
+        </button>
+        <button type="button" disabled={!nearbySlug || nearbyDist >= 6.8}
+          className="min-h-14 min-w-14 rounded-full border border-border bg-primary px-4 text-sm font-medium text-primary-fg disabled:opacity-40"
+          onClick={() => { if (nearbySlug && nearbyDist < 6.8) collect(nearbySlug, bookBySlug(nearbySlug)?.title ?? "Book"); }}>
+          {pressed ? "In press" : "Read"}
+        </button>
       </div>
     </div>
   );

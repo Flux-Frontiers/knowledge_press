@@ -11,7 +11,8 @@ phone, **Time of day** in the three-dot menu) to step through them.
 | Dawn, Day, Dusk, Night | Held at that hour. |
 
 At night the stars come out, the lantern lights the road, and lamps light the
-redwood and the exhibits from their feet. The mode is saved between visits.
+redwood and the exhibits from their feet. Each visit starts on Live; a mode
+you pick lasts until you reload.
 
 ### Where the sky is placed
 
@@ -29,7 +30,29 @@ covers what the forest keeps.
 The night sky is the real one: the 5,080 stars of magnitude 6 or brighter
 from the Yale Bright Star Catalogue, placed for the clock's time and your
 place. Size follows brightness and color follows the star's own, and stars
-fade toward the horizon. Look up with ++up++ at night to see them.
+fade toward the horizon. Look up with ++up++, or drag the view up, at night
+to see them. Twilight washes out the faint stars first, so at dusk only the
+brightest are out, and the moon hides the stars behind its disc.
+
+### The planets
+
+Mercury, Venus, Mars, Jupiter and Saturn stand where they are tonight among
+the stars, as steady points a little larger than the brightest stars and
+tinted their own colors: Mars orange, Saturn pale gold. Their positions come
+from JPL's approximate Keplerian elements (Standish), good to about an
+arcminute, and their brightness from Mallama and Hilton (2018). Like the
+stars, they fade in twilight, fog and cloud, and hide behind the moon.
+
+### Tonight's sky
+
+**About** (++"?"++, the info button in the top bar, or on a phone the
+three-dot menu) has a Tonight's sky section for the real date, whatever the
+clock is set to: the moon's phase and the next full and new moon, the meteor
+showers active now and coming up, which planets are up tonight with when
+they rise or set and where they stand highest, and where to find Polaris.
+North is the top of the minimap and the red point of the compass rose around
+the redwood. **Use my location** there places the sky for where you are, if
+you did not allow it when play started.
 
 ### Meteors
 
@@ -63,8 +86,10 @@ peak, expect a meteor every minute or two across the whole sky.
 
 To see a shower at its peak, add `?meteors=` to the address with the
 shower's name in lowercase, hyphenated (`perseids`, `eta-aquariids`,
-`delta-aquariids`). Add `:` and a number to multiply its rate. Set the
-clock to Night first. For example:
+`delta-aquariids`). Add `:` and a number to multiply its rate. A number
+alone, such as `?meteors=10`, multiplies tonight's whole sky: the sporadic
+meteors and every shower in season. Set the clock to Night first. For
+example:
 
 ```
 https://flux-frontiers.github.io/knowledge_press/?meteors=geminids:20
@@ -72,7 +97,9 @@ https://flux-frontiers.github.io/knowledge_press/?meteors=geminids:20
 
 ## Seasons
 
-Pick a season on the start screen or under **Environment** in settings.
+Each visit starts in the season of the date where you are: astronomical
+seasons, from the equinoxes and solstices, and half a year on south of the
+equator. Pick another under **Environment** in settings.
 
 | Season | The forest |
 | --- | --- |
@@ -81,7 +108,7 @@ Pick a season on the start screen or under **Environment** in settings.
 | Autumn | Turned leaves, the canopy thinning |
 | Winter | No leaves. The wood is the point: every limb and its thickness |
 
-The season is saved between visits.
+A season you pick lasts until you reload.
 
 ## Fog and weather
 

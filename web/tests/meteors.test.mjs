@@ -90,5 +90,7 @@ test("?meteors= pins a shower, with an optional boost", () => {
   assert.equal(meteorOverride("?meteors=perseids").boost, 1);
   assert.equal(meteorOverride("?meteors=geminids:20").boost, 20);
   assert.equal(meteorOverride("?meteors=nope"), null);
+  // A bare number multiplies tonight's whole sky and pins no shower.
+  assert.deepEqual(meteorOverride("?meteors=10"), { shower: null, boost: 10 });
   assert.equal(meteorOverride("?weather=fog"), null);
 });

@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Library, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -7,7 +7,7 @@ import { GenreGlyph } from "./GenreGlyph";
 import { SPECIES, speciesFor } from "./species";
 import { QUESTS, questProgress } from "./quests";
 import { saveScreenshot } from "./screenshot";
-import { SEASON_ORDER, SEASONS } from "./seasons";
+import { SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
 import { ReaderPanel } from "./Reader";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
@@ -17,7 +17,6 @@ const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as 
 
 export function HUD({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
-  const setSeason = useGame((s) => s.setSeason);
   const timeMode = useGame((s) => s.timeMode);
   const sunEvent = useGame((s) => s.sunEvent);
   const moonName = useGame((s) => s.moonName);
@@ -194,12 +193,28 @@ export function HUD({ forest }: { forest: Forest }) {
               </button>
               <button
                 type="button"
+                onClick={() => useGame.getState().toggleHelp()}
+                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
+                aria-label="About the forest and tonight's sky" title="About · ?"
+              >
+                <Info className="size-4" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
+                onClick={() => useGame.getState().exit()}
+                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
+                aria-label="Exit to the start screen" title="Exit to the start screen"
+              >
+                <LogOut className="size-4" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
                 className={
                   "grid size-11 place-items-center rounded-md border sm:hidden " +
                   (menuOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
                 }
-                aria-label="More: time of day, silent mode, screenshot, clean view, settings"
+                aria-label="More: time of day, silent mode, screenshot, clean view, settings, about, exit"
                 aria-expanded={menuOpen}
               >
                 <Ellipsis className="size-4" strokeWidth={1.75} />
@@ -216,6 +231,10 @@ export function HUD({ forest }: { forest: Forest }) {
                     onClick={() => { setMenuOpen(false); toggleCleanView(); }} />
                   <MenuItem icon={<Settings2 className="size-4" strokeWidth={1.75} />} label="Controls and settings"
                     onClick={() => { setMenuOpen(false); pause(true); }} />
+                  <MenuItem icon={<Info className="size-4" strokeWidth={1.75} />} label="About and tonight's sky"
+                    onClick={() => { setMenuOpen(false); useGame.getState().toggleHelp(); }} />
+                  <MenuItem icon={<LogOut className="size-4" strokeWidth={1.75} />} label="Exit to the start screen"
+                    onClick={() => { setMenuOpen(false); useGame.getState().exit(); }} />
                 </ul>
               </>) : null}
             </>)}
@@ -403,23 +422,10 @@ export function HUD({ forest }: { forest: Forest }) {
           >
             {travelMode === "circuit" ? "On the ring" : "Ride the ring"}
           </button>
-          {SEASON_ORDER.map((name) => (
-            <button
-              key={name}
-              type="button"
-              onClick={() => setSeason(name)}
-              className={
-                "rounded-sm px-2 py-1 text-xs " +
-                (season === name ? "bg-primary text-primary-fg" : "border border-border bg-surface text-muted")
-              }
-            >
-              {SEASONS[name].label}
-            </button>
-          ))}
         </div>
 
         <p className="key-hints absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
-          WASD drive · Arrows look · Space brake · E read · B books · C camera · Esc settings
+          WASD drive · Drag or arrows look · Space brake · E read · B books · C camera · Esc settings · ? about
         </p>
       </>)}
 

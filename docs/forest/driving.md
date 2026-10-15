@@ -16,8 +16,12 @@ driving.
 
 ## Look around
 
-- ++left++ and ++right++, or the right stick, turn the view. It eases back
-  to straight ahead when you release, so a glance to the side does not
+- Drag the forest with the mouse or a finger to look around: no button to
+  hold. The sideways look eases back to straight ahead when you let go, and
+  the tilt stays. Not in god's eye, where a drag does nothing and the wheel
+  or a pinch zooms.
+- ++left++ and ++right++, or a gamepad's right stick, turn the view. It eases
+  back to straight ahead when you release, so a glance to the side does not
   change where you are going.
 - ++up++ and ++down++ tilt the view. The tilt stays where you leave it.
   Tilt up to see the crowns.

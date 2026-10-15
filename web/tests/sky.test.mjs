@@ -99,3 +99,16 @@ test("only a sun well above the horizon casts shadows", () => {
   assert.equal(at("2024-01-26T04:00:00Z").shadow, 0, "under a full moon");
   assert.ok(at("2026-06-21T23:45:00Z").shadow > 0, "evening sun still casts");
 });
+
+test("the season follows the sun, half a year on south of the equator", () => {
+  const { seasonFor } = require(`${process.env.FOREST_TEST_BUILD}/seasons.js`);
+  const SYDNEY = { lat: -33.9, lon: 151.2 };
+  assert.equal(seasonFor(new Date("2026-10-14T12:00:00Z"), NYC), "autumn");
+  assert.equal(seasonFor(new Date("2026-10-14T12:00:00Z"), SYDNEY), "spring");
+  assert.equal(seasonFor(new Date("2026-01-15T12:00:00Z"), NYC), "winter");
+  assert.equal(seasonFor(new Date("2026-07-04T12:00:00Z"), NYC), "summer");
+  assert.equal(seasonFor(new Date("2026-04-01T12:00:00Z"), NYC), "spring");
+  // The day after the June solstice (21 June 08:24 UTC) is summer, the day before still spring.
+  assert.equal(seasonFor(new Date("2026-06-22T12:00:00Z"), NYC), "summer");
+  assert.equal(seasonFor(new Date("2026-06-20T12:00:00Z"), NYC), "spring");
+});

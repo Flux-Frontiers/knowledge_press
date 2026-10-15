@@ -96,10 +96,10 @@ export function PauseOverlay() {
         </label>
       </div>
       <div className="rounded-md bg-bg p-3 text-sm leading-relaxed text-muted">
-        <p><span className="text-fg">WASD</span> drive · <span className="text-fg">Arrows</span> look around · <span className="text-fg">Space</span> brake</p>
+        <p><span className="text-fg">WASD</span> drive · <span className="text-fg">Drag</span> or <span className="text-fg">arrows</span> look around · <span className="text-fg">Space</span> brake</p>
         <p><span className="text-fg">Shift</span> hurry · <span className="text-fg">E</span> read · <span className="text-fg">C</span> camera</p>
-        <p><span className="text-fg">G</span> groves · <span className="text-fg">B</span> books · <span className="text-fg">H</span> home · <span className="text-fg">Q</span> guided tour</p>
-        <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. Gamepad: left stick to drive, right stick to look around, A to read, LT to brake, RT to hurry.</p>
+        <p><span className="text-fg">G</span> groves · <span className="text-fg">B</span> books · <span className="text-fg">H</span> home · <span className="text-fg">Q</span> guided tour · <span className="text-fg">?</span> about</p>
+        <p className="mt-2 text-xs">Release the throttle to stop. You can turn in place. On a phone, the stick drives and a drag anywhere else looks. Gamepad: left stick to drive, right stick to look around, A to read, LT to brake, RT to hurry.</p>
       </div>
       <p className="mt-4 text-center text-sm text-muted">
         <a href={USER_GUIDE_URL} target="_blank" rel="noopener" className="text-primary underline">Read the user guide</a>

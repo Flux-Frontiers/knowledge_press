@@ -16,7 +16,7 @@ const LABEL_Y = 30;
  * one size on screen at every zoom and draw over the trees.
  */
 export function GroveLabels({ forest }: { forest: Forest }) {
-  const show = useGame((s) => s.preferences.camera === "god" && !s.flight);
+  const show = useGame((s) => s.playing && s.preferences.camera === "god" && !s.flight);
   const labels = useMemo(
     () =>
       forest.groves.map((g) => {

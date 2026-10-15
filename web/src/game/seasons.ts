@@ -1,3 +1,5 @@
+import { solarLongitude, type Place } from "./sky";
+
 export type SeasonName = "spring" | "summer" | "autumn" | "winter";
 
 export type Season = {
@@ -70,3 +72,13 @@ export const SEASONS: Record<SeasonName, Season> = {
 };
 
 export const SEASON_ORDER: SeasonName[] = ["spring", "summer", "autumn", "winter"];
+
+/**
+ * The season for a date and place, astronomical: spring from the March
+ * equinox, summer from the June solstice, and so on, by the sun's longitude.
+ * South of the equator the seasons run half a year on.
+ */
+export function seasonFor(date: Date, place: Place): SeasonName {
+  const lon = (solarLongitude(date) + (place.lat < 0 ? 180 : 0)) % 360;
+  return SEASON_ORDER[Math.floor(lon / 90)]!;
+}

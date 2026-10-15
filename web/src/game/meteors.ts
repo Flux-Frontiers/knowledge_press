@@ -88,15 +88,19 @@ export function meteorSources(solarLon: number, starMatrix: readonly number[]): 
   return out;
 }
 
-/** The shower a `?meteors=` query pins to its peak, and how many times its rate to show ("perseids" or "perseids:20"). */
-export function meteorOverride(search: string): { shower: Shower; boost: number } | null {
+/**
+ * The `?meteors=` knob. A shower's key pins it to its peak, with an optional
+ * multiple of its rate ("perseids", "perseids:20"); a bare number multiplies
+ * tonight's real sky, sporadics and every shower in season ("10").
+ */
+export function meteorOverride(search: string): { shower: Shower | null; boost: number } | null {
   const raw = new URLSearchParams(search).get("meteors");
   if (!raw) return null;
+  const times = (n: string | undefined) => { const b = Number(n); return Number.isFinite(b) && b > 0 ? b : 1; };
+  if (/^[\d.]+$/.test(raw)) return { shower: null, boost: times(raw) };
   const [key, n] = raw.split(":");
   const shower = SHOWERS.find((s) => s.key === key);
-  if (!shower) return null;
-  const boost = Number(n);
-  return { shower, boost: Number.isFinite(boost) && boost > 0 ? boost : 1 };
+  return shower ? { shower, boost: times(n) } : null;
 }
 
 export type Meteor = {

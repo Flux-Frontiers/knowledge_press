@@ -14,7 +14,9 @@ test("existing collections survive preference changes and library jumps close th
   assert.deepEqual(saved.library, ["hamlet"]);
   assert.deepEqual(saved.grovesVisited, ["shakespeare"]);
   assert.equal(saved.preferences.camera, "high");
-  assert.equal(saved.season, "winter");
+  // The season and clock are the date's and Live each visit, not the save's.
+  assert.equal(saved.season, undefined);
+  assert.equal(useGame.getState().timeMode, "live");
   useGame.getState().toggleLibrary();
   useGame.getState().requestJump({ x: 1, z: 2, yaw: 0 });
   assert.equal(useGame.getState().libraryOpen, false);
@@ -47,6 +49,8 @@ test("reset puts every setting back, forgets the tour welcome, and forgets the p
   };
   const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
   const { tourHeard } = require(`${process.env.FOREST_TEST_BUILD}/tourScript.js`);
+  const { seasonFor } = require(`${process.env.FOREST_TEST_BUILD}/seasons.js`);
+  const { timeZonePlace } = require(`${process.env.FOREST_TEST_BUILD}/sky.js`);
   const st = () => useGame.getState();
   st().setPreferences({ camera: "god", narrate: true, weather: true, fog: "heavy" });
   st().setSeason("winter");
@@ -59,13 +63,28 @@ test("reset puts every setting back, forgets the tour welcome, and forgets the p
   assert.equal(st().preferences.narrate, false);
   assert.equal(st().preferences.weather, false);
   assert.equal(st().preferences.fog, "normal");
-  assert.equal(st().season, "summer");
+  assert.equal(st().season, seasonFor(new Date(), timeZonePlace(new Date())));
   assert.equal(st().timeMode, "live");
   assert.equal(tourHeard(), false);
   assert.deepEqual(st().library, []);
   assert.equal(st().lastReadSlug, null);
   const saved = JSON.parse(store.get("kpf-library-v1"));
-  assert.equal(saved.season, "summer");
   assert.equal(saved.preferences.camera, "follow");
   assert.deepEqual(saved.library, []);
+});
+
+test("exit goes back to the start screen with every panel shut and the tour over", () => {
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().play();
+  st().toggleCircuit();
+  st().openCatalog("drama");
+  st().toggleHelp();
+  st().setQuery("fire");
+  st().exit();
+  assert.equal(st().playing, false);
+  assert.equal(st().travelMode, "free");
+  assert.equal(st().catalogOpen, false);
+  assert.equal(st().helpOpen, false);
+  assert.equal(st().query, "");
 });
