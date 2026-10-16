@@ -164,6 +164,17 @@ Control Center records without the microphone unless it is turned on
 Trim the ends in Photos with **Edit**, then attach the `.mov` to the reply
 and under App Review Information > Attachment.
 
+## Availability
+
+All storefronts except China mainland. App Review held 1.28.0 (725) on
+2026-10-16 under Guideline 2.1: an app with book content offered in China
+mainland needs an Internet Publishing License from the National Press and
+Publication Administration in the developer's name, which we do not have.
+China mainland was removed under Distribution > Pricing and Availability >
+App Availability, and the same build was resubmitted. The setting belongs to
+the app, so later versions keep it. Hong Kong, Macau and Taiwan are separate
+storefronts and stay in.
+
 ## Category
 
 Primary: Books. Secondary: Education.
