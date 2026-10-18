@@ -228,7 +228,7 @@ public struct PadRootView: View {
                                 model.newConversation()
                                 selection = .chat
                             }
-                            .disabled(model.turns.isEmpty)
+                            .disabled(model.turns.isEmpty && selection != .browse)
                         }
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Delete", systemImage: "trash") {

@@ -40,8 +40,10 @@ struct ConversationSidebar: View {
                     selection = .chat
                 }
                 // A new chat over an empty one would do nothing; saying so
-                // is better than a button that silently ignores a tap.
-                .disabled(model.turns.isEmpty)
+                // is better than a button that silently ignores a tap. From
+                // Browse it still has a job: before the first chat there is
+                // no conversation row, so this is the only way back.
+                .disabled(model.turns.isEmpty && selection != .browse)
 
                 NavigationLink(value: SidebarItem.browse) {
                     Label("Browse the corpus", systemImage: "books.vertical")
