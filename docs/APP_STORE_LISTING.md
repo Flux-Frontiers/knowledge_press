@@ -13,13 +13,17 @@ A library that answers back
 
 ## Promotional text (170, changeable without a new version)
 
-253 classic books on your device. Ask a question, get an answer written
-from the passages it found, with every source shown. Works in airplane mode.
+249 classic books and four diaries on your device. Ask a question, get an
+answer written from the passages it found, with every source shown.
+
+The Mac page has this text since 2026-10-18. The iOS page still opens "253
+classic books on your device" and ends "Works in airplane mode."; promotional
+text changes without a new version, so it can be brought in line any time.
 
 ## Description (4000)
 
-The Knowledge Press is a library of 253 public-domain books that you can
-search and question, entirely on your device.
+The Knowledge Press is a library of 249 public-domain books and four
+diaries that you can search and question, entirely on your device.
 
 Ask it anything: what Marcus Aurelius says about anger, how Darwin
 describes the Galapagos finches, where Pepys was on the day of the Great
@@ -122,7 +126,7 @@ Resubmitted after the 2.1.0 rejection of October 1. The requested screen recordi
 Attached: recorded on a physical iPhone running the latest iOS, starting from launch and showing the typical flow. The app has no account registration, login or account deletion, no user-generated content shared with other users, and no paid content or in-app purchases, so none of those flows exist to show.
 
 2. Purpose and audience
-The Knowledge Press is a library of 253 public-domain books (philosophy, literature, history, science, drama, sacred texts) and four historical diaries (Samuel Pepys, John Evelyn, and Boswell's Hebrides journal), installed with the app. Readers ask a question in plain language; the app searches the whole library by meaning and by exact wording, then writes an answer only from the passages it found, and shows every source passage. It is for students, teachers, and general readers who want to explore the classics and check what the books actually say. It works offline: the books, the search index, and the language model are all on the device.
+The Knowledge Press is a library of 249 public-domain books (philosophy, literature, history, science, drama, sacred texts) and four historical diaries (Samuel Pepys, John Evelyn, and Boswell's Hebrides journal), installed with the app. Readers ask a question in plain language; the app searches the whole library by meaning and by exact wording, then writes an answer only from the passages it found, and shows every source passage. It is for students, teachers, and general readers who want to explore the classics and check what the books actually say. It works offline: the books, the search index, and the language model are all on the device.
 
 3. Setup and main features
 No login, account, or sample files are needed. The library is bundled in the app; nothing is downloaded.
@@ -144,7 +148,7 @@ There are no accounts, analytics, advertising, crash reporting, third-party SDKs
 The app's features and content are the same in every region. The only difference is Apple's: written answers use Apple Intelligence, which is available only in the regions and languages Apple supports. Where it is unavailable, the app still searches, browses, and reads the full library. The books are in English.
 
 6. Third-party material and regulation
-The app does not operate in a regulated industry. All 253 books and four diaries are public domain in the United States. The texts come from Project Gutenberg and the Internet Archive, which the app acknowledges as sources. Project Gutenberg's header and license text are removed from each book, as its license permits for public-domain works. The app is not affiliated with Project Gutenberg and does not use its trademark in the app's name or branding.
+The app does not operate in a regulated industry. All 249 books and four diaries are public domain in the United States. The texts come from Project Gutenberg and the Internet Archive, which the app acknowledges as sources. Project Gutenberg's header and license text are removed from each book, as its license permits for public-domain works. The app is not affiliated with Project Gutenberg and does not use its trademark in the app's name or branding.
 ```
 
 ### The screen recording
@@ -174,6 +178,45 @@ China mainland was removed under Distribution > Pricing and Availability >
 App Availability, and the same build was resubmitted. The setting belongs to
 the app, so later versions keep it. Hong Kong, Macau and Taiwan are separate
 storefronts and stay in.
+
+## The Mac version
+
+Same record as iOS (Universal Purchase): name, subtitle, category, age
+rating, privacy, availability and price are shared. The macOS version page
+has its own text; the first one, 1.30.0 (790), was submitted 2026-10-18 with
+the iOS promotional text, description, keywords and URLs above, copyright
+"2026 Eric G. Suchanek, PhD", and the review notes above changed in four
+places:
+
+- A one-line lead: this is the Mac version of the same app and record, and
+  the answers given for iOS apply unchanged except where noted.
+- Item 1: the recording was made on an iPhone; the Mac app has the same
+  features and flow.
+- Items 2-4: "on the Mac" for "on the device", "click" for "tap", and
+  "with networking off" for "in airplane mode". The 3-second title-screen
+  line is dropped.
+- Item 5: the app is not offered in China mainland.
+
+The book count was fixed on 2026-10-18 in the Mac text and in the blocks
+above: 249 books plus four diaries, 253 works in all. The iOS 1.28.0 listing
+in review still says 253 books; correct it with the next iOS version.
+
+### Mac screenshots
+
+Apple takes 1280x800, 1440x900, 2560x1600 or 2880x1800. On a 14-inch
+MacBook Pro (3024x1964), zoom the window (double-click its title bar), take
+a full-screen capture with Cmd-Shift-3, and crop off the 74 px menu bar;
+what is left is exactly 16:10:
+
+```sh
+ffmpeg -i in.png -vf "crop=3024:1890:0:74,scale=2880:1800:flags=lanczos" -q:v 2 out.jpg
+```
+
+Clear the Worker field in Settings first, or every answer shows "Cannot
+reach the worker" and a Render button. The 1.30.0 set, in order: the start
+screen with sample questions; "what did marcus aurelius say about anger?"
+with Source passages open; Pepys on 1 January 1660 in the reader; *Macbeth*
+I.ii in the reader.
 
 ## Category
 
