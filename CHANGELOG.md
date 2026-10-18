@@ -11,6 +11,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Back to the chat from Browse on Mac and iPad.** New chat was disabled
+  while the current chat was empty, so on a fresh install, with no saved
+  chats in the sidebar, Browse had no way back. It now stays enabled in
+  Browse and returns to the chat without starting an empty one.
+
 ## [1.30.0] - 2026-10-14
 
 ### Added
