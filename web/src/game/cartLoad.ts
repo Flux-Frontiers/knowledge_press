@@ -202,7 +202,7 @@ export function cartLoad(slugs: readonly string[], colorOf: (slug: string) => st
       const perLayer = HEAP_COLS * STACK_ROWS;
       const layer = STACK_LAYERS + Math.floor(i / perLayer);
       const cell = { col: i % HEAP_COLS, row: Math.floor((i % perLayer) / HEAP_COLS), layer };
-      out.push(lying(cell, HEAP_COLS, HEAP_PITCH_X, 0.12, 0.07, hash, color));
+      out.push(lying(cell, HEAP_COLS, HEAP_PITCH_X, 0.12, 0.03, hash, color));
     }
   }
   return out;
