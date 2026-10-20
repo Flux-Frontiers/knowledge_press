@@ -9,6 +9,10 @@
 // platform, which on a phone names the phone. Together that meant an iPhone
 // spent every query dialling itself and reporting that it could not reach a
 // server the reader had never named.
+//
+// Then the Mac kept its `localhost` default, and a stored empty string was
+// treated as "never set": clearing the field lasted until the next launch,
+// and a fresh install showed "Cannot reach the worker" under every answer.
 
 import Foundation
 import Testing
@@ -57,30 +61,34 @@ struct WorkerURLTests {
         }
     }
 
-    @Test("an empty stored value falls through to the platform default")
-    func emptyStoredValueIsIgnored() {
+    @Test("a stored empty value is a cleared address, not a missing one")
+    func emptyStoredValueStaysEmpty() {
         withScratchDefaults { defaults in
             defaults.set("", forKey: AppModel.workerURLKey)
-            #if os(macOS)
-                #expect(AppModel.initialWorkerURL() == "http://localhost:8000")
-            #else
-                #expect(AppModel.initialWorkerURL().isEmpty)
-            #endif
+            #expect(AppModel.initialWorkerURL().isEmpty)
         }
     }
 
-    /// The heart of it: `localhost` must never be the starting address on a
-    /// device where it means the device itself.
-    @Test("the default never points a phone at itself")
-    func defaultIsPlatformHonest() {
+    @Test("clearing the address survives a relaunch")
+    func clearedAddressPersists() {
         withScratchDefaults { _ in
-            let initial = AppModel.initialWorkerURL()
-            #if os(macOS)
-                #expect(initial == "http://localhost:8000")
-            #else
-                #expect(initial.isEmpty)
-                #expect(!initial.contains("localhost"))
-            #endif
+            let first = AppModel()
+            first.workerURLString = "http://egsmac.local:8000"
+            first.workerURLString = ""
+
+            let second = AppModel()
+            #expect(second.workerURLString.isEmpty)
+            #expect(!second.hasWorkerURL)
+        }
+    }
+
+    /// The worker is optional, so no platform starts with an address: on a
+    /// phone `localhost` names the phone, and on a Mac without a worker it
+    /// only puts an error under every answer.
+    @Test("a fresh install starts with no worker address")
+    func defaultIsEmpty() {
+        withScratchDefaults { _ in
+            #expect(AppModel.initialWorkerURL().isEmpty)
         }
     }
 
