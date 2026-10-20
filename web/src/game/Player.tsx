@@ -2,6 +2,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
+import { cartLoad, NEUTRAL_SPINE } from "./cartLoad";
 import { EXPOSURE } from "./Environment";
 import { atGroveStop, treesNear, type Forest } from "./forest";
 import { addDragLook, resetInput, sampleActions, setDragging } from "./input";
@@ -64,6 +65,11 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   const markGrove = useGame((s) => s.markGrove);
   const setNearby = useGame((s) => s.setNearby);
   const setPose = useGame((s) => s.setPose);
+  const library = useGame((s) => s.library);
+
+  // Each grove's color, by slug, so the cargo matches the trees it was pressed from.
+  const spineColors = useMemo(() => new Map(forest.trees.map((t) => [t.book.slug, t.color])), [forest]);
+  const load = useMemo(() => cartLoad(library, (slug) => spineColors.get(slug) ?? NEUTRAL_SPINE), [library, spineColors]);
 
   const lanternColor = useMemo(() => "#f3e6c2", []);
   const gl = useThree((s) => s.gl);
@@ -423,7 +429,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
 
   return (
     <group ref={group}>
-      <Cart lanternColor={lanternColor} wheelLeft={wheelL} wheelRight={wheelR} />
+      <Cart lanternColor={lanternColor} wheelLeft={wheelL} wheelRight={wheelR} load={load} />
     </group>
   );
 }

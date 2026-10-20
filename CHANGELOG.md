@@ -11,6 +11,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **The cart carries the press.** In the Forest, each book you press now rides
+  in the lantern cart's bed, in its grove's color: an empty cart for a new
+  player, standing rows, then flat stacks, then a heap over the side rails at
+  a full press of 253. The load is one instanced mesh, so it adds one draw
+  call at any count, and it stays under 1.2 m so the seat and behind cameras
+  keep their view. The gallery's parked cart keeps its fixed cargo.
+
 ### Fixed
 
 - **Back to the chat from Browse on Mac and iPad.** New chat was disabled
