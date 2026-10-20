@@ -1,5 +1,6 @@
-import { forwardRef, useMemo } from "react";
-import type { Group } from "three";
+import { forwardRef, useLayoutEffect, useMemo, useRef } from "react";
+import { Color, Object3D, type Group, type InstancedMesh } from "three";
+import { CART_CAPACITY, type CartBook } from "./cartLoad";
 
 /**
  * The lantern cart: a small oak book wagon, the reader's own vehicle, and the
@@ -50,9 +51,56 @@ type CartProps = {
   light?: boolean;
   wheelLeft?: React.Ref<Group>;
   wheelRight?: React.Ref<Group>;
+  /**
+   * The pressed books to carry, from cartLoad. Omitted, the cart carries the
+   * fixed cargo the gallery's parked cart shows.
+   */
+  load?: readonly CartBook[];
 };
 
-export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelRight }: CartProps) {
+const WHITE = new Color("#ffffff");
+const placer = new Object3D();
+const tint = new Color();
+
+/**
+ * The pressed books as one InstancedMesh: a unit box scaled, turned and
+ * colored per instance, so any number of books is one draw call.
+ *
+ * :param load: the books to draw, at most CART_CAPACITY.
+ */
+function CartCargo({ load }: { load: readonly CartBook[] }) {
+  const mesh = useRef<InstancedMesh>(null);
+
+  useLayoutEffect(() => {
+    const m = mesh.current;
+    if (!m) return;
+    // The color attribute exists only once a color is set; make it before the first draw.
+    if (!m.instanceColor) m.setColorAt(0, WHITE);
+    load.forEach((b, k) => {
+      placer.position.set(b.x, b.y, b.z);
+      // Yaw about y, then the lean about z in its own frame: the matrix cartLoad assumes.
+      placer.rotation.set(0, b.yaw, b.lean, "YXZ");
+      placer.scale.set(b.w, b.h, b.d);
+      placer.updateMatrix();
+      m.setMatrixAt(k, placer.matrix);
+      m.setColorAt(k, tint.set(b.color));
+    });
+    m.instanceMatrix.needsUpdate = true;
+    if (m.instanceColor) m.instanceColor.needsUpdate = true;
+    // Count last, so a half-written buffer is never drawn.
+    m.count = load.length;
+  }, [load]);
+
+  // The bounding sphere is one unit box's, so the books would be culled from the seat.
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, CART_CAPACITY]} frustumCulled={false} castShadow>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial roughness={0.7} />
+    </instancedMesh>
+  );
+}
+
+export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelRight, load }: CartProps) {
   // A row of books standing in the bed, heights and widths varied by position.
   const books = useMemo(() => Array.from({ length: 9 }, (_, k) => ({
     x: -0.42 + k * 0.105,
@@ -102,19 +150,23 @@ export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelR
         <meshStandardMaterial color={OAK_DARK} roughness={0.8} />
       </mesh>
 
-      {/* The press's cargo: a row of books standing, and a stack lying flat. */}
-      {books.map((b) => (
-        <mesh key={b.x} position={[b.x, 0.53 + b.h / 2, -0.55]} castShadow>
-          <boxGeometry args={[b.w, b.h, 0.2]} />
-          <meshStandardMaterial color={b.color} roughness={0.7} />
-        </mesh>
-      ))}
-      {[0, 1, 2].map((k) => (
-        <mesh key={k} position={[0.18, 0.56 + k * 0.06, 0.05]} rotation={[0, 0.12 * (k - 1), 0]} castShadow>
-          <boxGeometry args={[0.36 - k * 0.03, 0.055, 0.26 - k * 0.02]} />
-          <meshStandardMaterial color={SPINES[(k * 2 + 1) % SPINES.length]} roughness={0.7} />
-        </mesh>
-      ))}
+      {/* The press's cargo: the pressed books, or for the gallery's cart a row standing and a stack lying flat. */}
+      {load ? <CartCargo load={load} /> : (
+        <>
+          {books.map((b) => (
+            <mesh key={b.x} position={[b.x, 0.53 + b.h / 2, -0.55]} castShadow>
+              <boxGeometry args={[b.w, b.h, 0.2]} />
+              <meshStandardMaterial color={b.color} roughness={0.7} />
+            </mesh>
+          ))}
+          {[0, 1, 2].map((k) => (
+            <mesh key={k} position={[0.18, 0.56 + k * 0.06, 0.05]} rotation={[0, 0.12 * (k - 1), 0]} castShadow>
+              <boxGeometry args={[0.36 - k * 0.03, 0.055, 0.26 - k * 0.02]} />
+              <meshStandardMaterial color={SPINES[(k * 2 + 1) % SPINES.length]} roughness={0.7} />
+            </mesh>
+          ))}
+        </>
+      )}
 
       {/* The lantern: an iron shepherd's hook at the front, a brass-capped lamp hanging from it. */}
       <mesh position={[-0.46, 0.98, 0.84]} castShadow>
