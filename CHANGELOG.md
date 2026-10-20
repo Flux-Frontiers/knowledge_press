@@ -33,6 +33,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   read as never set. Every platform now starts empty, and an empty value is
   kept. `KGRAG_ENDPOINT` still sets the address for a launch from the shell.
 
+### Security
+
+- **Dependabot alerts cleared.** `source-map-js` 1.2.1 -> 1.2.2 in
+  `web/package-lock.json` (a dev dependency of Vite and Tailwind; denial of
+  service through crafted source-map offsets), and `mkdocs-material` 9.6.14
+  -> 9.7.7 in `docs/requirements.txt` (DOM XSS in search suggestions).
+
 ## [1.30.0] - 2026-10-14
 
 ### Added
