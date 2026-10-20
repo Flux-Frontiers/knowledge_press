@@ -18,7 +18,8 @@ Drive up to a tree. Within about 7 m of the trunk, and with the cart slowed,
 the book's **card** appears: its title, author, genre, an excerpt, and how
 many leaves it has. The card has two buttons.
 
-- **Read** (or ++e++, or A on a gamepad) puts the book in your press.
+- **Read** (or ++e++, or A on a gamepad) puts the book in your press. Each
+  pressed book rides in the cart's bed, in its grove's color.
 - **Open the book** opens the book's text.
 
 Clicking a tree pins its card, so you can read the card of a tree you are not
