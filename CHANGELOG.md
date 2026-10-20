@@ -26,6 +26,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   while the current chat was empty, so on a fresh install, with no saved
   chats in the sidebar, Browse had no way back. It now stays enabled in
   Browse and returns to the chat without starting an empty one.
+- **The Mac app starts with no worker address, and a cleared one stays
+  cleared.** The Mac defaulted to `http://localhost:8000`, so on a Mac with
+  no worker every answer showed "Cannot reach the worker", and clearing the
+  field lasted only until the next launch because an empty stored value was
+  read as never set. Every platform now starts empty, and an empty value is
+  kept. `KGRAG_ENDPOINT` still sets the address for a launch from the shell.
 
 ## [1.30.0] - 2026-10-14
 

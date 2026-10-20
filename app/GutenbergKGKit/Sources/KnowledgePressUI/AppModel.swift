@@ -171,24 +171,19 @@ public final class AppModel {
 
     /// The worker address to start from.
     ///
-    /// The default differs by platform on purpose. `localhost` is right on a
-    /// Mac, where the worker is the same machine. On iOS it names *the
-    /// phone*, so the app spends every query dialling a port nothing is
-    /// listening on and reports "Could not connect to the server" about a
-    /// machine the reader never chose. Better to start empty and say what is
-    /// wanted in the placeholder.
+    /// Empty on every platform. The worker is optional and most readers have
+    /// none, so a starting address only produces "Cannot reach the worker"
+    /// under every answer -- on iOS `localhost` even names the phone itself.
+    /// The placeholder says what is wanted instead.
+    ///
+    /// A stored empty string is a choice, not a missing value: a reader who
+    /// clears the field keeps it cleared across launches. Only a key that was
+    /// never written falls through to the empty default.
     static func initialWorkerURL() -> String {
         if let fromEnv = ProcessInfo.processInfo.environment["KGRAG_ENDPOINT"], !fromEnv.isEmpty {
             return fromEnv
         }
-        if let stored = defaults.string(forKey: workerURLKey), !stored.isEmpty {
-            return stored
-        }
-        #if os(macOS)
-            return "http://localhost:8000"
-        #else
-            return ""
-        #endif
+        return defaults.string(forKey: workerURLKey) ?? ""
     }
 
     /// Placeholder for the Settings field — a real example, not a format
