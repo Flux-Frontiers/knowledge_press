@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A second moot: *Meditations* and *The Prince* on virtue.** Marcus
+  Aurelius and Machiavelli, eight turns, each book in its author's voice,
+  argued with fresh passages each turn and a shaped ending (gutenberg_kg's
+  turn intents): it opens, asks, gives examples, concedes, and closes with
+  what each takes from the other.
 - **Moots: books that talk to each other.** In the Forest, a new Moots button
   (and a Moots item in the phone menu) lists saved moots: two books holding a
   conversation on a topic, each speaking only from its own text, written by

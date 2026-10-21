@@ -9,5 +9,16 @@
   ],
   "turns": 4,
   "date": "2026-10-21"
+ },
+ {
+  "id": "meditations-the-prince-virtue",
+  "title": "Meditations and The Prince on virtue",
+  "topic": "virtue",
+  "trees": [
+   "philosophy/Meditations",
+   "philosophy/The Prince"
+  ],
+  "turns": 8,
+  "date": "2026-10-21"
  }
 ]

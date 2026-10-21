@@ -1,0 +1,398 @@
+{
+ "version": 1,
+ "id": "meditations-the-prince-virtue",
+ "topic": "virtue",
+ "date": "2026-10-21",
+ "model": "Qwen3.8-27B-4bit",
+ "backend": "omlx",
+ "trees": [
+  {
+   "key": "philosophy/Meditations",
+   "title": "Meditations",
+   "author": "Marcus Aurelius",
+   "voice": {
+    "gender": "male",
+    "accent": null
+   }
+  },
+  {
+   "key": "philosophy/The Prince",
+   "title": "The Prince",
+   "author": "Niccolò Machiavelli",
+   "voice": {
+    "gender": "male",
+    "accent": null
+   }
+  }
+ ],
+ "turns": [
+  {
+   "turn": 1,
+   "speaker": 0,
+   "text": "The Prince, you seek power through fear and deception, yet I find my happiness in virtue alone [s1]. You treat external things—wealth, health—as ends, but to me they are indifferent, merely the sphere where virtue acts [s1]. Your motions are political, under, above, and about, but the motion of virtue is more excellent and divine [s2]. You calculate advantage; I accept with praises whatsoever the Gods appoint [s2]. Against your unthankful enemies, Nature gave me goodness and meekness as an antidote [s3]. If you hinder my just actions, I convert my inclination to cheerful patience, using your force for another virtue [s5]. You are subject to shame for your artifices; I divide my affections to attain contempt of the whole [s6].",
+   "cites": [
+    {
+     "tag": "s1",
+     "label": "chunk:0033",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0032"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0366",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0365"
+    },
+    {
+     "tag": "s3",
+     "label": "chunk:0053",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0052"
+    },
+    {
+     "tag": "s5",
+     "label": "chunk:0411",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0410"
+    },
+    {
+     "tag": "s6",
+     "label": "chunk:0736",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0735"
+    }
+   ],
+   "grounded": true,
+   "snaps": []
+  },
+  {
+   "turn": 2,
+   "speaker": 1,
+   "text": "Meditations, you mistake my counsel for mere artifice, yet you ignore that \"military virtue were exhausted\" because Italians failed to find a new order [s1]. I do not seek happiness in isolation; I seek to keep the state, which forces me to do evil when the body is corrupt [s2]. You speak of divine motion, but I know that \"good works will do you harm\" if they breed hatred [s2]. Your meekness is a luxury I cannot afford, for I must avoid being \"hated and despised\" to secure my rule [s4]. You convert my force to patience, but I must leave \"affairs of reproach to the management of others\" to preserve the kingdom [s6]. Your virtue is static; mine is the difficult labor of maintaining order amidst ambition [s5].",
+   "cites": [
+    {
+     "tag": "s1",
+     "label": "chunk:0505",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0504"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0387",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0386"
+    },
+    {
+     "tag": "s4",
+     "label": "chunk:0367",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0366"
+    },
+    {
+     "tag": "s6",
+     "label": "chunk:0377",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0376"
+    },
+    {
+     "tag": "s5",
+     "label": "chunk:0217",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0216"
+    }
+   ],
+   "grounded": true,
+   "snaps": []
+  },
+  {
+   "turn": 3,
+   "speaker": 0,
+   "text": "The Prince, you mistake my counsel for isolation, yet I find these professed politicians are wretches in very deed [s1]. You claim the state forces evil, but if you \"mayst use this liberty,\" why not set your mind at true liberty instead of choosing \"baseness and servility\"? [s2] Your fear of being hated and despised reveals a mere slave to brutish affections [s4]. I ask plainly: if you must commit heinous acts to rule, how can you claim your virtue is anything but a vile contemptibility? [s1]",
+   "cites": [
+    {
+     "tag": "s1",
+     "label": "chunk:0620",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0619"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0637",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0636"
+    },
+    {
+     "tag": "s4",
+     "label": "chunk:0787",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0786"
+    }
+   ],
+   "grounded": false,
+   "snaps": [
+    {
+     "text": "professed politicians",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "wretches in very deed",
+     "action": "unquoted",
+     "to": null,
+     "reason": "not in source"
+    },
+    {
+     "text": "true liberty",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "hated and despised",
+     "action": "unquoted",
+     "to": null,
+     "reason": "not in source"
+    },
+    {
+     "text": "mere slave",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "brutish affections",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "heinous",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "vile",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    }
+   ]
+  },
+  {
+   "turn": 4,
+   "speaker": 1,
+   "text": "Meditations, you call my necessity baseness, yet you ignore that \"he who is your friend will entreat you to declare yourself with arms\" [s5]. Consider the prince who \"goes forth with his army, supporting it by pillage\" [s3]. He is not a wretch, but a leader who understands that \"liberality is necessary\" to be followed [s3]. You see heinous acts, I see the preservation of order, where \"wishing to be good, they have more cause to love him\" [s4]. Your true liberty ignores that \"he who conspires cannot act alone\" [s2]. I do not choose servility; I choose the difficult path of keeping the state, ensuring that \"good works will do you harm\" is avoided through prudent, if harsh, governance [s2].",
+   "cites": [
+    {
+     "tag": "s5",
+     "label": "chunk:0444",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0443"
+    },
+    {
+     "tag": "s3",
+     "label": "chunk:0325",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0324"
+    },
+    {
+     "tag": "s4",
+     "label": "chunk:0079",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0078"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0369",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0368"
+    }
+   ],
+   "grounded": true,
+   "snaps": [
+    {
+     "text": "baseness",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "heinous acts",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "true liberty",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    }
+   ]
+  },
+  {
+   "turn": 5,
+   "speaker": 0,
+   "text": "The Prince, I grant that I take order for those things in my own power, for they are good [s5]. But you mistake this active management for license to commit heinous acts [o3]. I \"rejoice thyself with true simplicity\" [s2], whereas your liberality is a calculated bribe to avoid hatred, making you a slave to external opinions rather than a free man [s2]. You claim to obey God [s2] only when it serves stability, yet I truly obey Him. Your difficult path [o4] is not virtue but a harder form of corruption. If you must \"act with some inconsistency\" [s3] to rule, you have already abandoned the very virtue you claim to preserve.",
+   "cites": [
+    {
+     "tag": "s5",
+     "label": "chunk:0169",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0168"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0456",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0455"
+    },
+    {
+     "tag": "s3",
+     "label": "chunk:0853",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0852"
+    }
+   ],
+   "grounded": true,
+   "snaps": [
+    {
+     "text": "take order",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "heinous acts",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "liberality",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "obey God",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "difficult path",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    }
+   ]
+  },
+  {
+   "turn": 6,
+   "speaker": 1,
+   "text": "Meditations, you mistake my prudence for inconsistency, yet you ignore that a prince \"cannot observe all those things for which men are esteemed\" [s4]. I do not act contrary to fidelity for pleasure, but because \"the state can only be saved with difficulty\" otherwise [s6]. You call my liberality a bribe, but I know it is necessary to avoid being \"poor or despised\" [s2]. If I \"keep faith when such observance may be turned against him,\" I am ruined [s5]. Your simplicity ignores that \"something which looks like virtue... would be his ruin\" [s6]. I am not a slave to opinion, but a guardian of the common weal, forced to act contrary to... religion to preserve order [s4].",
+   "cites": [
+    {
+     "tag": "s4",
+     "label": "chunk:0353",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0352"
+    },
+    {
+     "tag": "s6",
+     "label": "chunk:0315",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0314"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0326",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0325"
+    },
+    {
+     "tag": "s5",
+     "label": "chunk:0347",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0346"
+    }
+   ],
+   "grounded": false,
+   "snaps": [
+    {
+     "text": "contrary to... religion",
+     "action": "unquoted",
+     "to": null,
+     "reason": "ellipsis"
+    }
+   ]
+  },
+  {
+   "turn": 7,
+   "speaker": 0,
+   "text": "The Prince, I hold that \"in the whole constitution of man, I see not any virtue contrary to justice\" [s1]. Your difficulty is not a test of character, but a surrender to fear. I take from you only the recognition that we share a common community [s2]. Yet while I deliberate myself toward what is most profitable for the soul [s4], you deliberate only for power. I remain free; you are bound by your own irreligious beliefs [s4]. Virtue is its own end; your order is a means to an end that rots the very soul it claims to save.",
+   "cites": [
+    {
+     "tag": "s1",
+     "label": "chunk:0548",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0547"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0045",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0044"
+    },
+    {
+     "tag": "s4",
+     "label": "chunk:0401",
+     "node_id": "chunk:philosophy/Meditations/meditations.md:0400"
+    }
+   ],
+   "grounded": true,
+   "snaps": [
+    {
+     "text": "difficulty",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "deliberate myself",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "most profitable",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "irreligious",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    }
+   ]
+  },
+  {
+   "turn": 8,
+   "speaker": 1,
+   "text": "Meditations, you mistake my prudence for fear, yet \"no principality is secure without having its own forces\" [s3]. I do not surrender to fear, but to necessity, for \"one’s own forces\" are the only shield against fortune [s3]. I take from you the insight that \"few really know what you are\" [s5], yet I must be judged by results, not appearances [s5]. You seek liberty of soul; I seek liberty of the state. Your virtue is a private joy; mine is a public burden. I hold that power is not baseness, but the \"valour which in adversity would defend it\" [s3]. We differ in end, but not in the weight of responsibility.",
+   "cites": [
+    {
+     "tag": "s3",
+     "label": "chunk:0296",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0295"
+    },
+    {
+     "tag": "s5",
+     "label": "chunk:0359",
+     "node_id": "chunk:philosophy/The Prince/the_prince.md:0358"
+    }
+   ],
+   "grounded": true,
+   "snaps": []
+  }
+ ],
+ "stats": {
+  "turns": 8,
+  "tags_valid_turns": 8,
+  "tags_valid_rate": 1.0,
+  "turns_citing": 8,
+  "quotes_found": 24,
+  "quotes_total": 27,
+  "quote_found_rate": 0.889,
+  "grounded_turns": 6,
+  "retried_turns": 3,
+  "other_quotes_found": 0,
+  "other_quotes_total": 0,
+  "other_quote_valid_rate": null,
+  "self_quotes_found": 0,
+  "self_quotes_total": 0,
+  "quotes_per_turn": 3.38,
+  "quotes_snapped": 0,
+  "quotes_unquoted": 3,
+  "quotes_too_short": 18
+ }
+}
