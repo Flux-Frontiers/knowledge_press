@@ -39,6 +39,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `web/package-lock.json` (a dev dependency of Vite and Tailwind; denial of
   service through crafted source-map offsets), and `mkdocs-material` 9.6.14
   -> 9.7.7 in `docs/requirements.txt` (DOM XSS in search suggestions).
+- **vite 8.3.4** (was 8.3.0) for three advisories against 8.3.0-8.3.2,
+  published after the entry above; the floor in `web/package.json` is now
+  `^8.3.4`. Its bundler moves with it (rolldown 1.2.14, postcss 8.5.31).
 
 ## [1.30.0] - 2026-10-14
 
