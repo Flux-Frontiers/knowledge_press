@@ -17,6 +17,10 @@ export type Preferences = {
   weather: boolean;
   /** Riding the ring, read each grove's summary aloud at its stop. */
   narrate: boolean;
+  /** Read a moot's turns aloud, a voice per tree; off, turns advance at reading pace. */
+  speakMoots: boolean;
+  /** Each tree's voice by name, first tree first; "" picks one automatically. */
+  mootVoices: [string, string];
 };
 
 export type FogLevel = "clear" | "light" | "normal" | "heavy";
@@ -50,5 +54,9 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     fog: value?.fog && value.fog in FOG_SCALE ? value.fog : "normal",
     weather: value?.weather === true,
     narrate: value?.narrate === true,
+    speakMoots: value?.speakMoots !== false,
+    mootVoices: Array.isArray(value?.mootVoices) && value.mootVoices.length === 2
+      && value.mootVoices.every((n) => typeof n === "string")
+      ? [value.mootVoices[0], value.mootVoices[1]] : ["", ""],
   };
 }

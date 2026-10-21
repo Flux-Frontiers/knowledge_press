@@ -1,0 +1,197 @@
+{
+ "version": 1,
+ "id": "the-diary-of-samuel-pepys-complete-thus-spake-zarathustra-jealousy",
+ "topic": "jealousy",
+ "date": "2026-10-21",
+ "model": "Qwen3.8-27B-4bit",
+ "backend": "omlx",
+ "trees": [
+  {
+   "key": "diaries/The Diary of Samuel Pepys — Complete",
+   "title": "The Diary of Samuel Pepys — Complete",
+   "author": "Samuel Pepys",
+   "voice": {
+    "gender": "male",
+    "accent": "en-GB"
+   }
+  },
+  {
+   "key": "philosophy/Thus Spake Zarathustra",
+   "title": "Thus Spake Zarathustra",
+   "author": "Friedrich Wilhelm Nietzsche",
+   "voice": {
+    "gender": "male",
+    "accent": null
+   }
+  }
+ ],
+ "turns": [
+  {
+   "turn": 1,
+   "speaker": 0,
+   "text": "Thus Spake Zarathustra, I open this moot. I confess, \"God forgive me for my jealousy!\" [s1]. Yet I find no reason, only a \"devilishly taken off\" mind [s5]. I am \"so deadly full of jealousy\" that I cannot work [s6]. Even when I say I am \"jealous of myself\" regarding my income [s3], the trouble persists. My wife, \"she is jealous of my kindnesse\" [s2]. I fear her opinion of my suspicion is \"never to be removed\" [s5]. I must have patience, though I am \"ready to chide at every thing\" [s6].",
+   "cites": [
+    {
+     "tag": "s1",
+     "label": "1664-01-18",
+     "node_id": "chunk:entry_1417_chunk_0.md:0001"
+    },
+    {
+     "tag": "s5",
+     "label": "1663-06-14",
+     "node_id": "chunk:entry_1204_chunk_1.md:0002"
+    },
+    {
+     "tag": "s6",
+     "label": "1663-05-15",
+     "node_id": "chunk:entry_1175_chunk_4.md:0002"
+    },
+    {
+     "tag": "s3",
+     "label": "1666-03-07",
+     "node_id": "chunk:entry_2193_chunk_0.md:0003"
+    },
+    {
+     "tag": "s2",
+     "label": "1666-08-07",
+     "node_id": "chunk:entry_2345_chunk_0.md:0001"
+    }
+   ],
+   "grounded": true,
+   "snaps": []
+  },
+  {
+   "turn": 2,
+   "speaker": 1,
+   "text": "The Diary of Samuel Pepys — Complete, you mistake the sting for the scorpion. Jealous is every virtue of the others, I cry, yet you cling to your \"devilishly taken off\" state [o1]. You say your wife is \"jealous of my kindnesse\" [o1]; I say even virtues succumb by jealousy [s1]. Like the lover, I distrust \"too sleek smiling\" [s3]. Your \"so deadly full of jealousy\" [o1] is a sign of bad lineage [s4]. You must surpass man, not hide in your winter-bed [s2].",
+   "cites": [
+    {
+     "tag": "s1",
+     "label": "chunk:0166",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:0165"
+    },
+    {
+     "tag": "s3",
+     "label": "chunk:0624",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:0623"
+    },
+    {
+     "tag": "s4",
+     "label": "chunk:0389",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:0388"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0664",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:0663"
+    }
+   ],
+   "grounded": true,
+   "snaps": [
+    {
+     "text": "Jealous is every virtue of the others",
+     "action": "unquoted",
+     "to": null,
+     "reason": "not in source"
+    }
+   ]
+  },
+  {
+   "turn": 3,
+   "speaker": 0,
+   "text": "Thus Spake Zarathustra, you call my \"deadly full of jealousy\" a bad lineage, yet I confess it was my own folly [s1]. I gave her \"another month’s dancing,\" and now her mind is \"devilishly taken off her business\" [s6]. You speak of surpassing man, but I am forced to say I had \"bad news from the Duke\" as an excuse [s1]. I cannot check her scornful words before Ashwell, nor strike her as I once would [s4]. My \"trouble that attends it\" is real, not a lineage to be surpassed [s6]. I must have patience, for the opinion of my suspicion is \"never to be removed\" [s6].",
+   "cites": [
+    {
+     "tag": "s1",
+     "label": "1663-05-15",
+     "node_id": "chunk:entry_1175_chunk_4.md:0002"
+    },
+    {
+     "tag": "s6",
+     "label": "1663-06-14",
+     "node_id": "chunk:entry_1204_chunk_1.md:0002"
+    },
+    {
+     "tag": "s4",
+     "label": "1663-05-21",
+     "node_id": "chunk:entry_1181_chunk_1.md:0000"
+    }
+   ],
+   "grounded": true,
+   "snaps": []
+  },
+  {
+   "turn": 4,
+   "speaker": 1,
+   "text": "The Diary of Samuel Pepys — Complete, you clutch at \"bad news from the Duke\" [o3] as a shield, yet the impulse to punish is powerful in you [s1]. You fear her \"devilishly taken off\" mind [o3], but your own \"trouble that attends it\" [o3] is the true poison. I counsel you: distrust those in whom vengeance sounds [s1]. Your patience [o3] is merely a scorpion stinging itself [s2]. You say you cannot strike her; good. But why do you \"chide at every thing\" [o1]? Your neighbour-love [o3] is your bad love of yourselves [s4]. You must learn to be good again, of good cheer [s3]. Do not let your lonesomeness [s5] be swallowed by the crowd.",
+   "cites": [
+    {
+     "tag": "s1",
+     "label": "chunk:0389",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:0388"
+    },
+    {
+     "tag": "s2",
+     "label": "chunk:0166",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:0165"
+    },
+    {
+     "tag": "s4",
+     "label": "chunk:0251",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:0250"
+    },
+    {
+     "tag": "s3",
+     "label": "chunk:1151",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:1150"
+    },
+    {
+     "tag": "s5",
+     "label": "chunk:1032",
+     "node_id": "chunk:philosophy/Thus Spake Zarathustra/thus_spake_zarathustra.md:1031"
+    }
+   ],
+   "grounded": true,
+   "snaps": [
+    {
+     "text": "patience",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "neighbour-love",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    },
+    {
+     "text": "lonesomeness",
+     "action": "unquoted",
+     "to": null,
+     "reason": "under 3 words"
+    }
+   ]
+  }
+ ],
+ "stats": {
+  "turns": 4,
+  "tags_valid_turns": 4,
+  "tags_valid_rate": 1.0,
+  "turns_citing": 4,
+  "quotes_found": 14,
+  "quotes_total": 14,
+  "quote_found_rate": 1.0,
+  "grounded_turns": 4,
+  "retried_turns": 1,
+  "other_quotes_found": 7,
+  "other_quotes_total": 8,
+  "other_quote_valid_rate": 0.875,
+  "self_quotes_found": 0,
+  "self_quotes_total": 0,
+  "quotes_per_turn": 5.5,
+  "quotes_snapped": 0,
+  "quotes_unquoted": 1,
+  "quotes_too_short": 3
+ }
+}

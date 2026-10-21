@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -10,6 +10,7 @@ import { saveScreenshot } from "./screenshot";
 import { SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
 import { ReaderPanel } from "./Reader";
+import { MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import type { TimeMode } from "./sky";
 
@@ -65,6 +66,8 @@ export function HUD({ forest }: { forest: Forest }) {
   const readingSlug = useGame((s) => s.readingSlug);
   const openReader = useGame((s) => s.openReader);
   const reading = readingSlug ? forest.trees.find((t) => t.book.slug === readingSlug) : undefined;
+  const mootsOpen = useGame((s) => s.mootsOpen);
+  const mootId = useGame((s) => s.mootId);
   const clean = useGame((s) => s.cleanView);
   const toggleCleanView = useGame((s) => s.toggleCleanView);
   const silent = useGame((s) => s.preferences.silent);
@@ -185,6 +188,14 @@ export function HUD({ forest }: { forest: Forest }) {
               </button>
               <button
                 type="button"
+                onClick={() => useGame.getState().openMoots(true)}
+                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
+                aria-label="Moots: books that talk to each other" title="Moots"
+              >
+                <MessagesSquare className="size-4" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
                 onClick={() => pause(true)}
                 className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
                 aria-label="Controls and settings" title="Controls and settings · Esc"
@@ -214,7 +225,7 @@ export function HUD({ forest }: { forest: Forest }) {
                   "grid size-11 place-items-center rounded-md border sm:hidden " +
                   (menuOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
                 }
-                aria-label="More: time of day, silent mode, screenshot, clean view, settings, about, exit"
+                aria-label="More: time of day, silent mode, screenshot, clean view, moots, settings, about, exit"
                 aria-expanded={menuOpen}
               >
                 <Ellipsis className="size-4" strokeWidth={1.75} />
@@ -229,6 +240,8 @@ export function HUD({ forest }: { forest: Forest }) {
                     onClick={() => { setMenuOpen(false); saveScreenshot(COARSE_POINTER); }} />
                   <MenuItem icon={<EyeOff className="size-4" strokeWidth={1.75} />} label="Clean view"
                     onClick={() => { setMenuOpen(false); toggleCleanView(); }} />
+                  <MenuItem icon={<MessagesSquare className="size-4" strokeWidth={1.75} />} label="Moots"
+                    onClick={() => { setMenuOpen(false); useGame.getState().openMoots(true); }} />
                   <MenuItem icon={<Settings2 className="size-4" strokeWidth={1.75} />} label="Controls and settings"
                     onClick={() => { setMenuOpen(false); pause(true); }} />
                   <MenuItem icon={<Info className="size-4" strokeWidth={1.75} />} label="About and tonight's sky"
@@ -438,6 +451,8 @@ export function HUD({ forest }: { forest: Forest }) {
       {browsing ? <BrowsePanel forest={forest} /> : null}
       {plaque ? <PlaquePanel plaque={plaque} /> : null}
       {reading ? <ReaderPanel key={reading.book.slug} book={reading.book} /> : null}
+      {mootsOpen ? <MootList /> : null}
+      {mootId ? <MootPlayer key={mootId} id={mootId} forest={forest} /> : null}
     </div>
   );
 }

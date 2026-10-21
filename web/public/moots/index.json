@@ -1,0 +1,13 @@
+[
+ {
+  "id": "the-diary-of-samuel-pepys-complete-thus-spake-zarathustra-jealousy",
+  "title": "The Diary of Samuel Pepys — Complete and Thus Spake Zarathustra on jealousy",
+  "topic": "jealousy",
+  "trees": [
+   "diaries/The Diary of Samuel Pepys — Complete",
+   "philosophy/Thus Spake Zarathustra"
+  ],
+  "turns": 4,
+  "date": "2026-10-21"
+ }
+]

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
-import { unlockSpeech } from "./speech";
+import { canSpeak, mootVoiceNames, onVoicesChanged, unlockSpeech } from "./speech";
 import { USER_GUIDE_URL } from "./links";
 import { useGame } from "./store";
 import { weather, weatherName } from "./weather";
@@ -67,6 +67,13 @@ export function PauseOverlay() {
             if (e.target.checked) unlockSpeech(true);
           }} />
         </label>
+        <label className="flex items-center justify-between gap-4">Read moots aloud
+          <input type="checkbox" checked={prefs.speakMoots} onChange={(e) => {
+            setPreferences({ speakMoots: e.target.checked });
+            if (e.target.checked) unlockSpeech(true);
+          }} />
+        </label>
+        {prefs.speakMoots && canSpeak() && <MootVoiceChoice />}
         <label className="flex items-center justify-between gap-4">Silent mode · no pop-up cards
           <input type="checkbox" checked={prefs.silent} onChange={(e) => setPreferences({ silent: e.target.checked })} />
         </label>
@@ -111,4 +118,33 @@ export function PauseOverlay() {
       <button ref={back} type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
     </dialog>
   );
+}
+
+/**
+ * The two moot voices, each "Automatic" unless the listener picks one of this
+ * browser's English voices. The list fills in once the browser has loaded it.
+ */
+function MootVoiceChoice() {
+  const voices = useGame((s) => s.preferences.mootVoices);
+  const setPreferences = useGame((s) => s.setPreferences);
+  const [names, setNames] = useState(mootVoiceNames);
+  useEffect(() => onVoicesChanged(() => setNames(mootVoiceNames())), []);
+  const choose = (i: 0 | 1, name: string) => {
+    const next: [string, string] = [voices[0], voices[1]];
+    next[i] = name;
+    setPreferences({ mootVoices: next });
+  };
+  return (<>
+    {(["First tree's voice", "Second tree's voice"] as const).map((label, i) => (
+      <label key={label} className="flex items-center justify-between gap-4 pl-4 text-muted">{label}
+        <select value={voices[i]} onChange={(e) => choose(i as 0 | 1, e.target.value)}
+          className="max-w-48 rounded-md border border-border bg-bg p-2 text-fg">
+          <option value="">Automatic</option>
+          {/* A chosen voice this browser lacks stays listed, so the choice is visible. */}
+          {voices[i] && !names.includes(voices[i]) && <option value={voices[i]}>{voices[i]} (not here)</option>}
+          {names.map((n) => <option key={n} value={n}>{n}</option>)}
+        </select>
+      </label>
+    ))}
+  </>);
 }

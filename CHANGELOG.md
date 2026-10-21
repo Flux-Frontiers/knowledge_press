@@ -13,6 +13,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Moots: books that talk to each other.** In the Forest, a new Moots button
+  (and a Moots item in the phone menu) lists saved moots: two books holding a
+  conversation on a topic, each speaking only from its own text, written by
+  gutenberg_kg's `gutenkg converse` and exported with
+  `gutenkg export-web-moots` into `web/public/moots/`. Playing one opens an
+  overlay styled like the Reader. Each turn is a speech bubble, the first
+  book on the left in green and the second on the right in pink, with each
+  book's name in its color, quotes in bold, citation tags dimmed and the
+  cited passages underneath. The speaking tree is ringed in its color in the
+  world. Lines are read aloud more slowly than grove narration, and the next
+  turn follows when a line ends. Each book speaks in a voice matching its
+  author, from the pack's `voice` (gender and accent, which gutenberg_kg
+  looks up on Wikidata): a woman's book in a woman's voice, and the nearest
+  accent the browser has (Twain gets an American man on Edge; Safari and
+  Chrome have none built in, so a British one). Gender is a rule and accent
+  a preference; voices that always speak come before optional downloads a
+  browser may list without having; a translated author takes the system's
+  accent. When both books need the same voice, the second speaks deeper.
+  Nothing needs setting up: Settings gains "Read moots aloud" (on by
+  default; the player's speaker button flips it, and off, turns advance at
+  reading pace) and two optional voice choices, each "Automatic" until a
+  listener picks one of the browser's English voices. A line that arrives
+  before the browser has listed its voices waits for them instead of using
+  the default voice.
 - **The cart carries the press.** In the Forest, each book you press now rides
   in the lantern cart's bed, in its grove's color: an empty cart for a new
   player, standing rows, then flat stacks, then a heap over the side rails at

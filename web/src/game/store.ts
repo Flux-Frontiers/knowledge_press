@@ -132,6 +132,12 @@ export type GameStore = {
   plaque: PlaqueText | null;
   /** The book open in the reader (Reader.tsx), by slug. */
   readingSlug: string | null;
+  /** The list of saved moots (MootOverlay.tsx) is open. */
+  mootsOpen: boolean;
+  /** The moot playing in the moot overlay, by id. */
+  mootId: string | null;
+  /** The tree speaking in the moot, by slug, and its moot color: Trees.tsx rings it. */
+  mootSpeaker: { slug: string; color: string } | null;
   /** Hide the HUD's buttons, cards and search, leaving the map and the driving controls. */
   cleanView: boolean;
   /** `?shot=`: a fixed camera on one tree, with no game on screen (portrait.ts). */
@@ -177,6 +183,9 @@ export type GameStore = {
   openCatalog: (genre: string | null) => void;
   openPlaque: (plaque: PlaqueText | null) => void;
   openReader: (slug: string | null) => void;
+  openMoots: (open: boolean) => void;
+  playMoot: (id: string | null) => void;
+  setMootSpeaker: (speaker: { slug: string; color: string } | null) => void;
   setTravelMode: (m: TravelMode) => void;
   setTourStop: (genre: string | null) => void;
   setTourNote: (note: string | null) => void;
@@ -265,6 +274,9 @@ export const useGame = create<GameStore>((set, get) => ({
   catalogGenre: null,
   plaque: null,
   readingSlug: null,
+  mootsOpen: false,
+  mootId: null,
+  mootSpeaker: null,
   cleanView: false,
   portrait: null,
   setPortrait: (portrait) => set({ portrait }),
@@ -280,6 +292,7 @@ export const useGame = create<GameStore>((set, get) => ({
     set({
       playing: false, paused: false, travelMode: "free", tourStop: null, tourNote: null,
       libraryOpen: false, atlasOpen: false, catalogOpen: false, helpOpen: false, plaque: null, readingSlug: null,
+      mootsOpen: false, mootId: null, mootSpeaker: null,
       jump: null, flight: null, query: "", searchPick: null, pinnedSlug: null, cardSlug: null, nearbySlug: null,
       selectedGrove: null, toast: null, cleanView: false,
     });
@@ -354,6 +367,9 @@ export const useGame = create<GameStore>((set, get) => ({
   setCatalogOpen: (catalogOpen) => set({ catalogOpen }),
   openPlaque: (plaque) => set(plaque ? { plaque, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { plaque: null }),
   openReader: (readingSlug) => set(readingSlug ? { readingSlug, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { readingSlug: null }),
+  openMoots: (mootsOpen) => set(mootsOpen ? { mootsOpen, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { mootsOpen }),
+  playMoot: (mootId) => set(mootId ? { mootId, mootsOpen: false } : { mootId: null, mootSpeaker: null }),
+  setMootSpeaker: (mootSpeaker) => set({ mootSpeaker }),
   // Leaving the ring drops the grove it was pointing at, so the lantern trail goes with it.
   setTravelMode: (travelMode) =>
     set(travelMode === "free" && get().travelMode === "circuit" ? { travelMode, selectedGrove: null } : { travelMode }),

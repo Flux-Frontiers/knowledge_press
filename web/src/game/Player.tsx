@@ -144,7 +144,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const dt = Math.min(delta, 0.1);
     const game = useGame.getState();
     const { preferences, jump } = game;
-    const blocked = !playing || paused || game.helpOpen || game.libraryOpen || game.atlasOpen || game.catalogOpen || Boolean(game.plaque) || Boolean(game.readingSlug) || Boolean(document.activeElement?.matches("input, textarea, select, [contenteditable=true]"));
+    const blocked = !playing || paused || game.helpOpen || game.libraryOpen || game.atlasOpen || game.catalogOpen || Boolean(game.plaque) || Boolean(game.readingSlug) || game.mootsOpen || Boolean(game.mootId) || Boolean(document.activeElement?.matches("input, textarea, select, [contenteditable=true]"));
     if (blocked) {
       sim.speed = sim.lat = sim.steering = 0;
       if (!wasBlocked.current) resetInput();
@@ -169,7 +169,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
 
     if (blocked) {
       // Still keep camera on the cart while paused; a pause or a panel ends the narration.
-      if (speaking()) hush();
+      // A playing moot speaks for itself (MootOverlay.tsx), so it is left alone.
+      if (speaking() && !game.mootId) hush();
     } else {
       const a = sampleActions();
       let throttle = a.throttle;

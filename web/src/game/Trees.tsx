@@ -98,6 +98,8 @@ export function Trees({
 
   // A tree portrait (portrait.ts) shows one tree and nothing else of the forest.
   const only = useGame((s) => s.portrait?.tree ?? null);
+  // The tree speaking in a moot (MootOverlay.tsx) gets a ring in its moot color.
+  const mootSpeaker = useGame((s) => s.mootSpeaker);
 
   const bark = useMemo(() => forest.chunks.map(({ bark: b }) => {
     const g = new BufferGeometry();
@@ -217,16 +219,18 @@ export function Trees({
     forest.trees.forEach((t, i) => {
       dummy.position.set(t.x, 0.05, t.z);
       dummy.rotation.set(-Math.PI / 2, 0, 0);
-      const on = match && only === null ? match.has(i) : false;
-      dummy.scale.set(on ? t.trunkRadius * 4.2 : 0.0001, on ? t.trunkRadius * 4.2 : 0.0001, 1);
+      const speaking = only === null && t.book.slug === mootSpeaker?.slug;
+      const on = speaking || (match && only === null ? match.has(i) : false);
+      const r = t.trunkRadius * (speaking ? 7 : 4.2);
+      dummy.scale.set(on ? r : 0.0001, on ? r : 0.0001, 1);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
-      color.set(t.color);
+      color.set(speaking ? mootSpeaker.color : t.color);
       mesh.setColorAt(i, color);
     });
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [forest, match, only]);
+  }, [forest, match, only, mootSpeaker]);
 
   return (
     <group>
