@@ -77,6 +77,7 @@ A rank for how much of the forest you have pressed, and a way to start over.
 | Random weather: morning fog that builds and burns off, mist to pea soup, gray sky, dimmed sun and stars (setting, off by default; `?weather=` pins it) | `weather.ts`, `World.tsx`, `Environment.tsx`, `PauseOverlay.tsx` |
 | Tour welcome, background, end-of-ring and farewell lines, editable as variables | `tourScript.ts`, `Player.tsx`, `HUD.tsx` |
 | Night floodlights on the redwood and exhibits | `Uplights.tsx` |
+| Moots: saved conversations between two books (`gutenkg export-web-moots`), played as speech bubbles in two voices, the speaking tree ringed in the forest | `moots.ts`, `MootOverlay.tsx`, `speech.ts`, `Trees.tsx` |
 | Lantern query over titles, tags, excerpts | `HUD.tsx`, `Trees.tsx` |
 | Browse panel (groves, every book, the press), minimap jump, home return, phone menu | `HUD.tsx` |
 | Corpus redwood at the hub, with its own ridged bark; book list popup (B), start at home | `corpusTree.ts`, `CorpusRedwood.tsx`, `HUD.tsx` |

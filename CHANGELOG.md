@@ -13,6 +13,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Moots: books that talk to each other.** In the Forest, a new Moots button
+  (and a Moots item in the phone menu) lists saved moots: two books holding a
+  conversation on a topic, each speaking only from its own text, written by
+  gutenberg_kg's `gutenkg converse` and exported with
+  `gutenkg export-web-moots` into `web/public/moots/`. Playing one opens an
+  overlay styled like the Reader. Each turn is a speech bubble, the first
+  book on the left in green and the second on the right in pink, with each
+  book's name in its color, quotes in bold, citation tags dimmed and the
+  cited passages underneath. The speaking tree is ringed in its color in the
+  world. Lines are read aloud, a British male voice per book where the
+  system has one (two voices when it has two, otherwise one at two pitches),
+  more slowly than grove narration, and the next turn follows when a line
+  ends. Nothing needs setting up: Settings gains "Read moots aloud" (on by
+  default; the player's speaker button flips it, and off, turns advance at
+  reading pace) and two optional voice choices, each "Automatic" until a
+  listener picks one of the browser's English voices. A line that arrives
+  before the browser has listed its voices waits for them instead of using
+  the default voice.
 - **The cart carries the press.** In the Forest, each book you press now rides
   in the lantern cart's bed, in its grove's color: an empty cart for a new
   player, standing rows, then flat stacks, then a heap over the side rails at

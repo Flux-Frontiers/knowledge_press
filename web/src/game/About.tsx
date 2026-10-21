@@ -25,7 +25,7 @@ const TOUCH: [string, string][] = [
   ["Drag anywhere else", "look around; the view eases back to ahead when you let go"],
   ["Read", "the nearest tree, once you are close"],
   ["Guided tour", "the cart drives the ring and stops at each grove"],
-  ["Three-dot menu", "time of day, silent mode, screenshot, settings, this page"],
+  ["Three-dot menu", "time of day, silent mode, screenshot, moots, settings, this page"],
 ];
 
 /**

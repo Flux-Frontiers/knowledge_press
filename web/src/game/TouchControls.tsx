@@ -8,7 +8,7 @@ export function TouchControls() {
   const nearbySlug = useGame((s) => s.nearbySlug);
   const pressed = useGame((s) => (s.nearbySlug ? s.library.includes(s.nearbySlug) : false));
   const nearbyDist = useGame((s) => s.nearbyDist);
-  const blocked = useGame((s) => s.paused || s.libraryOpen || s.atlasOpen || s.catalogOpen);
+  const blocked = useGame((s) => s.paused || s.libraryOpen || s.atlasOpen || s.catalogOpen || s.mootsOpen || Boolean(s.mootId));
   const toggleCircuit = useGame((s) => s.toggleCircuit);
   const travelMode = useGame((s) => s.travelMode);
 
