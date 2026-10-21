@@ -89,44 +89,6 @@ test("spoken text drops the citation tags", () => {
   assert.equal(spokenText("I confess [s1]. Yet [o3, s2] I find none (s5)."), "I confess. Yet I find none.");
 });
 
-test("two speakers get British male voices, never a female or old UK voice", () => {
-  const { voicePair } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
-  const v = (name, lang, isDefault = false) => ({ name, lang, default: isDefault, localService: true });
-  const daniel = v("Daniel", "en-GB");
-  const samantha = v("Samantha (English (US))", "en-US", true);
-  const reedUs = v("Reed (English (US))", "en-US");
-  const reedUk = v("Reed (English (UK))", "en-GB");
-  // This Mac's list: Samantha twice, novelty voices, Reed in both locales.
-  const mac = [v("Albert", "en-US"), v("Bubbles", "en-US"), v("Amelie", "fr-CA"),
-    samantha, v("Samantha (English (US))", "en-US"), reedUs, reedUk, daniel];
-  assert.deepEqual(voicePair(mac), [daniel, daniel]); // never Samantha, never Reed
-  const arthur = v("Arthur", "en-GB");
-  assert.deepEqual(voicePair([...mac, arthur]), [daniel, arthur]); // a second good voice
-  // This Mac after downloads: Enhanced copies win over the plain ones.
-  const danielUk = v("Daniel (English (UK))", "en-GB");
-  const danielPlus = v("Daniel (Enhanced)", "en-GB");
-  const arthurPlus = v("Arthur (Enhanced)", "en-GB");
-  const jamiePlus = v("Jamie (Enhanced)", "en-GB");
-  const downloaded = [arthur, arthurPlus, danielUk, v("Daniel (English (UK))", "en-GB"), danielPlus, jamiePlus, samantha];
-  assert.deepEqual(voicePair(downloaded), [danielPlus, arthurPlus]);
-  assert.deepEqual(voicePair([danielUk, jamiePlus, samantha]), [danielUk, jamiePlus]);
-  // Edge's British voices.
-  const ryan = v("Microsoft Ryan Online (Natural) - English (United Kingdom)", "en-GB");
-  const thomas = v("Microsoft Thomas Online (Natural) - English (United Kingdom)", "en-GB");
-  assert.deepEqual(voicePair([v("Microsoft Aria Online (Natural) - English (United States)", "en-US"), thomas, ryan]), [ryan, thomas]);
-});
-
-test("with one male voice both speakers share it; with none, the usual voice", () => {
-  const { voicePair } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
-  const v = (name, lang, isDefault = false) => ({ name, lang, default: isDefault, localService: true });
-  const ukMale = v("Google UK English Male", "en-GB");
-  const us = v("Google US English", "en-US", true);
-  assert.deepEqual(voicePair([us, ukMale]), [ukMale, ukMale]); // never the female voice
-  const kim = v("Kim (English (US))", "en-US", true);
-  assert.deepEqual(voicePair([kim, v("Zarvox", "en-US")]), [kim, kim]);
-  assert.deepEqual(voicePair([v("Amelie", "fr-CA")]), [undefined, undefined]);
-});
-
 test("a silent turn stays for its reading time, never under four seconds", () => {
   const { readingMs } = moots();
   assert.equal(readingMs("Short [s1]."), 4000);
@@ -152,20 +114,6 @@ test("the exported moots decode and their trees stand in the catalog", async () 
   }
 });
 
-test("a voice chosen in Settings wins for its speaker when the browser has it", () => {
-  const { voicePair } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
-  const v = (name, lang, isDefault = false) => ({ name, lang, default: isDefault, localService: true });
-  const daniel = v("Daniel", "en-GB");
-  const arthur = v("Arthur", "en-GB");
-  const samantha = v("Samantha", "en-US", true);
-  const all = [samantha, daniel, arthur];
-  assert.deepEqual(voicePair(all), [daniel, arthur]); // automatic
-  assert.deepEqual(voicePair(all, ["Samantha", ""]), [samantha, arthur]);
-  assert.deepEqual(voicePair(all, ["Arthur", ""]), [arthur, daniel]); // the automatic second avoids the first's
-  assert.deepEqual(voicePair(all, ["", "Daniel"]), [daniel, daniel]);
-  assert.deepEqual(voicePair(all, ["Gone Voice", "Also Gone"]), [daniel, arthur]); // not here: automatic
-});
-
 test("the moot voice setting keeps two names and resets anything else", () => {
   const { readPreferences } = require(`${process.env.FOREST_TEST_BUILD}/preferences.js`);
   assert.deepEqual(readPreferences().mootVoices, ["", ""]);
@@ -175,21 +123,85 @@ test("the moot voice setting keeps two names and resets anything else", () => {
   assert.deepEqual(readPreferences({ mootVoices: [1, 2] }).mootVoices, ["", ""]);
 });
 
-test("Chrome's own British voice beats a download it lists but may not have", () => {
-  const { voicePair } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
-  const v = (name, lang, local = true) => ({ name, lang, default: false, localService: local });
-  const daniel = v("Daniel (English (UK))", "en-GB");
-  const arthur = v("Arthur", "en-GB"); // listed by Chrome, maybe never downloaded
-  const ukMale = v("Google UK English Male", "en-GB", false);
-  assert.deepEqual(voicePair([arthur, daniel, ukMale]), [daniel, ukMale]); // Chrome
-  assert.deepEqual(voicePair([arthur, daniel]), [daniel, arthur]); // Safari: only installed voices
+// ---------------------------------------------------------------------------
+// Voices that match each book's author: gender first, then accent
+// ---------------------------------------------------------------------------
+
+const voice = (name, lang, isDefault = false, local = true) => ({ name, lang, default: isDefault, localService: local });
+const want = (gender, accent) => ({ gender, accent });
+const pair = (...args) => require(`${process.env.FOREST_TEST_BUILD}/speech.js`).voicePair(...args);
+// Safari's whole English list: what macOS and iOS ship.
+const safari = () => {
+  const [daniel, karen, moira, rishi, samantha, tessa] = [voice("Daniel", "en-GB"), voice("Karen", "en-AU"),
+    voice("Moira", "en-IE"), voice("Rishi", "en-IN"), voice("Samantha", "en-US", true), voice("Tessa", "en-ZA")];
+  return { all: [daniel, karen, moira, rishi, samantha, tessa], daniel, karen, moira, rishi, samantha, tessa };
+};
+const auto = ["", ""];
+
+test("Safari: men get Daniel, women a woman's voice, never Rishi", () => {
+  const { all, daniel, moira, samantha } = safari();
+  // Pepys and Nietzsche: both men, so Daniel twice (the second deeper).
+  assert.deepEqual(pair(all, auto, [want("male", "en-GB"), want("male", null)]), [daniel, daniel]);
+  // Twain has no American man in Safari: Daniel, not Rishi.
+  assert.deepEqual(pair(all, auto, [want("male", "en-US"), want("male", null)]), [daniel, daniel]);
+  // Austen: Moira, the nearest British accent among the women; Twain: Daniel.
+  assert.deepEqual(pair(all, auto, [want("female", "en-GB"), want("male", "en-US")]), [moira, daniel]);
+  // Two American women: Samantha, then another woman rather than Samantha again.
+  const [first, second] = pair(all, auto, [want("female", "en-US"), want("female", "en-US")]);
+  assert.equal(first, samantha);
+  assert.ok(["Moira", "Karen", "Tessa"].includes(second.name));
 });
 
-test("Safari's six voices give Daniel twice, the second tree deeper, never Rishi", () => {
-  const { voicePair } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
-  const v = (name, lang, isDefault = false) => ({ name, lang, default: isDefault, localService: true });
-  const daniel = v("Daniel", "en-GB");
-  const safari = [daniel, v("Karen", "en-AU"), v("Moira", "en-IE"), v("Rishi", "en-IN"),
-    v("Samantha", "en-US", true), v("Tessa", "en-ZA")];
-  assert.deepEqual(voicePair(safari), [daniel, daniel]);
+test("Chrome: its own voices before downloads it lists but may not have", () => {
+  const daniel = voice("Daniel (English (UK))", "en-GB");
+  const arthur = voice("Arthur", "en-GB"); // listed, maybe never downloaded
+  const ukMale = voice("Google UK English Male", "en-GB", false, false);
+  const us = voice("Google US English", "en-US", false, false);
+  const ukFemale = voice("Google UK English Female", "en-GB", false, false);
+  const samantha = voice("Samantha (English (US))", "en-US", true);
+  const chrome = [arthur, daniel, ukMale, us, ukFemale, samantha];
+  assert.deepEqual(pair(chrome, auto, [want("male", "en-GB"), want("male", null)]), [daniel, ukMale]);
+  assert.deepEqual(pair(chrome, auto, [want("female", "en-GB"), want("male", "en-US")]), [ukFemale, daniel]);
+});
+
+test("Edge: an American man for Twain", () => {
+  const guy = voice("Microsoft Guy Online (Natural) - English (United States)", "en-US", false, false);
+  const ryan = voice("Microsoft Ryan Online (Natural) - English (United Kingdom)", "en-GB", false, false);
+  const aria = voice("Microsoft Aria Online (Natural) - English (United States)", "en-US", true, false);
+  assert.deepEqual(pair([aria, ryan, guy], auto, [want("male", "en-US"), want("male", "en-GB")]), [guy, ryan]);
+});
+
+test("downloads count once installed: an Enhanced copy wins among them", () => {
+  const { all } = safari();
+  const arthur = voice("Arthur", "en-GB");
+  const arthurPlus = voice("Arthur (Enhanced)", "en-GB");
+  const jamiePlus = voice("Jamie (Enhanced)", "en-GB");
+  const [first, second] = pair([...all, arthur, arthurPlus, jamiePlus], auto, [want("male", "en-GB"), want("male", null)]);
+  assert.equal(first.name, "Daniel");
+  assert.equal(second, arthurPlus);
+});
+
+test("an author of unknown gender gets the system's default voice", () => {
+  const { all, samantha } = safari();
+  assert.equal(pair(all, auto, [want(null, null), want("male", "en-GB")])[0], samantha);
+});
+
+test("a voice chosen in Settings wins for its speaker when the browser has it", () => {
+  const { all, daniel, moira, samantha } = safari();
+  const men = [want("male", "en-GB"), want("male", null)];
+  assert.deepEqual(pair(all, ["Samantha", ""], men), [samantha, daniel]);
+  assert.deepEqual(pair(all, ["", "Moira"], men), [daniel, moira]);
+  assert.deepEqual(pair(all, ["Gone Voice", "Also Gone"], men), [daniel, daniel]); // not here: automatic
+});
+
+test("a tree's voice decodes from the pack, anything unknown as null", () => {
+  const { decodeMoot } = moots();
+  const p = pack();
+  p.trees[0].voice = { gender: "male", accent: "en-GB" };
+  p.trees[1].voice = { gender: "robot", accent: 7 };
+  const m = decodeMoot(p);
+  assert.deepEqual(m.trees[0].voice, { gender: "male", accent: "en-GB" });
+  assert.deepEqual(m.trees[1].voice, { gender: null, accent: null });
+  delete p.trees[0].voice; // a pack written before voices
+  assert.deepEqual(decodeMoot(p).trees[0].voice, { gender: null, accent: null });
 });

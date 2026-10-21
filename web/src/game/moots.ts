@@ -6,6 +6,7 @@
  */
 
 import type { Book } from "./catalogTypes";
+import type { VoiceWant } from "./speech";
 
 export const MOOT_VERSION = 1;
 
@@ -13,7 +14,8 @@ export const MOOT_VERSION = 1;
 export const MOOT_COLORS = ["#9fd38a", "#e39ad9"] as const;
 
 export type MootEntry = { id: string; title: string; topic: string | null; trees: string[]; turns: number; date: string };
-export type MootTree = { key: string; title: string; author: string };
+/** `voice` is the author's gender and accent; both null when the pack does not say. */
+export type MootTree = { key: string; title: string; author: string; voice: VoiceWant };
 export type MootCite = { tag: string; label: string; node_id: string };
 export type MootTurn = { turn: number; speaker: 0 | 1; text: string; cites: MootCite[]; grounded: boolean };
 export type Moot = {
@@ -66,7 +68,17 @@ export function decodeMoot(data: unknown): Moot {
       throw new MootError("moot pack has a malformed turn");
     }
   }
-  return { ...m, turns: [...m.turns].sort((a, b) => a.turn - b.turn) } as Moot;
+  const trees = m.trees.map((t) => ({ ...t, voice: voiceOf((t as { voice?: unknown }).voice) }));
+  return { ...m, trees, turns: [...m.turns].sort((a, b) => a.turn - b.turn) } as Moot;
+}
+
+/** A tree's voice from its pack, anything unknown or malformed read as null. */
+function voiceOf(raw: unknown): VoiceWant {
+  const v = raw as { gender?: unknown; accent?: unknown } | null | undefined;
+  return {
+    gender: v?.gender === "male" || v?.gender === "female" ? v.gender : null,
+    accent: isString(v?.accent) && v.accent ? v.accent : null,
+  };
 }
 
 /**

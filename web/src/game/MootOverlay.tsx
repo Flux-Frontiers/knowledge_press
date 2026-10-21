@@ -175,7 +175,9 @@ function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; o
     // from following hush() in the same instant.
     let poll = 0;
     const start = window.setTimeout(() => {
-      speak(spokenText(current.text), false, current.speaker, advance, mootVoices);
+      speak(spokenText(current.text), false, {
+        speaker: current.speaker, onEnd: advance, chosen: mootVoices, wants: [moot.trees[0].voice, moot.trees[1].voice],
+      });
       // Safari can drop the end event; trust the engine as well.
       poll = window.setInterval(() => { if (!speaking()) advance(); }, 500);
     }, SPEAK_DELAY_MS);
@@ -185,7 +187,7 @@ function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; o
       window.clearInterval(poll);
       hush();
     };
-  }, [current, shown, total, playing, muted, mootVoices]);
+  }, [current, shown, total, playing, muted, mootVoices, moot]);
 
   // Ring the speaking tree in the forest.
   useEffect(() => {

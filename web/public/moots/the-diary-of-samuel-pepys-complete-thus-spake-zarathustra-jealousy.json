@@ -9,12 +9,20 @@
   {
    "key": "diaries/The Diary of Samuel Pepys — Complete",
    "title": "The Diary of Samuel Pepys — Complete",
-   "author": "Samuel Pepys"
+   "author": "Samuel Pepys",
+   "voice": {
+    "gender": "male",
+    "accent": "en-GB"
+   }
   },
   {
    "key": "philosophy/Thus Spake Zarathustra",
    "title": "Thus Spake Zarathustra",
-   "author": "Friedrich Wilhelm Nietzsche"
+   "author": "Friedrich Wilhelm Nietzsche",
+   "voice": {
+    "gender": "male",
+    "accent": null
+   }
   }
  ],
  "turns": [

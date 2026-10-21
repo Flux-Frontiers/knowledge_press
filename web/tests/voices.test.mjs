@@ -32,7 +32,7 @@ const tick = (ms) => new Promise((r) => setTimeout(r, ms));
 // waiting cases run before any test lists voices.
 test("hush cancels a line still waiting for voices", async () => {
   const { speak, hush, speaking } = speech();
-  speak("never said", false, 0);
+  speak("never said", false, { speaker: 0 });
   hush();
   assert.equal(speaking(), false);
   await tick(1100); // past VOICE_WAIT_MS: the overtaken line must stay unsaid
@@ -41,7 +41,9 @@ test("hush cancels a line still waiting for voices", async () => {
 
 test("a moot line waits for the voice list instead of speaking with the default voice", async () => {
   const { speak, speaking } = speech();
-  speak("Thus Spake Zarathustra, I confess", false, 1);
+  speak("Thus Spake Zarathustra, I confess", false, {
+    speaker: 1, wants: [{ gender: "male", accent: "en-GB" }, { gender: "male", accent: null }],
+  });
   assert.equal(engine.spoken.length, 0); // nothing yet: no voices
   assert.equal(speaking(), true); // so the player does not skip the turn
   engine.listVoices([daniel, arthur]);
