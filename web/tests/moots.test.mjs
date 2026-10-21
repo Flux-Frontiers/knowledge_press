@@ -174,3 +174,22 @@ test("the moot voice setting keeps two names and resets anything else", () => {
   assert.deepEqual(readPreferences({ mootVoices: "Daniel" }).mootVoices, ["", ""]);
   assert.deepEqual(readPreferences({ mootVoices: [1, 2] }).mootVoices, ["", ""]);
 });
+
+test("Chrome's own British voice beats a download it lists but may not have", () => {
+  const { voicePair } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
+  const v = (name, lang, local = true) => ({ name, lang, default: false, localService: local });
+  const daniel = v("Daniel (English (UK))", "en-GB");
+  const arthur = v("Arthur", "en-GB"); // listed by Chrome, maybe never downloaded
+  const ukMale = v("Google UK English Male", "en-GB", false);
+  assert.deepEqual(voicePair([arthur, daniel, ukMale]), [daniel, ukMale]); // Chrome
+  assert.deepEqual(voicePair([arthur, daniel]), [daniel, arthur]); // Safari: only installed voices
+});
+
+test("Safari's six voices give Daniel twice, the second tree deeper, never Rishi", () => {
+  const { voicePair } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
+  const v = (name, lang, isDefault = false) => ({ name, lang, default: isDefault, localService: true });
+  const daniel = v("Daniel", "en-GB");
+  const safari = [daniel, v("Karen", "en-AU"), v("Moira", "en-IE"), v("Rishi", "en-IN"),
+    v("Samantha", "en-US", true), v("Tessa", "en-ZA")];
+  assert.deepEqual(voicePair(safari), [daniel, daniel]);
+});

@@ -25,15 +25,17 @@ const NOVELTY = new Set([
 
 /**
  * British male voices to try for each moot speaker, best first (macOS and iOS,
- * Edge, Chrome). The second list holds only good voices other than the
- * first's: macOS's older UK voices (Reed, Rocko, Eddy) are listed by the
- * system but not offered to the browser, which then speaks with its default,
- * often a female voice. Without a second voice both trees share the first,
- * told apart by pitch.
+ * Edge, Chrome). A voice that is listed but cannot speak makes the browser
+ * use its default, often a female voice, so each list puts voices that
+ * always work first: Daniel ships with macOS and iOS, and Chrome's Google and
+ * Edge's Microsoft voices come with the browser. Arthur, Jamie and Oliver are
+ * optional macOS downloads, which Chrome lists whether or not they are
+ * installed (Safari lists only installed voices), so they come after. Without
+ * a second voice both trees share the first, told apart by pitch.
  */
 const PREFERRED: readonly [readonly string[], readonly string[]] = [
-  ["Daniel", "Google UK English Male", "Microsoft Ryan", "Arthur", "Jamie", "Oliver", "Microsoft George"],
-  ["Arthur", "Jamie", "Oliver", "Microsoft Thomas", "Microsoft George", "Microsoft Ryan"],
+  ["Daniel", "Google UK English Male", "Microsoft Ryan", "Microsoft George", "Arthur", "Jamie", "Oliver"],
+  ["Google UK English Male", "Microsoft Thomas", "Microsoft George", "Microsoft Ryan", "Arthur", "Jamie", "Oliver"],
 ];
 
 /** Pitch for each speaker when both share one voice: the second tree speaks deeper. */
