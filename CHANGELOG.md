@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A Moots page in the Forest guide.** `docs/forest/moots.md` covers opening
+  and playing a moot, its controls, reading aloud and the author voices, what
+  each browser offers, and where moots come from. Settings lists "Read moots
+  aloud" and the two voice choices, and `web/README.md` mentions moots and
+  lists `moots.ts` and `MootOverlay.tsx`.
 - **A second moot: *Meditations* and *The Prince* on virtue.** Marcus
   Aurelius and Machiavelli, eight turns, each book in its author's voice,
   argued with fresh passages each turn and a shaped ending (gutenberg_kg's

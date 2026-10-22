@@ -3,7 +3,9 @@
 Web port of the GutenbergKG forest: 253 public-domain books grown as trees
 (space colonization + pipe model + genre tropism), each genre a tree species,
 laid out as a hub-and-spoke wheel of genre groves around a redwood for the
-whole corpus. You drive a lantern cart through them.
+whole corpus. You drive a lantern cart through them, and can play moots:
+two books talking about a topic, each from its own text
+([guide](https://flux-frontiers.github.io/knowledge_press/docs/forest/moots/)).
 
 This directory is additive — it does not replace the PyVista / Qt viewer.
 
@@ -144,7 +146,8 @@ forestWorker.ts  grows the forest off the main thread
 roads.ts       brick road ribbons and plazas
 tour.ts        the guided tour: pure pursuit along the roads, a stop at each grove
 narration.ts   each grove's tour caption, generated from the catalog
-speech.ts      reads the caption aloud with the browser's speech synthesis
+speech.ts      reads captions and moots aloud with the browser's speech synthesis
+moots.ts, MootOverlay.tsx   saved moots from public/moots/: the list, the player, author voices
 corpusTree.ts  the hub redwood: one limb per book, pipe-model trunk, needle sprays
 exhibits.ts    roadside glades for set pieces
 CorpusRedwood.tsx, Mysterium.tsx   the redwood and the Kepler exhibit
