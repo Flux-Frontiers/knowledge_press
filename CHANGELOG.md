@@ -16,7 +16,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **App runbook: the worker is local-only by default.** gutenberg_kg's
   worker now answers only its own Mac; "iPhone cannot reach the worker"
   says to set `WORKER_BIND=0.0.0.0` for the phone, and why a
-  `HANDLER_SECRET` would lock out a phone installed normally.
+  `HANDLER_SECRET` would lock out a phone installed normally. The app
+  guide's Settings page says the same under Worker.
 
 ### Added
 

@@ -66,7 +66,9 @@ appears when you are on the on-device engine.
 The address of a server you run. Type it and tap **Test**. The app reports the
 number of books and genres it found, or why it could not reach it. On an
 iPhone or iPad, `localhost` means the device itself, so use your Mac's name or
-address instead. See [Answer engines](engines.md#worker).
+address instead. A GutenbergKG worker answers only its own Mac unless it is
+started with `WORKER_BIND=0.0.0.0` in its `docker/.env`; anyone on your
+network can use it then. See [Answer engines](engines.md#worker).
 
 ## Help and About
 
