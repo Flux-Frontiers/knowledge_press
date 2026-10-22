@@ -13,6 +13,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Hold a live moot in the Forest.** Moots gains "Hold a new moot": pick two
+  books and a topic, and a local GutenbergKG worker (its new `moot_start`,
+  `moot_turn` and `moot_stop` ops) makes each turn while you watch. The
+  player shows the next book "thinking" and rings its tree, plays each turn
+  as it lands, and asks for the next as soon as one arrives, so the worker
+  makes it while the current one is read. Closing the moot ends it on the
+  worker; a failed turn can be tried again. Settings gains a "Live moots"
+  section for the worker's address (`http://localhost:8000` by default) and
+  an optional token. Works from the dev server in Chrome and Safari, and
+  from the published forest in Chrome once local network access is allowed.
 - **A Moots page in the Forest guide.** `docs/forest/moots.md` covers opening
   and playing a moot, its controls, reading aloud and the author voices, what
   each browser offers, and where moots come from. Settings lists "Read moots

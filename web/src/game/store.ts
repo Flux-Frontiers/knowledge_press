@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { TimeOfDay } from "./daylight";
 import { effectiveTime, moonPhaseName, nextSunEvent, skyState, timeZonePlace, type Place, type SkyState, type TimeMode } from "./sky";
 import { seasonFor, type SeasonName } from "./seasons";
+import type { LiveRequest } from "./liveMoots";
 import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
 import { clearTourHeard } from "./tourScript";
@@ -134,8 +135,10 @@ export type GameStore = {
   readingSlug: string | null;
   /** The list of saved moots (MootOverlay.tsx) is open. */
   mootsOpen: boolean;
-  /** The moot playing in the moot overlay, by id. */
+  /** The moot playing in the moot overlay, by id; a live moot's is "live-<n>". */
   mootId: string | null;
+  /** The live moot a worker is holding (liveMoots.ts), while mootId is its "live-<n>". */
+  liveMoot: LiveRequest | null;
   /** The tree speaking in the moot, by slug, and its moot color: Trees.tsx rings it. */
   mootSpeaker: { slug: string; color: string } | null;
   /** Hide the HUD's buttons, cards and search, leaving the map and the driving controls. */
@@ -185,6 +188,8 @@ export type GameStore = {
   openReader: (slug: string | null) => void;
   openMoots: (open: boolean) => void;
   playMoot: (id: string | null) => void;
+  /** Open the moot player on a new live moot. */
+  holdMoot: (request: LiveRequest) => void;
   setMootSpeaker: (speaker: { slug: string; color: string } | null) => void;
   setTravelMode: (m: TravelMode) => void;
   setTourStop: (genre: string | null) => void;
@@ -202,6 +207,8 @@ export type GameStore = {
 };
 
 const initial = loadSave();
+/** Numbers each live moot, so the player starts fresh for every one. */
+let liveMoots = 0;
 
 /**
  * Each visit opens on the real season for the date and place, with the clock
@@ -276,6 +283,7 @@ export const useGame = create<GameStore>((set, get) => ({
   readingSlug: null,
   mootsOpen: false,
   mootId: null,
+  liveMoot: null,
   mootSpeaker: null,
   cleanView: false,
   portrait: null,
@@ -292,7 +300,7 @@ export const useGame = create<GameStore>((set, get) => ({
     set({
       playing: false, paused: false, travelMode: "free", tourStop: null, tourNote: null,
       libraryOpen: false, atlasOpen: false, catalogOpen: false, helpOpen: false, plaque: null, readingSlug: null,
-      mootsOpen: false, mootId: null, mootSpeaker: null,
+      mootsOpen: false, mootId: null, liveMoot: null, mootSpeaker: null,
       jump: null, flight: null, query: "", searchPick: null, pinnedSlug: null, cardSlug: null, nearbySlug: null,
       selectedGrove: null, toast: null, cleanView: false,
     });
@@ -368,7 +376,8 @@ export const useGame = create<GameStore>((set, get) => ({
   openPlaque: (plaque) => set(plaque ? { plaque, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { plaque: null }),
   openReader: (readingSlug) => set(readingSlug ? { readingSlug, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { readingSlug: null }),
   openMoots: (mootsOpen) => set(mootsOpen ? { mootsOpen, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { mootsOpen }),
-  playMoot: (mootId) => set(mootId ? { mootId, mootsOpen: false } : { mootId: null, mootSpeaker: null }),
+  playMoot: (mootId) => set(mootId ? { mootId, liveMoot: null, mootsOpen: false } : { mootId: null, liveMoot: null, mootSpeaker: null }),
+  holdMoot: (liveMoot) => set({ liveMoot, mootId: `live-${++liveMoots}`, mootsOpen: false }),
   setMootSpeaker: (mootSpeaker) => set({ mootSpeaker }),
   // Leaving the ring drops the grove it was pointing at, so the lantern trail goes with it.
   setTravelMode: (travelMode) =>

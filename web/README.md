@@ -148,6 +148,7 @@ tour.ts        the guided tour: pure pursuit along the roads, a stop at each gro
 narration.ts   each grove's tour caption, generated from the catalog
 speech.ts      reads captions and moots aloud with the browser's speech synthesis
 moots.ts, MootOverlay.tsx   saved moots from public/moots/: the list, the player, author voices
+liveMoots.ts   live moots held by a local GutenbergKG worker, one turn per request
 corpusTree.ts  the hub redwood: one limb per book, pipe-model trunk, needle sprays
 exhibits.ts    roadside glades for set pieces
 CorpusRedwood.tsx, Mysterium.tsx   the redwood and the Kepler exhibit

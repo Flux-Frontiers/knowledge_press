@@ -2,6 +2,8 @@ import { ChevronRight, Pause, Play, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BOOKS } from "./catalog";
 import type { Forest } from "./forest";
+import type { Book } from "./catalogTypes";
+import { LIVE_TURNS, nextLiveTurn, startLiveMoot, stepAfter, stopLiveMoot, type LiveRequest, type WorkerSettings } from "./liveMoots";
 import { getMoot, getMootIndex, markText, MOOT_COLORS, mootBooks, readingMs, spokenText, type Moot, type MootEntry, type MootTurn } from "./moots";
 import { canSpeak, hush, speak, speaking, unlockSpeech } from "./speech";
 import { useGame } from "./store";
@@ -10,6 +12,8 @@ type Load<T> = { state: "loading" } | { state: "error"; message: string } | { st
 
 /** How long after a turn appears its speech starts; see the playback effect. */
 const SPEAK_DELAY_MS = 120;
+/** How long after the live player opens it asks the worker; see LiveMootPlayer. */
+const START_DELAY_MS = 120;
 
 function useLoad<T>(load: () => Promise<T>, deps: unknown[]): [Load<T>, () => void] {
   const [value, setValue] = useState<Load<T>>({ state: "loading" });
@@ -62,6 +66,7 @@ export function MootList() {
         <CloseButton onClose={close} label="Close the moots" />
       </header>
       <div className="min-h-0 flex-1 overflow-auto p-4 sm:px-6">
+        <HoldMoot />
         {index.state === "error" ? (
           <div className="grid gap-3 text-sm leading-relaxed text-muted">
             <p className="text-fg">The moots could not be fetched: {index.message}.</p>
@@ -83,6 +88,66 @@ export function MootList() {
         )}
       </div>
     </Frame>
+  );
+}
+
+const bookKey = (b: Book) => `${b.genre}/${b.book}`;
+const bookLabel = (b: Book) => `${b.title} - ${b.author}`;
+
+/** Start a live moot: two books, a topic and a length; a worker makes each turn. */
+function HoldMoot() {
+  const [open, setOpen] = useState(false);
+  const [first, setFirst] = useState("");
+  const [second, setSecond] = useState("");
+  const [topic, setTopic] = useState("");
+  const [turns, setTurns] = useState(8);
+  const worker = useGame((s) => s.preferences.mootWorker);
+  const byLabel = useMemo(() => new Map(BOOKS.map((b) => [bookLabel(b), b])), []);
+  const a = byLabel.get(first);
+  const b = byLabel.get(second);
+  const ready = Boolean(a && b && a !== b);
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)}
+        className="mb-4 min-h-11 w-full rounded-lg border border-dashed border-border px-4 text-left text-sm text-fg hover:border-primary">
+        Hold a new moot<span className="block text-xs text-muted">Pick two books and a topic; a GutenbergKG worker makes each turn as you watch.</span>
+      </button>
+    );
+  }
+  return (
+    <form className="mb-5 grid gap-3 rounded-lg border border-border bg-bg/40 p-4 text-sm"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!a || !b || a === b) return;
+        // Speech is only allowed from a tap, and this is one; the turns speak as they arrive.
+        unlockSpeech();
+        useGame.getState().holdMoot({ books: [bookKey(a), bookKey(b)], topic: topic.trim(), turns });
+      }}>
+      <datalist id="moot-books">{BOOKS.map((bk) => <option key={bk.slug} value={bookLabel(bk)} />)}</datalist>
+      <label className="grid gap-1">First book
+        <input list="moot-books" value={first} onChange={(e) => setFirst(e.target.value)} placeholder="Type to search the books"
+          className="rounded-md border border-border bg-bg p-2" style={{ borderColor: a ? MOOT_COLORS[0] : undefined }} />
+      </label>
+      <label className="grid gap-1">Second book
+        <input list="moot-books" value={second} onChange={(e) => setSecond(e.target.value)} placeholder="Type to search the books"
+          className="rounded-md border border-border bg-bg p-2" style={{ borderColor: b ? MOOT_COLORS[1] : undefined }} />
+      </label>
+      <label className="grid gap-1">Topic
+        <input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="virtue, jealousy, the sea..."
+          className="rounded-md border border-border bg-bg p-2" />
+      </label>
+      <label className="flex items-center justify-between gap-4">Turns
+        <select value={turns} onChange={(e) => setTurns(Number(e.target.value))} className="rounded-md border border-border bg-bg p-2">
+          {LIVE_TURNS.map((n) => <option key={n} value={n}>{n}</option>)}
+        </select>
+      </label>
+      {a && b && a === b ? <p className="text-xs text-muted">Pick two different books.</p> : null}
+      <p className="text-xs text-muted">Worker: <code className="text-fg">{worker}</code>. Change it in Settings, under Live moots.</p>
+      <div className="flex gap-2">
+        <button type="submit" disabled={!ready} className="min-h-11 rounded-md bg-primary px-4 text-primary-fg disabled:opacity-50">Start the moot</button>
+        <button type="button" onClick={() => setOpen(false)} className="min-h-11 rounded-md px-4 text-muted">Cancel</button>
+      </div>
+    </form>
   );
 }
 
@@ -131,11 +196,100 @@ export function MootPlayer({ id, forest }: { id: string; forest: Forest }) {
   );
 }
 
-function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; onClose: () => void }) {
+/** A live moot's progress, which MootPlayback waits on when it catches up. */
+type LiveState = { total: number; done: boolean; error: string | null; retry: () => void };
+
+/**
+ * A moot a worker is holding: started on open, each turn asked for as soon as
+ * the last arrives (so the worker makes the next while this one is spoken),
+ * and stopped on the worker when the player closes early.
+ */
+export function LiveMootPlayer({ request, forest }: { request: LiveRequest; forest: Forest }) {
+  const close = () => useGame.getState().playMoot(null);
+  const url = useGame((s) => s.preferences.mootWorker);
+  const token = useGame((s) => s.preferences.mootToken);
+  // The worker this moot started on, kept for the stop on close.
+  const worker = useRef<WorkerSettings>({ url, token });
+  const mootId = useRef<string | null>(null);
+  const [moot, setMoot] = useState<Moot | null>(null);
+  const [total, setTotal] = useState(request.turns);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let live = true;
+    // Start a moment later, and cancel on cleanup: React's dev StrictMode
+    // mounts twice, and each start would hold a moot on the worker.
+    const timer = window.setTimeout(async () => {
+      try {
+        let id = mootId.current;
+        if (!id) {
+          const started = await startLiveMoot(worker.current, request);
+          if (!live) { void stopLiveMoot(worker.current, started.mootId); return; }
+          mootId.current = id = started.mootId;
+          setMoot(started.moot);
+          setTotal(started.total);
+        }
+        for (;;) {
+          const next = await nextLiveTurn(worker.current, id);
+          if (!live) return;
+          setMoot((m) => (m ? { ...m, turns: [...m.turns, next.turn] } : m));
+          if (next.done) {
+            mootId.current = null;
+            setDone(true);
+            return;
+          }
+        }
+      } catch (e: unknown) {
+        if (live) setError(String((e as Error).message ?? e));
+      }
+    }, START_DELAY_MS);
+    return () => {
+      live = false;
+      window.clearTimeout(timer);
+    };
+  }, [attempt, request]);
+
+  // Closing before the end frees the moot on the worker.
+  useEffect(() => () => {
+    if (mootId.current) void stopLiveMoot(worker.current, mootId.current);
+  }, []);
+
+  const retry = () => { setError(null); setAttempt((n) => n + 1); };
+  return (
+    <Frame label="moot-title" onClose={close}>
+      {moot ? <MootPlayback moot={moot} forest={forest} onClose={close} live={{ total, done, error, retry }} /> : (
+        <>
+          <header className="flex items-start gap-3 border-b border-border p-4 sm:px-6">
+            <h2 id="moot-title" className="min-w-0 flex-1 font-display text-2xl leading-tight">A live moot</h2>
+            <CloseButton onClose={close} label="Close the moot" />
+          </header>
+          <div className="grid gap-3 p-4 text-sm leading-relaxed text-muted sm:px-6">
+            {error ? (<>
+              <p className="text-fg">The moot could not start: {error}.</p>
+              <p>
+                It needs a GutenbergKG worker at <code className="text-fg">{worker.current.url}</code> that allows this
+                page. Safari cannot reach a worker on this computer from the published forest; use the forest's dev
+                server, or Chrome. The Moots guide has the setup.
+              </p>
+              <button type="button" onClick={retry}
+                className="min-h-11 justify-self-start rounded-md bg-primary px-4 text-primary-fg">Try again</button>
+            </>) : <p>Asking the worker to seat the two books...</p>}
+          </div>
+        </>
+      )}
+    </Frame>
+  );
+}
+
+function MootPlayback({ moot, forest, onClose, live }: { moot: Moot; forest: Forest; onClose: () => void; live?: LiveState }) {
   const names = [moot.trees[0].title, moot.trees[1].title] as const;
   // The trees standing in this forest, by side; a tree the catalog lacks plays unringed.
-  const slugs = useMemo(() => mootBooks(moot, BOOKS).map((b) =>
-    b && forest.trees.some((t) => t.book.slug === b.slug) ? b.slug : null), [moot, forest]);
+  // Keyed on the trees, which stay the same object as a live moot's turns arrive.
+  const trees = moot.trees;
+  const slugs = useMemo(() => mootBooks({ ...moot, trees }, BOOKS).map((b) =>
+    b && forest.trees.some((t) => t.book.slug === b.slug) ? b.slug : null), [trees, forest]);
   const voiced = canSpeak();
   // "Read moots aloud" in Settings; the speaker button here flips the same setting.
   const speakMoots = useGame((s) => s.preferences.speakMoots);
@@ -145,8 +299,17 @@ function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; o
   const [playing, setPlaying] = useState(true);
   const paused = useGame((s) => s.paused);
   const page = useRef<HTMLDivElement>(null);
-  const total = moot.turns.length;
+  const arrived = moot.turns.length;
+  const total = live ? live.total : arrived;
+  const liveDone = live ? live.done : true;
   const current = moot.turns[shown - 1];
+  // A live moot can catch up with its worker: the next turn is still being made.
+  const waiting = !current && !liveDone && !live?.error;
+  const waitingSide = (shown - 1) % 2 as 0 | 1;
+  // Read by the playback effect when a turn ends, not watched by it: a live
+  // moot's turns arriving must not restart the turn being played.
+  const progress = useRef({ arrived, liveDone });
+  progress.current = { arrived, liveDone };
 
   // Esc settings, or the window losing focus, pause the moot with the forest.
   useEffect(() => { if (paused) setPlaying(false); }, [paused]);
@@ -158,8 +321,9 @@ function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; o
     const advance = () => {
       if (!live) return;
       live = false;
-      if (shown < total) setShown(shown + 1);
-      else setPlaying(false);
+      const next = stepAfter(shown, progress.current.arrived, progress.current.liveDone);
+      if (next === null) setPlaying(false);
+      else setShown(next);
     };
     if (muted) {
       const timer = window.setTimeout(advance, readingMs(current.text));
@@ -176,7 +340,7 @@ function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; o
     let poll = 0;
     const start = window.setTimeout(() => {
       speak(spokenText(current.text), false, {
-        speaker: current.speaker, onEnd: advance, chosen: mootVoices, wants: [moot.trees[0].voice, moot.trees[1].voice],
+        speaker: current.speaker, onEnd: advance, chosen: mootVoices, wants: [trees[0].voice, trees[1].voice],
       });
       // Safari can drop the end event; trust the engine as well.
       poll = window.setInterval(() => { if (!speaking()) advance(); }, 500);
@@ -187,20 +351,21 @@ function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; o
       window.clearInterval(poll);
       hush();
     };
-  }, [current, shown, total, playing, muted, mootVoices, moot]);
+  }, [current, shown, playing, muted, mootVoices, trees]);
 
-  // Ring the speaking tree in the forest.
+  // Ring the speaking tree in the forest, or the one a live moot is waiting on.
   useEffect(() => {
-    const slug = current ? slugs[current.speaker] : null;
-    useGame.getState().setMootSpeaker(slug && current ? { slug, color: MOOT_COLORS[current.speaker] } : null);
-  }, [current, slugs]);
+    const side = current ? current.speaker : waiting ? waitingSide : null;
+    const slug = side === null ? null : slugs[side];
+    useGame.getState().setMootSpeaker(slug && side !== null ? { slug, color: MOOT_COLORS[side] } : null);
+  }, [current, waiting, waitingSide, slugs]);
   useEffect(() => () => { hush(); useGame.getState().setMootSpeaker(null); }, []);
 
   useEffect(() => {
     page.current?.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [shown]);
 
-  const done = shown >= total;
+  const done = liveDone && shown >= arrived;
   function toggleVoice() {
     if (!speakMoots) unlockSpeech(true);
     useGame.getState().setPreferences({ speakMoots: !speakMoots });
@@ -222,13 +387,26 @@ function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; o
           <h2 id="moot-title" className="font-display text-2xl leading-tight sm:text-3xl">
             <em style={{ color: MOOT_COLORS[0] }}>{names[0]}</em> and <em style={{ color: MOOT_COLORS[1] }}>{names[1]}</em>
           </h2>
-          <p className="text-sm text-muted">{moot.date}{moot.model ? ` · ${moot.model}` : ""}</p>
+          <p className="text-sm text-muted">{moot.date}{moot.model ? ` · ${moot.model}` : ""}{live ? " · live" : ""}</p>
         </div>
         <CloseButton onClose={onClose} label="Close the moot" />
       </header>
 
       <div ref={page} className="grid min-h-0 flex-1 content-start gap-4 overflow-auto px-4 py-5 sm:px-6">
         {moot.turns.slice(0, shown).map((t) => <Bubble key={t.turn} turn={t} names={names} speaking={playing && t === current} />)}
+        {waiting ? (
+          <p className={"px-2 text-sm italic " + (waitingSide === 0 ? "justify-self-start" : "justify-self-end")}
+            style={{ color: MOOT_COLORS[waitingSide] }} aria-live="polite">
+            {names[waitingSide]} is thinking...
+          </p>
+        ) : null}
+        {live?.error ? (
+          <div className="grid gap-2 text-sm text-muted" role="alert">
+            <p className="text-fg">The next turn did not come: {live.error}.</p>
+            <button type="button" onClick={live.retry}
+              className="min-h-11 justify-self-start rounded-md bg-primary px-4 text-primary-fg">Try again</button>
+          </div>
+        ) : null}
       </div>
 
       <footer className="flex items-center justify-between gap-2 border-t border-border p-3 sm:px-6">
@@ -246,8 +424,8 @@ function MootPlayback({ moot, forest, onClose }: { moot: Moot; forest: Forest; o
             </button>
           ) : <span className="px-3 text-xs text-muted">No speech in this browser</span>}
         </div>
-        <span className="text-xs text-muted tabular-nums">Turn {shown} of {total}</span>
-        <button type="button" disabled={done} onClick={() => setShown(shown + 1)}
+        <span className="text-xs text-muted tabular-nums">Turn {Math.min(shown, total)} of {total}</span>
+        <button type="button" disabled={shown >= arrived} onClick={() => setShown(shown + 1)}
           className="inline-flex min-h-11 items-center gap-1 rounded-md px-3 text-sm text-fg disabled:text-faint">
           Next <ChevronRight className="size-4" strokeWidth={1.75} />
         </button>

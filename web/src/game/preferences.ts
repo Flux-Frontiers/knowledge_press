@@ -21,7 +21,14 @@ export type Preferences = {
   speakMoots: boolean;
   /** Each tree's voice by name, first tree first; "" picks one automatically. */
   mootVoices: [string, string];
+  /** The GutenbergKG worker that holds live moots (liveMoots.ts). */
+  mootWorker: string;
+  /** The worker's MOOT_TOKEN, when it sets one; "" otherwise. */
+  mootToken: string;
 };
+
+/** Where a local GutenbergKG worker listens. */
+export const DEFAULT_MOOT_WORKER = "http://localhost:8000";
 
 export type FogLevel = "clear" | "light" | "normal" | "heavy";
 
@@ -58,5 +65,7 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     mootVoices: Array.isArray(value?.mootVoices) && value.mootVoices.length === 2
       && value.mootVoices.every((n) => typeof n === "string")
       ? [value.mootVoices[0], value.mootVoices[1]] : ["", ""],
+    mootWorker: typeof value?.mootWorker === "string" && value.mootWorker.trim() ? value.mootWorker.trim() : DEFAULT_MOOT_WORKER,
+    mootToken: typeof value?.mootToken === "string" ? value.mootToken : "",
   };
 }

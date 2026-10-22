@@ -30,6 +30,13 @@ is parked while they are open. Every setting is saved in this browser.
 | First tree's voice, second tree's voice | Shown while **Read moots aloud** is on. **Automatic** picks a voice for each author; or pick one of this browser's English voices. A choice this browser lacks is marked *(not here)*. |
 | Silent mode | No cards, hints or captions appear on their own. ++e++ and clicking a tree still work. |
 
+## Live moots
+
+| Setting | What it does |
+| --- | --- |
+| GutenbergKG worker | Where the worker that holds a [new moot](moots.md#hold-a-new-moot) listens. `http://localhost:8000` by default. |
+| Moot token | Only if the worker sets `MOOT_TOKEN`. Kept in this browser. |
+
 ## Environment
 
 | Setting | What it does |

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { DEFAULT_MOOT_WORKER } from "./preferences";
 import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
 import { canSpeak, mootVoiceNames, onVoicesChanged, unlockSpeech } from "./speech";
 import { USER_GUIDE_URL } from "./links";
@@ -100,6 +101,19 @@ export function PauseOverlay() {
         <label className="flex items-center justify-between gap-4">
           <span>Random weather<span className="block text-xs text-muted">Morning fog that burns off, and cloud{prefs.weather ? ` · now ${weatherName(weather).toLowerCase()}` : ""}</span></span>
           <input type="checkbox" checked={prefs.weather} onChange={(e) => setPreferences({ weather: e.target.checked })} />
+        </label>
+      </div>
+      <h3 className="mb-3 text-xs tracking-[0.2em] text-primary uppercase">Live moots</h3>
+      <div className="mb-5 grid gap-4 text-sm">
+        <label className="grid gap-2">
+          <span>GutenbergKG worker<span className="block text-xs text-muted">Holds a new moot and makes each turn. See the Moots guide.</span></span>
+          <input type="url" value={prefs.mootWorker} spellCheck={false} placeholder={DEFAULT_MOOT_WORKER}
+            onChange={(e) => setPreferences({ mootWorker: e.target.value })} className="rounded-md border border-border bg-bg p-2" />
+        </label>
+        <label className="grid gap-2">
+          <span>Moot token<span className="block text-xs text-muted">Only if the worker sets MOOT_TOKEN</span></span>
+          <input type="password" value={prefs.mootToken} autoComplete="off"
+            onChange={(e) => setPreferences({ mootToken: e.target.value })} className="rounded-md border border-border bg-bg p-2" />
         </label>
       </div>
       <div className="rounded-md bg-bg p-3 text-sm leading-relaxed text-muted">
