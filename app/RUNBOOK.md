@@ -1149,8 +1149,13 @@ http://192.168.1.42:8000          works until the lease moves
 ```
 
 `scutil --get LocalHostName` on the Mac prints the name; `ipconfig getifaddr
-en0` prints the address. Check the worker answers on the LAN and not just
-loopback before blaming the phone —
+en0` prints the address. The worker answers only its own Mac unless
+`WORKER_BIND=0.0.0.0` is set in gutenberg_kg's `docker/.env` (then restart
+it). Anyone on the network can use it after that, so do this on a network
+you trust: the app sends `HANDLER_SECRET` only when its launch environment
+has it (an Xcode scheme), so a secret locks out a phone installed normally.
+Check the worker answers on the LAN and not just loopback before
+blaming the phone —
 
 ```sh
 curl -s -o /dev/null -w '%{http_code}\n' http://<your-mac>.local:8000/
