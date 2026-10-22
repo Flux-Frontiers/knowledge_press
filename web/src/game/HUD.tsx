@@ -10,7 +10,7 @@ import { saveScreenshot } from "./screenshot";
 import { SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
 import { ReaderPanel } from "./Reader";
-import { MootList, MootPlayer } from "./MootOverlay";
+import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import type { TimeMode } from "./sky";
 
@@ -68,6 +68,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const reading = readingSlug ? forest.trees.find((t) => t.book.slug === readingSlug) : undefined;
   const mootsOpen = useGame((s) => s.mootsOpen);
   const mootId = useGame((s) => s.mootId);
+  const liveMoot = useGame((s) => s.liveMoot);
   const clean = useGame((s) => s.cleanView);
   const toggleCleanView = useGame((s) => s.toggleCleanView);
   const silent = useGame((s) => s.preferences.silent);
@@ -452,7 +453,8 @@ export function HUD({ forest }: { forest: Forest }) {
       {plaque ? <PlaquePanel plaque={plaque} /> : null}
       {reading ? <ReaderPanel key={reading.book.slug} book={reading.book} /> : null}
       {mootsOpen ? <MootList /> : null}
-      {mootId ? <MootPlayer key={mootId} id={mootId} forest={forest} /> : null}
+      {mootId && liveMoot ? <LiveMootPlayer key={mootId} request={liveMoot} forest={forest} />
+        : mootId ? <MootPlayer key={mootId} id={mootId} forest={forest} /> : null}
     </div>
   );
 }

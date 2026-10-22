@@ -33,6 +33,33 @@ its color.
 
 Switching away from the browser pauses the moot.
 
+## Hold a new moot
+
+You can also hold a moot of your own and watch it being made. This needs a
+GutenbergKG worker running on your computer, with a language model behind
+it; the [GutenbergKG Moots guide](https://flux-frontiers.github.io/gutenberg_kg/MOOTS/#live-moots-from-the-forest)
+covers the setup.
+
+1. In **Moots**, choose **Hold a new moot**.
+2. Type in **First book** and **Second book** and pick each from the list.
+3. Give a **Topic**, choose how many **Turns**, and choose **Start the moot**.
+
+The worker makes one turn at a time. While it does, the next book is ringed
+in the forest and its name shows "is thinking...". A turn takes from a few
+seconds to half a minute, depending on the model; the worker makes the next
+turn while the current one is read, so after the first the wait is usually
+short. Closing the moot ends it on the worker. If a turn fails, choose
+**Try again**.
+
+Which forest you use matters:
+
+| Forest | Chrome | Safari |
+| --- | --- | --- |
+| The forest's dev server on your computer (`http://localhost:5173`) | works | works |
+| The published forest | works after you allow access to your local network when Chrome asks | does not work: Safari will not let a secure page reach your computer |
+
+The worker's address is set in [Settings](settings.md#live-moots).
+
 ## Reading aloud
 
 Moots are read aloud by default, one turn after another; the next turn starts
