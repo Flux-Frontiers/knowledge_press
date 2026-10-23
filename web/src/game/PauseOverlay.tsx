@@ -126,7 +126,7 @@ export function PauseOverlay() {
         <a href={USER_GUIDE_URL} target="_blank" rel="noopener" className="text-primary underline">Read the user guide</a>
       </p>
       <button type="button" className="mt-3 min-h-11 w-full rounded-md border border-border text-muted"
-        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome and your pressed books? Your visited groves are kept.")) resetSettings(); }}>
+        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome? Your press and visited groves are kept.")) resetSettings(); }}>
         Reset all settings
       </button>
       <button ref={back} type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>

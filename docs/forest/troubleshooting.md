@@ -45,7 +45,7 @@ degree and never leaves the browser.
 
 The press, the visited groves and the settings live in this browser's
 storage. They are gone if you cleared the site's data, used a private window,
-opened the forest in a different browser, or pressed **Reset all settings**.
+opened the forest in a different browser, or pressed **Empty the press**.
 
 ## The page is blank or shows an error about WebGL
 

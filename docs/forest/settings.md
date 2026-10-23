@@ -51,7 +51,7 @@ is parked while they are open. Every setting is saved in this browser.
 
 - Puts every setting above back to its default.
 - Sets the season to the date's and the clock to live.
-- Empties the press.
 - Forgets the tour's welcome, so the next tour gives it in full again.
 
-The groves you have visited are kept.
+The press and the groves you have visited are kept. To empty the press, use
+**Empty the press** in the Press tab; see [The press](reading.md#the-press).

@@ -86,8 +86,8 @@ export type GameStore = {
   setPreferences: (patch: Partial<Preferences>) => void;
   /**
    * Put every setting back as on a first visit: the Pause preferences, the
-   * season and the clock (back to the date's season and Live), the tour's
-   * full welcome, and the books pressed. The groves visited stay.
+   * season and the clock (back to the date's season and Live), and the tour's
+   * full welcome. The press and the groves visited stay: they are progress.
    */
   resetSettings: () => void;
   paused: boolean;
@@ -168,6 +168,8 @@ export type GameStore = {
   setQuery: (q: string) => void;
   pickSearch: (slug: string | null) => void;
   collect: (slug: string, title: string) => void;
+  /** Take every book out of the press. */
+  emptyPress: () => void;
   markGrove: (genre: string) => void;
   setNearby: (slug: string | null, dist: number, speed: number) => void;
   pinTree: (slug: string | null) => void;
@@ -246,7 +248,7 @@ export const useGame = create<GameStore>((set, get) => ({
   resetSettings: () => {
     clearTourHeard();
     seasonPicked = false;
-    set({ preferences: readPreferences(), groundCamera: "follow", season: autoSeason(get().place), timeMode: "live", library: [], lastReadSlug: null, libraryOpen: false });
+    set({ preferences: readPreferences(), groundCamera: "follow", season: autoSeason(get().place), timeMode: "live" });
     set(readSky("live", get().place));
     persist(get());
   },
@@ -334,6 +336,10 @@ export const useGame = create<GameStore>((set, get) => ({
     const library = [...lib, slug];
     set({ library, lastReadSlug: slug, toast: `Pressed · ${title}` });
     persist({ ...get(), library });
+  },
+  emptyPress: () => {
+    set({ library: [], lastReadSlug: null });
+    persist(get());
   },
   markGrove: (genre) => {
     const grovesVisited = get().grovesVisited;
