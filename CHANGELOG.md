@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Forest: Empty the press.** A button at the bottom of the Press tab takes
+  every book out of the press, after asking. **Reset all settings** no longer
+  touches the press; the press and visited groves are progress, not settings.
+
 - **App runbook: the worker is local-only by default.** gutenberg_kg's
   worker now answers only its own Mac; "iPhone cannot reach the worker"
   says to set `WORKER_BIND=0.0.0.0` for the phone, and why a

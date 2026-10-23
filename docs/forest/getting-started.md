@@ -97,5 +97,6 @@ screen**. On a wider screen these are buttons in the bar; Exit is the last.
 The books in your press, the groves you have visited and your settings are
 saved in this browser only. They do not follow you to
 another device or another browser, and a private window forgets them when it
-closes. **Reset all settings** in settings clears them; see
+closes. **Empty the press** in the Press tab clears the press, and
+**Reset all settings** clears the settings; see
 [Settings](settings.md#reset-all-settings).

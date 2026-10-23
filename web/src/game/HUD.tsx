@@ -736,6 +736,12 @@ function PressTab({ forest }: { forest: Forest }) {
         ))
       )}
     </ul>
+    {collected.length > 0 && (
+      <button type="button" className="mt-3 min-h-11 w-full rounded-md border border-border text-sm text-muted"
+        onClick={() => { if (window.confirm("Empty the press? Every book comes out, and the quests that count them start over.")) useGame.getState().emptyPress(); }}>
+        Empty the press
+      </button>
+    )}
   </>);
 }
 

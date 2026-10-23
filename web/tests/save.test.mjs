@@ -38,7 +38,7 @@ test("leaving the ring puts the lantern trail away; a grove jump keeps it", () =
   assert.equal(st().selectedGrove, "letters");
 });
 
-test("reset puts every setting back, forgets the tour welcome, and forgets the pressed books", () => {
+test("reset puts every setting back and forgets the tour welcome, but keeps the press", () => {
   const store = new Map([["kpf-tour-heard", "1"]]);
   globalThis.window = {
     localStorage: {
@@ -66,11 +66,28 @@ test("reset puts every setting back, forgets the tour welcome, and forgets the p
   assert.equal(st().season, seasonFor(new Date(), timeZonePlace(new Date())));
   assert.equal(st().timeMode, "live");
   assert.equal(tourHeard(), false);
-  assert.deepEqual(st().library, []);
-  assert.equal(st().lastReadSlug, null);
+  assert.deepEqual(st().library, ["hamlet"]);
   const saved = JSON.parse(store.get("kpf-library-v1"));
   assert.equal(saved.preferences.camera, "follow");
-  assert.deepEqual(saved.library, []);
+  assert.deepEqual(saved.library, ["hamlet"]);
+});
+
+test("emptying the press takes every book out and saves it", () => {
+  const store = new Map();
+  globalThis.window = {
+    localStorage: {
+      getItem: (k) => store.get(k) ?? null,
+      setItem: (k, v) => { store.set(k, v); },
+      removeItem: (k) => { store.delete(k); },
+    },
+  };
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().collect("hamlet", "Hamlet");
+  st().emptyPress();
+  assert.deepEqual(st().library, []);
+  assert.equal(st().lastReadSlug, null);
+  assert.deepEqual(JSON.parse(store.get("kpf-library-v1")).library, []);
 });
 
 test("exit goes back to the start screen with every panel shut and the tour over", () => {
