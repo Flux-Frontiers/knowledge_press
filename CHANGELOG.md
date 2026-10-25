@@ -13,6 +13,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Forest: rounded curbs at the crossings.** Where a spoke meets a ring,
+  each corner is rounded by a 2 m curb in place of the 3 m paved disc that
+  covered every crossing, so the roads read as one road bending; at the
+  outer ring the spoke ends in a T and only its two inside corners are
+  rounded. The tour's turns stay on the brick, tested wheel by wheel, and
+  signposts keep 5 m from a crossing. Ported from The Family.
+
 - **Forest: Empty the press.** A button at the bottom of the Press tab takes
   every book out of the press, after asking. **Reset all settings** no longer
   touches the press; the press and visited groves are progress, not settings.

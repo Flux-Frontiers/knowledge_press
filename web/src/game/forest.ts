@@ -3,6 +3,7 @@ import { growCorpusTree, type CorpusTree } from "./corpusTree";
 import { EXHIBITS, placeExhibits, type Exhibit } from "./exhibits";
 import { GROW_VERSION, cellKey3, emitBark, emitLeaves, growTree, type BarkBuffers, type GrownTree } from "./growTree";
 import { sunflower, wheelLayout } from "./math";
+import type { Junction } from "./roads";
 import { groveNarration } from "./narration";
 import { SPECIES, speciesFor } from "./species";
 
@@ -80,12 +81,12 @@ const ROAD_STEP = 2;
 /** The most spokes from the hub. */
 const MAX_SPOKES = 6;
 /**
- * Paved disc where a spoke meets a ring, as small as the tour allows. The
- * tour's turn there is rounded with TOUR_TURN_R, which cuts 1.2 m inside the
- * corner; with the cart's half-width that needs 2.3 m of paving from the crossing.
+ * The tour's turns where a spoke meets a ring are rounded with this radius;
+ * the curb fillets there (roads.ts) keep the cart's wheels on the brick.
  */
-const JUNCTION_R = 3;
 const TOUR_TURN_R = 3.5;
+/** A signpost keeps this far from a junction's crossing point, clear of its fillets. */
+const SIGN_JUNCTION_CLEAR = 5;
 /** Exhibit spurs keep this far from a junction (the old junction plaza, plus a verge). */
 const JUNCTION_CLEAR = 12;
 /** Bearing of the redwood's plaque from the hub; home looks back along it. */
@@ -125,8 +126,10 @@ export type Forest = {
   /** Straight pieces of every road line, for clearance tests. */
   roads: RoadSeg[];
   roadLines: RoadLine[];
-  /** Road junctions (ring stops and the hub), each paved with a disc. */
+  /** Paved discs: the hub, each grove's stop and each exhibit. */
   plazas: { x: number; z: number; r: number }[];
+  /** Where each spoke crosses each ring; their curbs are rounded (roads.ts). */
+  junctions: Junction[];
   /** One stop per grove, on its tier's ring, in the order the tour loop reaches them. */
   circuit: Waypoint[];
   /** Each grove's signpost: beside its stop, off the road on the grove's side, facing the road. */
@@ -535,10 +538,10 @@ function buildForest(leafMultiplier: number): Forest {
   const plazas = [
     { x: 0, z: 0, r: HUB_PLAZA_R },
     ...circuit.map((wp) => ({ x: wp.x, z: wp.z, r: STOP_R })),
-    // Where a spoke crosses a ring.
-    ...wheel.spokes.flatMap((a) => wheel.rings.map((R) => ({ x: R * Math.cos(a), z: R * Math.sin(a), r: JUNCTION_R }))),
     ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.plazaR })),
   ];
+  const junctions: Junction[] = wheel.spokes.flatMap((a) => wheel.rings.map((R, t) => (
+    { x: R * Math.cos(a), z: R * Math.sin(a), a, ring: R, through: t < wheel.rings.length - 1 })));
   // Each signpost stands just off its stop's plaza, clear of every road and
   // trunk, as near the grove's bearing as it can, facing back to the stop.
   const signs = circuit.map((wp) => {
@@ -550,6 +553,7 @@ function buildForest(leafMultiplier: number): Forest {
         const a = toward + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (Math.PI / 18);
         const x = wp.x + Math.cos(a) * d, z = wp.z + Math.sin(a) * d;
         if (roads.every((r) => segDistance(x, z, r) >= SIGN_ROAD_CLEAR)
+          && junctions.every((j) => Math.hypot(x - j.x, z - j.z) >= SIGN_JUNCTION_CLEAR)
           && trees.every((t) => Math.hypot(x - t.x, z - t.z) - t.trunkRadius >= SIGN_TRUNK_CLEAR)) {
           best = { x, z };
           break;
@@ -582,6 +586,7 @@ function buildForest(leafMultiplier: number): Forest {
     roads,
     roadLines,
     plazas,
+    junctions,
     circuit,
     signs,
     ringPath,
