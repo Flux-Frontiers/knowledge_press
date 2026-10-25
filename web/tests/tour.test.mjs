@@ -13,6 +13,16 @@ function roadDistance(f, x, z) {
   }
   // Plazas are paved too: the tour turns round on a stop's plaza where the ring doubles back.
   for (const p of f.plazas) if (Math.hypot(x - p.x, z - p.z) < p.r) return 0;
+  // So are the curb fillets where a spoke meets a ring: the tour's rounded turns cross them.
+  const { onFillet } = require(`${process.env.FOREST_TEST_BUILD}/roads.js`);
+  if (f.junctions.some((j) => onFillet(x, z, j))) return 0;
+  // Through a junction the rounded turn runs off both centrelines but stays on the strips.
+  const { RING_W, SPOKE_W } = require(`${process.env.FOREST_TEST_BUILD}/roads.js`);
+  if (f.junctions.some((j) => Math.hypot(x - j.x, z - j.z) < 4)) {
+    const r = Math.hypot(x, z);
+    if (f.junctions.some((j) => Math.abs(r - j.ring) <= RING_W / 2
+      || (Math.hypot(x - j.x, z - j.z) < 4 && Math.abs(Math.atan2(Math.sin(Math.atan2(z, x) - j.a), Math.cos(Math.atan2(z, x) - j.a)) * r) <= SPOKE_W / 2))) return 0;
+  }
   return best;
 }
 

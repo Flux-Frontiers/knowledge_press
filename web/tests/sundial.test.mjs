@@ -158,22 +158,32 @@ test("the compass rose rings the redwood on the hub plaza, clear of the root fla
   for (const w of WINDS) assert.ok(w.tip > hole + 150, `${w.name} is too short to show past the trunk`);
 });
 
-test("junction plazas are small, and still cover the tour's rounded turns", () => {
+test("no discs at the junctions: curb fillets keep the tour's rounded turns on the brick", () => {
   const { getForest } = require(`${build()}/forest.js`);
+  const { onFillet, RING_W, SPOKE_W } = require(`${build()}/roads.js`);
   const f = getForest();
-  const junctions = f.plazas.filter((p) => p.r !== 10 && !f.circuit.some((wp) => wp.x === p.x && wp.z === p.z) && !f.exhibits.some((e) => e.x === p.x && e.z === p.z));
-  assert.ok(junctions.length >= 2);
-  for (const j of junctions) assert.equal(j.r, 3);
-  // Where the loop bends at a junction, every route point near it stays on the paving with the cart's half-width to spare.
-  for (const j of junctions) {
-    for (const p of f.ringPath) {
-      const d = Math.hypot(p.x - j.x, p.z - j.z);
-      if (d > j.r) continue;
-      const onRing = f.roads.some((r) => r.kind === "ring" && segDist(p.x, p.z, r.ax, r.az, r.bx, r.bz) < 1.7 - 1.05);
-      const onSpoke = f.roads.some((r) => r.kind === "spoke" && segDist(p.x, p.z, r.ax, r.az, r.bx, r.bz) < 1.4 - 1.05);
-      assert.ok(onRing || onSpoke || d + 1.05 <= j.r, `the cart leaves the paving ${d.toFixed(1)} m from a junction`);
+  const isStop = (p) => f.circuit.some((wp) => wp.x === p.x && wp.z === p.z);
+  const isExhibit = (p) => f.exhibits.some((e) => e.x === p.x && e.z === p.z);
+  assert.ok(f.plazas.every((p) => (p.x === 0 && p.z === 0) || isStop(p) || isExhibit(p)), "a plaza that is not the hub, a stop or an exhibit");
+  const spokes = f.roadLines.filter((l) => l.kind === "spoke").length;
+  const rings = f.roadLines.filter((l) => l.kind === "ring").length;
+  assert.equal(f.junctions.length, spokes * rings);
+  // Near a junction, both sides of the cart (1.05 m either side of the route) are on a road or a fillet.
+  const paved = (x, z) => f.roads.some((r) => segDist(x, z, r.ax, r.az, r.bx, r.bz) <= (r.kind === "ring" ? RING_W : SPOKE_W) / 2)
+    || f.junctions.some((j) => onFillet(x, z, j)) || f.plazas.some((p) => Math.hypot(x - p.x, z - p.z) < p.r);
+  let checked = 0;
+  const pts = f.ringPath;
+  for (let k = 1; k + 1 < pts.length; k++) {
+    const p = pts[k];
+    if (!f.junctions.some((j) => Math.hypot(p.x - j.x, p.z - j.z) < 4)) continue;
+    const dx = pts[k + 1].x - pts[k - 1].x, dz = pts[k + 1].z - pts[k - 1].z, len = Math.hypot(dx, dz) || 1;
+    for (const side of [-1, 1]) {
+      const x = p.x - (dz / len) * 1.05 * side, z = p.z + (dx / len) * 1.05 * side;
+      assert.ok(paved(x, z), `the cart's wheel leaves the brick at ${x.toFixed(1)}, ${z.toFixed(1)}`);
     }
+    checked++;
   }
+  assert.ok(checked > 10, `only ${checked} route points near a junction`);
 });
 
 function segDist(x, z, ax, az, bx, bz) {

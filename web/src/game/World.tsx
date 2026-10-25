@@ -10,7 +10,7 @@ import { FOG_SCALE } from "./preferences";
 const GOD_EYE_FOG = 0.1;
 import type { Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./forest";
-import { disc, ribbon, type FlatMesh } from "./roads";
+import { disc, fillets, ribbon, RING_W, SPOKE_W, SPUR_W, type FlatMesh } from "./roads";
 import { CompassRose } from "./CompassRose";
 import { CorpusRedwood } from "./CorpusRedwood";
 import { Cart } from "./Cart";
@@ -168,7 +168,7 @@ function brickMaterial() {
 }
 
 /**
- * Spokes and exhibit spurs sit lowest, the ring above them, junction plazas on top, so each join
+ * Spokes and exhibit spurs sit lowest, the ring and its curb fillets above them, plazas on top, so each join
  * is covered by the next layer instead of z-fighting.
  */
 function Roads({ forest, circuit }: { forest: Forest; circuit: boolean }) {
@@ -176,10 +176,12 @@ function Roads({ forest, circuit }: { forest: Forest; circuit: boolean }) {
     const spokes: FlatMesh = { pos: [], uv: [], index: [] };
     const ring: FlatMesh = { pos: [], uv: [], index: [] };
     for (const line of forest.roadLines) {
-      if (line.kind === "spoke") ribbon(line, 2.8, 0.035, spokes);
-      else if (line.kind === "spur") ribbon(line, 2.4, 0.035, spokes);
-      else ribbon(line, 3.4, 0.045, ring);
+      if (line.kind === "spoke") ribbon(line, SPOKE_W, 0.035, spokes);
+      else if (line.kind === "spur") ribbon(line, SPUR_W, 0.035, spokes);
+      else ribbon(line, RING_W, 0.045, ring);
     }
+    // Curbs rounded where a spoke meets a ring, at the ring's level: they touch neither road's strip.
+    for (const j of forest.junctions) fillets(j, 0.045, ring);
     for (const p of forest.plazas) disc(p.x, p.z, p.r, 0.055, ring);
     return { spokes: flatGeometry(spokes), ring: flatGeometry(ring) };
   }, [forest]);

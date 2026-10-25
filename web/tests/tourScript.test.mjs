@@ -81,7 +81,8 @@ test("once every grove has been visited the tour drives back to the redwood and 
   assert.equal(tour.next, 0);
   assert.ok(tour.ending && !tour.done);
   // The way back keeps to the brick, and ends at home.
-  const paved = (x, z) => f.plazas.some((p) => Math.hypot(x - p.x, z - p.z) < p.r) || f.roads.some((r) => {
+  const { onFillet } = require(`${process.env.FOREST_TEST_BUILD}/roads.js`);
+  const paved = (x, z) => f.plazas.some((p) => Math.hypot(x - p.x, z - p.z) < p.r) || f.junctions.some((j) => onFillet(x, z, j)) || f.roads.some((r) => {
     const dx = r.bx - r.ax, dz = r.bz - r.az;
     const u = Math.max(0, Math.min(1, ((x - r.ax) * dx + (z - r.az) * dz) / (dx * dx + dz * dz || 1)));
     return Math.hypot(x - r.ax - dx * u, z - r.az - dz * u) < (r.kind === "ring" ? 1.7 : 1.4);
