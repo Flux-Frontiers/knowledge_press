@@ -1066,8 +1066,11 @@ is `public.app-category.books`, which Mac uploads require.
 - [ ] A first TestFlight build, installed from TestFlight on a device that has
       never had a development build -- the only way to prove the bundled
       corpus is found
-- [ ] macOS added as a platform on the App Store Connect record, Mac
-      screenshots, then a first `make mac-upload` and a Mac TestFlight install
+- [x] macOS added as a platform on the App Store Connect record, Mac
+      screenshots, then a first `make mac-upload` -- the Mac app was
+      submitted and **approved for distribution 2026-10-28**. Apple allows up
+      to 24 hours before it appears on the Mac App Store, and only once the
+      paid-apps agreement in Agreements, Tax, and Banking is in effect.
 
 ## 9. Troubleshooting
 
