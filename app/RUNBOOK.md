@@ -1059,9 +1059,9 @@ is `public.app-category.books`, which Mac uploads require.
 ### First submission
 
 Status as of 2026-10-28: the **Mac app is approved**; the **iPhone app is
-submitted and awaiting review**. Still open: the iPhone approval, and a Mac
-TestFlight install -- the Mac twin of the iPhone TestFlight check, and the
-only way to prove the sandboxed store build finds its bundled corpus.
+submitted and awaiting review**. Still open: the iPhone approval, and a
+TestFlight install on each platform -- not yet done on either. It is the only
+way to prove a store build finds its bundled corpus on a clean device.
 
 - [x] Answers verified on the phone with the network off -- section 6's
       item, and the claim the whole product rests on
@@ -1070,8 +1070,8 @@ only way to prove the sandboxed store build finds its bundled corpus.
 - [x] A privacy policy URL, which App Store Connect requires even when the
       privacy manifest declares no collection
 - [ ] iPhone app approved -- submitted, awaiting App Review as of 2026-10-28
-- [x] A first TestFlight build, installed from TestFlight on a device that has
-      never had a development build -- the only way to prove the bundled
+- [ ] A first TestFlight build, installed from TestFlight on a device that has
+      never had a development build -- not yet done -- the only way to prove the bundled
       corpus is found
 - [x] macOS added as a platform on the App Store Connect record, Mac
       screenshots, then a first `make mac-upload` -- the Mac app was
