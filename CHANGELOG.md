@@ -13,6 +13,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **The Mac app is approved for the Mac App Store.** App Review approved
+  The Knowledge Press for macOS on 2026-10-28; the iPhone app is submitted
+  and awaiting review. The app runbook's first-submission checklist records
+  both, and checks off the store metadata and privacy URL that a submission
+  requires.
+
 - **Forest: rounded curbs at the crossings.** Where a spoke meets a ring,
   each corner is rounded by a 2 m curb in place of the 3 m paved disc that
   covered every crossing, so the roads read as one road bending; at the

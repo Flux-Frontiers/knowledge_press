@@ -166,8 +166,9 @@ throwaway scratch package, never in `app/GutenbergKGKit`.
       iPhone 17 Pro (`iPhone18,1`), iOS 27
 - [x] Corpus pushed to the device with `devicectl` — 691 MB, all sixteen
       entries verified in place including the `.mlpackage` weights
-- [ ] Answers verified on the phone with the network off (the Simulator
-      cannot run Foundation Models at all, on-device or PCC)
+- [x] Answers verified on the phone with the network off (the Simulator
+      cannot run Foundation Models at all, on-device or PCC) -- confirmed
+      before the first submission
 
 **Mac app, signed and notarized (step 7)**
 
@@ -1055,19 +1056,31 @@ network.client under a Cloud Managed Apple Distribution certificate. The
 floor is macOS 26 (`LSMinimumSystemVersion`), and `LSApplicationCategoryType`
 is `public.app-category.books`, which Mac uploads require.
 
-### Still to do before a first submission
+### First submission
 
-- [ ] Answers verified on the phone with the network off -- section 6's open
+Status as of 2026-10-28: the **Mac app is approved**; the **iPhone app is
+submitted and awaiting review**. Still open: the iPhone approval, and a
+TestFlight install on each platform -- not yet done on either. It is the only
+way to prove a store build finds its bundled corpus on a clean device.
+
+- [x] Answers verified on the phone with the network off -- section 6's
       item, and the claim the whole product rests on
-- [ ] Screenshots, description, keywords, support URL, age rating in App Store
-      Connect
-- [ ] A privacy policy URL, which App Store Connect requires even when the
+- [x] Screenshots, description, keywords, support URL, age rating in App Store
+      Connect -- App Store Connect blocks a submission without them
+- [x] A privacy policy URL, which App Store Connect requires even when the
       privacy manifest declares no collection
+- [ ] iPhone app approved -- submitted, awaiting App Review as of 2026-10-28
 - [ ] A first TestFlight build, installed from TestFlight on a device that has
-      never had a development build -- the only way to prove the bundled
-      corpus is found
-- [ ] macOS added as a platform on the App Store Connect record, Mac
-      screenshots, then a first `make mac-upload` and a Mac TestFlight install
+      never had a development build -- not yet done. The only way to prove
+      the bundled corpus is found
+- [x] macOS added as a platform on the App Store Connect record, Mac
+      screenshots, then a first `make mac-upload` -- the Mac app was
+      submitted and **approved for distribution 2026-10-28**. Apple allows up
+      to 24 hours before it appears on the Mac App Store, and only once the
+      paid-apps agreement in Agreements, Tax, and Banking is in effect.
+- [ ] A Mac TestFlight install, on a Mac that has never run a development
+      build -- not yet done. The approval does not cover it: App Review
+      tests the app, not that the corpus is found on a clean machine.
 
 ## 9. Troubleshooting
 
