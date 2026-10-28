@@ -1071,8 +1071,8 @@ way to prove a store build finds its bundled corpus on a clean device.
       privacy manifest declares no collection
 - [ ] iPhone app approved -- submitted, awaiting App Review as of 2026-10-28
 - [ ] A first TestFlight build, installed from TestFlight on a device that has
-      never had a development build -- not yet done -- the only way to prove the bundled
-      corpus is found
+      never had a development build -- not yet done. The only way to prove
+      the bundled corpus is found
 - [x] macOS added as a platform on the App Store Connect record, Mac
       screenshots, then a first `make mac-upload` -- the Mac app was
       submitted and **approved for distribution 2026-10-28**. Apple allows up
