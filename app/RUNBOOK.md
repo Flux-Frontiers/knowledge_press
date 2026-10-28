@@ -1055,14 +1055,19 @@ network.client under a Cloud Managed Apple Distribution certificate. The
 floor is macOS 26 (`LSMinimumSystemVersion`), and `LSApplicationCategoryType`
 is `public.app-category.books`, which Mac uploads require.
 
-### Still to do before a first submission
+### First submission
+
+Status as of 2026-10-28: the **Mac app is approved**; the **iPhone app is
+submitted and awaiting review**. The two items still open below were not
+gates on submitting, but they are the checks that the shipped build works.
 
 - [ ] Answers verified on the phone with the network off -- section 6's open
       item, and the claim the whole product rests on
-- [ ] Screenshots, description, keywords, support URL, age rating in App Store
-      Connect
-- [ ] A privacy policy URL, which App Store Connect requires even when the
+- [x] Screenshots, description, keywords, support URL, age rating in App Store
+      Connect -- App Store Connect blocks a submission without them
+- [x] A privacy policy URL, which App Store Connect requires even when the
       privacy manifest declares no collection
+- [ ] iPhone app approved -- submitted, awaiting App Review as of 2026-10-28
 - [ ] A first TestFlight build, installed from TestFlight on a device that has
       never had a development build -- the only way to prove the bundled
       corpus is found
