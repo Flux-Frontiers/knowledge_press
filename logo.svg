@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" role="img" aria-labelledby="title desc">
+  <title id="title">The Knowledge Press: The Forest</title>
+  <desc id="desc">A book grown as a tree inside the forest's two ring roads, its leaves turning from spring green to autumn red across the crown; an open book on an arch of the same seasons; and the title.</desc>
+  <defs>
+    <!-- The press's ink (colors.css), deepened toward the seal's green. -->
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="0%">
+      <stop offset="0%" stop-color="#151b29"/>
+      <stop offset="50%" stop-color="#18283a"/>
+      <stop offset="100%" stop-color="#111723"/>
+    </linearGradient>
+    <!-- In user space: a vertical trunk has no bounding-box width to map a gradient onto. -->
+    <linearGradient id="wood" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="312" y2="150">
+      <stop offset="0%" stop-color="#8a6a44"/>
+      <stop offset="60%" stop-color="#b08a5a"/>
+      <stop offset="100%" stop-color="#c9a878"/>
+    </linearGradient>
+    <!-- The seasons, spring to autumn; the press's two greens lead. -->
+    <linearGradient id="seasons" gradientUnits="userSpaceOnUse" x1="0" x2="670" y1="0" y2="0">
+      <stop offset="0%" stop-color="#2dcc78"/>
+      <stop offset="30%" stop-color="#237f59"/>
+      <stop offset="55%" stop-color="#c9c24a"/>
+      <stop offset="80%" stop-color="#e08a2e"/>
+      <stop offset="100%" stop-color="#c0392b"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#080b12" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="380" rx="42" fill="url(#bg)"/>
+
+  <!-- The medallion: a book tree inside the forest's inner and outer ring roads. -->
+  <g transform="translate(54 -2)" filter="url(#shadow)">
+    <circle cx="166" cy="192" r="150" fill="#121a26" opacity="0.96"/>
+    <circle cx="166" cy="192" r="126" fill="none" stroke="#f4f0dc" stroke-width="4" opacity="0.75"/>
+    <circle cx="166" cy="192" r="80" fill="none" stroke="#f4f0dc" stroke-width="2" opacity="0.28"/>
+
+    <!-- The ground, the trunk and its limbs. -->
+    <ellipse cx="166" cy="310" rx="34" ry="7" fill="#237f59" opacity="0.45"/>
+    <g fill="none" stroke="url(#wood)" stroke-linecap="round">
+      <path d="M166 310 L166 160" stroke-width="13"/>
+      <path d="M166 250 Q124 220 96 200" stroke-width="7"/>
+      <path d="M166 250 Q208 220 236 200" stroke-width="7"/>
+      <path d="M166 210 Q136 180 118 158" stroke-width="5"/>
+      <path d="M166 210 Q196 180 214 158" stroke-width="5"/>
+    </g>
+
+    <!-- The crown: leaves as soft tufts, spring on the left to autumn on the right. -->
+    <g opacity="0.95">
+      <ellipse cx="94" cy="190" rx="22" ry="16" fill="#2dcc78"/>
+      <ellipse cx="84" cy="176" rx="14" ry="11" fill="#5fd98f"/>
+      <ellipse cx="108" cy="174" rx="14" ry="11" fill="#2dcc78"/>
+
+      <ellipse cx="118" cy="150" rx="22" ry="16" fill="#237f59"/>
+      <ellipse cx="106" cy="136" rx="14" ry="11" fill="#2dcc78"/>
+      <ellipse cx="132" cy="134" rx="14" ry="11" fill="#3e9a5a"/>
+
+      <ellipse cx="166" cy="146" rx="24" ry="18" fill="#8fb046"/>
+      <ellipse cx="152" cy="128" rx="15" ry="12" fill="#3e9a5a"/>
+      <ellipse cx="180" cy="128" rx="15" ry="12" fill="#c9c24a"/>
+      <ellipse cx="166" cy="114" rx="14" ry="11" fill="#8fb046"/>
+
+      <ellipse cx="214" cy="150" rx="22" ry="16" fill="#e0a53a"/>
+      <ellipse cx="200" cy="134" rx="14" ry="11" fill="#c9c24a"/>
+      <ellipse cx="226" cy="136" rx="14" ry="11" fill="#e08a2e"/>
+
+      <ellipse cx="238" cy="190" rx="22" ry="16" fill="#e08a2e"/>
+      <ellipse cx="224" cy="174" rx="14" ry="11" fill="#d0602c"/>
+      <ellipse cx="248" cy="176" rx="14" ry="11" fill="#c0392b"/>
+    </g>
+  </g>
+
+  <!-- The book, underlining the title: two pages open on an arch of the seasons. -->
+  <g transform="translate(521 200) scale(0.7)" filter="url(#shadow)">
+    <path d="M0 80 Q160 -4 335 30 Q510 -4 670 80" fill="none" stroke="#f4f0dc" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.45"/>
+    <path d="M0 80 Q160 -4 335 30 Q510 -4 670 80" fill="none" stroke="url(#seasons)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- The pages' lines of type. -->
+    <g fill="none" stroke="#f4f0dc" stroke-width="3" stroke-linecap="round" opacity="0.55">
+      <path d="M110 58 Q200 26 300 40"/>
+      <path d="M150 74 Q220 50 300 60"/>
+      <path d="M370 40 Q470 26 560 58"/>
+      <path d="M370 60 Q450 50 520 74"/>
+    </g>
+    <path d="M335 30 L335 92" stroke="#f4f0dc" stroke-width="5" stroke-linecap="round" opacity="0.85"/>
+  </g>
+
+  <!-- The title. -->
+  <g transform="translate(424 0)" fill="#f4f0dc">
+    <text x="2" y="64" font-size="22" font-family="Arial, Helvetica, sans-serif" letter-spacing="6" fill="#bfe8cf">THE KNOWLEDGE PRESS</text>
+    <text x="0" y="156" font-size="88" font-weight="700" font-family="Georgia, 'Times New Roman', serif" letter-spacing="1">The Forest</text>
+    <text x="2" y="334" font-size="28" font-family="Arial, Helvetica, sans-serif" fill="#e7d7ad">genres  &#8226;  books  &#8226;  passages</text>
+  </g>
+</svg>

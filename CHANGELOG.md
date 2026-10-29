@@ -38,6 +38,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A logo for the Forest.** `logo.svg`, at the top of `web/README.md`:
+  a book grown as a tree inside the forest's ring roads, its leaves turning
+  from spring to autumn, and an open book under the title. In the same style
+  as The Disulfides' logo.
+
 - **Hold a live moot in the Forest.** Moots gains "Hold a new moot": pick two
   books and a topic, and a local GutenbergKG worker (its new `moot_start`,
   `moot_turn` and `moot_stop` ops) makes each turn while you watch. The
