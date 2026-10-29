@@ -49,6 +49,16 @@ test("the same press gives the same load", () => {
   assert.deepEqual(cartLoad(slugs, colorOf), cartLoad([...slugs], colorOf));
 });
 
+test("the load fills from the front board back, where the behind camera sees it", () => {
+  const load = cartLoad(slugs, colorOf);
+  // The first row stands at the front board; the next row stands behind it.
+  assert.ok(load[0].z > 0.5, `first book at z ${load[0].z.toFixed(3)}`);
+  assert.ok(load[11].z < load[0].z - 0.15, "the twelfth book starts the second row, nearer the tailboard");
+  // So do the flat stacks and the heap, each starting at the front.
+  assert.ok(load[77].z > 0.5, `first flat book at z ${load[77].z.toFixed(3)}`);
+  assert.ok(load[77 + 72].z > 0.5, `first heaped book at z ${load[77 + 72].z.toFixed(3)}`);
+});
+
 test("every box sits inside the bed, above its floor and under the cap", () => {
   const load = cartLoad(slugs, colorOf);
   load.forEach((b, k) => {

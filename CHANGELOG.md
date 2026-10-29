@@ -20,6 +20,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Forest: the cart fills from the front.** Pressed books stood first by the
+  tailboard, where the tailboard hid them from the behind camera. Rows, flat
+  stacks and the heap now start at the front board and fill back, so the
+  first books are in view. A full cart looks the same as before.
+
 - **Forest: a picked tree's card no longer hides the next tree's.** A card
   opened by clicking, searching or jumping stayed up until closed, so
   pulling up at another tree showed nothing new. Now, slowing at a

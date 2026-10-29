@@ -38,7 +38,7 @@ const STANDING_COLS = 11;
 const STANDING_ROWS = 7;
 const STANDING_PITCH_X = 0.094;
 const STANDING_PITCH_Z = 0.215;
-/** Center of the first standing row, m: just clear of the tailboard. */
+/** Center of the standing row nearest the tailboard, m: just clear of it. */
 const STANDING_Z0 = -0.695;
 
 /** Flat stacks: a regular grid of three columns, a few layers deep. */
@@ -50,7 +50,7 @@ const STACK_PITCH_X = 0.345;
 const HEAP_COLS = 4;
 const HEAP_LAYERS = 4;
 const HEAP_PITCH_X = 0.315;
-/** Row pitch and first row center for the flat grids, m. */
+/** Row pitch, and center of the row nearest the tailboard, for the flat grids, m. */
 const FLAT_PITCH_Z = 0.1875;
 const FLAT_Z0 = -0.80 + FLAT_PITCH_Z / 2;
 /** Vertical pitch of the flat layers, m. */
@@ -124,10 +124,14 @@ function restingOn(base: number, book: Omit<CartBook, "y">): CartBook {
   return { ...book, y: base + cartBookHalfExtents(book).y };
 }
 
-/** A book standing on the bed floor, spine to the tailboard, in standing slot k. */
+/**
+ * A book standing on the bed floor, spine to the tailboard, in standing slot k.
+ * Rows fill from the front board back, so the first books stand where the
+ * behind camera sees them over the tailboard.
+ */
 function standing(k: number, hash: number, color: string): CartBook {
   const col = k % STANDING_COLS;
-  const row = Math.floor(k / STANDING_COLS);
+  const row = STANDING_ROWS - 1 - Math.floor(k / STANDING_COLS);
   return restingOn(BED_FLOOR, {
     x: (col - (STANDING_COLS - 1) / 2) * STANDING_PITCH_X + between(-0.003, 0.003, unit(hash, 5)),
     z: STANDING_Z0 + row * STANDING_PITCH_Z + between(-0.004, 0.004, unit(hash, 6)),
@@ -174,7 +178,7 @@ function lying(
 /**
  * Lay out the pressed books in the cart's bed, slot k for the k-th book pressed.
  *
- * The first books stand in rows across the bed from the tailboard forward,
+ * The first books stand in rows across the bed from the front board back,
  * the next lie in stacks on a shelf above them, and the rest are heaped on top,
  * wedged at angles and overhanging the side rails. Past CART_CAPACITY the
  * extra books are dropped.
@@ -195,13 +199,13 @@ export function cartLoad(slugs: readonly string[], colorOf: (slug: string) => st
       const i = k - STANDING_COUNT;
       const perLayer = STACK_COLS * STACK_ROWS;
       const layer = Math.floor(i / perLayer);
-      const cell = { col: i % STACK_COLS, row: Math.floor((i % perLayer) / STACK_COLS), layer };
+      const cell = { col: i % STACK_COLS, row: STACK_ROWS - 1 - Math.floor((i % perLayer) / STACK_COLS), layer };
       out.push(lying(cell, STACK_COLS, STACK_PITCH_X, 0.06, 0, hash, color));
     } else {
       const i = k - STANDING_COUNT - STACK_COUNT;
       const perLayer = HEAP_COLS * STACK_ROWS;
       const layer = STACK_LAYERS + Math.floor(i / perLayer);
-      const cell = { col: i % HEAP_COLS, row: Math.floor((i % perLayer) / HEAP_COLS), layer };
+      const cell = { col: i % HEAP_COLS, row: STACK_ROWS - 1 - Math.floor((i % perLayer) / HEAP_COLS), layer };
       out.push(lying(cell, HEAP_COLS, HEAP_PITCH_X, 0.12, 0.03, hash, color));
     }
   }
