@@ -5,6 +5,11 @@ iPhone, iPad or Mac and writes an answer to your question from the passages it
 finds. Everything it needs is inside the app: the books, the search index, and
 the language model. It works in airplane mode.
 
+## Get the app
+
+The Mac app is on the
+[Mac App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12). The iPhone and iPad app is in App Review.
+
 ## What you need
 
 | Device | Requirement |
