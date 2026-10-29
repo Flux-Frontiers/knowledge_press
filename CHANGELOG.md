@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Forest: jump to a tree from the press.** Each entry in the Press tab
+  has a **Tree** button in place of **Grove**: it puts the cart beside that
+  book's tree with its card open, as the Books tab does. The Forest guide
+  already described it this way.
+
 - **App Store link.** The README, the user guide's home and app Getting
   started pages, and the listing doc link to The Knowledge Press on the Mac
   App Store (Apple ID 6812116080). The iPhone and iPad app is in App Review.
