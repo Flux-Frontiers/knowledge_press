@@ -19,6 +19,16 @@
 #   make ios-deploy-all     -- install + relaunch the app on every reachable device
 #   make ios-push-all       -- build, then install app + corpus + relaunch on every reachable device
 #
+# The iPhone app for the App Store -- see app/RUNBOOK.md section 8:
+#   make ios-stage-corpus   -- copy the corpus packs into app/ios/Corpus
+#   make ios-unstage-corpus -- empty app/ios/Corpus again
+#   make ios-archive        -- Release .xcarchive, corpus staged and bundled
+#   make ios-upload         -- export the archive as an .ipa and send it to App Store Connect
+#   make ios-sim            -- Simulator build with the corpus, for screenshots (SIM=<name>)
+#                              (runs ios-sim-build, ios-sim-boot, ios-sim-install-corpus, ios-sim-launch)
+#   make ios-sim-screenshot -- save the booted Simulator's screen under screenshots/
+#   make ios-sim-kill       -- shut every booted Simulator down
+#
 # All the ios-* targets auto-detect a reachable device. With more than one
 # paired, name it: make ios-deploy IOS_DEVICE=<udid|name>
 #
@@ -27,6 +37,8 @@
 #   make mac-check     -- compile unsigned; no certificate needed (the CI gate)
 #   make mac-stage-corpus   -- copy the corpus packs into app/macos/Corpus
 #   make mac-unstage-corpus -- empty app/macos/Corpus again
+#   make mac-dev       -- Debug .app, automatic signing, carries Private Cloud Compute
+#   make mac-dev-run   -- build mac-dev and open it
 #   make mac-archive   -- sandboxed Release .xcarchive for the Mac App Store
 #   make mac-upload    -- export the archive as a .pkg and send it to App Store Connect
 #
@@ -39,6 +51,12 @@
 #   make web-kill      -- stop every running Vite dev or preview server
 #   make web-books     -- write each book's text into web/public/books (gutenberg_kg)
 #   make web-books-publish -- upload that text for the Pages build, then redeploy
+#
+# The user guide (docs/):
+#   make docs-install  -- create .venv-docs with mkdocs-material
+#   make docs          -- build the guide into site/, --strict
+#   make docs-serve    -- serve the guide locally with live reload
+#   make docs-gallery  -- render the book gallery's tree portraits (needs make web-dev)
 #
 # The app icon (app/icon):
 #   make icons         -- re-render every icon PNG from the press-seal SVGs
