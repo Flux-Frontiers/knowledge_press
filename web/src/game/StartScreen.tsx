@@ -61,7 +61,7 @@ export function StartScreen({
             <Route className="size-4" strokeWidth={1.75} />
             Guided tour
           </button>
-          <button type="button" onClick={toggleHelp}
+          <button type="button" onClick={() => toggleHelp()}
             className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border bg-surface/80 px-4 py-3 text-base text-fg">
             <Info className="size-4" strokeWidth={1.75} />
             About

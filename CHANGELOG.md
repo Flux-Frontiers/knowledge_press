@@ -18,6 +18,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   book's tree with its card open, as the Books tab does. The Forest guide
   already described it this way.
 
+### Changed
+
+- **Forest: tap the redwood's sign to read it.** The sign at the corpus
+  redwood opens at reading size, as an exhibit's plaque does. Tapping the
+  tree, or B, still lists every book.
+- **Forest: ? opens About at the key list.** The info button and the start
+  screen still open About at the top.
+
 ### Fixed
 
 - **Forest: the cart fills from the front.** Pressed books stood first by the

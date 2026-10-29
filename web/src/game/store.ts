@@ -122,6 +122,8 @@ export type GameStore = {
   setStats: (stats: { tris: number; calls: number; fps: number } | null) => void;
   libraryOpen: boolean;
   helpOpen: boolean;
+  /** Where About opens: at the top, or at its key list (the ? key). */
+  helpAt: "top" | "keys";
   lastReadSlug: string | null;
   selectedGrove: string | null;
   atlasOpen: boolean;
@@ -179,7 +181,8 @@ export type GameStore = {
   setPose: (x: number, z: number, yaw: number, speed: number) => void;
   setToast: (msg: string | null) => void;
   toggleLibrary: () => void;
-  toggleHelp: () => void;
+  /** :param at: where About opens; ignored when closing. */
+  toggleHelp: (at?: "top" | "keys") => void;
   setLastRead: (slug: string | null) => void;
   selectGrove: (genre: string | null) => void;
   toggleAtlas: () => void;
@@ -277,6 +280,7 @@ export const useGame = create<GameStore>((set, get) => ({
   setStats: (stats) => set({ stats }),
   libraryOpen: false,
   helpOpen: false,
+  helpAt: "top",
   lastReadSlug: null,
   selectedGrove: null,
   atlasOpen: false,
@@ -378,7 +382,7 @@ export const useGame = create<GameStore>((set, get) => ({
   setPose: (x, z, yaw, speed) => set({ x, z, yaw, speed }),
   setToast: (toast) => set({ toast }),
   toggleLibrary: () => set({ libraryOpen: !get().libraryOpen, atlasOpen: false, catalogOpen: false }),
-  toggleHelp: () => set({ helpOpen: !get().helpOpen }),
+  toggleHelp: (at = "top") => set(get().helpOpen ? { helpOpen: false } : { helpOpen: true, helpAt: at }),
   setLastRead: (lastReadSlug) => set({ lastReadSlug }),
   selectGrove: (selectedGrove) => set({ selectedGrove }),
   toggleAtlas: () => set({ atlasOpen: !get().atlasOpen, libraryOpen: false, catalogOpen: false }),

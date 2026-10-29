@@ -16,7 +16,7 @@ const KEYS: [string, string][] = [
   ["G / B / L", "the grove atlas, every book, your press"],
   ["H / Q", "home to the redwood / the guided tour"],
   ["C", "camera: behind, high, in the cart, god's eye"],
-  ["?", "this page"],
+  ["?", "this page, at this list"],
   ["Esc", "close a panel; with none open, settings"],
 ];
 
@@ -31,13 +31,16 @@ const TOUCH: [string, string][] = [
 /**
  * What the forest is, what is in it, what is in tonight's sky, and how to get
  * around: the long form of the start screen. Opened with ?, the About button
- * in the bar or the phone's three-dot menu, or About on the start screen.
+ * in the bar or the phone's three-dot menu, or About on the start screen; ?
+ * opens it scrolled to the key list, the others at the top.
  */
 export function About() {
   const open = useGame((s) => s.helpOpen);
+  const at = useGame((s) => s.helpAt);
   const toggle = useGame((s) => s.toggleHelp);
   const dialog = useRef<HTMLDialogElement>(null);
   const close = useRef<HTMLButtonElement>(null);
+  const keys = useRef<HTMLHeadingElement>(null);
   // Each species with the genres that grow as it, in catalog order.
   const species = useMemo(() => {
     const labels = new Map(BOOKS.map((b) => [b.genre, b.genreLabel]));
@@ -50,9 +53,11 @@ export function About() {
   useEffect(() => {
     if (open) {
       dialog.current?.showModal();
-      close.current?.focus();
+      close.current?.focus({ preventScroll: true });
+      if (at === "keys") keys.current?.scrollIntoView({ block: "start" });
+      else dialog.current?.scrollTo({ top: 0 });
     } else dialog.current?.close();
-  }, [open]);
+  }, [open, at]);
 
   return (
     <dialog ref={dialog} aria-labelledby="about-title" onCancel={(e) => { e.preventDefault(); toggle(); }}
@@ -65,7 +70,7 @@ export function About() {
           <p className="text-xs tracking-[0.2em] text-primary uppercase">The Knowledge Press</p>
           <h2 id="about-title" className="mt-1 font-display text-3xl">About the forest</h2>
         </div>
-        <button ref={close} type="button" aria-label="Close" onClick={toggle}
+        <button ref={close} type="button" aria-label="Close" onClick={() => toggle()}
           className="grid size-11 shrink-0 place-items-center rounded-md border border-border text-xl leading-none">×</button>
       </header>
 
@@ -100,7 +105,7 @@ export function About() {
         {/* Mounted only while open, so each opening reads the sky for now. */}
         {open && <NightSky />}
 
-        <h3>Getting around</h3>
+        <h3 ref={keys}>Getting around</h3>
         <dl className="about-keys">
           {(COARSE_POINTER ? TOUCH : KEYS).map(([k, v]) => (
             <div key={k}><dt>{k}</dt><dd>{v}</dd></div>

@@ -44,7 +44,7 @@ plaque. The groves are out along the roads.
 | ++b++ | Browse: every book. |
 | ++l++ | Browse: the press, the books you have read. |
 | ++h++ | Home, in front of the corpus redwood. |
-| ++"?"++ | About the forest and tonight's sky. |
+| ++"?"++ | About the forest and tonight's sky, opened at the list of keys. |
 | ++esc++ | Settings. With a panel open, closes it. |
 
 With a book open in the reader, ++left++ and ++right++ turn the chapter and
