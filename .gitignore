@@ -52,3 +52,6 @@ assets/meshy_dad_sculpture_12feet.blend
 assets/Meshy_dad_sculpture.glb
 .venv-docs/
 site/
+
+# AgentKG conversational memory (local)
+.agentkg/
