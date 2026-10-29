@@ -36,6 +36,36 @@ test("a picked tree stays pinned until dismissed", () => {
   assert.equal(st().nearbyDismissed, "hamlet");
 });
 
+test("pulling up at another tree, away from the pinned one, unpins it", () => {
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().setNearby(null, 16, 0);
+  // Parked at Hamlet, click Lear across the grove: Lear stays pinned.
+  st().setNearby("hamlet", 3, 0, 40);
+  st().pinTree("lear");
+  st().setNearby("hamlet", 3, 0, 40);
+  assert.equal(st().pinnedSlug, "lear");
+  // Driving off past trees at speed keeps the pin.
+  st().setNearby("macbeth", 3, 4, 30);
+  assert.equal(st().pinnedSlug, "lear");
+  // Slowing at Macbeth, still far from Lear: Macbeth's card takes over.
+  st().setNearby("macbeth", 3, 0.5, 30);
+  assert.equal(st().cardSlug, "macbeth");
+  assert.equal(st().pinnedSlug, null);
+});
+
+test("a jump that lands nearer a neighbor keeps the pinned tree", () => {
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().setNearby(null, 16, 0);
+  st().pinTree("lear");
+  st().setNearby("othello", 4, 0, 5.5);
+  assert.equal(st().pinnedSlug, "lear");
+  // Arriving at the pinned tree itself keeps it too.
+  st().setNearby("lear", 4, 0, 4);
+  assert.equal(st().pinnedSlug, "lear");
+});
+
 test("pickTree returns the first tree along the ray", () => {
   const { pickTree } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
   const tree = (slug, x, z) => ({ book: { slug }, x, z, height: 10, trunkRadius: 0.3 });

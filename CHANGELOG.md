@@ -18,6 +18,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   book's tree with its card open, as the Books tab does. The Forest guide
   already described it this way.
 
+### Fixed
+
+- **Forest: a picked tree's card no longer hides the next tree's.** A card
+  opened by clicking, searching or jumping stayed up until closed, so
+  pulling up at another tree showed nothing new. Now, slowing at a
+  different tree, away from the picked one, brings up that tree's card.
+  A tree clicked while parked at another, or a jump that lands nearer a
+  neighbor, keeps its card.
+
 - **App Store link.** The README, the user guide's home and app Getting
   started pages, and the listing doc link to The Knowledge Press on the Mac
   App Store (Apple ID 6812116080). The iPhone and iPad app is in App Review.
