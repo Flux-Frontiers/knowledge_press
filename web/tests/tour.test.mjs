@@ -87,6 +87,36 @@ test("the guided tour keeps to the road, from home and from the hub end of a spo
   }
 });
 
+test("from a tree off the road, the tour reaches the ring at a drive, not a crawl", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const { sim, teleportSim, stepVehicle } = require(`${process.env.FOREST_TEST_BUILD}/sim.js`);
+  const { planTour, steerTour } = require(`${process.env.FOREST_TEST_BUILD}/tour.js`);
+  const f = getForest();
+  // A tree well back from any road, the cart parked beside it facing its trunk.
+  const t = f.trees.map((tr) => ({ tr, d: roadDistance(f, tr.x, tr.z) })).filter(({ d }) => d > 26 && d < 40).sort((a, b) => a.d - b.d)[0].tr;
+  const x = t.x + 4, z = t.z;
+  teleportSim(x, z, Math.atan2(-(t.x - x), -(t.z - z)));
+  const start = roadDistance(f, sim.x, sim.z);
+  const tour = planTour(f, sim.x, sim.z, sim.yaw);
+  const hz = 30;
+  let s = 0;
+  for (; s < 60 && roadDistance(f, sim.x, sim.z) > 1; s += 1 / hz) {
+    const c = steerTour(tour, sim.x, sim.z, sim.yaw, sim.speed, 1 / hz);
+    stepVehicle(f, c.throttle, c.steer, false, 1 / hz, { brake: c.brake });
+  }
+  // Turning round, then about 2 m/s or better: the off-route slowdown is for the last few meters.
+  assert.ok(s < start / 2 + 6, `${start.toFixed(1)} m to the road took ${s.toFixed(1)} s`);
+  // Then it rides on and pulls up at the next grove's sign within the next stretch of ring.
+  let stopped = false;
+  for (let k = 0; k < 120 * hz && !stopped; k++) {
+    const c = steerTour(tour, sim.x, sim.z, sim.yaw, sim.speed, 1 / hz);
+    stepVehicle(f, c.throttle, c.steer, false, 1 / hz, { brake: c.brake });
+    stopped = Boolean(tour.dwell);
+  }
+  assert.ok(stopped, "never pulled up at a grove after joining the ring");
+  assert.ok(roadDistance(f, sim.x, sim.z) < 1.4, "pulled up off the road");
+});
+
 test("the tour loop turns smoothly: no corner sharper than 40 degrees between samples", () => {
   const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
   const f = getForest();

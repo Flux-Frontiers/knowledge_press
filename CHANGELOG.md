@@ -28,6 +28,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Forest: the tour leaves a grove at a drive.** Started from a tree, the
+  guided tour crawled toward the ring, held to the slow pace meant for
+  drifting off the road, and then braked in the middle of the grove to
+  face the grove's sign from ten meters off. It now drives to the ring at
+  full tour speed, skips the stop for the grove it set out from, and pulls
+  up at the next grove on the road. From 25 m out it reaches the ring in
+  11 s, down from 23.
+
 - **Forest: the cart fills from the front.** Pressed books stood first by the
   tailboard, where the tailboard hid them from the behind camera. Rows, flat
   stacks and the heap now start at the front board and fill back, so the
