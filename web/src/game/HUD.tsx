@@ -721,15 +721,8 @@ function PressTab({ forest }: { forest: Forest }) {
               <button type="button" className="text-xs text-primary" onClick={() => useGame.getState().openReader(t.book.slug)}>
                 Open
               </button>
-              <button
-                type="button"
-                className="text-xs text-primary"
-                onClick={() => {
-                  const g = forest.groves.find((gr) => gr.genre === t.book.genre);
-                  if (g) jumpToGrove(g);
-                }}
-              >
-                Grove
+              <button type="button" className="text-xs text-primary" onClick={() => jumpToTree(t)}>
+                Tree
               </button>
             </div>
           </li>

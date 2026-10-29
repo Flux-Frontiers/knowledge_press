@@ -145,10 +145,10 @@ function RedwoodPlaque({ forest }: { forest: Forest }) {
   const byline = `${c.limbs} books · ${c.totalChunks.toLocaleString("en-US")} chunks · ${Math.round(c.height)} m`;
   const x = Math.cos(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
   const z = Math.sin(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
-  // Tapping the plaque lists every book, as tapping the tree does.
+  // Tapping the plaque shows it at reading size, as an exhibit's does; tapping the tree lists every book.
   return (
     <group position={[x, 0, z]} rotation={[0, Math.atan2(x, z), 0]}
-      onClick={(e) => { e.stopPropagation(); useGame.getState().openCatalog(null); }}
+      onClick={(e) => { e.stopPropagation(); useGame.getState().openPlaque({ title: "The Corpus Redwood", byline, body: REDWOOD_BODY }); }}
       onPointerOver={() => pointer(true)} onPointerOut={() => pointer(false)}>
       <Lectern title="The Corpus Redwood" byline={byline} body={REDWOOD_BODY} />
     </group>

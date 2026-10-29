@@ -423,7 +423,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     poseAcc.current += dt;
     if (poseAcc.current > 0.08) {
       poseAcc.current = 0;
-      setNearby(bestSlug, bestD, sim.speed);
+      const pinned = game.pinnedSlug ? forest.trees.find((t) => t.book.slug === game.pinnedSlug) : undefined;
+      setNearby(bestSlug, bestD, sim.speed, pinned ? Math.hypot(pinned.x - sim.x, pinned.z - sim.z) : Infinity);
       setPose(sim.x, sim.z, sim.yaw, sim.speed);
     }
   });

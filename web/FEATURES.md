@@ -49,7 +49,6 @@ A rank for how much of the forest you have pressed. Starting over shipped as
 
 | Feature | Notes |
 | --- | --- |
-| Jump to a tree from the press | The press list opens a book or jumps to its grove; the lantern query and the **B** list already land at the tree. |
 | Ambient audio | Wind, wet leaves, a distant press. Unlock on first gesture. |
 | Breadcrumb lanterns | Optional trail of your own lights so a long wander still has a way home. |
 | Live corpus ingest | `gutenkg export-web-catalog`, in gutenberg_kg, counts `kind='chunk'` nodes in each book's `graph.sqlite` and rewrites the TypeScript catalog. The web forest does not re-chunk. |
@@ -83,6 +82,7 @@ A rank for how much of the forest you have pressed. Starting over shipped as
 | Live moots: pick two books and a topic, and a local GutenbergKG worker writes each turn while you watch | `liveMoots.ts`, `MootOverlay.tsx`, `PauseOverlay.tsx` |
 | Lantern query over titles, tags, excerpts | `HUD.tsx`, `Trees.tsx` |
 | Browse panel (Groves, Books and Press tabs), minimap jump, home return, one-row phone bar with a three-dot menu | `HUD.tsx` |
+| Jump to a tree from the press: **Tree** beside each entry lands at the tree with its card open, as the Books tab does | `HUD.tsx` |
 | Empty the press (Press tab, after asking); Reset all settings leaves the press and visited groves alone | `HUD.tsx`, `store.ts` |
 | Link to a tree: `?tree=<slug>` starts beside it with its card open | `deepLink.ts`, `ForestApp.tsx` |
 | Corpus redwood at the hub, with its own ridged bark; book list popup (B), start at home | `corpusTree.ts`, `CorpusRedwood.tsx`, `HUD.tsx` |

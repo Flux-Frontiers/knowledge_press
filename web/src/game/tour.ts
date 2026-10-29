@@ -20,6 +20,8 @@ export type Tour = {
   loopStart: number;
   /** Progress: the route point the cart has reached. */
   i: number;
+  /** The cart has reached the route; until then it is heading for it, not straying from it. */
+  joined: boolean;
   /** Grove stops on the loop in route order: the route point and the grove's signpost. */
   stops: { k: number; genre: string; x: number; z: number }[];
   /** The stop the cart is heading for. */
@@ -155,7 +157,7 @@ export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circui
   const hr = Math.hypot(h.x, h.z) || 1;
   const innerR = Math.min(...forest.roadLines.filter((l) => l.kind === "ring").map((l) => Math.hypot(...l.pts[0]!)));
   const home = { x: h.x, z: h.z, junction: [(h.x / hr) * innerR, (h.z / hr) * innerR] as [number, number] };
-  return { pts, genre, loopStart, i: 0, stops, next: 0, laps: 0, dwell: null, home, ending: false, arrive: null, done: false };
+  return { pts, genre, loopStart, i: 0, joined: false, stops, next: 0, laps: 0, dwell: null, home, ending: false, arrive: null, done: false };
 }
 
 /**
@@ -305,12 +307,6 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
     t.arrive = "brake";
     return { steer: 0, throttle: 0, brake: true, genre: "" };
   }
-  // Pull up at the next grove stop once progress reaches it.
-  const at = t.ending ? undefined : t.stops[t.next];
-  if (at && t.i >= t.loopStart && stepsTo(t, at.k, t.i) <= SEARCH) {
-    t.dwell = { phase: "brake", left: DWELL };
-    return { steer: 0, throttle: 0, brake: true, genre: at.genre };
-  }
   // Distance off the route: to the segments either side of the point reached.
   const seg = (a: number, b: number) => {
     const [ax, az] = t.pts[a]!, [bx, bz] = t.pts[b]!;
@@ -319,14 +315,30 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
     return Math.hypot(x - ax - dx * u, z - az - dz * u);
   };
   const off = Math.min(seg(t.i, next(t, t.i)), t.i > 0 ? seg(t.i - 1, t.i) : Infinity);
+  // Starting at a tree, out in a grove, the cart heads for the road; it has
+  // joined the route once it first comes within a meter of it. A stop it
+  // crossed the grove past on the way is the grove it set out from: skip it.
+  if (!t.joined && off < 1) {
+    t.joined = true;
+    for (let k = 1; k < t.stops.length && t.i >= t.loopStart && t.stops[t.next]!.k + SEARCH < t.i; k++) t.next++;
+  }
+  // Pull up at the next grove stop once progress reaches it, on the road: a
+  // cart still crossing the grove it set out from does not stop for its sign.
+  const at = t.ending ? undefined : t.stops[t.next];
+  if (at && t.joined && t.i >= t.loopStart && stepsTo(t, at.k, t.i) <= SEARCH) {
+    t.dwell = { phase: "brake", left: DWELL };
+    return { steer: 0, throttle: 0, brake: true, genre: at.genre };
+  }
   // Look further ahead the faster the cart goes: tight at a crawl, smooth at speed.
   const [tx, tz] = t.pts[along(t, t.i, clamp(2.5 + 0.8 * Math.abs(speed), 3, 6))]!;
   const err = wrapAngle(yawToward(x, z, tx, tz) - yaw);
   // Slow for the bends ahead (the ring doubles back at some grove stops):
   // coast when over the bend's speed, so drag brakes the cart before the turn.
   const bend = Math.max(turnAhead(t, t.i, 10), Math.abs(err));
-  // Off the centreline (coming out of a turn), hold back until it is regained.
-  let limit = (1.2 + 3 * Math.max(0, 1 - bend / 1.9)) * Math.max(0.45, 1 - Math.max(0, off - 0.5) / 2);
+  // Off the centreline (coming out of a turn), hold back until it is regained;
+  // not before the cart has joined the route, when it is heading for it, not straying.
+  const hold = t.joined ? Math.max(0.45, 1 - Math.max(0, off - 0.5) / 2) : 1;
+  let limit = (1.2 + 3 * Math.max(0, 1 - bend / 1.9)) * hold;
   // Ease off approaching the stop, so the cart pulls up rather than stands on the brake.
   if (at && t.i >= t.loopStart) limit = Math.min(limit, 0.8 + 0.35 * Math.hypot(t.pts[at.k]![0] - x, t.pts[at.k]![1] - z));
   if (t.ending && t.i >= t.pts.length - 12) limit = Math.min(limit, 0.8 + 0.35 * toEnd);

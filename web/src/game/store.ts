@@ -122,6 +122,8 @@ export type GameStore = {
   setStats: (stats: { tris: number; calls: number; fps: number } | null) => void;
   libraryOpen: boolean;
   helpOpen: boolean;
+  /** Where About opens: at the top, or at its key list (the ? key). */
+  helpAt: "top" | "keys";
   lastReadSlug: string | null;
   selectedGrove: string | null;
   atlasOpen: boolean;
@@ -171,14 +173,16 @@ export type GameStore = {
   /** Take every book out of the press. */
   emptyPress: () => void;
   markGrove: (genre: string) => void;
-  setNearby: (slug: string | null, dist: number, speed: number) => void;
+  /** :param pinnedDist: distance from the pinned tree, m; Infinity when none is pinned. */
+  setNearby: (slug: string | null, dist: number, speed: number, pinnedDist?: number) => void;
   pinTree: (slug: string | null) => void;
   dismissNearby: () => void;
   dismissQuestHint: (id: string) => void;
   setPose: (x: number, z: number, yaw: number, speed: number) => void;
   setToast: (msg: string | null) => void;
   toggleLibrary: () => void;
-  toggleHelp: () => void;
+  /** :param at: where About opens; ignored when closing. */
+  toggleHelp: (at?: "top" | "keys") => void;
   setLastRead: (slug: string | null) => void;
   selectGrove: (genre: string | null) => void;
   toggleAtlas: () => void;
@@ -276,6 +280,7 @@ export const useGame = create<GameStore>((set, get) => ({
   setStats: (stats) => set({ stats }),
   libraryOpen: false,
   helpOpen: false,
+  helpAt: "top",
   lastReadSlug: null,
   selectedGrove: null,
   atlasOpen: false,
@@ -348,18 +353,24 @@ export const useGame = create<GameStore>((set, get) => ({
     set({ grovesVisited: next });
     persist({ ...get(), grovesVisited: next });
   },
-  setNearby: (nearbySlug, nearbyDist, speed) => {
+  setNearby: (nearbySlug, nearbyDist, speed, pinnedDist = Infinity) => {
     // Roads pass within 3 m of trunks, so distance alone would pop a card at
     // every tree on the way. Pop one only when the cart slows within reading range,
     // and drop it as soon as the cart leaves that range or another tree is nearer.
     const inRange = nearbySlug !== null && nearbyDist < READ_RANGE;
     const s = get();
-    if (nearbySlug !== s.nearbySlug) {
-      set({ nearbySlug, nearbyDist, nearbyDismissed: null, cardSlug: inRange && Math.abs(speed) < CARD_SPEED ? nearbySlug : null });
-      return;
-    }
-    const cardSlug = !inRange ? null : s.cardSlug ?? (Math.abs(speed) < CARD_SPEED ? nearbySlug : null);
-    set(cardSlug === s.cardSlug ? { nearbyDist } : { nearbyDist, cardSlug });
+    const changed = nearbySlug !== s.nearbySlug;
+    const cardSlug = !inRange ? null
+      : !changed && s.cardSlug ? s.cardSlug
+      : Math.abs(speed) < CARD_SPEED ? nearbySlug : null;
+    // A pin yields when the cart pulls up at a different tree, away from the
+    // pinned one. Only on that arrival: a tree clicked while parked at another
+    // stays pinned, and a jump that lands nearer a neighbor keeps its tree.
+    const unpin = s.pinnedSlug !== null && cardSlug !== null && cardSlug !== s.cardSlug
+      && cardSlug !== s.pinnedSlug && pinnedDist >= READ_RANGE;
+    const pin = unpin ? { pinnedSlug: null } : {};
+    if (changed) set({ nearbySlug, nearbyDist, nearbyDismissed: null, cardSlug, ...pin });
+    else set(cardSlug === s.cardSlug ? { nearbyDist } : { nearbyDist, cardSlug, ...pin });
   },
   pinTree: (pinnedSlug) => set({ pinnedSlug }),
   dismissNearby: () => {
@@ -371,7 +382,7 @@ export const useGame = create<GameStore>((set, get) => ({
   setPose: (x, z, yaw, speed) => set({ x, z, yaw, speed }),
   setToast: (toast) => set({ toast }),
   toggleLibrary: () => set({ libraryOpen: !get().libraryOpen, atlasOpen: false, catalogOpen: false }),
-  toggleHelp: () => set({ helpOpen: !get().helpOpen }),
+  toggleHelp: (at = "top") => set(get().helpOpen ? { helpOpen: false } : { helpOpen: true, helpAt: at }),
   setLastRead: (lastReadSlug) => set({ lastReadSlug }),
   selectGrove: (selectedGrove) => set({ selectedGrove }),
   toggleAtlas: () => set({ atlasOpen: !get().atlasOpen, libraryOpen: false, catalogOpen: false }),

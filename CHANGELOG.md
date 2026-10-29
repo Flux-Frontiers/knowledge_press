@@ -13,6 +13,41 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Forest: jump to a tree from the press.** Each entry in the Press tab
+  has a **Tree** button in place of **Grove**: it puts the cart beside that
+  book's tree with its card open, as the Books tab does. The Forest guide
+  already described it this way.
+
+### Changed
+
+- **Forest: tap the redwood's sign to read it.** The sign at the corpus
+  redwood opens at reading size, as an exhibit's plaque does. Tapping the
+  tree, or B, still lists every book.
+- **Forest: ? opens About at the key list.** The info button and the start
+  screen still open About at the top.
+
+### Fixed
+
+- **Forest: the tour leaves a grove at a drive.** Started from a tree, the
+  guided tour crawled toward the ring, held to the slow pace meant for
+  drifting off the road, and then braked in the middle of the grove to
+  face the grove's sign from ten meters off. It now drives to the ring at
+  full tour speed, skips the stop for the grove it set out from, and pulls
+  up at the next grove on the road. From 25 m out it reaches the ring in
+  11 s, down from 23.
+
+- **Forest: the cart fills from the front.** Pressed books stood first by the
+  tailboard, where the tailboard hid them from the behind camera. Rows, flat
+  stacks and the heap now start at the front board and fill back, so the
+  first books are in view. A full cart looks the same as before.
+
+- **Forest: a picked tree's card no longer hides the next tree's.** A card
+  opened by clicking, searching or jumping stayed up until closed, so
+  pulling up at another tree showed nothing new. Now, slowing at a
+  different tree, away from the picked one, brings up that tree's card.
+  A tree clicked while parked at another, or a jump that lands nearer a
+  neighbor, keeps its card.
+
 - **App Store link.** The README, the user guide's home and app Getting
   started pages, and the listing doc link to The Knowledge Press on the Mac
   App Store (Apple ID 6812116080). The iPhone and iPad app is in App Review.

@@ -138,8 +138,8 @@ export function ForestApp() {
     function onKey(e: KeyboardEvent) {
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
       const st = useGame.getState();
-      // About: ? anywhere, the start screen too. Its dialog handles Escape itself.
-      if (e.key === "?" && !st.paused && !st.readingSlug && !st.mootsOpen && !st.mootId && !isInputTarget(e.target)) { st.toggleHelp(); return; }
+      // About, opened at its key list: ? anywhere, the start screen too. Its dialog handles Escape itself.
+      if (e.key === "?" && !st.paused && !st.readingSlug && !st.mootsOpen && !st.mootId && !isInputTarget(e.target)) { st.toggleHelp("keys"); return; }
       if (!st.playing) return;
       if (e.code === "Escape") {
         if (st.paused || st.helpOpen) return; // The settings and About dialogs handle Escape themselves.
