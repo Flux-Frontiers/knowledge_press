@@ -1,3 +1,5 @@
+![The Forest logo](../logo.svg)
+
 # Knowledge Press Forest
 
 Web port of the GutenbergKG forest: 253 public-domain books grown as trees
