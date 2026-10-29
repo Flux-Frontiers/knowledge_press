@@ -11,6 +11,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Forest: settings open at the top.** On a phone the settings card
+  opened scrolled to its end, because it focused its "Back to the forest"
+  button at the bottom. It now focuses the card itself and resets its
+  scroll, again a frame later for iOS Safari. Ported from The Disulfides.
+
 ### Changed
 
 - **The Mac app is approved for the Mac App Store.** App Review approved
