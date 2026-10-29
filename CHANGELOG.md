@@ -11,6 +11,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **App Store link.** The README, the user guide's home and app Getting
+  started pages, and the listing doc link to The Knowledge Press on the Mac
+  App Store (Apple ID 6812116080). The iPhone and iPad app is in App Review.
+
 ### Removed
 
 - **The notarized Developer ID Mac build.** `make mac-build`, `mac-verify`,

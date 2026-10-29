@@ -18,6 +18,9 @@ this repo holds the ways to read it.
 
 *Author: Eric G. Suchanek, PhD -- Flux-Frontiers, Liberty TWP, OH*
 
+**Get the app:** [The Knowledge Press on the Mac App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12).
+The iPhone and iPad app is in App Review.
+
 | Directory | What it is | License |
 | --- | --- | --- |
 | [`app/`](app/) | The Knowledge Press for iPhone, iPad and Mac: searches the corpus on the device and answers with Apple Foundation Models. Swift, XcodeGen. | Proprietary, see [`app/LICENSE`](app/LICENSE) |

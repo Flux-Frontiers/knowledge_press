@@ -3,6 +3,11 @@
 The text in App Store Connect, kept here so the next release can update it
 in one place. Character limits are Apple's.
 
+Store page: <https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12> (Apple ID `6812116080`). The Mac app is live; the iPhone
+and iPad app is in App Review. Both are one Universal Purchase on the same
+record, so the same Apple ID serves both once iOS is approved; `?mt=12`
+opens the Mac tab.
+
 ## Name (30)
 
 The Knowledge Press

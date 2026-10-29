@@ -9,7 +9,8 @@ corpus of public-domain books in two ways:
   through the groves, read the books from their trees, and collect them in
   your press. The [Forest guide](forest/getting-started.md) covers it.
 - **The Knowledge Press app** for iPhone, iPad and Mac, which searches the
-  same corpus on the device and answers questions from it. The [App
+  same corpus on the device and answers questions from it. It is [on the
+  Mac App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12); the iPhone and iPad app is in App Review. The [App
   guide](app/getting-started.md) covers it; [Inside the
   app](APP_INTERNALS.md) describes how it is built.
 
