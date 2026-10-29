@@ -1,8 +1,8 @@
 name: Release
 
 # Adapted from doc_kg's release.yml. There is no package to publish here: the
-# app needs a Developer ID to sign (app/RUNBOOK.md section 7), so the release
-# carries the notes and a static build of the web forest. Publishing the
+# app ships only through the App Store (app/RUNBOOK.md section 8), so the
+# release carries the notes and a static build of the web forest. Publishing the
 # GitHub Release is also what makes Zenodo archive it.
 
 on:

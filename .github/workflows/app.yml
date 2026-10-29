@@ -13,9 +13,9 @@ name: App
 # workflow is path-filtered to the app tree and the Makefile that drives it.
 # `!app/**.md` keeps a RUNBOOK-only edit from spending a macOS runner.
 #
-# Everything here is unsigned. Signing and notarization need a Developer ID
-# certificate that cannot live in CI, and `make mac-build` would fail without
-# one -- see app/RUNBOOK.md section 7. Compiling unsigned is the part CI can
+# Everything here is unsigned. Signing needs the team's certificates and
+# provisioning profiles, which do not live in CI -- see app/RUNBOOK.md. Compiling
+# unsigned is the part CI can
 # usefully own, and it is also what separates a code failure from a signing
 # failure when something does break.
 

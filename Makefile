@@ -27,10 +27,6 @@
 #   make mac-check     -- compile unsigned; no certificate needed (the CI gate)
 #   make mac-stage-corpus   -- copy the corpus packs into app/macos/Corpus
 #   make mac-unstage-corpus -- empty app/macos/Corpus again
-#   make mac-build     -- Release .app, corpus bundled, Developer ID signed
-#   make mac-verify    -- prove the signature is distributable before shipping
-#   make mac-notarize  -- submit the .app to Apple, wait, staple the ticket
-#   make mac-dmg       -- package the stapled .app as a signed .dmg
 #   make mac-archive   -- sandboxed Release .xcarchive for the Mac App Store
 #   make mac-upload    -- export the archive as a .pkg and send it to App Store Connect
 #
@@ -49,7 +45,7 @@
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: icons ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg mac-release mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill web-books web-books-publish
+.PHONY: icons ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill web-books web-books-publish
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -310,8 +306,7 @@ IOS_APP = app/ios/build/Build/Products/Debug-iphoneos/KnowledgePress.app
 IOS_TEAM ?=
 
 # Resolve the Apple Developer Team ID from this machine, so no one's team is
-# hardcoded here -- the same reason mac_resolve_identity reads the signer out
-# of the keychain rather than naming them.
+# hardcoded here.
 #
 # project.yml carries no team and xcodegen wipes whatever was set in Xcode's
 # Signing & Capabilities editor, so it has to arrive as a build setting; the
@@ -463,39 +458,20 @@ ios-push-all: ios-build
 # The Knowledge Press -- Mac app (app/macos)
 #
 # `swift run KnowledgePress` from app/GutenbergKGKit is still the fast loop.
-# These targets produce the thing a SwiftPM executable cannot be: a signed,
-# notarized bundle someone else can install.
+# These targets produce the signed, sandboxed bundle a SwiftPM executable
+# cannot be. The Mac App Store is the only way the app reaches anyone else;
+# there is no notarized Developer ID build.
 #
-# The release build carries the corpus inside the .app, as the App Store iOS
+# The store build carries the corpus inside the .app, as the App Store iOS
 # build does; CorpusPacks.bundledDirectory() finds it in Contents/Resources.
 # An installed corpus still wins over the bundled one.
 #
-# The Developer ID build is unsandboxed -- mac-build drops the entitlements
-# file -- so it reads the same ~/Library/Application Support/Corpus that
-# `swift run` does. mac-dev and mac-archive carry App Sandbox, so theirs is
+# mac-dev and mac-archive carry App Sandbox, so their Application Support is
 # inside ~/Library/Containers/com.fluxfrontiers.knowledgepress; both bundle
 # the corpus rather than rely on one being copied there.
 # ---------------------------------------------------------------------------
 
-MAC_BUILD_DIR ?= app/macos/build
 MAC_CORPUS_DIR ?= $(IOS_CORPUS_DIR)
-MAC_APP = $(MAC_BUILD_DIR)/Build/Products/Release/KnowledgePress.app
-MAC_DMG ?= $(MAC_BUILD_DIR)/KnowledgePress.dmg
-# `notarytool store-credentials <name>` writes this; see RUNBOOK section 7.
-MAC_NOTARY_PROFILE ?= knowledgepress-notary
-
-# Resolve the Developer ID Application identity from the login keychain, so
-# the signer's name is never hardcoded here.
-define mac_resolve_identity
-IDENTITY=$$(security find-identity -v -p codesigning \
-	  | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -1); \
-if [ -z "$$IDENTITY" ]; then \
-	echo "No Developer ID Application certificate in the login keychain."; \
-	echo "Xcode > Settings > Accounts > Manage Certificates > + Developer ID Application."; \
-	exit 1; \
-fi; \
-TEAM=$$(printf '%s' "$$IDENTITY" | sed -n 's/.*(\([A-Z0-9]*\))$$/\1/p')
-endef
 
 mac-generate:
 	@command -v xcodegen >/dev/null 2>&1 \
@@ -528,30 +504,10 @@ mac-unstage-corpus:
 	@git checkout -- app/macos/Corpus/.gitkeep 2>/dev/null || true
 	@echo "app/macos/Corpus emptied."
 
-# Stages the corpus first, for the same reason ios-archive does: a notarized
-# .app with an empty Corpus folder installs, launches, and answers nothing.
-#
-# Developer ID signing takes no Private Cloud Compute: Apple's Developer ID
-# profile for this App ID does not grant it (the development and App Store
-# profiles do), and xcodebuild refuses to sign a restricted entitlement
-# without a profile granting it. So this build alone drops the entitlements
-# file on the command line; project.yml keeps PCC for every other build.
-# The notarized app answers on-device only.
-mac-build: mac-stage-corpus mac-generate
-	@$(mac_resolve_identity); \
-	echo "Signing as $$IDENTITY"; \
-	cd app/macos && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj \
-	  -scheme KnowledgePress -destination 'platform=macOS' \
-	  -derivedDataPath build -configuration Release \
-	  CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="$$TEAM" \
-	  CODE_SIGN_IDENTITY="$$IDENTITY" OTHER_CODE_SIGN_FLAGS="--timestamp" \
-	  CODE_SIGN_ENTITLEMENTS= \
-	  build | tail -3
-
 # A Debug build signed with the Apple Development identity through automatic
 # signing, which is the only way a Mac build gets a provisioning profile
 # carrying the Private Cloud Compute entitlement today. Runs from the build
-# directory; it is not notarized and is not for anyone else's machine. Same
+# directory; it is not for anyone else's machine. Same
 # `-allowProvisioningUpdates` lesson as ios-build: without it xcodebuild
 # cannot mint the profile and fails with "No profiles for ... were found".
 # A Mac App Development profile also names the Mac it runs on, so the first
@@ -574,88 +530,10 @@ mac-dev: mac-stage-corpus mac-generate
 mac-dev-run: mac-dev
 	open app/macos/build/Build/Products/Debug/KnowledgePress.app
 
-# The checks worth making before spending a notarization round trip. The
-# entitlements check is the one that matters: Xcode injects
-# com.apple.security.get-task-allow unless CODE_SIGN_INJECT_BASE_ENTITLEMENTS
-# is NO, the notary service rejects anything carrying it, and the app signs
-# and passes spctl locally either way.
-mac-verify:
-	@test -d "$(MAC_APP)" || { echo "No app at $(MAC_APP) -- run 'make mac-build'."; exit 1; }
-	@echo "== architectures =="
-	@lipo -archs "$(MAC_APP)/Contents/MacOS/KnowledgePress"
-	@echo "== signature =="
-	@codesign -dvvv "$(MAC_APP)" 2>&1 | grep -E 'Authority|TeamIdentifier|flags|Timestamp'
-	@echo "== hardened runtime =="
-	@codesign -dvvv "$(MAC_APP)" 2>&1 | grep -q '0x10000(runtime)' \
-	  && echo "enabled" \
-	  || { echo "MISSING -- notarization will fail"; exit 1; }
-	@echo "== debug entitlement =="
-	@codesign -d --entitlements - "$(MAC_APP)" 2>&1 | grep -q 'get-task-allow' \
-	  && { echo "PRESENT -- notarization will be rejected"; exit 1; } \
-	  || echo "absent"
-	@echo "== bundled corpus =="
-	@test -f "$(MAC_APP)/Contents/Resources/Corpus/manifest.json" \
-	  && du -sh "$(MAC_APP)/Contents/Resources/Corpus" | cut -f1 \
-	  || { echo "MISSING -- the app would ship with no corpus; run 'make mac-build'"; exit 1; }
-	@echo "== gatekeeper =="
-	@spctl -a -vvv -t exec "$(MAC_APP)" 2>&1 | head -3
-
-define mac_require_notary_profile
-xcrun notarytool history --keychain-profile "$(MAC_NOTARY_PROFILE)" >/dev/null 2>&1 \
-  || { echo "No notarytool profile '$(MAC_NOTARY_PROFILE)'. Create it once:"; \
-	echo "  xcrun notarytool store-credentials $(MAC_NOTARY_PROFILE) \\"; \
-	echo "    --apple-id <your-apple-id> --team-id <team> --password <app-specific-password>"; \
-	echo "App-specific passwords come from appleid.apple.com, not your Apple ID password."; \
-	exit 1; }
-endef
-
-mac-notarize: mac-verify
-	@$(mac_require_notary_profile)
-	ditto -c -k --keepParent "$(MAC_APP)" "$(MAC_BUILD_DIR)/KnowledgePress.zip"
-	xcrun notarytool submit "$(MAC_BUILD_DIR)/KnowledgePress.zip" \
-	  --keychain-profile "$(MAC_NOTARY_PROFILE)" --wait
-	xcrun stapler staple "$(MAC_APP)"
-	@echo "Stapled. The app now launches on a machine that has never seen it."
-
-# The disk image needs signing in its own right. Stapling the .app inside is
-# not enough: a .dmg downloaded from the internet carries a quarantine flag,
-# and Gatekeeper assesses the *image* when it is mounted. An unsigned one is
-# refused ("source=no usable signature") before the reader ever reaches the
-# app, so `make mac-release` would report success and hand you something that
-# fails on the recipient's machine.
-#
-# hdiutil is deprecated on macOS 26+ in favour of `diskutil image create`,
-# which does not exist on older systems. Keeping hdiutil until the floor
-# rises; the warning is expected.
-mac-dmg:
-	@test -d "$(MAC_APP)" || { echo "No app at $(MAC_APP) -- run 'make mac-build'."; exit 1; }
-	@rm -f "$(MAC_DMG)"
-	hdiutil create -volname "Knowledge Press" -srcfolder "$(MAC_APP)" \
-	  -ov -format UDZO "$(MAC_DMG)"
-	@$(mac_resolve_identity); \
-	codesign --force --sign "$$IDENTITY" --timestamp "$(MAC_DMG)"
-	@echo "Wrote and signed $(MAC_DMG)"
-
-# A second round trip, and worth it. Notarizing the image covers the
-# container the recipient actually double-clicks; the app was stapled
-# separately so it still launches offline once copied out of the image, which
-# a dmg-only ticket would not guarantee.
-mac-notarize-dmg:
-	@test -f "$(MAC_DMG)" || { echo "No dmg at $(MAC_DMG) -- run 'make mac-dmg'."; exit 1; }
-	@$(mac_require_notary_profile)
-	xcrun notarytool submit "$(MAC_DMG)" \
-	  --keychain-profile "$(MAC_NOTARY_PROFILE)" --wait
-	xcrun stapler staple "$(MAC_DMG)"
-	@echo "== dmg gatekeeper verdict =="
-	@spctl -a -vvv -t open --context context:primary-signature "$(MAC_DMG)" 2>&1 | head -3
-
-mac-release: mac-build mac-verify mac-notarize mac-dmg mac-notarize-dmg
-	@echo "Signed, notarized, stapled, packaged: $(MAC_DMG)"
-
 # Mac App Store archive: the Mac twin of ios-archive. Automatic signing picks
 # the Apple Distribution identity and a Mac App Store profile, which grants
-# PCC, so unlike mac-build this keeps the entitlements file: PCC plus the App
-# Sandbox the store requires. Stages the corpus for ios-archive's reason.
+# PCC, so this keeps the entitlements file: PCC plus the App Sandbox the
+# store requires. Stages the corpus for ios-archive's reason.
 mac-archive: mac-stage-corpus mac-generate
 	@$(ios_resolve_team); \
 	cd app/macos && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj \

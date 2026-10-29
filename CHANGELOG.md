@@ -11,6 +11,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Removed
+
+- **The notarized Developer ID Mac build.** `make mac-build`, `mac-verify`,
+  `mac-notarize`, `mac-dmg`, `mac-notarize-dmg` and `mac-release` are gone.
+  The Mac App Store is the only way the app reaches anyone else: the
+  Developer ID build could not carry Private Cloud Compute, so it was a
+  weaker app than the store build, and it was never published. The app
+  runbook's section 7 now covers the signed dev build only.
+
 ## [1.31.0] - 2026-10-29
 
 ### Changed

@@ -4,9 +4,8 @@
 #
 # `swift run KnowledgePress` from app/GutenbergKGKit still works and is still
 # the fastest loop. This target exists for the things a SwiftPM executable
-# cannot be: a double-clickable bundle, signed with a Developer ID and
-# notarized, that someone else can install -- or archived, sandboxed, for the
-# Mac App Store.
+# cannot be: a signed, sandboxed bundle, archived for the Mac App Store, which
+# is the only way the app reaches anyone else.
 name: KnowledgePress
 options:
   bundleIdPrefix: com.fluxfrontiers
@@ -37,7 +36,7 @@ targets:
       - PrivacyInfo.xcprivacy
       # See app/ios/project.yml: a folder reference, so the corpus keeps its
       # layout inside Contents/Resources. Empty in development and in CI;
-      # `make mac-stage-corpus` fills it, and `make mac-build` stages first.
+      # `make mac-stage-corpus` fills it, and `make mac-archive` stages first.
       - path: Corpus
         type: folder
     dependencies:
@@ -47,18 +46,15 @@ targets:
     # same App ID, which holds the capability since 2026-09-14. A restricted
     # entitlement has to be in the provisioning profile as well as the
     # signature, so `make mac-dev` (automatic signing, Apple Development) is
-    # the path that gets PCC on a Mac today; `make mac-build` signs with a
-    # Developer ID and no profile, and a Developer ID app carrying a
-    # restricted entitlement its profile does not grant is killed at launch.
-    # Until a Developer ID profile with PCC is minted and embedded, the
-    # Release build has to go without: see the Release config below.
+    # the local path that gets PCC on a Mac, and the Mac App Store profile
+    # `make mac-archive` uses grants it too. Apple's Developer ID profile does
+    # not, which is one reason there is no notarized Developer ID build.
     #
     # App Sandbox is required on the Mac App Store, and lives here rather than
     # in an archive-only file so `make mac-dev` runs sandboxed too: a sandbox
     # failure shows up in the dev build instead of in TestFlight, since an
     # App Store-signed app cannot be run locally. network.client is the
-    # outgoing connection to the LAN worker. `make mac-build` drops this whole
-    # file on its command line, so the notarized app stays unsandboxed.
+    # outgoing connection to the LAN worker.
     entitlements:
       path: KnowledgePress.entitlements
       properties:
@@ -104,26 +100,17 @@ targets:
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        # Required for notarization. The sandboxed builds (mac-dev, the App
-        # Store archive) keep Application Support in
-        # ~/Library/Containers/com.fluxfrontiers.knowledgepress; the
-        # unsandboxed Developer ID build shares ~/Library/Application
-        # Support/Corpus with `swift run`. An installed corpus wins over the
-        # bundled one. No code change either way, since
+        # The sandboxed builds (mac-dev, the App Store archive) keep
+        # Application Support in
+        # ~/Library/Containers/com.fluxfrontiers.knowledgepress; `swift run`
+        # uses ~/Library/Application Support/Corpus. An installed corpus wins
+        # over the bundled one. No code change either way, since
         # CorpusPacks.defaultDirectory() resolves through FileManager.
         ENABLE_HARDENED_RUNTIME: YES
         DEVELOPMENT_TEAM: ""
       configs:
         # Xcode injects com.apple.security.get-task-allow -- the entitlement
         # that lets a debugger attach -- into every signature unless told not
-        # to. Apple's notary service rejects any app carrying it, so a Release
-        # build signed with the default would sign cleanly, pass spctl
-        # locally, and then fail notarization with a message that does not
-        # obviously name this as the cause.
+        # to. A shipping build has no business carrying it.
         Release:
           CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
-          # No PCC in the notarized build until a Developer ID profile that
-          # grants it is embedded -- see the entitlements note above. An
-          # empty path signs with no entitlements file at all, which is what
-          # this configuration did before PCC existed.
-          CODE_SIGN_ENTITLEMENTS: ""
