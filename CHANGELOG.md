@@ -11,12 +11,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Fixed
-
-- **Forest: settings open at the top.** On a phone the settings card
-  opened scrolled to its end, because it focused its "Back to the forest"
-  button at the bottom. It now focuses the card itself and resets its
-  scroll, again a frame later for iOS Safari. Ported from The Disulfides.
+## [1.31.0] - 2026-10-29
 
 ### Changed
 
@@ -102,6 +97,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   keep their view. The gallery's parked cart keeps its fixed cargo.
 
 ### Fixed
+
+- **Forest: settings open at the top.** On a phone the settings card
+  opened scrolled to its end, because it focused its "Back to the forest"
+  button at the bottom. It now focuses the card itself and resets its
+  scroll, again a frame later for iOS Safari. Ported from The Disulfides.
 
 - **Back to the chat from Browse on Mac and iPad.** New chat was disabled
   while the current chat was empty, so on a fresh install, with no saved

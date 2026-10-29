@@ -1,80 +1,117 @@
-# Release Notes -- v1.30.0
+# Release Notes -- v1.31.0
 
-> Released: 2026-10-14
-
-### Added
-
-- **The planets.** Mercury, Venus, Mars, Jupiter and Saturn stand among the
-  stars where they are tonight, steady points a little larger than the
-  brightest stars, in their own tints. Positions from JPL's approximate
-  Keplerian elements (Standish), magnitudes from Mallama and Hilton (2018);
-  a test checks them against JPL Horizons. Ported from the Art Techno plaza.
-- **About, with tonight's sky.** The ? key, the info button in the bar (on a
-  phone, the three-dot menu), or About on the start screen opens a page on
-  what the forest is, which species grows each genre, the sky, every
-  control, and how it was made. Its Tonight's sky section gives the moon's
-  phase and the next full and new moon, the meteor showers active and
-  coming up, the planets up tonight with their rising, setting and highest
-  points, where to find Polaris, and a **Use my location** button.
-- **`?meteors=10`.** A number alone multiplies tonight's whole meteor sky,
-  sporadics and every shower in season; `?meteors=perseids:20` still pins
-  one shower to its peak.
+> Released: 2026-10-29
 
 ### Changed
 
-- **A new start screen over the live forest.** While the forest grows, a
-  still of it shows, by day or by night as your sky is now; then the live
-  forest fades in behind the title in today's season and sky, the camera
-  circling the redwood, lifted at night so the dark does not read as black. The title, a one-line introduction, **Start driving**, **Guided
-  tour** and **About** sit bottom-left over a dark gradient, after the Art
-  Techno plaza's start. The long description and the key boxes moved to
-  About; a row of keys stays on desktop, one line on touch screens.
-  **Exit**, the last button in the bar (on a phone, in the three-dot menu),
-  goes back to it: panels shut, a tour ended, the camera circling again.
-- **The season and the clock set themselves.** Each visit opens in the
-  season of the date where you are (astronomical seasons, flipped south of
-  the equator) and on the Live clock. The season buttons on the start screen
-  and down the right of the desktop view are gone; settings and the clock
-  button still change either until you reload.
-  Neither is saved any more.
-- **Drag to look.** A mouse or one-finger drag anywhere on the forest looks
-  around, with no button to hold. The sideways look eases back to straight
-  ahead when you let go, as the arrows do, and the tilt stays. A drag that
-  ends over a signpost or the redwood does not click it. Off in god's eye.
-  On touch screens this replaces the right-hand look stick.
-- **Twilight and the moon in the star field.** The faint stars go first as
-  the sky brightens, so dusk and dawn show only the brightest, and the moon's
-  disc hides the stars and planets behind it.
-- **Less over the forest on touch screens.** The Ride the ring button is
-  gone on touch, where the Guided tour button rides the ring; it stays on
-  desktop. The keyboard hints are
-  hidden on touch too.
-- **A one-row top bar on phones.** In portrait the button row wrapped three
-  deep and ran under the minimap. The bar now holds home, **Browse** and a
-  three-dot menu with the clock, silent mode, screenshot, clean view and
-  settings; from 640 px up every button stays in the bar. The minimap sits
-  under the bar instead of at a fixed offset, so the buttons cannot cover it.
-- **One Browse panel.** The grove atlas, the book list and the press are now
-  the Groves, Books and Press tabs of one panel, opened by **Browse** or by
-  G, B and L as before. The Browse button shows the press count.
-  The atlas's own Home and Ride the ring buttons are gone; the bar and the
-  tour button already have them.
-- **The behind-the-cart camera tilts up a little on a portrait screen.**
-  Looking level, a tall screen was half road and cart; it now rests about
-  8° up, so the cart sits at the bottom edge and more of the forest ahead
-  shows. The look stick still tilts from there.
+- **The Mac app is approved for the Mac App Store.** App Review approved
+  The Knowledge Press for macOS on 2026-10-28; the iPhone app is submitted
+  and awaiting review. The app runbook's first-submission checklist records
+  both, and checks off the store metadata and privacy URL that a submission
+  requires.
+
+- **Forest: rounded curbs at the crossings.** Where a spoke meets a ring,
+  each corner is rounded by a 2 m curb in place of the 3 m paved disc that
+  covered every crossing, so the roads read as one road bending; at the
+  outer ring the spoke ends in a T and only its two inside corners are
+  rounded. The tour's turns stay on the brick, tested wheel by wheel, and
+  signposts keep 5 m from a crossing. Ported from The Family.
+
+- **Forest: Empty the press.** A button at the bottom of the Press tab takes
+  every book out of the press, after asking. **Reset all settings** no longer
+  touches the press; the press and visited groves are progress, not settings.
+
+- **App runbook: the worker is local-only by default.** gutenberg_kg's
+  worker now answers only its own Mac; "iPhone cannot reach the worker"
+  says to set `WORKER_BIND=0.0.0.0` for the phone, and why a
+  `HANDLER_SECRET` would lock out a phone installed normally. The app
+  guide's Settings page says the same under Worker.
+
+### Added
+
+- **A logo for the Forest.** `logo.svg`, at the top of `web/README.md`:
+  a book grown as a tree inside the forest's ring roads, its leaves turning
+  from spring to autumn, and an open book under the title. In the same style
+  as The Disulfides' logo.
+
+- **Hold a live moot in the Forest.** Moots gains "Hold a new moot": pick two
+  books and a topic, and a local GutenbergKG worker (its new `moot_start`,
+  `moot_turn` and `moot_stop` ops) makes each turn while you watch. The
+  player shows the next book "thinking" and rings its tree, plays each turn
+  as it lands, and asks for the next as soon as one arrives, so the worker
+  makes it while the current one is read. Closing the moot ends it on the
+  worker; a failed turn can be tried again. Settings gains a "Live moots"
+  section for the worker's address (`http://localhost:8000` by default) and
+  an optional token. Works from the dev server in Chrome and Safari, and
+  from the published forest in Chrome once local network access is allowed.
+- **A Moots page in the Forest guide.** `docs/forest/moots.md` covers opening
+  and playing a moot, its controls, reading aloud and the author voices, what
+  each browser offers, and where moots come from. Settings lists "Read moots
+  aloud" and the two voice choices, and `web/README.md` mentions moots and
+  lists `moots.ts` and `MootOverlay.tsx`.
+- **A second moot: *Meditations* and *The Prince* on virtue.** Marcus
+  Aurelius and Machiavelli, eight turns, each book in its author's voice,
+  argued with fresh passages each turn and a shaped ending (gutenberg_kg's
+  turn intents): it opens, asks, gives examples, concedes, and closes with
+  what each takes from the other.
+- **Moots: books that talk to each other.** In the Forest, a new Moots button
+  (and a Moots item in the phone menu) lists saved moots: two books holding a
+  conversation on a topic, each speaking only from its own text, written by
+  gutenberg_kg's `gutenkg converse` and exported with
+  `gutenkg export-web-moots` into `web/public/moots/`. Playing one opens an
+  overlay styled like the Reader. Each turn is a speech bubble, the first
+  book on the left in green and the second on the right in pink, with each
+  book's name in its color, quotes in bold, citation tags dimmed and the
+  cited passages underneath. The speaking tree is ringed in its color in the
+  world. Lines are read aloud more slowly than grove narration, and the next
+  turn follows when a line ends. Each book speaks in a voice matching its
+  author, from the pack's `voice` (gender and accent, which gutenberg_kg
+  looks up on Wikidata): a woman's book in a woman's voice, and the nearest
+  accent the browser has (Twain gets an American man on Edge; Safari and
+  Chrome have none built in, so a British one). Gender is a rule and accent
+  a preference; voices that always speak come before optional downloads a
+  browser may list without having; a translated author takes the system's
+  accent. When both books need the same voice, the second speaks deeper.
+  Nothing needs setting up: Settings gains "Read moots aloud" (on by
+  default; the player's speaker button flips it, and off, turns advance at
+  reading pace) and two optional voice choices, each "Automatic" until a
+  listener picks one of the browser's English voices. A line that arrives
+  before the browser has listed its voices waits for them instead of using
+  the default voice.
+- **The cart carries the press.** In the Forest, each book you press now rides
+  in the lantern cart's bed, in its grove's color: an empty cart for a new
+  player, standing rows, then flat stacks, then a heap over the side rails at
+  a full press of 253. The load is one instanced mesh, so it adds one draw
+  call at any count, and it stays under 1.2 m so the seat and behind cameras
+  keep their view. The gallery's parked cart keeps its fixed cargo.
 
 ### Fixed
 
-- **Stuck touch sticks.** When iOS swallowed a stick's release (a touch
-  taken over by an edge swipe, the app backgrounded), the cart kept driving
-  and the stick ignored new touches. A new touch now always takes the stick,
-  and the owning finger lifting anywhere, every finger lifting, or the page
-  losing focus releases it.
-- **Phone landscape layout.** On a phone on its side the book card was
-  stacked above the controls and rode up over the top bar. It now sits on
-  the left above the drive stick, without its excerpt, and the search field
-  sits on the bottom edge between the sticks.
+- **Forest: settings open at the top.** On a phone the settings card
+  opened scrolled to its end, because it focused its "Back to the forest"
+  button at the bottom. It now focuses the card itself and resets its
+  scroll, again a frame later for iOS Safari. Ported from The Disulfides.
+
+- **Back to the chat from Browse on Mac and iPad.** New chat was disabled
+  while the current chat was empty, so on a fresh install, with no saved
+  chats in the sidebar, Browse had no way back. It now stays enabled in
+  Browse and returns to the chat without starting an empty one.
+- **The Mac app starts with no worker address, and a cleared one stays
+  cleared.** The Mac defaulted to `http://localhost:8000`, so on a Mac with
+  no worker every answer showed "Cannot reach the worker", and clearing the
+  field lasted only until the next launch because an empty stored value was
+  read as never set. Every platform now starts empty, and an empty value is
+  kept. `KGRAG_ENDPOINT` still sets the address for a launch from the shell.
+
+### Security
+
+- **Dependabot alerts cleared.** `source-map-js` 1.2.1 -> 1.2.2 in
+  `web/package-lock.json` (a dev dependency of Vite and Tailwind; denial of
+  service through crafted source-map offsets), and `mkdocs-material` 9.6.14
+  -> 9.7.7 in `docs/requirements.txt` (DOM XSS in search suggestions).
+- **vite 8.3.4** (was 8.3.0) for three advisories against 8.3.0-8.3.2,
+  published after the entry above; the floor in `web/package.json` is now
+  `^8.3.4`. Its bundler moves with it (rolldown 1.2.14, postcss 8.5.31).
 
 ---
 
