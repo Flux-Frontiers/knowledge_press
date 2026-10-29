@@ -170,7 +170,9 @@ throwaway scratch package, never in `app/GutenbergKGKit`.
       cannot run Foundation Models at all, on-device or PCC) -- confirmed
       before the first submission
 
-**Mac app, signed and notarized (step 7)**
+**Mac app, signed and notarized (step 7)** -- history. The notarized
+Developer ID build was retired on 2026-10-29 and never published; the Mac
+App Store is the only channel. Its make targets are gone.
 
 - [x] `app/macos/project.yml` builds a real `KnowledgePress.app` — universal
       (arm64 + x86_64), reusing the same `KnowledgePressApp.swift` that
@@ -529,7 +531,7 @@ speaks of provisioning rather than of the name, so it is worth changing before
 the first build rather than after.
 
 Nothing else needs editing. Neither `project.yml` carries a team, and both
-`make ios-build` and `make mac-build` read the signing identity off the
+`make ios-build` and `make mac-dev` read the signing team off the
 machine they run on — see "More than one device" below and section 7.
 
 `make ios-check` and `make mac-check` build with `CODE_SIGNING_ALLOWED=NO` and
@@ -762,78 +764,38 @@ xcrun simctl get_app_container booted com.fluxfrontiers.knowledgepress data
 
 ---
 
-## 7. Ship the Mac app
+## 7. Build the Mac app
 
 Everything above runs the Mac app through `swift run`, which is the fastest
-loop and needs no certificate. This section produces the other thing: a
-double-clickable `KnowledgePress.app`, signed with a Developer ID and
-notarized, that opens on a machine which has never seen it before.
+loop and needs no certificate. This section builds a real, signed
+`KnowledgePress.app`. The Mac App Store is the only way the app reaches anyone
+else; the archive and upload are in section 8. There is no notarized
+Developer ID build: it was retired on 2026-10-29 because Apple's Developer ID
+profile cannot carry Private Cloud Compute, so it was a weaker app than the
+store build, and it was never published.
 
 ```sh
-make mac-dev           # Debug .app, automatic signing, carries Private Cloud Compute
-make mac-build         # Release .app, corpus bundled, Developer ID signed, hardened runtime
-make mac-verify        # prove it is distributable before a round trip
-make mac-notarize      # submit the .app, wait, staple the ticket
-make mac-dmg           # package it as a signed .dmg
-make mac-notarize-dmg  # notarize and staple the image itself
-make mac-release       # all five, in order
+make mac-dev             # Debug .app, automatic signing, carries Private Cloud Compute
+make mac-dev-run         # build it and open it
 make mac-unstage-corpus  # empty app/macos/Corpus again when you are done
 ```
 
-The Mac App Store build is in section 8.
-
-`mac-dev` is the odd one out, and it exists for one reason: Private Cloud
-Compute. A restricted entitlement has to be in the provisioning profile as
-well as the signature, automatic signing with the Apple Development identity
-is what mints a Mac profile carrying it, and `-allowProvisioningDeviceRegistration`
-lets the first build register this Mac -- a Mac App Development profile names
-the machines it runs on. The Release build signs with a Developer ID and no
-profile, so it is built **without** the PCC entitlement
-(`CODE_SIGN_ENTITLEMENTS: ""` under the Release config in
-`app/macos/project.yml`); a Developer ID app carrying a restricted entitlement
-its profile does not grant is killed at launch. Until a Developer ID profile
-with PCC is minted and embedded, the notarized app offers on-device answers
-only. The dev build also answers `--ask` from a terminal; see
+`mac-dev` exists for Private Cloud Compute. A restricted entitlement has to be
+in the provisioning profile as well as the signature, automatic signing with
+the Apple Development identity is what mints a Mac profile carrying it, and
+`-allowProvisioningDeviceRegistration` lets the first build register this Mac
+-- a Mac App Development profile names the machines it runs on. The dev build
+also answers `--ask` from a terminal; see
 `analysis/SYNTHESIS_TUNING_NOTES.md`.
 
-**Both layers are notarized, and both are necessary.** Stapling the app alone
-produces a disk image Gatekeeper refuses:
-
-```
-KnowledgePress.dmg: rejected
-source=no usable signature
-```
-
-A `.dmg` downloaded from the internet carries a quarantine flag, and
-Gatekeeper assesses the *image* when it is mounted -- so an unsigned one stops
-the reader before they ever reach the app. Notarizing the image alone is not
-enough either: the app inside would then have no ticket of its own, and would
-need a network check on first launch after being dragged out. For an app whose
-whole premise is working offline, that is the wrong trade. Two round trips,
-roughly a minute each.
-
-To check it the way the recipient will see it, set the quarantine flag on a
-copy rather than trusting the local verdict:
-
-```sh
-cp app/macos/build/KnowledgePress.dmg /tmp/
-xattr -w com.apple.quarantine "0083;0;Safari;$(uuidgen)" /tmp/KnowledgePress.dmg
-spctl -a -vvv -t open --context context:primary-signature /tmp/KnowledgePress.dmg
-```
-
-Want `accepted` and `source=Notarized Developer ID`. Verified 2026-09-03 on
-both the image and the app inside it.
-
-The signing identity is read out of the login keychain, so no name or team ID
-is written into the repo. `app/macos/project.yml` is the source of truth;
-`KnowledgePress.xcodeproj`, `Info.plist` and `build/` are all generated and
-gitignored.
+`app/macos/project.yml` is the source of truth; `KnowledgePress.xcodeproj`,
+`Info.plist` and `build/` are all generated and gitignored.
 
 ### The corpus ships inside the app
 
-`make mac-build` runs `make mac-stage-corpus` first (so do `mac-dev` and
-`mac-archive`), which copies the exported
-packs (`$(GUTENBERG_KG_DIR)/bundles/gutenberg-all/swift`, 743 MB) into
+`make mac-dev` and `make mac-archive` run `make mac-stage-corpus` first,
+which copies the exported packs
+(`$(GUTENBERG_KG_DIR)/bundles/gutenberg-all/swift`, 743 MB) into
 `app/macos/Corpus`. That folder is a folder reference in
 `app/macos/project.yml`, so the packs land in
 `KnowledgePress.app/Contents/Resources/Corpus` with their layout intact, and
@@ -843,26 +805,6 @@ runtime. The app comes to about 750 MB.
 
 `app/macos/Corpus` is committed empty with a `.gitkeep`, and its contents are
 gitignored, so `make mac-check` and CI compile against an empty folder.
-`make mac-verify` fails if the built app has no `Corpus/manifest.json`, before
-a notarization round trip is spent on an app that answers nothing.
-
-**On your own Mac the bundled corpus is shadowed.** `CorpusPacks.installed()`
-tries `~/Library/Application Support/Corpus` first, so a Mac with a corpus
-installed per section 4 reads that copy, not the one in the bundle. To see
-what a recipient sees, move that folder aside before launching the release
-build, and put it back after. The app creates an empty `Corpus` in its place
-on launch, which is what the `rmdir` removes:
-
-```sh
-AS="$HOME/Library/Application Support"
-mv "$AS/Corpus" "$AS/Corpus.moved-aside"
-app/macos/build/Build/Products/Release/KnowledgePress.app/Contents/MacOS/KnowledgePress \
-  --ask "Who is Mr. Darcy?" --engine onDevice
-rmdir "$AS/Corpus"; mv "$AS/Corpus.moved-aside" "$AS/Corpus"
-```
-
-Verified 2026-09-27: an on-device answer citing three passages, from the
-bundle alone.
 
 ### It shares one source file with `swift run`, on purpose
 
@@ -873,45 +815,11 @@ let the bundle and `swift run` drift apart silently, and "the .app answers
 differently from the executable" is the single worst bug this project could
 ship.
 
-### Notarization credentials, once
-
-Nothing can be notarized until a keychain profile exists:
-
-```sh
-xcrun notarytool store-credentials knowledgepress-notary \
-  --apple-id <your-apple-id> --team-id <your-team-id> \
-  --password <app-specific-password>
-```
-
-Your team ID is the parenthesised value on your Developer ID Application
-identity — `security find-identity -v -p codesigning` prints it.
-
-The password is an **app-specific password** from
-[appleid.apple.com](https://appleid.apple.com), not the Apple ID password
-itself. `make mac-notarize` checks for the profile and prints this if it is
-missing, rather than failing inside `notarytool`.
-
-### The one trap that costs a round trip
-
-Xcode injects `com.apple.security.get-task-allow` — the entitlement that lets
-a debugger attach — into every signature unless
-`CODE_SIGN_INJECT_BASE_ENTITLEMENTS` is `NO`. Apple's notary service rejects
-anything carrying it. The failure is nasty because everything *local* passes:
-the app signs cleanly, `codesign --verify` is happy, and `spctl` accepts it.
-Only the submission fails, minutes later, with a message that does not
-obviously name the entitlement as the cause.
-
-`app/macos/project.yml` sets it `NO` for Release, and `make mac-verify` fails
-loudly if it ever reappears. That check is the reason the target exists.
-
-### Sandboxed everywhere except the Developer ID build
+### Sandboxed
 
 `app/macos/project.yml` declares `com.apple.security.app-sandbox` and
 `com.apple.security.network.client` beside PCC, because the Mac App Store
-requires the sandbox. `make mac-dev` and `make mac-archive` carry them.
-`make mac-build` drops the entitlements file on its command line (see above),
-so the notarized Developer ID app stays unsandboxed and reads
-`~/Library/Application Support/Corpus`, the same directory `swift run` uses.
+requires the sandbox. `make mac-dev` and `make mac-archive` both carry them.
 
 The sandbox lives in `project.yml` rather than in an archive-only file so the
 dev build runs under it too. An App Store-signed app cannot be run locally, so
@@ -926,7 +834,7 @@ to it. **No code change** follows from that, since
 automatically, as on iOS. Two consequences:
 
 - `mac-dev` does not see the corpus `swift run` uses, so it stages and bundles
-  the corpus, as `mac-build` and `mac-archive` do.
+  the corpus, as `mac-archive` does.
 - Conversations saved by an earlier unsandboxed dev build stay in
   `~/Library/Application Support/Conversations`; the sandboxed build starts
   with none.
@@ -935,29 +843,19 @@ Verified 2026-09-27 on the `mac-dev` build: `--ask` answers with both the
 on-device and the Private Cloud Compute engine, and `lsof` on the running app
 shows every pack opened from `KnowledgePress.app/Contents/Resources/Corpus`.
 
-### What is signed, and what that is worth
+### No debug entitlement in Release
 
-`make mac-verify` reports:
-
-```
-== architectures ==     x86_64 arm64
-== signature ==         Developer ID Application: … (<your-team-id>)
-                        flags=0x10000(runtime)
-== debug entitlement == absent
-== gatekeeper ==        accepted, source=Developer ID
-```
-
-`spctl` accepting the app **before** notarization only means the signature is
-well-formed and the certificate is trusted on *this* machine. A Mac that has
-never seen the app still refuses it until the notarization ticket is stapled.
-Do not read a local `accepted` as "ready to send someone."
+Xcode injects `com.apple.security.get-task-allow` -- the entitlement that lets
+a debugger attach -- into every signature unless
+`CODE_SIGN_INJECT_BASE_ENTITLEMENTS` is `NO`. `app/macos/project.yml` sets it
+`NO` for Release, so the store archive never carries it.
 
 ---
 
 ## 8. Ship the iPhone app to the App Store
 
-The Mac section above produces a notarized app you hand someone. This one
-produces a build App Store Connect will accept.
+This section produces a build App Store Connect will accept, for the iPhone
+and, under "The Mac app on the Mac App Store", for the Mac.
 
 ```sh
 make export-swift        # the corpus, if it is not already built
@@ -1042,8 +940,7 @@ The Mac twins of `ios-archive` and `ios-upload`, with the same
 `ExportOptions.plist` and the same API key. Automatic signing archives with
 Apple Development, and the export re-signs with a cloud-managed Apple
 Distribution certificate and a Mac Team Store profile, which grants PCC, so
-the store build keeps Private Cloud Compute where the Developer ID build
-cannot. The installer package is signed with a 3rd Party Mac Developer
+the store build keeps Private Cloud Compute. The installer package is signed with a 3rd Party Mac Developer
 Installer certificate, which the first export creates in your account.
 
 It uses the iOS app's bundle ID, so it is the same App Store Connect record
