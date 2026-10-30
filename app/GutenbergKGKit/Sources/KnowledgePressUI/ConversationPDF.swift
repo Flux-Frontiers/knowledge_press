@@ -2,7 +2,7 @@
 // The Knowledge Press. Not redistributable; see app/LICENSE.
 //
 // A conversation as a PDF: the Markdown export's content, plus each turn's
-// illustration, laid out on US Letter pages.
+// illustration, on US Letter or A4 pages by the reader's locale.
 //
 // Same record as ConversationMarkdown -- question, provenance, answer, the
 // quoted passages with work, author and score -- because a PDF without its
@@ -31,11 +31,16 @@ import GutenbergKGKit
 @MainActor
 enum ConversationPDF {
 
-    /// US Letter, in points.
-    static let pageSize = CGSize(width: 612, height: 792)
+    static let letter = CGSize(width: 612, height: 792)
+    static let a4 = CGSize(width: 595, height: 842)
     static let margin: CGFloat = 54
 
-    private static var contentSize: CGSize {
+    /// US Letter where the reader measures in inches, A4 everywhere else.
+    static func pageSize(for locale: Locale) -> CGSize {
+        locale.measurementSystem == .us ? letter : a4
+    }
+
+    private static func contentSize(_ pageSize: CGSize) -> CGSize {
         CGSize(width: pageSize.width - 2 * margin, height: pageSize.height - 2 * margin)
     }
 
@@ -45,13 +50,17 @@ enum ConversationPDF {
     /// :param image: PNG (or any image) bytes for a turn's illustration, or
     ///     nil when the turn has none.
     /// :param dateStyle: Formatter for the header date.
+    /// :param locale: Picks the paper size.
     /// :returns: PDF data, one or more pages.
     static func render(
         _ conversation: Conversation,
         image: (ChatTurn) -> Data?,
-        dateStyle: Date.FormatStyle = .dateTime.year().month().day()
+        dateStyle: Date.FormatStyle = .dateTime.year().month().day(),
+        locale: Locale = .current
     ) -> Data {
-        paginate(document(conversation, image: image, dateStyle: dateStyle))
+        let page = pageSize(for: locale)
+        return paginate(
+            document(conversation, image: image, dateStyle: dateStyle, page: page), page: page)
     }
 
     /// A filename for the exported document: the Markdown one, as `.pdf`.
@@ -68,7 +77,8 @@ enum ConversationPDF {
     private static func document(
         _ conversation: Conversation,
         image: (ChatTurn) -> Data?,
-        dateStyle: Date.FormatStyle
+        dateStyle: Date.FormatStyle,
+        page: CGSize
     ) -> NSAttributedString {
         let out = NSMutableAttributedString()
         out.append(paragraph(conversation.title, font: .boldSystemFont(ofSize: 22), after: 4))
@@ -78,7 +88,7 @@ enum ConversationPDF {
                 font: italic(body), color: gray, after: 18))
 
         for turn in conversation.turns {
-            out.append(render(turn, image: image(turn)))
+            out.append(render(turn, image: image(turn), page: page))
         }
 
         out.append(
@@ -89,7 +99,7 @@ enum ConversationPDF {
         return out
     }
 
-    private static func render(_ turn: ChatTurn, image: Data?) -> NSAttributedString {
+    private static func render(_ turn: ChatTurn, image: Data?, page: CGSize) -> NSAttributedString {
         let out = NSMutableAttributedString()
         out.append(paragraph(turn.question, font: .boldSystemFont(ofSize: 16), before: 6, after: 2))
 
@@ -113,7 +123,7 @@ enum ConversationPDF {
                     color: gray, after: 8))
         }
 
-        if let image, let attachment = attachment(image) {
+        if let image, let attachment = attachment(image, page: page) {
             let picture = NSMutableAttributedString(attachment: attachment)
             picture.append(NSAttributedString(string: "\n"))
             picture.addAttribute(
@@ -239,8 +249,9 @@ enum ConversationPDF {
     /// The illustration, scaled to the text width and never taller than half
     /// a page -- an attachment taller than a page would never fit a container
     /// and pagination would stall on it.
-    private static func attachment(_ data: Data) -> NSTextAttachment? {
+    private static func attachment(_ data: Data, page: CGSize) -> NSTextAttachment? {
         guard let image = PlatformImage(data: data), image.size.width > 0 else { return nil }
+        let contentSize = contentSize(page)
         let scale = min(contentSize.width / image.size.width, contentSize.height / 2 / image.size.height)
         let attachment = NSTextAttachment()
         attachment.image = image
@@ -251,14 +262,14 @@ enum ConversationPDF {
 
     // MARK: - Pages
 
-    private static func paginate(_ text: NSAttributedString) -> Data {
+    private static func paginate(_ text: NSAttributedString, page pageSize: CGSize) -> Data {
         let storage = NSTextStorage(attributedString: text)
         let layout = NSLayoutManager()
         storage.addLayoutManager(layout)
 
         var pages: [NSRange] = []
         while true {
-            let container = NSTextContainer(size: contentSize)
+            let container = NSTextContainer(size: contentSize(pageSize))
             container.lineFragmentPadding = 0
             layout.addTextContainer(container)
             let range = layout.glyphRange(for: container)

@@ -78,6 +78,15 @@ enum ConversationMarkdown {
         }
         lines.append("")
 
+        // A .md file cannot carry the picture; say there was one and where
+        // to find it, so the record does not silently lose it.
+        if turn.imageFile != nil || turn.generatedImage != nil {
+            var note = "*Illustration"
+            if let model = turn.generatedImage?.imageModel { note += " by \(model)" }
+            lines.append(note + ": included in the PDF export.*")
+            lines.append("")
+        }
+
         let hits = turn.retrieval?.hits ?? []
         if !hits.isEmpty {
             lines.append(contentsOf: renderSources(hits, metrics: turn.metrics))

@@ -15,13 +15,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **App: save an illustration.** A **Save Image** button under each
   rendered picture opens the share sheet: Save Image (Photos) and Save to
-  Files on iPhone and iPad, Save on the Mac.
+  Files on iPhone and iPad. The shared picture is titled with its question.
 - **App: re-render an illustration.** A **Re-render** button beside it,
   shown while the worker can draw, replaces the picture and its saved PNG.
 - **App: export a chat as PDF.** The export button is now a menu with
   Markdown and PDF. The PDF carries the same record as the Markdown file
   (question, provenance, answer, quoted passages) plus each turn's
-  illustration, on US Letter pages.
+  illustration, on US Letter in the US and A4 elsewhere. The Markdown
+  file notes each turn that has a picture and points to the PDF.
 - **Forest: jump to a tree from the press.** Each entry in the Press tab
   has a **Tree** button in place of **Grove**: it puts the cart beside that
   book's tree with its card open, as the Books tab does. The Forest guide

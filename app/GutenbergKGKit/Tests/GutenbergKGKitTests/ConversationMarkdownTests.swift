@@ -150,6 +150,17 @@ struct ConversationMarkdownTests {
         #expect(quoted[0].contains("journey of our life"))
     }
 
+    @Test("a turn with a picture says so, and one without does not")
+    func notesTheIllustration() throws {
+        var pictured = answeredTurn()
+        pictured.imageFile = "images/x.png"
+        pictured.generatedImage = try JSONDecoder().decode(
+            GeneratedImage.self,
+            from: Data(#"{"image_b64":"iVBORw0KGgo=","image_model":"mflux"}"#.utf8))
+        #expect(render([pictured]).contains("*Illustration by mflux: included in the PDF export.*"))
+        #expect(render([answeredTurn()]).contains("Illustration") == false)
+    }
+
     @Test("the filename is derived from the title and is filesystem-safe")
     func filenameIsSafe() {
         let conversation = Conversation(title: "circles of Hell: Dante/Inferno?", turns: [])

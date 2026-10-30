@@ -182,7 +182,7 @@ struct AssistantTurnView: View {
                     // Files on iOS, and Save on the Mac.
                     ShareLink(
                         item: rendered,
-                        preview: SharePreview("Illustration", image: rendered)
+                        preview: SharePreview(turn.question, image: rendered)
                     ) {
                         Label("Save Image", systemImage: "square.and.arrow.up")
                     }
