@@ -60,6 +60,13 @@ Which forest you use matters:
 
 The worker's address is set in [Settings](settings.md#live-moots).
 
+From a phone or iPad on your network, open the dev server as
+`http://<your-mac>.local:5173` (see [Book text](../BOOK_TEXT.md)) and set the
+worker's address to `http://<your-mac>.local:8000`. The worker must listen on
+the network and allow that forest as an origin: `WORKER_BIND=0.0.0.0` and
+`GUTENKG_CORS_ORIGINS=http://localhost:5173,http://<your-mac>.local:5173,https://flux-frontiers.github.io`
+in the worker's `docker/.env`, as GutenbergKG's installation guide describes.
+
 ## Reading aloud
 
 Moots are read aloud by default, one turn after another; the next turn starts
