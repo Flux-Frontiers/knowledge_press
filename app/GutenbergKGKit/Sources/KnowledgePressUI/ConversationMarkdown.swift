@@ -115,7 +115,7 @@ enum ConversationMarkdown {
 
     /// A hit's text, trimmed to something quotable and kept on one line so it
     /// survives as a Markdown blockquote.
-    private static func passage(_ hit: Hit, limit: Int = 400) -> String? {
+    static func passage(_ hit: Hit, limit: Int = 400) -> String? {
         let raw = (hit.content?.isEmpty == false ? hit.content : hit.summary) ?? ""
         let text = raw.split(whereSeparator: \.isNewline)
             .joined(separator: " ")
@@ -128,7 +128,7 @@ enum ConversationMarkdown {
         return cut[..<lastSpace] + "..."
     }
 
-    private static func score(_ value: Double) -> String {
+    static func score(_ value: Double) -> String {
         String(format: "%.3f", value)
     }
 
