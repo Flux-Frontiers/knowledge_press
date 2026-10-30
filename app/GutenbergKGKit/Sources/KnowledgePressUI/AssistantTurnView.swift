@@ -172,10 +172,33 @@ struct AssistantTurnView: View {
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                if let model = turn.generatedImage?.imageModel {
-                    Text("🎨 \(model)")
+                HStack(spacing: 8) {
+                    if let model = turn.generatedImage?.imageModel {
+                        Text("🎨 \(model)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    // The share sheet carries Save Image (Photos) and Save to
+                    // Files on iOS, and Save on the Mac.
+                    ShareLink(
+                        item: rendered,
+                        preview: SharePreview(turn.question, image: rendered)
+                    ) {
+                        Label("Save Image", systemImage: "square.and.arrow.up")
+                    }
+                    .font(.caption)
+                    // Replaces this turn's picture, file on disk included.
+                    if model.renderAvailability == .available {
+                        Button("Re-render", systemImage: "arrow.clockwise") {
+                            model.renderImage(for: turn.id)
+                        }
+                        .font(.caption)
+                    }
+                }
+                if let error = turn.imageError {
+                    Label(error, systemImage: "exclamationmark.triangle")
                         .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.orange)
                 }
             }
         } else if model.renderAvailability != .unconfigured {
