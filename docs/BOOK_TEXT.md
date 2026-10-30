@@ -37,6 +37,16 @@ make web-dev       # or make web-preview
 Open the URL Vite prints, normally `http://localhost:5173`, and click
 **Start driving**. `npm run dev` also listens on your network address, so a
 phone or iPad on the same network can open `http://<your-mac>.local:5173`.
+Vite refuses host names it does not know, so name yours when you start the
+server:
+
+```bash
+__VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS=<your-mac>.local make web-dev
+```
+
+The variable keeps the host name out of `vite.config.ts` and the repository.
+Moots from the phone also need the worker to accept that origin; see
+[moots](forest/moots.md).
 
 ## Publishing the text
 
