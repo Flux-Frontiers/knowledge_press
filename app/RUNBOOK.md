@@ -955,10 +955,11 @@ is `public.app-category.books`, which Mac uploads require.
 
 ### First submission
 
-Status as of 2026-10-28: the **Mac app is approved**; the **iPhone app is
+Status as of 2026-10-30: the **Mac app is approved and live**; the **iPhone app is
 submitted and awaiting review**. Still open: the iPhone approval, and a
-TestFlight install on each platform -- not yet done on either. It is the only
-way to prove a store build finds its bundled corpus on a clean device.
+clean install of the iPhone store build -- the only way to prove it finds its
+bundled corpus. The Mac build has passed that check, installed from the Mac
+App Store on 2026-10-30.
 
 - [x] Answers verified on the phone with the network off -- section 6's
       item, and the claim the whole product rests on
@@ -967,17 +968,18 @@ way to prove a store build finds its bundled corpus on a clean device.
 - [x] A privacy policy URL, which App Store Connect requires even when the
       privacy manifest declares no collection
 - [ ] iPhone app approved -- submitted, awaiting App Review as of 2026-10-28
-- [ ] A first TestFlight build, installed from TestFlight on a device that has
-      never had a development build -- not yet done. The only way to prove
-      the bundled corpus is found
+- [ ] A clean install of the iPhone store build, from TestFlight or, once
+      approved, the App Store, on a device that has never had a development
+      build -- not yet done. The only way to prove the bundled corpus is found
 - [x] macOS added as a platform on the App Store Connect record, Mac
       screenshots, then a first `make mac-upload` -- the Mac app was
       submitted and **approved for distribution 2026-10-28**. Apple allows up
       to 24 hours before it appears on the Mac App Store, and only once the
       paid-apps agreement in Agreements, Tax, and Banking is in effect.
-- [ ] A Mac TestFlight install, on a Mac that has never run a development
-      build -- not yet done. The approval does not cover it: App Review
-      tests the app, not that the corpus is found on a clean machine.
+- [x] A clean install of the Mac store build -- done 2026-10-30 straight
+      from the Mac App Store, which proves more than TestFlight would: the
+      shipped build, on a clean install, finds its bundled corpus and
+      answers. App Review alone would not have shown that.
 
 ## 9. Troubleshooting
 
