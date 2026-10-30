@@ -25,7 +25,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   corpus. That closes the Mac item in the first-submission checklist, and
   the iPhone item now accepts a clean App Store install as well as
   TestFlight.
-
 - **Forest: tap the redwood's sign to read it.** The sign at the corpus
   redwood opens at reading size, as an exhibit's plaque does. Tapping the
   tree, or B, still lists every book.
