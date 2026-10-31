@@ -20,6 +20,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **three.js r187.** `three` and `@types/three` move from 0.186 to 0.187.
+  The forest stays on `WebGLRenderer`, so r187's new WebGPU drawing
+  pipelines are not used.
+
 - **App runbook: the Mac store build passes a clean install.** Installed
   from the Mac App Store on 2026-10-30, the shipped build found its bundled
   corpus. That closes the Mac item in the first-submission checklist, and
