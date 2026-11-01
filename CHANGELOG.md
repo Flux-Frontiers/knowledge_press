@@ -29,6 +29,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   house style: the brand lockup and app version at the head of page one,
   serif text with green accents, a running header, and numbered footers. The Markdown
   file notes each turn that has a picture and points to the PDF.
+- **App: the unfolded iPhone Duo gets the sidebar layout.** The iOS app
+  picks its layout by window width instead of device type: an unfolded Duo
+  gets the iPad layout with the chat sidebar, its folded screen the phone
+  layout, and an iPad in narrow Split View the phone layout too.
 - **Forest: jump to a tree from the press.** Each entry in the Press tab
   has a **Tree** button in place of **Grove**: it puts the cart beside that
   book's tree with its card open, as the Books tab does. The Forest guide
