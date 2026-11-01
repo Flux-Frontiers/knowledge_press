@@ -5,8 +5,10 @@
 // the answer (streaming, or one of the honest not-answered states), the stats
 // caption, and collapsible hit cards with KG badges and score bars.
 
+import CoreTransferable
 import GutenbergKGKit
 import SwiftUI
+import UniformTypeIdentifiers
 
 #if canImport(UIKit)
     import UIKit
@@ -14,10 +16,24 @@ import SwiftUI
     import AppKit
 #endif
 
+/// An illustration's PNG, for the Mac's Save panel.
+struct ExportedPNG: Transferable {
+    let data: Data
+    let filename: String
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .png) { $0.data }
+            .suggestedFileName { $0.filename }
+    }
+}
+
 struct AssistantTurnView: View {
     @Environment(AppModel.self) private var model
     let turn: ChatTurn
     @State private var passagesExpanded: Bool?
+    #if os(macOS)
+        @State private var imageExport: ExportedPNG?
+    #endif
 
     private var hits: [Hit] { turn.retrieval?.hits ?? [] }
     /// Which of them reached the model. Empty means nobody said -- the
@@ -178,15 +194,39 @@ struct AssistantTurnView: View {
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
-                    // The share sheet carries Save Image (Photos) and Save to
-                    // Files on iOS, and Save on the Mac.
-                    ShareLink(
-                        item: rendered,
-                        preview: SharePreview(turn.question, image: rendered)
-                    ) {
-                        Label("Save Image", systemImage: "square.and.arrow.up")
-                    }
-                    .font(.caption)
+                    #if os(macOS)
+                        // The Mac share menu has no save-to-disk item.
+                        Button("Save Image...", systemImage: "square.and.arrow.down") {
+                            imageExport = illustrationData.map {
+                                ExportedPNG(data: $0, filename: pngFilename)
+                            }
+                        }
+                        .font(.caption)
+                        .fileExporter(
+                            isPresented: Binding(
+                                get: { imageExport != nil }, set: { if !$0 { imageExport = nil } }),
+                            item: imageExport, contentTypes: [.png],
+                            defaultFilename: imageExport?.filename
+                        ) { _ in }
+                        // Kept beside Save: Add to Photos, Messages, AirDrop.
+                        ShareLink(
+                            item: rendered,
+                            preview: SharePreview(turn.question, image: rendered)
+                        ) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
+                        .font(.caption)
+                    #else
+                        // The share sheet carries Save Image (Photos) and Save
+                        // to Files.
+                        ShareLink(
+                            item: rendered,
+                            preview: SharePreview(turn.question, image: rendered)
+                        ) {
+                            Label("Save Image", systemImage: "square.and.arrow.up")
+                        }
+                        .font(.caption)
+                    #endif
                     // Replaces this turn's picture, file on disk included.
                     if model.renderAvailability == .available {
                         Button("Re-render", systemImage: "arrow.clockwise") {
@@ -250,6 +290,26 @@ struct AssistantTurnView: View {
             let store = model.store
         else { return nil }
         return loadImage(at: store.imageURL(conversation: conversation, file: file))
+    }
+
+    /// The illustration's PNG bytes, from the same two places as
+    /// `illustration`.
+    private var illustrationData: Data? {
+        if let image = turn.generatedImage, let data = Data(base64Encoded: image.imageB64) {
+            return data
+        }
+        guard let file = turn.imageFile,
+            let conversation = model.activeConversation?.id,
+            let store = model.store
+        else { return nil }
+        return try? Data(contentsOf: store.imageURL(conversation: conversation, file: file))
+    }
+
+    private var pngFilename: String {
+        let stem = ConversationMarkdown.filename(
+            for: Conversation(title: turn.question, turns: [])
+        ).dropLast(".md".count)
+        return stem + ".png"
     }
 
     private func loadImage(at url: URL) -> Image? {

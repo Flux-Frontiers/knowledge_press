@@ -26,11 +26,28 @@ struct ExportedConversation: Transferable {
         // Plain text rather than a Markdown UTType: every destination that
         // matters (Mail, Notes, Files, Messages) accepts it, and the `.md`
         // extension is what tells an editor how to read it.
+        FileRepresentation(exportedContentType: .plainText) { exported in
+            try SentTransferredFile(
+                temporaryFile(Data(exported.markdown.utf8), named: exported.filename))
+        }
         DataRepresentation(exportedContentType: .plainText) { exported in
             Data(exported.markdown.utf8)
         }
         .suggestedFileName { $0.filename }
     }
+}
+
+/// Write an export to a fresh temporary directory under its own name.
+///
+/// The Mac share menu offers only Copy for bare data; handed a file it lists
+/// Mail, Messages, AirDrop and the rest, as the iOS sheet does.
+private func temporaryFile(_ data: Data, named filename: String) throws -> URL {
+    let directory = FileManager.default.temporaryDirectory
+        .appendingPathComponent(UUID().uuidString, isDirectory: true)
+    try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+    let url = directory.appendingPathComponent(filename)
+    try data.write(to: url)
+    return url
 }
 
 /// A conversation to share as a PDF, rendered only when the share sheet asks
@@ -45,6 +62,10 @@ struct ExportedConversationPDF: Transferable {
     let filename: String
 
     static var transferRepresentation: some TransferRepresentation {
+        FileRepresentation(exportedContentType: .pdf) { exported in
+            try SentTransferredFile(
+                temporaryFile(await exported.render(), named: exported.filename))
+        }
         DataRepresentation(exportedContentType: .pdf) { exported in
             await exported.render()
         }
@@ -64,31 +85,85 @@ struct ExportedConversationPDF: Transferable {
 
 struct ExportConversationButton: View {
     @Environment(AppModel.self) private var model
+    #if os(macOS)
+        @State private var markdownExport: ExportedConversation?
+        @State private var pdfExport: ExportedConversationPDF?
+    #endif
 
     var body: some View {
         if let conversation = exportable {
+            #if os(macOS)
+                saveMenu(conversation)
+            #else
+                shareMenu(conversation)
+            #endif
+        }
+    }
+
+    #if os(macOS)
+        /// The Mac share menu offers only Copy for these files, so the Mac
+        /// saves through the Save panel instead.
+        private func saveMenu(_ conversation: Conversation) -> some View {
             Menu {
-                ShareLink(
-                    item: ExportedConversation(
+                Button("Save as Markdown...", systemImage: "doc.plaintext") {
+                    markdownExport = ExportedConversation(
                         markdown: ConversationMarkdown.render(conversation),
-                        filename: ConversationMarkdown.filename(for: conversation)),
-                    preview: SharePreview(conversation.title)
-                ) {
-                    Label("Export as Markdown", systemImage: "doc.plaintext")
+                        filename: ConversationMarkdown.filename(for: conversation))
                 }
-                ShareLink(
-                    item: ExportedConversationPDF(
+                Button("Save as PDF (with images)...", systemImage: "doc.richtext") {
+                    pdfExport = ExportedConversationPDF(
                         conversation: conversation,
                         inlineImages: inlineImages,
                         imageURLs: imageURLs(conversation),
-                        filename: ConversationPDF.filename(for: conversation)),
-                    preview: SharePreview(conversation.title)
-                ) {
-                    Label("Export as PDF (with images)", systemImage: "doc.richtext")
+                        filename: ConversationPDF.filename(for: conversation))
                 }
+                Divider()
+                shareLinks(conversation)
             } label: {
                 Label("Export", systemImage: "square.and.arrow.up")
             }
+            .fileExporter(
+                isPresented: presenting($markdownExport), item: markdownExport,
+                contentTypes: [.plainText], defaultFilename: markdownExport?.filename
+            ) { _ in }
+            .fileExporter(
+                isPresented: presenting($pdfExport), item: pdfExport,
+                contentTypes: [.pdf], defaultFilename: pdfExport?.filename
+            ) { _ in }
+        }
+
+        private func presenting<T>(_ item: Binding<T?>) -> Binding<Bool> {
+            Binding(get: { item.wrappedValue != nil }, set: { if !$0 { item.wrappedValue = nil } })
+        }
+    #endif
+
+    private func shareMenu(_ conversation: Conversation) -> some View {
+        Menu {
+            shareLinks(conversation)
+        } label: {
+            Label("Export", systemImage: "square.and.arrow.up")
+        }
+    }
+
+    @ViewBuilder
+    private func shareLinks(_ conversation: Conversation) -> some View {
+        ShareLink(
+            item: ExportedConversation(
+                markdown: ConversationMarkdown.render(conversation),
+                filename: ConversationMarkdown.filename(for: conversation)),
+            preview: SharePreview(conversation.title)
+        ) {
+            Label("Share as Markdown", systemImage: "doc.plaintext")
+        }
+        ShareLink(
+            item: ExportedConversationPDF(
+                conversation: conversation,
+                inlineImages: inlineImages,
+                imageURLs: imageURLs(conversation),
+                filename: ConversationPDF.filename(for: conversation)),
+            preview: SharePreview(conversation.title)
+        ) {
+            Label("Share as PDF (with images)", systemImage: "doc.richtext")
         }
     }
 

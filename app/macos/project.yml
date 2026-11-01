@@ -54,12 +54,15 @@ targets:
     # in an archive-only file so `make mac-dev` runs sandboxed too: a sandbox
     # failure shows up in the dev build instead of in TestFlight, since an
     # App Store-signed app cannot be run locally. network.client is the
-    # outgoing connection to the LAN worker.
+    # outgoing connection to the LAN worker. files.user-selected.read-write
+    # lets the Save panel write exports and illustrations where the reader
+    # picks; the Mac share menu has no save-to-disk item.
     entitlements:
       path: KnowledgePress.entitlements
       properties:
         com.apple.developer.private-cloud-compute: true
         com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-write: true
         com.apple.security.network.client: true
     info:
       path: Info.plist
