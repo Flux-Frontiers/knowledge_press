@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.32.0] - 2026-11-01
+
 ### Added
 
 - **App: save an illustration.** A **Save Image** button under each
@@ -40,6 +42,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **App: the rebuilt corpus, 255 books.** The apps ship packs exported on
+  2026-11-01 from the rebuilt gutenberg_kg corpus, up from 253 books.
+  Tolstoy's trilogy is now three books: Childhood, Boyhood and Youth. The
+  embedder is unchanged, and the golden queries reproduce on device.
 - **three.js r187.** `three` and `@types/three` move from 0.186 to 0.187.
   The forest stays on `WebGLRenderer`, so r187's new WebGPU drawing
   pipelines are not used.
