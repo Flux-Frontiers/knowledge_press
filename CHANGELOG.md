@@ -25,7 +25,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the Mac it also has Save as Markdown and Save as PDF through the Save
   panel. The PDF carries the same record as the Markdown file
   (question, provenance, answer, quoted passages) plus each turn's
-  illustration, on US Letter in the US and A4 elsewhere. The Markdown
+  illustration, on US Letter in the US and A4 elsewhere. It is set in the
+  house style: the brand lockup and app version at the head of page one,
+  serif text with green accents, a running header, and numbered footers. The Markdown
   file notes each turn that has a picture and points to the PDF.
 - **Forest: jump to a tree from the press.** Each entry in the Press tab
   has a **Tree** button in place of **Grove**: it puts the cart beside that

@@ -62,7 +62,9 @@ struct ConversationPDFTests {
     func paginates() throws {
         let conversation = Conversation(
             title: "circles of Hell", turns: (1...4).map { turn("question \($0)") })
-        let picture = png()
+        // KP_PDF_IMAGE swaps in a real illustration when eyeballing KP_PDF_OUT.
+        let picture = ProcessInfo.processInfo.environment["KP_PDF_IMAGE"]
+            .flatMap { try? Data(contentsOf: URL(fileURLWithPath: $0)) } ?? png()
         let data = ConversationPDF.render(conversation) { _ in picture }
 
         if let dir = ProcessInfo.processInfo.environment["KP_PDF_OUT"] {
