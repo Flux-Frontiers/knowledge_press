@@ -302,15 +302,21 @@ private struct DeleteConversationConfirmation: ViewModifier {
 }
 
 #if os(iOS)
-    import UIKit
-
-    /// The iOS entry point's root: `PadRootView` on the iPad, `PhoneRootView`
-    /// on the iPhone. See each type's own doc comment for why they differ.
+    /// The iOS entry point's root: `PadRootView` when the window is wide,
+    /// `PhoneRootView` when it is narrow. See each type's own doc comment for
+    /// why they differ.
+    ///
+    /// Chosen by width, not by device: an unfolded iPhone Duo has an iPad's
+    /// room and gets the sidebar, its cover screen gets the phone layout, and
+    /// an iPad in narrow Split View gets the phone layout too. Folding swaps
+    /// the root; the conversation lives in `AppModel`, so nothing is lost.
     public struct AdaptiveRootView: View {
+        @Environment(\.horizontalSizeClass) private var sizeClass
+
         public init() {}
 
         public var body: some View {
-            if UIDevice.current.userInterfaceIdiom == .pad {
+            if sizeClass == .regular {
                 PadRootView()
             } else {
                 PhoneRootView()

@@ -78,6 +78,15 @@ enum ConversationMarkdown {
         }
         lines.append("")
 
+        // A .md file cannot carry the picture; say there was one and where
+        // to find it, so the record does not silently lose it.
+        if turn.imageFile != nil || turn.generatedImage != nil {
+            var note = "*Illustration"
+            if let model = turn.generatedImage?.imageModel { note += " by \(model)" }
+            lines.append(note + ": included in the PDF export.*")
+            lines.append("")
+        }
+
         let hits = turn.retrieval?.hits ?? []
         if !hits.isEmpty {
             lines.append(contentsOf: renderSources(hits, metrics: turn.metrics))
@@ -115,7 +124,7 @@ enum ConversationMarkdown {
 
     /// A hit's text, trimmed to something quotable and kept on one line so it
     /// survives as a Markdown blockquote.
-    private static func passage(_ hit: Hit, limit: Int = 400) -> String? {
+    static func passage(_ hit: Hit, limit: Int = 400) -> String? {
         let raw = (hit.content?.isEmpty == false ? hit.content : hit.summary) ?? ""
         let text = raw.split(whereSeparator: \.isNewline)
             .joined(separator: " ")
@@ -128,7 +137,7 @@ enum ConversationMarkdown {
         return cut[..<lastSpace] + "..."
     }
 
-    private static func score(_ value: Double) -> String {
+    static func score(_ value: Double) -> String {
         String(format: "%.3f", value)
     }
 
