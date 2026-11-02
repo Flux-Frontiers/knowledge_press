@@ -58,7 +58,7 @@ test("the numbers in the welcome are the real forest's", () => {
   const { tourIntro } = script();
   const f = getForest();
   const text = tourIntro({ books: f.trees.length, groves: f.groves.length }, false).join(" ");
-  assert.ok(f.trees.length === 253 && text.includes("253 books"), `${f.trees.length} trees`);
+  assert.ok(f.trees.length === 265 && text.includes("265 books"), `${f.trees.length} trees`);
   assert.ok(text.includes(`${f.groves.length} groves`));
 });
 
