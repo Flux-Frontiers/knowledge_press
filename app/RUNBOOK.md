@@ -955,11 +955,10 @@ is `public.app-category.books`, which Mac uploads require.
 
 ### First submission
 
-Status as of 2026-10-30: the **Mac app is approved and live**; the **iPhone app is
-submitted and awaiting review**. Still open: the iPhone approval, and a
-clean install of the iPhone store build -- the only way to prove it finds its
-bundled corpus. The Mac build has passed that check, installed from the Mac
-App Store on 2026-10-30.
+Status as of 2026-11-02: **both apps are approved and live**; iOS 1.30.0 was
+released on 2026-11-02. Still open: a clean install of the iPhone store
+build -- the only way to prove it finds its bundled corpus. The Mac build
+has passed that check, installed from the Mac App Store on 2026-10-30.
 
 - [x] Answers verified on the phone with the network off -- section 6's
       item, and the claim the whole product rests on
@@ -967,7 +966,7 @@ App Store on 2026-10-30.
       Connect -- App Store Connect blocks a submission without them
 - [x] A privacy policy URL, which App Store Connect requires even when the
       privacy manifest declares no collection
-- [ ] iPhone app approved -- submitted, awaiting App Review as of 2026-10-28
+- [x] iPhone app approved -- 1.30.0 approved and released 2026-11-02
 - [ ] A clean install of the iPhone store build, from TestFlight or, once
       approved, the App Store, on a device that has never had a development
       build -- not yet done. The only way to prove the bundled corpus is found
