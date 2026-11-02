@@ -9,6 +9,7 @@ import { BOOKS_PART3 } from "./catalogPart3";
 import { BOOKS_PART4 } from "./catalogPart4";
 import { BOOKS_PART5 } from "./catalogPart5";
 import { BOOKS_PART6 } from "./catalogPart6";
+import { BOOKS_PART7 } from "./catalogPart7";
 
 export const BOOKS: Book[] = [
   ...BOOKS_PART1,
@@ -17,6 +18,7 @@ export const BOOKS: Book[] = [
   ...BOOKS_PART4,
   ...BOOKS_PART5,
   ...BOOKS_PART6,
+  ...BOOKS_PART7,
 ];
 
 export const GENRE_ORDER = [...new Set(BOOKS.map((b) => b.genre))];
