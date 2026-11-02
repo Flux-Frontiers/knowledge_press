@@ -3,10 +3,11 @@
 The text in App Store Connect, kept here so the next release can update it
 in one place. Character limits are Apple's.
 
-Store page: <https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12> (Apple ID `6812116080`). The Mac app is live; the iPhone
-and iPad app is in App Review. Both are one Universal Purchase on the same
-record, so the same Apple ID serves both once iOS is approved; `?mt=12`
-opens the Mac tab.
+Store page: <https://apps.apple.com/us/app/the-knowledge-press/id6812116080>
+(Apple ID `6812116080`). Both apps are live: the Mac since 2026-10-28, the
+iPhone and iPad app since iOS 1.30.0 was released on 2026-11-02. They are one
+Universal Purchase on the same record, so the same link serves both;
+`?mt=12` opens the Mac tab.
 
 ## Name (30)
 
@@ -18,16 +19,16 @@ A library that answers back
 
 ## Promotional text (170, changeable without a new version)
 
-249 classic books and four diaries on your device. Ask a question, get an
+261 classic books and four diaries on your device. Ask a question, get an
 answer written from the passages it found, with every source shown.
 
-The Mac page has this text since 2026-10-18. The iOS page still opens "253
-classic books on your device" and ends "Works in airplane mode."; promotional
-text changes without a new version, so it can be brought in line any time.
+On the Mac page "on your device" reads "on your Mac". The 261 count went to
+the Mac page with 1.32.0 on 2026-11-02. Promotional text changes without a
+new version, so the iOS page can be brought in line any time.
 
 ## Description (4000)
 
-The Knowledge Press is a library of 249 public-domain books and four
+The Knowledge Press is a library of 261 public-domain books and four
 diaries that you can search and question, entirely on your device.
 
 Ask it anything: what Marcus Aurelius says about anger, how Darwin
@@ -97,6 +98,32 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 ## What's New (per version)
 
+### 1.32.0
+
+Submitted 2026-11-02 for both platforms, build 826. iOS is set to release on
+approval.
+
+iOS:
+
+```text
+265 books, ten of them new: Gogol's The Mantle, and Other Stories, the letters of Lady Mary Wortley Montagu and of Charles Lamb, Chekhov's Plays, Second Series, Synge's The Playboy of the Western World, the Raven Edition of Poe (volumes 2-5), and Cicero's De Officiis.
+
+- Save an illustration to Photos or Files with the new Save Image button.
+- Export a chat as a PDF, with its question, answer, quoted passages and pictures, or as Markdown as before.
+- On iPad, Browse always has a way back to the chat, even on a fresh install.
+- The layout now follows window width, so iPad Split View and folding iPhones get the right one.
+```
+
+Mac (the Browse and worker-address fixes were already in the Mac's October
+builds, and the layout change is iPhone and iPad only):
+
+```text
+265 books, ten of them new: Gogol's The Mantle, and Other Stories, the letters of Lady Mary Wortley Montagu and of Charles Lamb, Chekhov's Plays, Second Series, Synge's The Playboy of the Western World, the Raven Edition of Poe (volumes 2-5), and Cicero's De Officiis.
+
+- Save an illustration with Save Image, or send it with Share.
+- Export a chat as a PDF, with its question, answer, quoted passages and pictures. Save as PDF and Save as Markdown are in the export menu.
+```
+
 ### 1.28.0
 
 First App Store release.
@@ -131,7 +158,7 @@ Resubmitted after the 2.1.0 rejection of October 1. The requested screen recordi
 Attached: recorded on a physical iPhone running the latest iOS, starting from launch and showing the typical flow. The app has no account registration, login or account deletion, no user-generated content shared with other users, and no paid content or in-app purchases, so none of those flows exist to show.
 
 2. Purpose and audience
-The Knowledge Press is a library of 249 public-domain books (philosophy, literature, history, science, drama, sacred texts) and four historical diaries (Samuel Pepys, John Evelyn, and Boswell's Hebrides journal), installed with the app. Readers ask a question in plain language; the app searches the whole library by meaning and by exact wording, then writes an answer only from the passages it found, and shows every source passage. It is for students, teachers, and general readers who want to explore the classics and check what the books actually say. It works offline: the books, the search index, and the language model are all on the device.
+The Knowledge Press is a library of 261 public-domain books (philosophy, literature, history, science, drama, sacred texts) and four historical diaries (Samuel Pepys, John Evelyn, and Boswell's Hebrides journal), installed with the app. Readers ask a question in plain language; the app searches the whole library by meaning and by exact wording, then writes an answer only from the passages it found, and shows every source passage. It is for students, teachers, and general readers who want to explore the classics and check what the books actually say. It works offline: the books, the search index, and the language model are all on the device.
 
 3. Setup and main features
 No login, account, or sample files are needed. The library is bundled in the app; nothing is downloaded.
@@ -153,7 +180,7 @@ There are no accounts, analytics, advertising, crash reporting, third-party SDKs
 The app's features and content are the same in every region. The only difference is Apple's: written answers use Apple Intelligence, which is available only in the regions and languages Apple supports. Where it is unavailable, the app still searches, browses, and reads the full library. The books are in English.
 
 6. Third-party material and regulation
-The app does not operate in a regulated industry. All 249 books and four diaries are public domain in the United States. The texts come from Project Gutenberg and the Internet Archive, which the app acknowledges as sources. Project Gutenberg's header and license text are removed from each book, as its license permits for public-domain works. The app is not affiliated with Project Gutenberg and does not use its trademark in the app's name or branding.
+The app does not operate in a regulated industry. All 261 books and four diaries are public domain in the United States. The texts come from Project Gutenberg and the Internet Archive, which the app acknowledges as sources. Project Gutenberg's header and license text are removed from each book, as its license permits for public-domain works. The app is not affiliated with Project Gutenberg and does not use its trademark in the app's name or branding.
 ```
 
 ### The screen recording
@@ -202,9 +229,9 @@ places:
   line is dropped.
 - Item 5: the app is not offered in China mainland.
 
-The book count was fixed on 2026-10-18 in the Mac text and in the blocks
-above: 249 books plus four diaries, 253 works in all. The iOS 1.28.0 listing
-in review still says 253 books; correct it with the next iOS version.
+The blocks above count the 1.32.0 corpus: 261 books plus four diaries, 265
+works in all. The description and review notes are per version, so the
+count changes only when a new version's text is edited.
 
 ### Mac screenshots
 

@@ -18,8 +18,8 @@ this repo holds the ways to read it.
 
 *Author: Eric G. Suchanek, PhD -- Flux-Frontiers, Liberty TWP, OH*
 
-**Get the app:** [The Knowledge Press on the Mac App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12).
-The iPhone and iPad app is in App Review.
+**Get the app:** The Knowledge Press on the [App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080) for iPhone and
+iPad and the [Mac App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12).
 
 | Directory | What it is | License |
 | --- | --- | --- |

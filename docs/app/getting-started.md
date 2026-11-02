@@ -1,14 +1,17 @@
 # Getting started
 
-The Knowledge Press app searches a library of 253 public-domain books on your
-iPhone, iPad or Mac and writes an answer to your question from the passages it
-finds. Everything it needs is inside the app: the books, the search index, and
-the language model. It works in airplane mode.
+The Knowledge Press app searches a library of 261 public-domain books and
+four diaries on your iPhone, iPad or Mac and writes an answer to your
+question from the passages it finds. Everything it needs is inside the app:
+the books, the search index, and the language model. It works in airplane
+mode.
 
 ## Get the app
 
-The Mac app is on the
-[Mac App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12). The iPhone and iPad app is in App Review.
+The app is on the
+[App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080)
+for iPhone and iPad and on the
+[Mac App Store](https://apps.apple.com/us/app/the-knowledge-press/id6812116080?mt=12).
 
 ## What you need
 

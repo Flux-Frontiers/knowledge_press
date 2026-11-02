@@ -19,6 +19,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   Chekhov's *Plays, Second Series*, Synge's *The Playboy of the Western
   World*, Poe's Raven Edition volumes 2-5, and Cicero's *De Officiis*.
   The app's Swift packs are re-exported from the same bundle.
+- **The iPhone and iPad app is on the App Store.** The README, the docs
+  home, the app guide and the App Store listing link it beside the Mac App
+  Store page, and the listing keeps the 1.32.0 What's New text.
 
 ## [1.32.0] - 2026-11-01
 
