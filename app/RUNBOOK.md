@@ -249,11 +249,11 @@ poetry run gutenkg export-swift --no-vectors --no-golden --out /tmp/packs-dry
 ### What you should see
 
 ```
-core.pack  ← 241 books
+core.pack  ← 265 books (261 plus four diaries)
 gutenberg.pack
-  gutenberg: ~364,000 passages
+  gutenberg: ~428,000 passages
   building the FTS5 index over clean passage text…
-  gutenberg: ~364,000 vectors written (int8)
+  gutenberg: ~393,000 vectors written (int8)
 diaries.pack
   ...
 golden.json

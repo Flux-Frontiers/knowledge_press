@@ -2,8 +2,8 @@
 
 # Knowledge Press Forest
 
-Web port of the GutenbergKG forest: 253 public-domain books grown as trees
-(space colonization + pipe model + genre tropism), each genre a tree species,
+Web port of the GutenbergKG forest: 261 public-domain books and four diaries
+grown as trees (space colonization + pipe model + genre tropism), each genre a tree species,
 laid out as a hub-and-spoke wheel of genre groves around a redwood for the
 whole corpus. You drive a lantern cart through them, and can play moots:
 two books talking about a topic, each from its own text
@@ -132,7 +132,7 @@ gutenkg export-web-catalog
 ```
 
 Each grove draws as one textured bark mesh for its species and one instanced
-leaf mesh, and groves lost in the fog are hidden, so 253 crowns stay
+leaf mesh, and groves lost in the fog are hidden, so 265 crowns stay
 interactive. Attractors, nodes, and leaves are capped for the browser;
 raise the caps in `growTree.ts` if you want denser Hamlet-scale skeletons.
 
@@ -140,7 +140,7 @@ raise the caps in `growTree.ts` if you want denser Hamlet-scale skeletons.
 
 ```
 catalog.ts, catalogPart1-6.ts, catalogTypes.ts
-               253 books: genre, chunks, excerpt, tags, corpus folder, diary periods
+               265 trees: genre, chunks, excerpt, tags, corpus folder, diary periods
 growTree.ts    space colonization + pipe-model radii + leaf points; diary year limbs
 species.ts     genre -> tree species: habit, bark, leaf outline, foliage shift
 forest.ts      hub-and-spoke grove layout (crown-aware placement), roads, tour loop, home
