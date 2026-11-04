@@ -311,6 +311,14 @@ The packs hold `bge-small-en-v1.5` vectors. A query embedded by any other model
 lands somewhere else in the space and returns fluent, ranked, **wrong**
 passages — so the app has to carry this exact model.
 
+Without it the app refuses the **whole corpus**, not just search:
+`CorpusPacks` checks `embedder.json` before it opens a single pack, so Browse
+shows "No genres yet — No worker address set", Settings ▸ Corpus reports
+`embedder.json` missing, and the forest's reader has no books. A fresh
+gutenberg_kg clone has no embedder (`make export-swift` writes the packs
+only), so this step is per-machine, like the corpus itself. Run it once; a
+corpus rebuild keeps the three files it writes.
+
 **This does not work in the project venv, and cannot.** transformers 5.x
 routes BERT through its unified `masking_utils`, which emits a non-scalar
 `aten::Int` that coremltools 9.0 cannot fold to a constant:
@@ -348,7 +356,15 @@ spec.loader.exec_module(mod)
 mod.export_embedder(Path("bundles/gutenberg-all/swift"), progress=print)
 ```
 
-Expect 66 MB at parity 0.9999.
+Run that from the gutenberg_kg checkout with the throwaway venv's own
+interpreter (`/tmp/mlenv/bin/python convert.py`), never `poetry run`: the
+whole point is to keep the project venv out of the process. The venv can live
+anywhere and is disposable once the three files exist. Expect 66 MB at parity
+0.9999, in about a minute with the model already in `~/.cache/huggingface`.
+
+Checked again on a fresh Mac, 2026-11-04: the project venv carried
+transformers 5.16 and no coremltools; the pinned venv converted at parity
+0.9999995.
 
 Writes into the same directory as step 1:
 
