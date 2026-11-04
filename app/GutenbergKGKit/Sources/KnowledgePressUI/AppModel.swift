@@ -486,6 +486,11 @@ public final class AppModel {
     /// gives no way to express "this token is fine to leak" explicitly.
     private var askObserver: NSObjectProtocol?
 
+    /// The Forest tab's web view and what it serves. Held here, not by the
+    /// view, so the forest survives switching tabs and the iPad changing
+    /// layout; lazy, so nothing touches WebKit until the tab is opened.
+    @ObservationIgnored private(set) lazy var forest = ForestHost(root: ForestHost.bundledRoot())
+
     /// The app's own initializer: conversations go to Application Support.
     public convenience init() {
         self.init(store: ConversationStore.defaultDirectory().map(ConversationStore.init))

@@ -17,6 +17,8 @@ enum SidebarItem: Hashable {
     /// The active conversation, or an empty one waiting for a question.
     case chat
     case browse
+    /// The web forest, served from the app bundle.
+    case forest
     /// A saved chat, selected from the list.
     case conversation(UUID)
 }
@@ -43,10 +45,14 @@ struct ConversationSidebar: View {
                 // is better than a button that silently ignores a tap. From
                 // Browse it still has a job: before the first chat there is
                 // no conversation row, so this is the only way back.
-                .disabled(model.turns.isEmpty && selection != .browse)
+                .disabled(model.turns.isEmpty && selection != .browse && selection != .forest)
 
                 NavigationLink(value: SidebarItem.browse) {
                     Label("Browse the corpus", systemImage: "books.vertical")
+                }
+
+                NavigationLink(value: SidebarItem.forest) {
+                    Label("The forest", systemImage: "tree")
                 }
             }
 

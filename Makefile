@@ -22,6 +22,8 @@
 # The iPhone app for the App Store -- see app/RUNBOOK.md section 8:
 #   make ios-stage-corpus   -- copy the corpus packs into app/ios/Corpus
 #   make ios-unstage-corpus -- empty app/ios/Corpus again
+#   make ios-stage-forest   -- build the web forest and copy it into app/ios/Forest
+#   make ios-unstage-forest -- empty app/ios/Forest again
 #   make ios-archive        -- Release .xcarchive, corpus staged and bundled
 #   make ios-upload         -- export the archive as an .ipa and send it to App Store Connect
 #   make ios-sim            -- Simulator build with the corpus, for screenshots (SIM=<name>)
@@ -37,6 +39,8 @@
 #   make mac-check     -- compile unsigned; no certificate needed (the CI gate)
 #   make mac-stage-corpus   -- copy the corpus packs into app/macos/Corpus
 #   make mac-unstage-corpus -- empty app/macos/Corpus again
+#   make mac-stage-forest   -- build the web forest and copy it into app/macos/Forest
+#   make mac-unstage-forest -- empty app/macos/Forest again
 #   make mac-dev       -- Debug .app, automatic signing, carries Private Cloud Compute
 #   make mac-dev-run   -- build mac-dev and open it
 #   make mac-archive   -- sandboxed Release .xcarchive for the Mac App Store
@@ -63,7 +67,25 @@
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
-.PHONY: icons ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-dev mac-dev-run mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill web-books web-books-publish
+# The web forest staged into an app shell's Forest folder, and taken out again;
+# used by the ios-/mac-stage-forest targets. $(1) is the folder.
+define stage_forest
+	@$(MAKE) web-build
+	@cd web && node scripts/export-catalog.mjs
+	@rm -rf $(1) && cp -R web/dist $(1)
+	@# web/public/books (make web-books) is 175 MB the app answers from its packs.
+	@rm -rf $(1)/books
+	@git checkout -- $(1)/.gitkeep 2>/dev/null || true
+	@echo "Staged forest $$(node -p 'require("./web/package.json").version') into $(1) ($$(du -sh $(1) | cut -f1))."
+endef
+
+define unstage_forest
+	@rm -rf $(1) && mkdir -p $(1)
+	@git checkout -- $(1)/.gitkeep 2>/dev/null || true
+	@echo "$(1) emptied."
+endef
+
+.PHONY: icons ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-stage-forest ios-unstage-forest ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-stage-forest mac-unstage-forest mac-dev mac-dev-run mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill web-books web-books-publish
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -391,6 +413,18 @@ ios-unstage-corpus:
 	@git checkout -- app/ios/Corpus/.gitkeep 2>/dev/null || true
 	@echo "app/ios/Corpus emptied."
 
+# Build the web forest and copy it into app/ios/Forest, where the Forest tab
+# serves it through a custom URL scheme (see ForestView.swift). Beside it goes
+# catalog.json, the slug -> (genre, book) table the app uses to answer the
+# reader's books/<slug>.json from its own corpus packs. Built from this
+# checkout, so the forest and the app always carry the same version.
+ios-stage-forest:
+	$(call stage_forest,app/ios/Forest)
+
+# Remove the staged forest; the Forest tab goes back to its placeholder.
+ios-unstage-forest:
+	$(call unstage_forest,app/ios/Forest)
+
 # Release archive for App Store Connect. Requires the corpus to be staged --
 # checked rather than assumed, because an archive that builds, uploads and
 # passes review with an empty Corpus folder is an app that does nothing, and
@@ -521,6 +555,14 @@ mac-unstage-corpus:
 	@rm -rf app/macos/Corpus && mkdir -p app/macos/Corpus
 	@git checkout -- app/macos/Corpus/.gitkeep 2>/dev/null || true
 	@echo "app/macos/Corpus emptied."
+
+# The Mac twin of ios-stage-forest.
+mac-stage-forest:
+	$(call stage_forest,app/macos/Forest)
+
+# Remove the staged forest from app/macos/Forest.
+mac-unstage-forest:
+	$(call unstage_forest,app/macos/Forest)
 
 # A Debug build signed with the Apple Development identity through automatic
 # signing, which is the only way a Mac build gets a provisioning profile

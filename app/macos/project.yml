@@ -39,6 +39,10 @@ targets:
       # `make mac-stage-corpus` fills it, and `make mac-archive` stages first.
       - path: Corpus
         type: folder
+      # The web forest's build, staged like the corpus; see app/ios/project.yml.
+      # `make mac-stage-forest` fills it.
+      - path: Forest
+        type: folder
     dependencies:
       - package: GutenbergKGKit
         product: KnowledgePressUI
