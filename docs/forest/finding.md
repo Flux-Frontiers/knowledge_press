@@ -1,6 +1,7 @@
 # Finding books
 
-There are 253 books in the forest. These are the ways to reach one.
+There are 265 trees in the forest: 261 books and four diaries. These are the
+ways to reach one.
 
 ## Light the groves with a query
 

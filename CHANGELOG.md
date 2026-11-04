@@ -13,12 +13,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- **The corpus grows to 265 books.** The forest catalog is regenerated
+- **The corpus grows to 265 works: 261 books and four diaries.** The forest catalog is regenerated
   from gutenberg_kg's ten-book batch: Gogol's *The Mantle, and Other
   Stories*, the letters of Lady Mary Wortley Montagu and of Charles Lamb,
   Chekhov's *Plays, Second Series*, Synge's *The Playboy of the Western
   World*, Poe's Raven Edition volumes 2-5, and Cicero's *De Officiis*.
   The app's Swift packs are re-exported from the same bundle.
+- **Docs state the current count.** The forest guide, the web README and
+  FEATURES, and the runbook's export sample said 253 or 241 books; they
+  now say 261 books and four diaries.
 - **The iPhone and iPad app is on the App Store.** The README, the docs
   home, the app guide and the App Store listing link it beside the Mac App
   Store page, and the listing keeps the 1.32.0 What's New text.

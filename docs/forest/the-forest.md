@@ -85,9 +85,9 @@ plaque to read it at reading size; it does not open on its own.
 
 ## The corpus
 
-The forest is a snapshot of the corpus at build time. It holds 253 books in
-20 genres. Which books they are, and how they were ingested, is documented on
-the GutenbergKG site under
+The forest is a snapshot of the corpus at build time. It holds 261 books and
+four diaries in 20 genres. Which books they are, and how they were ingested, is
+documented on the GutenbergKG site under
 [Books in the corpus](https://flux-frontiers.github.io/gutenberg_kg/CORPUS/).
 The chunk counts on the cards come from that index; the forest does not
 re-read the books.
