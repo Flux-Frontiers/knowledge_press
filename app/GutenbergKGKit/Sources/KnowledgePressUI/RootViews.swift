@@ -61,6 +61,8 @@ public struct MacRootView: View {
         switch selection {
         case .browse:
             BrowseView()
+        case .forest:
+            ForestView()
         case .chat, .conversation, .none:
             ChatView(showsHeader: false)
                 .navigationTitle(model.activeConversation?.title ?? "New chat")
@@ -68,7 +70,8 @@ public struct MacRootView: View {
     }
 }
 
-/// iPhone: Chat and Browse as tabs, settings behind a toolbar button.
+/// iPhone: Chat, Browse and the Forest as tabs, settings behind a toolbar
+/// button.
 ///
 /// The sidebar does not survive the trip to a phone, so the controls move to
 /// a sheet. The corpus/version caption that used to sit under the nav title
@@ -115,6 +118,9 @@ public struct PhoneRootView: View {
 
             BrowseView()
                 .tabItem { Label("Browse", systemImage: "books.vertical") }
+
+            ForestView()
+                .tabItem { Label("Forest", systemImage: "tree") }
         }
         .sheet(isPresented: $showingHistory) {
             ConversationHistorySheet(isPresented: $showingHistory)
@@ -228,7 +234,9 @@ public struct PadRootView: View {
                                 model.newConversation()
                                 selection = .chat
                             }
-                            .disabled(model.turns.isEmpty && selection != .browse)
+                            .disabled(
+                                model.turns.isEmpty && selection != .browse
+                                    && selection != .forest)
                         }
                         ToolbarItem(placement: .cancellationAction) {
                             Button("Delete", systemImage: "trash") {
@@ -264,6 +272,8 @@ public struct PadRootView: View {
         switch selection {
         case .browse:
             BrowseView()
+        case .forest:
+            ForestView()
         // `nil` is "no row highlighted", which happens after New chat and on
         // a fresh launch; the chat is still what belongs in the detail column.
         case .chat, .conversation, .none:
