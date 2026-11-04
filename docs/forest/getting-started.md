@@ -6,6 +6,10 @@ It needs WebGL, which every current desktop and mobile browser has. Nothing
 is installed, and nothing about you leaves the browser except the requests
 that fetch the page and the book text.
 
+The same forest is also inside the Knowledge Press app for iPhone, iPad
+and Mac, where it works offline. See
+[The forest in the app](../app/forest.md).
+
 ## Start driving
 
 1. Open the forest. The trees grow while the start screen shows a picture of

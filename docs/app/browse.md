@@ -10,7 +10,8 @@ sidebar on iPad and Mac.
 
 1. **Corpus** lists the genres, each with its number of books. Tap one to see
    its books, with their authors.
-2. Tap a book to see its chapters.
+2. Tap a book to see its chapters. **Tree** beside a book opens the
+   forest at its tree; see [The forest in the app](forest.md).
 3. Tap a chapter to read it.
 
 To find an author, type in **Search authors** at the top of the Corpus list.
