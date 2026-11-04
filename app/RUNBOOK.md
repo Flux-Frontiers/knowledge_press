@@ -209,6 +209,7 @@ download, no image generation, no chat persistence.
 | A built bundle | steps 1–2 | `bundles/gutenberg-all/` in a `gutenberg_kg` checkout -- the output of its `make build-corpus`. |
 | ~5 GB free | steps 1–2 | The export reads 5.7 GB and writes under 1 GB. |
 | iPhone 15 Pro or newer, iOS 26 | step 6 | The Simulator cannot run Foundation Models. |
+| Node 22 and `make web-install` | steps 7–8 | The Forest tab bundles the web forest, built from this checkout by `make ios-stage-forest` / `mac-stage-forest`. `mac-dev` and the archives run it themselves. |
 
 Check the toolchain before you start:
 
@@ -794,6 +795,7 @@ store build, and it was never published.
 make mac-dev             # Debug .app, automatic signing, carries Private Cloud Compute
 make mac-dev-run         # build it and open it
 make mac-unstage-corpus  # empty app/macos/Corpus again when you are done
+make mac-unstage-forest  # and app/macos/Forest
 ```
 
 `mac-dev` exists for Private Cloud Compute. A restricted entitlement has to be
@@ -821,6 +823,17 @@ runtime. The app comes to about 750 MB.
 
 `app/macos/Corpus` is committed empty with a `.gitkeep`, and its contents are
 gitignored, so `make mac-check` and CI compile against an empty folder.
+
+### So does the forest
+
+`make mac-dev` and `make mac-archive` also run `make mac-stage-forest`. It
+builds `web/` (`npm run build`), writes `catalog.json`, and copies
+`web/dist` into `app/macos/Forest`, without `books/`, because the app answers
+book text from its packs. That adds about 5 MB. Like `Corpus`, the folder is
+committed empty. An unstaged build still runs, and the Forest tab says
+**The forest is not staged**. The stage stops with a message if
+`web/node_modules` is missing; run `make web-install` once. How the forest is
+served is in `docs/APP_INTERNALS.md` §9.
 
 ### It shares one source file with `swift run`, on purpose
 
@@ -876,9 +889,10 @@ and, under "The Mac app on the Mac App Store", for the Mac.
 ```sh
 make export-swift        # the corpus, if it is not already built
 make ios-stage-corpus    # copy it into app/ios/Corpus
-make ios-archive         # Release .xcarchive (stages the corpus itself)
+make ios-archive         # Release .xcarchive (stages the corpus and the forest itself)
 make ios-upload          # export the .ipa and send it to App Store Connect
 make ios-unstage-corpus  # empty the folder again when you are done
+make ios-unstage-forest  # and app/ios/Forest
 ```
 
 ### The corpus ships inside the app

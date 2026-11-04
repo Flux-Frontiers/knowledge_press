@@ -85,6 +85,7 @@ A rank for how much of the forest you have pressed. Starting over shipped as
 | Jump to a tree from the press: **Tree** beside each entry lands at the tree with its card open, as the Books tab does | `HUD.tsx` |
 | Empty the press (Press tab, after asking); Reset all settings leaves the press and visited groves alone | `HUD.tsx`, `store.ts` |
 | Link to a tree: `?tree=<slug>` starts beside it with its card open | `deepLink.ts`, `ForestApp.tsx` |
+| Runs inside the iOS and macOS app, offline, with book text from the app's packs. A host bridge moves to a tree without a reload, reports the card shown and the press, and adds **Ask about this book**. It does nothing on the Pages site | `host.ts`, `ForestApp.tsx`, `store.ts`, `HUD.tsx`; app: `Forest/` |
 | Corpus redwood at the hub, with its own ridged bark; book list popup (B), start at home | `corpusTree.ts`, `CorpusRedwood.tsx`, `HUD.tsx` |
 | Exhibits on side spokes off the rings, spread round the forest: Kepler's Mysterium, three wind rotors, a DNA double helix, a weather mast | `exhibits.ts`, `Mysterium.tsx`, `WindSculptures.tsx`, `windRotors.ts` |
 | Armillary sundial for 39° N: style on the celestial pole, hour ring square to it, the style's shadow computed from the sky's sun | `sundialGeometry.ts`, `Sundial.tsx` |

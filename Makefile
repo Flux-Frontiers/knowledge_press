@@ -24,7 +24,7 @@
 #   make ios-unstage-corpus -- empty app/ios/Corpus again
 #   make ios-stage-forest   -- build the web forest and copy it into app/ios/Forest
 #   make ios-unstage-forest -- empty app/ios/Forest again
-#   make ios-archive        -- Release .xcarchive, corpus staged and bundled
+#   make ios-archive        -- Release .xcarchive, corpus and forest staged and bundled
 #   make ios-upload         -- export the archive as an .ipa and send it to App Store Connect
 #   make ios-sim            -- Simulator build with the corpus, for screenshots (SIM=<name>)
 #                              (runs ios-sim-build, ios-sim-boot, ios-sim-install-corpus, ios-sim-launch)
@@ -41,7 +41,8 @@
 #   make mac-unstage-corpus -- empty app/macos/Corpus again
 #   make mac-stage-forest   -- build the web forest and copy it into app/macos/Forest
 #   make mac-unstage-forest -- empty app/macos/Forest again
-#   make mac-dev       -- Debug .app, automatic signing, carries Private Cloud Compute
+#   make mac-dev       -- Debug .app, automatic signing, carries Private Cloud Compute,
+#                         corpus and forest staged
 #   make mac-dev-run   -- build mac-dev and open it
 #   make mac-archive   -- sandboxed Release .xcarchive for the Mac App Store
 #   make mac-upload    -- export the archive as a .pkg and send it to App Store Connect
@@ -70,6 +71,8 @@ GUTENBERG_KG_DIR ?= ../gutenberg_kg
 # The web forest staged into an app shell's Forest folder, and taken out again;
 # used by the ios-/mac-stage-forest targets. $(1) is the folder.
 define stage_forest
+	@test -d web/node_modules \
+	  || { echo "web/node_modules is missing -- run 'make web-install' (Node 22) first."; exit 1; }
 	@$(MAKE) web-build
 	@cd web && node scripts/export-catalog.mjs
 	@rm -rf $(1) && cp -R web/dist $(1)
@@ -428,8 +431,10 @@ ios-unstage-forest:
 # Release archive for App Store Connect. Requires the corpus to be staged --
 # checked rather than assumed, because an archive that builds, uploads and
 # passes review with an empty Corpus folder is an app that does nothing, and
-# the only symptom is a reviewer's rejection a week later.
-ios-archive: ios-stage-corpus ios-generate
+# the only symptom is a reviewer's rejection a week later. Stages the forest
+# too, built from this checkout, so the Forest tab never ships its
+# placeholder. Needs Node 22 and web/node_modules (make web-install).
+ios-archive: ios-stage-corpus ios-stage-forest ios-generate
 	@$(ios_resolve_team); \
 	cd app/ios && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj -scheme KnowledgePress \
 	  -destination 'generic/platform=iOS' -archivePath build/KnowledgePress.xcarchive \
@@ -577,7 +582,8 @@ mac-unstage-forest:
 #
 # Sandboxed, like the App Store build, so it stages the corpus too: its
 # Application Support is the app's container, not the one `swift run` fills.
-mac-dev: mac-stage-corpus mac-generate
+# The forest is only ever read from the bundle, so it is staged as well.
+mac-dev: mac-stage-corpus mac-stage-forest mac-generate
 	@$(ios_resolve_team); \
 	cd app/macos && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj \
 	  -scheme KnowledgePress -destination 'platform=macOS' \
@@ -593,8 +599,8 @@ mac-dev-run: mac-dev
 # Mac App Store archive: the Mac twin of ios-archive. Automatic signing picks
 # the Apple Distribution identity and a Mac App Store profile, which grants
 # PCC, so this keeps the entitlements file: PCC plus the App Sandbox the
-# store requires. Stages the corpus for ios-archive's reason.
-mac-archive: mac-stage-corpus mac-generate
+# store requires. Stages the corpus and the forest for ios-archive's reasons.
+mac-archive: mac-stage-corpus mac-stage-forest mac-generate
 	@$(ios_resolve_team); \
 	cd app/macos && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj \
 	  -scheme KnowledgePress -destination 'generic/platform=macOS' \

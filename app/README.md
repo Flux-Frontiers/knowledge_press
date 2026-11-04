@@ -22,10 +22,12 @@ app/
 │   │   ├── Retrieval/                RetrievalEngine + WorkerRetrieval,
 │   │   │                             CorpusPacks/PassagePack/CatalogPack,
 │   │   │                             VectorIndex (mmap + vDSP), LocalRetrieval
-│   │   └── Synthesis/                SynthesisBackend protocol, ContextBudgeter,
-│   │                                 SynthesisPrompt, OnDeviceSynthesis
-│   ├── Sources/KnowledgePressUI/   shared SwiftUI — chat, browse, settings,
-│   │                               and one root view per platform
+│   │   ├── Synthesis/                SynthesisBackend protocol, ContextBudgeter,
+│   │   │                             SynthesisPrompt, OnDeviceSynthesis
+│   │   └── Forest/                   ForestServer (bundle files + book text
+│   │                                 from the packs), ForestBridge messages
+│   ├── Sources/KnowledgePressUI/   shared SwiftUI — chat, browse, forest,
+│   │                               settings, and one root view per platform
 │   ├── Sources/KnowledgePress/     macOS shell (`swift run KnowledgePress`)
 │   └── Tests/                      Swift Testing suites
 └── ios/                            iPhone shell + XcodeGen spec — see its README
@@ -38,6 +40,7 @@ app/
 | Answer | Apple Foundation Models, on the device | yes |
 | Passages | the installed corpus packs | yes |
 | Browse | the same packs | yes |
+| Forest | the web forest staged into the bundle, book text from the packs | yes |
 
 With packs installed the app answers with the network off. Build them in a
 `gutenberg_kg` checkout with `gutenkg export-swift` and
@@ -66,6 +69,13 @@ swift test
 prefix commands with `DEVELOPER_DIR=/Applications/Xcode-beta.app/Contents/Developer`.
 
 The iPhone app builds from `app/ios` — see [ios/README.md](ios/README.md).
+
+The Forest tab needs the web forest staged into the shell:
+`make ios-stage-forest` or `make mac-stage-forest` (Node 22, after
+`make web-install`). The archives and `make mac-dev` stage it themselves,
+and an unstaged build shows a placeholder that says what to run. How it is
+served is covered in
+[Inside the app §9](../docs/APP_INTERNALS.md#9-the-forest-inside-the-app).
 
 ## Live smoke test
 
