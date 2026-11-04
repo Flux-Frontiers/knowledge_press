@@ -31,6 +31,10 @@ public final class PassagePack: @unchecked Sendable {
     /// carry no book name.
     private let hasBookColumn: Bool
 
+    /// Whether `passages` has `gap_after`, what the source has between a chunk
+    /// and the next. Without it Browse puts a blank line at every seam.
+    private let hasGapColumn: Bool
+
     /// Open a pack and map its vectors.
     ///
     /// :param url: Path to a `.pack` file.
@@ -52,14 +56,20 @@ public final class PassagePack: @unchecked Sendable {
             : nil
 
         var hasBookColumn = false
+        var hasGapColumn = false
         database.tryEach("PRAGMA table_info(passages)") { statement in
-            if SQLiteConnection.string(statement, 1) == "book" { hasBookColumn = true }
+            switch SQLiteConnection.string(statement, 1) {
+            case "book": hasBookColumn = true
+            case "gap_after": hasGapColumn = true
+            default: break
+            }
         }
 
         self.database = database
         self.name = name
         self.vectors = vectors
         self.hasBookColumn = hasBookColumn
+        self.hasGapColumn = hasGapColumn
     }
 
     // MARK: - Retrieval
@@ -273,11 +283,13 @@ public final class PassagePack: @unchecked Sendable {
         let next = index + 1 < all.count ? all[index + 1].id : nil
 
         var chunks: [ChapterText.Chunk] = []
+        // An older pack has no gap_after; NULL keeps the blank line at each seam.
+        let gap = hasGapColumn ? "gap_after" : "NULL"
         if sectionID.hasPrefix("chapter:") {
             let number = Int(sectionID.dropFirst("chapter:".count)) ?? -1
             try each(
                 """
-                SELECT char_start, content FROM passages
+                SELECT char_start, content, \(gap) FROM passages
                  WHERE file_path = ? AND kind = 'chunk' AND chapter = ?
                  ORDER BY char_start
                 """,
@@ -287,7 +299,8 @@ public final class PassagePack: @unchecked Sendable {
                     ChapterText.Chunk(
                         start: sqlite3_column_type(statement, 0) == SQLITE_NULL
                             ? nil : Int(sqlite3_column_int64(statement, 0)),
-                        text: Self.text(statement, 1) ?? ""))
+                        text: Self.text(statement, 1) ?? "",
+                        gapAfter: Self.text(statement, 2)))
             }
         } else {
             // Chunks between this section marker and the next one.
@@ -297,7 +310,7 @@ public final class PassagePack: @unchecked Sendable {
                 end = boundary
             }
             var sql = """
-                SELECT char_start, content FROM passages
+                SELECT char_start, content, \(gap) FROM passages
                  WHERE file_path = ? AND kind = 'chunk' AND char_start >= ?
                 """
             var bounds: [Int64] = [Int64(start)]
@@ -311,7 +324,8 @@ public final class PassagePack: @unchecked Sendable {
                     ChapterText.Chunk(
                         start: sqlite3_column_type(statement, 0) == SQLITE_NULL
                             ? nil : Int(sqlite3_column_int64(statement, 0)),
-                        text: Self.text(statement, 1) ?? ""))
+                        text: Self.text(statement, 1) ?? "",
+                        gapAfter: Self.text(statement, 2)))
             }
         }
         let text = ChapterText.join(chunks)

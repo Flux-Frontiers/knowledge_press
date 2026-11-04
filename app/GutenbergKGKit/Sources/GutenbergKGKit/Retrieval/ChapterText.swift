@@ -10,14 +10,18 @@ import Foundation
 
 public enum ChapterText {
 
-    /// One chunk of a chapter: its stored offset and its text.
+    /// One chunk of a chapter: its stored offset, its text, and what the
+    /// source has between it and the next chunk (a space, a newline or two),
+    /// when the pack records it.
     public struct Chunk: Sendable {
         public let start: Int?
         public let text: String
+        public let gapAfter: String?
 
-        public init(start: Int?, text: String) {
+        public init(start: Int?, text: String, gapAfter: String? = nil) {
             self.start = start
             self.text = text
+            self.gapAfter = gapAfter
         }
     }
 
@@ -32,9 +36,12 @@ public enum ChapterText {
     /// the match sits on word boundaries, so a phrase that merely recurs is
     /// kept.
     ///
+    /// Chunks that do not overlap are joined by the source's own gap when the
+    /// pack records it, so a seam in the middle of a line stays one line.
+    /// Without it they are separated by a blank line.
+    ///
     /// :param chunks: The chapter's chunks, ordered by `char_start`.
-    /// :returns: The chapter's text; chunks with no overlap are separated by a
-    ///     blank line, overlapping ones continue the same paragraph.
+    /// :returns: The chapter's text.
     public static func join(_ chunks: [Chunk]) -> String {
         var text = ""
         var previous: Chunk?
@@ -42,6 +49,12 @@ public enum ChapterText {
             defer { previous = chunk }
             guard let previous, !text.isEmpty else {
                 text = chunk.text
+                continue
+            }
+            // A recorded gap means the chunks are neighbours that do not
+            // overlap, so a matching tail is a repeat in the book, not a seam.
+            if let gap = previous.gapAfter {
+                text += gap + chunk.text
                 continue
             }
             var offsetsOverlap = false
