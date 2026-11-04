@@ -26,6 +26,15 @@ public final class PassagePack: @unchecked Sendable {
     /// this and nothing else.
     public var isDiaries: Bool { name == "diaries" }
 
+    /// Whether `passages` has a `book` column. Every pack built since the
+    /// forest catalog has one; an older pack is still searched, its hits just
+    /// carry no book name.
+    private let hasBookColumn: Bool
+
+    /// Whether `passages` has `gap_after`, what the source has between a chunk
+    /// and the next. Without it Browse puts a blank line at every seam.
+    private let hasGapColumn: Bool
+
     /// Open a pack and map its vectors.
     ///
     /// :param url: Path to a `.pack` file.
@@ -46,9 +55,21 @@ public final class PassagePack: @unchecked Sendable {
             ? try VectorIndex(contentsOf: sidecar, expectedDimension: expectedDimension)
             : nil
 
+        var hasBookColumn = false
+        var hasGapColumn = false
+        database.tryEach("PRAGMA table_info(passages)") { statement in
+            switch SQLiteConnection.string(statement, 1) {
+            case "book": hasBookColumn = true
+            case "gap_after": hasGapColumn = true
+            default: break
+            }
+        }
+
         self.database = database
         self.name = name
         self.vectors = vectors
+        self.hasBookColumn = hasBookColumn
+        self.hasGapColumn = hasGapColumn
     }
 
     // MARK: - Retrieval
@@ -162,7 +183,8 @@ public final class PassagePack: @unchecked Sendable {
         try each(
             """
             SELECT id, kg_name, kg_kind, kind, name, title, node_title, author, genre,
-                   file_path, timestamp, vector_index, content
+                   file_path, timestamp, vector_index, content,
+                   \(hasBookColumn ? "book" : "NULL")
               FROM passages WHERE id IN (\(placeholders))
             """,
             bind: ids
@@ -181,7 +203,8 @@ public final class PassagePack: @unchecked Sendable {
                 timestamp: Self.text(statement, 10),
                 vectorRow: sqlite3_column_type(statement, 11) == SQLITE_NULL
                     ? nil : Int(sqlite3_column_int64(statement, 11)),
-                content: Self.text(statement, 12) ?? "")
+                content: Self.text(statement, 12) ?? "",
+                book: Self.text(statement, 13))
             rows[row.id] = row
         }
         return rows
@@ -260,11 +283,13 @@ public final class PassagePack: @unchecked Sendable {
         let next = index + 1 < all.count ? all[index + 1].id : nil
 
         var chunks: [ChapterText.Chunk] = []
+        // An older pack has no gap_after; NULL keeps the blank line at each seam.
+        let gap = hasGapColumn ? "gap_after" : "NULL"
         if sectionID.hasPrefix("chapter:") {
             let number = Int(sectionID.dropFirst("chapter:".count)) ?? -1
             try each(
                 """
-                SELECT char_start, content FROM passages
+                SELECT char_start, content, \(gap) FROM passages
                  WHERE file_path = ? AND kind = 'chunk' AND chapter = ?
                  ORDER BY char_start
                 """,
@@ -274,7 +299,8 @@ public final class PassagePack: @unchecked Sendable {
                     ChapterText.Chunk(
                         start: sqlite3_column_type(statement, 0) == SQLITE_NULL
                             ? nil : Int(sqlite3_column_int64(statement, 0)),
-                        text: Self.text(statement, 1) ?? ""))
+                        text: Self.text(statement, 1) ?? "",
+                        gapAfter: Self.text(statement, 2)))
             }
         } else {
             // Chunks between this section marker and the next one.
@@ -284,7 +310,7 @@ public final class PassagePack: @unchecked Sendable {
                 end = boundary
             }
             var sql = """
-                SELECT char_start, content FROM passages
+                SELECT char_start, content, \(gap) FROM passages
                  WHERE file_path = ? AND kind = 'chunk' AND char_start >= ?
                 """
             var bounds: [Int64] = [Int64(start)]
@@ -298,7 +324,8 @@ public final class PassagePack: @unchecked Sendable {
                     ChapterText.Chunk(
                         start: sqlite3_column_type(statement, 0) == SQLITE_NULL
                             ? nil : Int(sqlite3_column_int64(statement, 0)),
-                        text: Self.text(statement, 1) ?? ""))
+                        text: Self.text(statement, 1) ?? "",
+                        gapAfter: Self.text(statement, 2)))
             }
         }
         let text = ChapterText.join(chunks)
@@ -465,6 +492,8 @@ public struct PassageRow: Sendable {
     public let timestamp: String?
     public let vectorRow: Int?
     public let content: String
+    /// The corpus folder name; nil for diary chunks.
+    public var book: String? = nil
 
     /// Shape this row as the worker would, so a hit card cannot tell the
     /// difference between a local answer and a remote one.
@@ -485,6 +514,7 @@ public struct PassageRow: Sendable {
             timestamp: timestamp,
             genre: genre,
             title: title,
-            author: author)
+            author: author,
+            book: book)
     }
 }

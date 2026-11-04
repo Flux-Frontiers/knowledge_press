@@ -53,6 +53,28 @@ struct ChapterTextJoinTests {
         let text = ChapterText.join([chunk(0, "Come along now."), chunk(10, "ow. And then.")])
         #expect(text == "Come along now.\n\now. And then.")
     }
+
+    @Test func usesTheSourcesGapBetweenNeighbours() {
+        // Macbeth I.ii: seams in the middle of a line and at a line end.
+        let text = ChapterText.join([
+            ChapterText.Chunk(start: 0, text: "And choke their art.", gapAfter: " "),
+            ChapterText.Chunk(
+                start: 21, text: "The merciless Macdonwald\nShow'd like a rebel's whore.", gapAfter: "\n"),
+            ChapterText.Chunk(start: 75, text: "But all's too weak;"),
+        ])
+        #expect(
+            text == "And choke their art. The merciless Macdonwald\nShow'd like a rebel's whore.\nBut all's too weak;")
+    }
+
+    @Test func aRecordedGapIsNotMistakenForAnOverlap() {
+        // A refrain repeated across a seam is the book's, not the chunker's.
+        let refrain = "Nevermore, quoth the Raven, nevermore."
+        let text = ChapterText.join([
+            ChapterText.Chunk(start: 0, text: "He said: " + refrain, gapAfter: "\n"),
+            ChapterText.Chunk(start: 48, text: refrain + " And so on."),
+        ])
+        #expect(text.components(separatedBy: refrain).count == 3)
+    }
 }
 
 struct ChapterTextReflowTests {
@@ -159,5 +181,21 @@ struct ChapterTextCorpusTests {
         #expect(content.text.components(separatedBy: "an awful sight of money when").count == 2)
         let shown = ChapterText.reflow(content.text)
         #expect(shown.contains("by the name of The Adventures of Tom Sawyer"))
+    }
+
+    @Test func macbethSceneTwoKeepsItsLinesAcrossChunkSeams() async throws {
+        let directory = try #require(packsDirectory)
+        let browser = LocalBrowser(packs: try CorpusPacks(directory: directory))
+        let books = try await browser.listBooks(genre: "shakespeare")
+        let macbeth = try #require(books.first { ($0.title ?? "") == "Macbeth" })
+        let chapters = try await browser.chapters(genre: "shakespeare", book: macbeth.book)
+        let scene = try #require(chapters.first { ($0.title ?? "").hasPrefix("SCENE II. A Camp") })
+        let content = try await browser.chapter(
+            genre: "shakespeare", book: macbeth.book, sectionId: scene.id)
+
+        let shown = ChapterText.reflow(content.text)
+        #expect(shown.contains("And choke their art. The merciless Macdonwald"))
+        #expect(shown.contains("Show\u{2019}d like a rebel\u{2019}s whore. But all\u{2019}s too weak;"))
+        #expect(shown.contains("battlements.\n\nDUNCAN.\nO valiant cousin!"))
     }
 }

@@ -271,7 +271,65 @@ with tools you already have is a format you can debug.
 
 ---
 
-## 9. From source to phone
+## 9. The forest inside the app
+
+The **Forest** tab runs the web forest from `web/`, the same build the Pages
+site serves, inside a `WKWebView`. It is not a port. One forest is
+maintained, and the app adds three things the browser cannot give it: the
+files come from the app bundle, the book text comes from the corpus packs,
+and a small bridge lets the forest and the app talk to each other.
+
+```
+  WKWebView ── kp-forest://forest/index.html, assets/…, catalog.json
+      │              │
+      │        ForestSchemeHandler ── ForestServer
+      │                                  ├── static files: <bundle>/Forest
+      │                                  └── books/<slug>.json ← CorpusBrowser (packs)
+      │
+      ├── posts  ready · tree · pressed · ask      ──▶ ForestHost ──▶ AppModel
+      └── runs   window.__forestHost.dispatch(…)   ◀── goto · home
+```
+
+**Files.** `make ios-stage-forest` / `mac-stage-forest` run `npm run build`
+and `web/scripts/export-catalog.mjs`, then copy `web/dist` into the shell's
+`Forest` folder. The archives and `mac-dev` depend on that stage. The folder
+is empty in git, like `Corpus`. An unstaged build shows a placeholder that
+names the target to run.
+
+**Why a custom scheme.** A page loaded from a `file://` URL cannot fetch
+its own JSON or start a module worker, and the forest needs both. Under
+`kp-forest://` WebKit treats the page as a secure context with a stable
+origin, so `fetch`, workers and `localStorage` behave as they do on the
+web. The press therefore persists in the web view's default data store.
+
+**Book text.** The web reader asks for `books/<slug>.json`. On the Pages
+site that is a static file. In the app, `ForestServer` looks the slug up in
+`catalog.json` (slug → genre, book) and builds the JSON from the same
+`CorpusBrowser` calls Browse uses. Every installed book can be read
+offline, with no 175 MB copy of the text in the bundle.
+
+**The bridge.** `web/src/game/host.ts` is the only web file that knows about
+the app. When the page has no `forest` message handler, as on the Pages site,
+`host.available` is false and every call does nothing. In the app:
+
+| Direction | Message | Effect |
+|---|---|---|
+| forest → app | `ready` | the page can take commands; anything queued is sent |
+| forest → app | `tree` | the card now shown (or none) |
+| forest → app | `pressed` | a book was read into the press |
+| forest → app | `ask` | **Ask about this book**: a new chat scoped to the genre, with a draft |
+| app → forest | `goto` | drive to a tree and open its card, without reloading |
+| app → forest | `home` | back to the redwood |
+
+`ForestBridge.swift` holds both message types, and `ForestHost` in
+`ForestView.swift` owns the web view. The host lives as long as `AppModel`,
+so switching tabs keeps the forest where you left it. It queues a command
+until `ready` arrives (the latest command wins) and accepts messages only
+from the `kp-forest` origin.
+
+---
+
+## 10. From source to phone
 
 Apple platforms have two overlapping toolchains, which is a common source of
 confusion.
@@ -288,7 +346,7 @@ parts that genuinely need it.
 
 ---
 
-## 10. Swift ↔ Python glossary
+## 11. Swift ↔ Python glossary
 
 Reading aids, not exact equivalences.
 
@@ -309,7 +367,7 @@ Reading aids, not exact equivalences.
 
 ---
 
-## 11. Where to look in the code
+## 12. Where to look in the code
 
 | File | What it does |
 |---|---|
@@ -327,6 +385,10 @@ Reading aids, not exact equivalences.
 | `QueryOrchestrator.swift` | Retrieval then synthesis, as one stream of events the chat renders |
 | `KnowledgePressUI/AppModel.swift` | All app state, and the decision about which engine answers |
 | `KnowledgePressUI/RootViews.swift` | The only place the two platforms differ: sidebar on the Mac, sheet on the phone |
+| `Forest/ForestServer.swift` | The forest's files from the bundle, and `books/<slug>.json` from the packs |
+| `Forest/ForestBridge.swift` | The messages between the forest and the app, both ways |
+| `KnowledgePressUI/Forest/ForestView.swift` | The web view, its host, and the **Tree** button |
+| `KnowledgePressUI/Forest/ForestSchemeHandler.swift` | Answers `kp-forest://` requests from `ForestServer` |
 
 If you read three, read `LocalRetrieval.swift` for the shape of the query,
 `ContextBudgeter.swift` for the one constraint that shapes the whole answer,

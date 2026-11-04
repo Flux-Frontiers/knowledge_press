@@ -32,6 +32,12 @@ targets:
       # in CI; `make ios-stage-corpus` fills it before an archive.
       - path: Corpus
         type: folder
+      # The web forest's production build (web/dist), the same way: a folder
+      # reference so its relative paths survive, empty in git because the
+      # build is an artifact, not source. `make ios-stage-forest` fills it;
+      # empty, the Forest tab says how to.
+      - path: Forest
+        type: folder
     dependencies:
       - package: GutenbergKGKit
         product: KnowledgePressUI
@@ -65,6 +71,12 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         # Asked the first time a reader saves an illustration to Photos;
         # without it the share sheet's Save Image crashes the app.
+        # The forest (the Forest tab) asks for a location for true sunrise and
+        # sunset, worded as its own About panel puts it.
+        NSLocationWhenInUseUsageDescription:
+          The forest uses your location only to place the sun, moon and stars
+          in its sky. It is rounded to a tenth of a degree and kept on this
+          device.
         NSPhotoLibraryAddUsageDescription: Knowledge Press saves illustrations you choose to your photo library.
         UILaunchScreen: {}
         # All four are required for iPad multitasking (App Store Connect

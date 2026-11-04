@@ -53,6 +53,26 @@ private func decode<T: Decodable>(_ json: String) throws -> T {
         #expect(result.hits[0].score == 0.7412)
         #expect(result.hits[0].genre == "sacred-texts")
         #expect(result.hits[1].timestamp == "1666-09-02T00:00:00")
+        // The worker sends no corpus folder name; the field is optional.
+        #expect(result.hits[0].book == nil)
+    }
+
+    /// A hit's book name round-trips through a saved conversation, and one
+    /// saved before the field existed still decodes.
+    @Test func hitBookIsOptionalAndRoundTrips() throws {
+        let old = """
+            {"kg_name": "gutenberg", "kg_kind": "KGKind.doc", "node_id": "n1",
+             "name": "c", "kind": "chunk", "score": 0.5, "summary": null,
+             "source_path": null, "content": "t", "timestamp": null,
+             "genre": "french-literature", "title": "Germinal", "author": "Zola"}
+            """
+        let hit = try JSONDecoder().decode(Hit.self, from: Data(old.utf8))
+        #expect(hit.book == nil)
+        var named = hit
+        named.book = "Germinal (Zola)"
+        let again = try JSONDecoder().decode(Hit.self, from: JSONEncoder().encode(named))
+        #expect(again.book == "Germinal (Zola)")
+        #expect(again.title == "Germinal")
     }
 
     @Test func queryResultSynthesisOff() throws {

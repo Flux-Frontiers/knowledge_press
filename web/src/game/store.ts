@@ -8,6 +8,7 @@ import { resetInput } from "./input";
 import { clearTourHeard } from "./tourScript";
 import type { Portrait } from "./portrait";
 import type { GroundCamera } from "./godEye";
+import { host } from "./host";
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -341,6 +342,7 @@ export const useGame = create<GameStore>((set, get) => ({
     const library = [...lib, slug];
     set({ library, lastReadSlug: slug, toast: `Pressed · ${title}` });
     persist({ ...get(), library });
+    host.post({ kind: "pressed", slug });
   },
   emptyPress: () => {
     set({ library: [], lastReadSlug: null });
@@ -434,3 +436,14 @@ export const useGame = create<GameStore>((set, get) => ({
     get().setPreferences({ camera: flight.to });
   },
 }));
+
+/** The tree whose card is up, as HUD.tsx decides it: a pinned tree, or the one the cart slowed beside. */
+function shownCard(s: GameStore): string | null {
+  return s.pinnedSlug ?? (s.preferences.silent ? null : s.cardSlug);
+}
+
+// Tell an app host (host.ts) each time a tree's card comes up. Nothing on the web.
+useGame.subscribe((now, before) => {
+  const slug = shownCard(now);
+  if (slug && slug !== shownCard(before)) host.post({ kind: "tree", slug });
+});

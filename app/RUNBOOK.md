@@ -209,6 +209,7 @@ download, no image generation, no chat persistence.
 | A built bundle | steps 1–2 | `bundles/gutenberg-all/` in a `gutenberg_kg` checkout -- the output of its `make build-corpus`. |
 | ~5 GB free | steps 1–2 | The export reads 5.7 GB and writes under 1 GB. |
 | iPhone 15 Pro or newer, iOS 26 | step 6 | The Simulator cannot run Foundation Models. |
+| Node 22 and `make web-install` | steps 7–8 | The Forest tab bundles the web forest, built from this checkout by `make ios-stage-forest` / `mac-stage-forest`. `mac-dev` and the archives run it themselves. |
 
 Check the toolchain before you start:
 
@@ -311,6 +312,14 @@ The packs hold `bge-small-en-v1.5` vectors. A query embedded by any other model
 lands somewhere else in the space and returns fluent, ranked, **wrong**
 passages — so the app has to carry this exact model.
 
+Without it the app refuses the **whole corpus**, not just search:
+`CorpusPacks` checks `embedder.json` before it opens a single pack, so Browse
+shows "No genres yet — No worker address set", Settings ▸ Corpus reports
+`embedder.json` missing, and the forest's reader has no books. A fresh
+gutenberg_kg clone has no embedder (`make export-swift` writes the packs
+only), so this step is per-machine, like the corpus itself. Run it once; a
+corpus rebuild keeps the three files it writes.
+
 **This does not work in the project venv, and cannot.** transformers 5.x
 routes BERT through its unified `masking_utils`, which emits a non-scalar
 `aten::Int` that coremltools 9.0 cannot fold to a constant:
@@ -348,7 +357,15 @@ spec.loader.exec_module(mod)
 mod.export_embedder(Path("bundles/gutenberg-all/swift"), progress=print)
 ```
 
-Expect 66 MB at parity 0.9999.
+Run that from the gutenberg_kg checkout with the throwaway venv's own
+interpreter (`/tmp/mlenv/bin/python convert.py`), never `poetry run`: the
+whole point is to keep the project venv out of the process. The venv can live
+anywhere and is disposable once the three files exist. Expect 66 MB at parity
+0.9999, in about a minute with the model already in `~/.cache/huggingface`.
+
+Checked again on a fresh Mac, 2026-11-04: the project venv carried
+transformers 5.16 and no coremltools; the pinned venv converted at parity
+0.9999995.
 
 Writes into the same directory as step 1:
 
@@ -778,6 +795,7 @@ store build, and it was never published.
 make mac-dev             # Debug .app, automatic signing, carries Private Cloud Compute
 make mac-dev-run         # build it and open it
 make mac-unstage-corpus  # empty app/macos/Corpus again when you are done
+make mac-unstage-forest  # and app/macos/Forest
 ```
 
 `mac-dev` exists for Private Cloud Compute. A restricted entitlement has to be
@@ -805,6 +823,17 @@ runtime. The app comes to about 750 MB.
 
 `app/macos/Corpus` is committed empty with a `.gitkeep`, and its contents are
 gitignored, so `make mac-check` and CI compile against an empty folder.
+
+### So does the forest
+
+`make mac-dev` and `make mac-archive` also run `make mac-stage-forest`. It
+builds `web/` (`npm run build`), writes `catalog.json`, and copies
+`web/dist` into `app/macos/Forest`, without `books/`, because the app answers
+book text from its packs. That adds about 5 MB. Like `Corpus`, the folder is
+committed empty. An unstaged build still runs, and the Forest tab says
+**The forest is not staged**. The stage stops with a message if
+`web/node_modules` is missing; run `make web-install` once. How the forest is
+served is in `docs/APP_INTERNALS.md` §9.
 
 ### It shares one source file with `swift run`, on purpose
 
@@ -860,9 +889,10 @@ and, under "The Mac app on the Mac App Store", for the Mac.
 ```sh
 make export-swift        # the corpus, if it is not already built
 make ios-stage-corpus    # copy it into app/ios/Corpus
-make ios-archive         # Release .xcarchive (stages the corpus itself)
+make ios-archive         # Release .xcarchive (stages the corpus and the forest itself)
 make ios-upload          # export the .ipa and send it to App Store Connect
 make ios-unstage-corpus  # empty the folder again when you are done
+make ios-unstage-forest  # and app/ios/Forest
 ```
 
 ### The corpus ships inside the app
