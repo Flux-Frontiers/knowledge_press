@@ -173,17 +173,6 @@ import Foundation
                 model: modelDescription,
                 packedIds: packed.passages.map(\.id))
         }
-        func trace(_ answer: String, _ metrics: SynthesisMetrics) {
-            SynthesisTrace.record(
-                question: question,
-                instructions: tuning.instructionText,
-                prompt: prompt,
-                answer: answer,
-                passages: packed.passages,
-                metrics: metrics,
-                temperature: tuning.greedy ? 0 : tuning.temperature)
-        }
-
         do {
             for try await partial in session.streamResponse(to: prompt, options: options) {
                 try Task.checkCancellation()
@@ -195,17 +184,11 @@ import Foundation
             }
         } catch where !latest.isEmpty && isGuardrailStop(error) {
             // The output check fired after text had streamed. The partial
-            // answer stays on the turn; the trace is written anyway, because
-            // *which* text tripped the filter is exactly what a trace is for.
-            trace(latest, metrics())
+            // answer stays on the turn.
             throw SynthesisFailure.guardrailCutShort
         }
 
-        let final = metrics()
-        continuation.yield(.completed(latest, final))
-
-        // After the answer is delivered, never before it.
-        trace(latest, final)
+        continuation.yield(.completed(latest, metrics()))
     }
 
     /// Whether `error` is the content filter (or the model's own refusal)

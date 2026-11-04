@@ -10,8 +10,7 @@
 // `SystemLanguageModel(guardrails: .permissiveContentTransformations)`, the
 // mode Apple describes for apps that "work with certain inputs ... that
 // might contain sensitive content"; the rest is this app's own packing and
-// prompting. A trace (`SynthesisTrace`) records temperature and the exact
-// instructions, so a saved answer can always be tied back to its settings.
+// prompting.
 
 import Foundation
 
