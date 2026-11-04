@@ -180,7 +180,7 @@ public struct SettingsView: View {
                 }
             }
             Toggle("Permissive guardrails (on-device)", isOn: $model.synthesisTuning.permissiveGuardrails)
-            Text("Changes apply to the next answer. Traces in Diagnostics record the settings each answer used.")
+            Text("Changes apply to the next answer.")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
             Button("↩️ Reset synthesis to defaults") { model.resetSynthesisTuning() }

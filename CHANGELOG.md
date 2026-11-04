@@ -47,6 +47,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   home, the app guide and the App Store listing link it beside the Mac App
   Store page, and the listing keeps the 1.32.0 What's New text.
 
+### Removed
+
+- **No more synthesis traces.** Each on-device answer used to write a JSON
+  file of the exact prompt and completion to `Application Support/Diagnostics`,
+  kept for a Foundation Models bug report to Apple. Apple never answered, so
+  the app stops writing them, and the Settings caption that pointed at them
+  is gone.
+
 ## [1.32.0] - 2026-11-01
 
 ### Added
