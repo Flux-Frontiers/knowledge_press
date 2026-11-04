@@ -55,6 +55,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the app stops writing them, and the Settings caption that pointed at them
   is gone.
 
+### Fixed
+
+- **Plays and prose read as printed in Browse and the forest.** A play's
+  speaker names keep their own lines ("DUNCAN." no longer runs on from the
+  speech before it), now that gutenberg_kg builds the packs with doc-kg
+  0.30.0, which keeps each chunk's source line breaks. And the reader joins
+  two chunks with the whitespace the source has between them, read from the
+  pack's new `gap_after` column. It used to put a blank line at every seam,
+  so a paragraph or a verse line broke in the middle ("And choke their art."
+  / "The merciless Macdonwald" is one line of *Macbeth*). A pack without the
+  column reads as before.
+
 ## [1.32.0] - 2026-11-01
 
 ### Added
