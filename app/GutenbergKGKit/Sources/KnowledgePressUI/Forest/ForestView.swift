@@ -61,18 +61,108 @@ final class ForestHost: NSObject {
         Bundle.main.url(forResource: "Forest", withExtension: nil)
     }
 
+    /// The tree the forest should open beside when it first loads.
+    @ObservationIgnored private var requestedTree: String?
+
+    /// Whether the page has said `ready` since it last loaded. Commands sent
+    /// before then would reach a page with no listener, so they wait.
+    @ObservationIgnored private var pageReady = false
+    /// The command waiting for `ready`. Only the latest matters: two Tree
+    /// taps before the forest has grown should land at the second tree.
+    @ObservationIgnored private var pendingCommand: ForestCommand?
+
+    /// What the app does with the forest's events. Set by `AppModel`, which
+    /// owns this host; called on the main actor.
+    @ObservationIgnored var onEvent: (ForestEvent) -> Void = { _ in }
+
     /// The web view, created and loaded on first use.
+    ///
+    /// A tree asked for before the tab was ever opened rides along as
+    /// `?tree=<slug>`, which the forest's start screen already understands.
     var webView: WKWebView? {
         guard let server else { return nil }
         if let webViewStorage { return webViewStorage }
         let view = makeWebView(server: server)
         webViewStorage = view
-        view.load(URLRequest(url: ForestSchemeHandler.rootURL))
+        view.load(URLRequest(url: Self.url(tree: requestedTree)))
+        requestedTree = nil
         return view
+    }
+
+    /// The tree for a book, when a forest is staged and it has one.
+    ///
+    /// :param genre: The book's genre key.
+    /// :param book: The corpus folder name (a diary's title).
+    /// :returns: The catalog slug, or nil when there is nothing to open.
+    func slug(genre: String, book: String) -> String? {
+        server?.catalog.slug(genre: genre, book: book)
+    }
+
+    /// Open the forest beside one tree, with its card up.
+    ///
+    /// Before the web view exists the slug waits for the first load as
+    /// `?tree=`. After, it goes to the page as a `goto` command, so the drive
+    /// carries on rather than restarting -- held until the page is `ready`
+    /// when it is still loading.
+    ///
+    /// :param slug: A catalog slug.
+    func show(tree slug: String) {
+        guard server != nil else { return }
+        guard webViewStorage != nil else {
+            requestedTree = slug
+            return
+        }
+        send(.goto(slug: slug))
+    }
+
+    /// Deliver a command now if the page is listening, or when it says `ready`.
+    ///
+    /// :param command: What to ask of the forest.
+    func send(_ command: ForestCommand) {
+        guard let webViewStorage, pageReady else {
+            pendingCommand = command
+            return
+        }
+        webViewStorage.evaluateJavaScript(command.script) { _, error in
+            if let error { Self.log("command \(command) failed: \(error.localizedDescription)") }
+        }
+    }
+
+    /// An event the page posted: `ready` flushes the waiting command, the
+    /// rest go to the app.
+    fileprivate func receive(_ event: ForestEvent) {
+        if case .ready = event {
+            pageReady = true
+            if let pendingCommand {
+                self.pendingCommand = nil
+                send(pendingCommand)
+            }
+        }
+        onEvent(event)
+    }
+
+    static func log(_ message: String) {
+        #if DEBUG
+            print("[forest] \(message)")
+        #endif
+    }
+
+    /// The forest's address, opening beside `tree` when one is given.
+    static func url(tree: String?) -> URL {
+        guard let tree,
+            var components = URLComponents(
+                url: ForestSchemeHandler.rootURL, resolvingAgainstBaseURL: false)
+        else { return ForestSchemeHandler.rootURL }
+        components.queryItems = [URLQueryItem(name: "tree", value: tree)]
+        return components.url ?? ForestSchemeHandler.rootURL
     }
 
     private func makeWebView(server: ForestServer) -> WKWebView {
         let configuration = WKWebViewConfiguration()
+        // Through a weak proxy: the content controller keeps its handlers
+        // alive, and the host keeps the web view that keeps the controller.
+        configuration.userContentController.add(
+            WeakMessageHandler(host: self), name: ForestEvent.handlerName)
         configuration.setURLSchemeHandler(
             ForestSchemeHandler(server: server), forURLScheme: ForestSchemeHandler.scheme)
         // The default, persistent store: the press and the settings live in
@@ -140,7 +230,32 @@ struct ModelBrowser: CorpusBrowser {
     }
 }
 
+/// Forwards the page's `forest` messages to the host without retaining it.
+private final class WeakMessageHandler: NSObject, WKScriptMessageHandler {
+    weak var host: ForestHost?
+
+    init(host: ForestHost) {
+        self.host = host
+    }
+
+    func userContentController(
+        _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
+    ) {
+        // Only the forest's own page speaks to the app.
+        guard message.frameInfo.securityOrigin.protocol == ForestSchemeHandler.scheme,
+            let event = ForestEvent(messageBody: message.body)
+        else { return }
+        MainActor.assumeIsolated { host?.receive(event) }
+    }
+}
+
 extension ForestHost: WKNavigationDelegate {
+    /// A new page load (a reload after the web process died, included): it
+    /// is not listening until it says `ready` again.
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        pageReady = false
+    }
+
     /// The web process was killed -- on a phone, usually for memory. Reload
     /// rather than leave a blank tab.
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
@@ -175,6 +290,28 @@ extension ForestHost: WKUIDelegate {
         decisionHandler: @escaping @MainActor @Sendable (WKPermissionDecision) -> Void
     ) {
         decisionHandler(.deny)
+    }
+}
+
+/// Opens a book's tree in the Forest tab. Shows nothing when this build
+/// carries no forest or the forest has no tree for the book, so it can sit
+/// on any row that names a book.
+struct ForestTreeButton: View {
+    @Environment(AppModel.self) private var model
+    let genre: String
+    let book: String
+
+    var body: some View {
+        if let slug = model.forest.slug(genre: genre, book: book) {
+            Button {
+                model.showForest(tree: slug)
+            } label: {
+                Label("Tree", systemImage: "tree")
+                    .font(.caption)
+            }
+            .buttonStyle(.borderless)
+            .help("Open this book's tree in the forest")
+        }
     }
 }
 

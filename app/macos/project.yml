@@ -84,6 +84,12 @@ targets:
         # validation. Books, matching docs/APP_STORE_LISTING.md.
         LSApplicationCategoryType: public.app-category.books
         NSHumanReadableCopyright: "© 2026 Eric G. Suchanek, PhD. Elastic-2.0."
+        # The forest (the Forest tab) asks for a location for true sunrise and
+        # sunset, worded as its own About panel puts it.
+        NSLocationWhenInUseUsageDescription:
+          The forest uses your location only to place the sun, moon and stars
+          in its sky. It is rounded to a tenth of a degree and kept on this
+          device.
         # The worker is reachable over plain HTTP on the LAN, same as iOS.
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true

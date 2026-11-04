@@ -212,3 +212,46 @@ struct ForestServerBookTests {
         #expect(ForestServer.bookSlug("books/hamlet.txt") == nil)
     }
 }
+
+/// The (genre, book) -> slug direction, which Browse and chat citations use to
+/// decide whether a book has a tree to open.
+struct ForestCatalogTests {
+
+    private let catalog = ForestCatalog(entries: [
+        .init(slug: "hamlet", genre: "shakespeare", book: "Hamlet"),
+        .init(slug: "germinal", genre: "french-literature", book: "Germinal (Zola)"),
+        .init(slug: "pepys", genre: "diaries", book: "The Diary of Samuel Pepys — Complete"),
+    ])
+
+    @Test func aBookFindsItsTree() {
+        #expect(catalog.slug(genre: "shakespeare", book: "Hamlet") == "hamlet")
+        #expect(
+            catalog.slug(genre: "diaries", book: "The Diary of Samuel Pepys — Complete") == "pepys")
+        let location = catalog.location(of: "germinal")
+        #expect(location?.genre == "french-literature")
+        #expect(location?.book == "Germinal (Zola)")
+    }
+
+    @Test func theLookupIsExact() {
+        // The corpus folder name, not the title, and only in its own genre.
+        #expect(catalog.slug(genre: "french-literature", book: "Germinal") == nil)
+        #expect(catalog.slug(genre: "english-literature", book: "Hamlet") == nil)
+        #expect(catalog.slug(genre: "shakespeare", book: "hamlet") == nil)
+    }
+
+    @Test func theStagedCatalogAnswersBothWays() throws {
+        let forest = try StagedForest()
+        defer { forest.remove() }
+        let server = ForestServer(root: forest.root)
+        #expect(server.catalog.count == 2)
+        #expect(server.catalog.slug(genre: "shakespeare", book: "Cardenio") == "lost_play")
+    }
+
+    @Test func aRepeatedBookKeepsItsFirstSlug() {
+        let doubled = ForestCatalog(entries: [
+            .init(slug: "a", genre: "g", book: "B"),
+            .init(slug: "b", genre: "g", book: "B"),
+        ])
+        #expect(doubled.slug(genre: "g", book: "B") == "a")
+    }
+}

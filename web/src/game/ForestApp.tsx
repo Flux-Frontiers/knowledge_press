@@ -6,9 +6,10 @@ import { PauseOverlay } from "./PauseOverlay";
 import { StartScreen } from "./StartScreen";
 import { TouchControls } from "./TouchControls";
 import { installControlsTest } from "./controlsTest";
-import { treeFromSearch } from "./deepLink";
+import { searchWithTree, treeBySlug, treeFromSearch } from "./deepLink";
+import { host } from "./host";
 import { commonFrame, portraitPose, shotSlug, treeExtent, type Extent, type Frame } from "./portrait";
-import { getForest, treeApproach, type Forest } from "./forest";
+import { getForest, treeApproach, type Forest, type TreeSite } from "./forest";
 import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
 import { requestPlace } from "./location";
@@ -82,7 +83,57 @@ export function ForestApp() {
   }, [leafScale, GROW_VERSION]);
 
   // `?tree=<slug>` opens the drive beside that book's tree instead of at home.
-  const linked = useMemo(() => (forest ? treeFromSearch(window.location.search, forest.trees) : undefined), [forest]);
+  // An app host's `goto` / `home` (host.ts) re-aims it without reloading: `aim` is
+  // the slug it last sent, null for home, undefined while it has sent none.
+  const [aim, setAim] = useState<string | null | undefined>(undefined);
+  const linked = useMemo(() => {
+    if (!forest) return undefined;
+    if (aim === undefined) return treeFromSearch(window.location.search, forest.trees);
+    return aim ? treeBySlug(aim, forest.trees) : undefined;
+  }, [forest, aim]);
+
+  // Beside a tree with its card up: what Enter does for a `?tree=` link, and `goto` mid-drive.
+  const landAt = (f: Forest, tree: TreeSite) => {
+    const st = useGame.getState();
+    st.pickSearch(tree.book.slug);
+    st.pinTree(tree.book.slug);
+    st.requestJump(treeApproach(tree, f.home.x, f.home.z), tree.book.title);
+  };
+
+  // Commands from an app host. Without one nothing is ever dispatched.
+  const announced = useRef(false);
+  useEffect(() => {
+    if (!forest) return;
+    const off = host.on((command) => {
+      const st = useGame.getState();
+      const slug = command.kind === "goto" ? command.slug : null;
+      const tree = slug ? treeBySlug(slug, forest.trees) : undefined;
+      if (slug && !tree) return;
+      setAim(tree ? tree.book.slug : null);
+      try {
+        history.replaceState(history.state, "", searchWithTree(window.location.search, tree ? tree.book.slug : null) || window.location.pathname);
+      } catch { /* an address the page cannot rewrite: only a reload would miss it */ }
+      // On the start screen the new aim is what Enter does; mid-drive, go now.
+      if (!st.playing) return;
+      if (st.readingSlug) st.openReader(null);
+      if (st.mootId) st.playMoot(null);
+      if (st.mootsOpen) st.openMoots(false);
+      if (st.plaque) st.openPlaque(null);
+      if (st.paused) st.pause(false);
+      if (tree) landAt(forest, tree);
+      else {
+        st.selectGrove(null);
+        st.pinTree(null);
+        st.requestJump(forest.home, "Home · the corpus redwood");
+      }
+    });
+    // Once, when the first forest has grown: the host holds commands until it hears this.
+    if (!announced.current) {
+      announced.current = true;
+      host.post({ kind: "ready" });
+    }
+    return off;
+  }, [forest]);
 
   // `?shot=<slug>`: the tree alone, at midday in summer, for the book gallery (portrait.ts).
   // `window.__shot(slug)` aims at another tree without regrowing the forest.
@@ -211,12 +262,7 @@ export function ForestApp() {
               play();
               // The tour sets off from home; a `?tree=` link is for driving there.
               if (tour) useGame.getState().toggleCircuit();
-              else if (linked) {
-                const st = useGame.getState();
-                st.pickSearch(linked.book.slug);
-                st.pinTree(linked.book.slug);
-                st.requestJump(treeApproach(linked, forest.home.x, forest.home.z), linked.book.title);
-              }
+              else if (linked) landAt(forest, linked);
             }
           }}
         />

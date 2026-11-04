@@ -26,6 +26,11 @@ public final class PassagePack: @unchecked Sendable {
     /// this and nothing else.
     public var isDiaries: Bool { name == "diaries" }
 
+    /// Whether `passages` has a `book` column. Every pack built since the
+    /// forest catalog has one; an older pack is still searched, its hits just
+    /// carry no book name.
+    private let hasBookColumn: Bool
+
     /// Open a pack and map its vectors.
     ///
     /// :param url: Path to a `.pack` file.
@@ -46,9 +51,15 @@ public final class PassagePack: @unchecked Sendable {
             ? try VectorIndex(contentsOf: sidecar, expectedDimension: expectedDimension)
             : nil
 
+        var hasBookColumn = false
+        database.tryEach("PRAGMA table_info(passages)") { statement in
+            if SQLiteConnection.string(statement, 1) == "book" { hasBookColumn = true }
+        }
+
         self.database = database
         self.name = name
         self.vectors = vectors
+        self.hasBookColumn = hasBookColumn
     }
 
     // MARK: - Retrieval
@@ -162,7 +173,8 @@ public final class PassagePack: @unchecked Sendable {
         try each(
             """
             SELECT id, kg_name, kg_kind, kind, name, title, node_title, author, genre,
-                   file_path, timestamp, vector_index, content
+                   file_path, timestamp, vector_index, content,
+                   \(hasBookColumn ? "book" : "NULL")
               FROM passages WHERE id IN (\(placeholders))
             """,
             bind: ids
@@ -181,7 +193,8 @@ public final class PassagePack: @unchecked Sendable {
                 timestamp: Self.text(statement, 10),
                 vectorRow: sqlite3_column_type(statement, 11) == SQLITE_NULL
                     ? nil : Int(sqlite3_column_int64(statement, 11)),
-                content: Self.text(statement, 12) ?? "")
+                content: Self.text(statement, 12) ?? "",
+                book: Self.text(statement, 13))
             rows[row.id] = row
         }
         return rows
@@ -465,6 +478,8 @@ public struct PassageRow: Sendable {
     public let timestamp: String?
     public let vectorRow: Int?
     public let content: String
+    /// The corpus folder name; nil for diary chunks.
+    public var book: String? = nil
 
     /// Shape this row as the worker would, so a hit card cannot tell the
     /// difference between a local answer and a remote one.
@@ -485,6 +500,7 @@ public struct PassageRow: Sendable {
             timestamp: timestamp,
             genre: genre,
             title: title,
-            author: author)
+            author: author,
+            book: book)
     }
 }

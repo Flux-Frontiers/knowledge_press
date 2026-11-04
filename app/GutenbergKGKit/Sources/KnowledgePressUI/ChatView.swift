@@ -53,6 +53,10 @@ struct ChatView: View {
             Divider()
             inputBar
         }
+        // A question started elsewhere (the forest's Ask about this book):
+        // waiting when the chat appears, or arriving while it is on screen.
+        .onAppear(perform: takeDraft)
+        .onChange(of: model.chatDraft) { _, _ in takeDraft() }
         .task(id: AvailabilityCheck(url: model.workerURLString, active: scenePhase == .active)) {
             guard scenePhase == .active else { return }
             // Debounce: the address field re-keys this on every keystroke.
@@ -128,6 +132,13 @@ struct ChatView: View {
             }
         }
         .padding()
+    }
+
+    private func takeDraft() {
+        guard let seed = model.chatDraft else { return }
+        model.chatDraft = nil
+        draft = seed
+        inputFocused = true
     }
 
     private func submit() {
