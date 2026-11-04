@@ -9,18 +9,36 @@
 // grows the forest gets a null origin -- so the web view asks a custom URL
 // scheme for every file, and this answers. It knows nothing about WebKit:
 // a path in, bytes and a media type out, which is what makes it testable.
+//
+// It is also the forest's backend for book text. The reader fetches
+// `books/<slug>.json`; on the web that is a file `make web-books` wrote, here
+// it is built from the installed corpus packs, so every book the app carries
+// can be read from its tree.
 
 import Foundation
 
-/// Answers requests for the forest's files from the staged forest folder.
+/// Answers requests for the forest's files and for book text, from the
+/// staged forest folder and the installed corpus packs.
 public final class ForestServer: Sendable {
 
     /// The staged build: the contents of web/dist.
     public let root: URL
 
+    private let browser: (any CorpusBrowser)?
+    private let catalog: ForestCatalog
+    private let books = BookCache()
+
     /// :param root: The staged forest folder, holding `index.html`.
-    public init(root: URL) {
+    /// :param browser: Where book text comes from; nil serves no books.
+    /// :param catalog: The slug table; nil reads `catalog.json` from `root`,
+    ///     and an older stage without one serves no books.
+    public init(root: URL, browser: (any CorpusBrowser)? = nil, catalog: ForestCatalog? = nil) {
         self.root = root.standardizedFileURL
+        self.browser = browser
+        self.catalog =
+            catalog
+            ?? (try? ForestCatalog(contentsOf: self.root.appendingPathComponent("catalog.json")))
+            ?? ForestCatalog(entries: [])
     }
 
     /// True when a forest has been staged into `root`.
@@ -43,9 +61,65 @@ public final class ForestServer: Sendable {
     ///     is no such file under `root`.
     public func respond(to path: String) async throws -> (Data, String)? {
         let relative = Self.relativePath(path)
+        if let slug = Self.bookSlug(relative) {
+            guard let data = await book(slug: slug) else { return nil }
+            return (data, "application/json")
+        }
         let target = relative.isEmpty ? "index.html" : relative
         guard let url = file(at: target) else { return nil }
         return (try Data(contentsOf: url), Self.mediaType(forExtension: url.pathExtension))
+    }
+
+    /// The slug in `books/<slug>.json`, or nil for any other path.
+    static func bookSlug(_ relative: String) -> String? {
+        let prefix = "books/", suffix = ".json"
+        guard relative.hasPrefix(prefix), relative.hasSuffix(suffix),
+            relative.count > prefix.count + suffix.count
+        else { return nil }
+        let slug = relative.dropFirst(prefix.count).dropLast(suffix.count)
+        return slug.contains("/") ? nil : String(slug)
+    }
+
+    /// One book's text as the forest's reader expects it, or nil for 404.
+    ///
+    /// `{"chapters": [{"title", "text"}]}` in reading order -- the shape
+    /// `decodeBook` in web/src/game/bookText.ts checks. Built once per slug
+    /// and kept for the life of the process: a book is a few hundred KB, and
+    /// the reader fetches it once per session anyway. A failure is not kept,
+    /// so a book that was not there (or a worker that was unreachable) is
+    /// tried again on the next request.
+    ///
+    /// :param slug: The catalog slug.
+    /// :returns: The encoded JSON, or nil when the slug is not in the catalog,
+    ///     the book is not in the packs, or it has no chapters.
+    func book(slug: String) async -> Data? {
+        guard let browser, let location = catalog.location(of: slug) else { return nil }
+        return await books.value(for: slug) {
+            try await Self.encodeBook(genre: location.genre, book: location.book, from: browser)
+        }
+    }
+
+    private struct BookText: Encodable {
+        struct Chapter: Encodable {
+            let title: String
+            let text: String
+        }
+        let chapters: [Chapter]
+    }
+
+    private static func encodeBook(genre: String, book: String, from browser: any CorpusBrowser)
+        async throws -> Data?
+    {
+        let list = try await browser.chapters(genre: genre, book: book)
+        guard !list.isEmpty else { return nil }
+        var chapters: [BookText.Chapter] = []
+        chapters.reserveCapacity(list.count)
+        for (position, entry) in list.enumerated() {
+            let content = try await browser.chapter(genre: genre, book: book, sectionId: entry.id)
+            let title = content.title ?? entry.title ?? "Chapter \(position + 1)"
+            chapters.append(.init(title: title, text: content.text))
+        }
+        return try JSONEncoder().encode(BookText(chapters: chapters))
     }
 
     /// The path with its query, fragment and leading slashes removed, and
@@ -114,5 +188,65 @@ public final class ForestServer: Sendable {
     public static func isText(_ mediaType: String) -> Bool {
         mediaType.hasPrefix("text/") || mediaType == "application/json"
             || mediaType == "image/svg+xml" || mediaType == "model/gltf+json"
+    }
+}
+
+/// The forest catalog's slug -> (genre, book) table.
+///
+/// Read from the `catalog.json` that `web/scripts/export-catalog.mjs` writes
+/// into the build at stage time, so the app and the forest it carries can
+/// never disagree about which slug is which book.
+public struct ForestCatalog: Sendable {
+
+    /// One tree: its slug, and the genre and corpus folder name the corpus
+    /// browser takes.
+    public struct Entry: Codable, Sendable, Hashable {
+        public let slug: String
+        public let genre: String
+        public let book: String
+
+        public init(slug: String, genre: String, book: String) {
+            self.slug = slug
+            self.genre = genre
+            self.book = book
+        }
+    }
+
+    private let bySlug: [String: Entry]
+
+    /// :param entries: The table; a repeated slug keeps its first entry.
+    public init(entries: [Entry]) {
+        bySlug = Dictionary(entries.map { ($0.slug, $0) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    /// :param url: A `catalog.json`: `[{slug, genre, book}]`.
+    public init(contentsOf url: URL) throws {
+        self.init(entries: try JSONDecoder().decode([Entry].self, from: Data(contentsOf: url)))
+    }
+
+    /// The number of trees in the table.
+    public var count: Int { bySlug.count }
+
+    /// :param slug: A catalog slug.
+    /// :returns: Its genre and book, or nil when the forest has no such tree.
+    public func location(of slug: String) -> (genre: String, book: String)? {
+        bySlug[slug].map { ($0.genre, $0.book) }
+    }
+}
+
+/// Encoded books by slug. A request already in flight is shared rather than
+/// built twice, and a failed or empty one is forgotten.
+private actor BookCache {
+    private var entries: [String: Task<Data?, Never>] = [:]
+
+    func value(for slug: String, build: @escaping @Sendable () async throws -> Data?) async
+        -> Data?
+    {
+        if let task = entries[slug] { return await task.value }
+        let task = Task { try? await build() }
+        entries[slug] = task
+        let data = await task.value
+        if data == nil { entries[slug] = nil }
+        return data
     }
 }

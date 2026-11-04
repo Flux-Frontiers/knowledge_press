@@ -49,8 +49,10 @@ final class ForestHost: NSObject {
 
     /// :param root: The staged forest folder; nil, or a folder without
     ///     `index.html`, means the tab shows how to stage one.
-    init(root: URL?) {
-        self.server = root.map(ForestServer.init(root:)).flatMap { $0.isStaged ? $0 : nil }
+    /// :param browser: Where the reader's book text comes from.
+    init(root: URL?, browser: (any CorpusBrowser)?) {
+        self.server = root.map { ForestServer(root: $0, browser: browser) }
+            .flatMap { $0.isStaged ? $0 : nil }
         super.init()
     }
 
@@ -104,6 +106,37 @@ final class ForestHost: NSObject {
             view.isInspectable = true
         #endif
         return view
+    }
+}
+
+/// The model's corpus browser at the moment of each call.
+///
+/// The forest server is built once, but `AppModel.browser` changes: the
+/// worker until the packs finish opening, the packs after. Asking the model
+/// per request means a book opened from a tree reads whatever Browse would.
+/// Weak, because the model owns the server through `ForestHost`.
+struct ModelBrowser: CorpusBrowser {
+    weak var model: AppModel?
+
+    private func current() async throws -> any CorpusBrowser {
+        guard let browser = await model?.browser else { throw CancellationError() }
+        return browser
+    }
+
+    func listGenres() async throws -> [GenreCount] {
+        try await current().listGenres()
+    }
+
+    func listBooks(genre: String) async throws -> [Book] {
+        try await current().listBooks(genre: genre)
+    }
+
+    func chapters(genre: String, book: String) async throws -> [Chapter] {
+        try await current().chapters(genre: genre, book: book)
+    }
+
+    func chapter(genre: String, book: String, sectionId: String) async throws -> ChapterContent {
+        try await current().chapter(genre: genre, book: book, sectionId: sectionId)
     }
 }
 

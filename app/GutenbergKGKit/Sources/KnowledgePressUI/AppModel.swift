@@ -489,7 +489,8 @@ public final class AppModel {
     /// The Forest tab's web view and what it serves. Held here, not by the
     /// view, so the forest survives switching tabs and the iPad changing
     /// layout; lazy, so nothing touches WebKit until the tab is opened.
-    @ObservationIgnored private(set) lazy var forest = ForestHost(root: ForestHost.bundledRoot())
+    @ObservationIgnored private(set) lazy var forest = ForestHost(
+        root: ForestHost.bundledRoot(), browser: ModelBrowser(model: self))
 
     /// The app's own initializer: conversations go to Application Support.
     public convenience init() {
