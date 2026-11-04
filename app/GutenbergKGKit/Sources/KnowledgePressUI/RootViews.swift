@@ -136,6 +136,7 @@ public struct PhoneRootView: View {
         }
         .onChange(of: model.sectionRequest) { _, request in
             switch request?.section {
+            case .chat: tab = .chat
             case .forest: tab = .forest
             case nil: break
             }

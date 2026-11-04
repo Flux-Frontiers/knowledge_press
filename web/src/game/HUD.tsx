@@ -12,6 +12,7 @@ import { wrapAngle, yawToward } from "./sim";
 import { ReaderPanel } from "./Reader";
 import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
+import { host } from "./host";
 import type { TimeMode } from "./sky";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
@@ -400,6 +401,13 @@ export function HUD({ forest }: { forest: Forest }) {
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-4 text-sm text-fg">
                   <BookOpen className="size-4" strokeWidth={1.75} /> Open the book
                 </button>
+                {host.available ? (
+                  // Only inside the app (host.ts): its chat answers from the book's passages.
+                  <button type="button" onClick={() => host.post({ kind: "ask", slug: nearby.book.slug })}
+                    className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-4 text-sm text-fg">
+                    <MessagesSquare className="size-4" strokeWidth={1.75} /> Ask about this book
+                  </button>
+                ) : null}
                 {godEye ? (
                   <button type="button" onClick={() => flyToTree(nearby)}
                     className="min-h-11 rounded-md border border-primary/60 px-4 text-sm text-fg">

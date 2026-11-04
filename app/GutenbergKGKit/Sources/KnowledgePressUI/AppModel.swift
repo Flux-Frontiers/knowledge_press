@@ -489,8 +489,11 @@ public final class AppModel {
     /// The Forest tab's web view and what it serves. Held here, not by the
     /// view, so the forest survives switching tabs and the iPad changing
     /// layout; lazy, so nothing touches WebKit until the tab is opened.
-    @ObservationIgnored private(set) lazy var forest = ForestHost(
-        root: ForestHost.bundledRoot(), browser: ModelBrowser(model: self))
+    @ObservationIgnored private(set) lazy var forest: ForestHost = {
+        let host = ForestHost(root: ForestHost.bundledRoot(), browser: ModelBrowser(model: self))
+        host.onEvent = { [weak self] event in self?.forestDid(event) }
+        return host
+    }()
 
     /// A part of the app something asked to bring forward: the Forest tab for
     /// a book's tree. Each shell owns its own tab or sidebar selection and
@@ -498,6 +501,7 @@ public final class AppModel {
     /// place still moves there.
     struct SectionRequest: Equatable {
         enum Section: Equatable {
+            case chat
             case forest
         }
         let id = UUID()
@@ -507,12 +511,56 @@ public final class AppModel {
     /// The latest request to change what the window is showing.
     private(set) var sectionRequest: SectionRequest?
 
+    /// Text for the chat's input field, put there by something other than the
+    /// reader typing (the forest's Ask about this book). The chat takes it and
+    /// clears it.
+    var chatDraft: String?
+
     /// Show the forest, beside one book's tree with its card open.
     ///
     /// :param slug: The tree's catalog slug, from `ForestHost.slug(genre:book:)`.
     func showForest(tree slug: String) {
         forest.show(tree: slug)
         sectionRequest = SectionRequest(section: .forest)
+    }
+
+    /// What the app does when the forest says something.
+    ///
+    /// `ask` is the only event with somewhere to go yet. A card opening and a
+    /// book read into the press are logged until the press moves out of the
+    /// page's localStorage and into the app.
+    ///
+    /// :param event: A message the forest posted.
+    func forestDid(_ event: ForestEvent) {
+        switch event {
+        case .ask(let slug):
+            askAbout(tree: slug)
+        case .tree(let slug):
+            ForestHost.log("card: \(slug)")
+        case .pressed(let slug):
+            ForestHost.log("pressed: \(slug)")
+        case .ready:
+            ForestHost.log("ready")
+        }
+    }
+
+    /// Start a chat about one book: a new conversation, scoped to the book's
+    /// genre, with the input field opened on the book's name for the reader to
+    /// finish the question.
+    ///
+    /// Retrieval scopes by genre, not by book, so the genre is the narrowest
+    /// scope there is; naming the book in the question does the rest. The
+    /// question is the reader's to write -- sending a stock one would spend an
+    /// answer on something nobody asked.
+    ///
+    /// :param slug: The tree's catalog slug. One the catalog does not know
+    ///     does nothing.
+    func askAbout(tree slug: String) {
+        guard let location = forest.server?.catalog.location(of: slug) else { return }
+        newConversation()
+        corpus = location.genre
+        chatDraft = "In \(location.book), "
+        sectionRequest = SectionRequest(section: .chat)
     }
 
     /// The app's own initializer: conversations go to Application Support.

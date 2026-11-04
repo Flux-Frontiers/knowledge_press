@@ -25,6 +25,7 @@ enum SidebarItem: Hashable {
     /// The row a request to show part of the app lands on.
     init(_ section: AppModel.SectionRequest.Section) {
         switch section {
+        case .chat: self = .chat
         case .forest: self = .forest
         }
     }
