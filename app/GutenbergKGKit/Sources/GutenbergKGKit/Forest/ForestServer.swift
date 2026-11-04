@@ -24,8 +24,11 @@ public final class ForestServer: Sendable {
     /// The staged build: the contents of web/dist.
     public let root: URL
 
+    /// The slug table the staged build carries; the app asks it which books
+    /// have a tree.
+    public let catalog: ForestCatalog
+
     private let browser: (any CorpusBrowser)?
-    private let catalog: ForestCatalog
     private let books = BookCache()
 
     /// :param root: The staged forest folder, holding `index.html`.
@@ -213,10 +216,21 @@ public struct ForestCatalog: Sendable {
     }
 
     private let bySlug: [String: Entry]
+    private let byBook: [BookKey: String]
 
-    /// :param entries: The table; a repeated slug keeps its first entry.
+    /// A (genre, book) pair as the corpus browser names a book.
+    private struct BookKey: Hashable {
+        let genre: String
+        let book: String
+    }
+
+    /// :param entries: The table; a repeated slug, or a repeated
+    ///     (genre, book), keeps its first entry.
     public init(entries: [Entry]) {
         bySlug = Dictionary(entries.map { ($0.slug, $0) }, uniquingKeysWith: { first, _ in first })
+        byBook = Dictionary(
+            entries.map { (BookKey(genre: $0.genre, book: $0.book), $0.slug) },
+            uniquingKeysWith: { first, _ in first })
     }
 
     /// :param url: A `catalog.json`: `[{slug, genre, book}]`.
@@ -231,6 +245,15 @@ public struct ForestCatalog: Sendable {
     /// :returns: Its genre and book, or nil when the forest has no such tree.
     public func location(of slug: String) -> (genre: String, book: String)? {
         bySlug[slug].map { ($0.genre, $0.book) }
+    }
+
+    /// The tree for a book, the way Browse and a chat citation name it.
+    ///
+    /// :param genre: The book's genre key, as `CorpusBrowser` takes it.
+    /// :param book: The corpus folder name (a book's `book`, a diary's title).
+    /// :returns: The catalog slug, or nil when the forest has no tree for it.
+    public func slug(genre: String, book: String) -> String? {
+        byBook[BookKey(genre: genre, book: book)]
     }
 }
 

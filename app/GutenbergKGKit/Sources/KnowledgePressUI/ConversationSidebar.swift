@@ -21,6 +21,13 @@ enum SidebarItem: Hashable {
     case forest
     /// A saved chat, selected from the list.
     case conversation(UUID)
+
+    /// The row a request to show part of the app lands on.
+    init(_ section: AppModel.SectionRequest.Section) {
+        switch section {
+        case .forest: self = .forest
+        }
+    }
 }
 
 struct ConversationSidebar: View {

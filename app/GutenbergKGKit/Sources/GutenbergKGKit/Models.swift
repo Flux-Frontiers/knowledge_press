@@ -24,6 +24,11 @@ public struct Hit: Codable, Sendable, Identifiable, Hashable {
     public let genre: String?
     public let title: String?
     public let author: String?
+    /// The corpus folder name, the key `CorpusBrowser` and the forest catalog
+    /// take. Usually the title, but not always (`Germinal (Zola)` is titled
+    /// `Germinal`). Nil from the worker, from diaries, and in conversations
+    /// saved before it was recorded.
+    public var book: String? = nil
 
     public var id: String { nodeId }
 
@@ -33,7 +38,7 @@ public struct Hit: Codable, Sendable, Identifiable, Hashable {
         case nodeId = "node_id"
         case name, kind, score, summary
         case sourcePath = "source_path"
-        case content, timestamp, genre, title, author
+        case content, timestamp, genre, title, author, book
     }
 }
 

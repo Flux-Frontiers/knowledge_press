@@ -492,6 +492,29 @@ public final class AppModel {
     @ObservationIgnored private(set) lazy var forest = ForestHost(
         root: ForestHost.bundledRoot(), browser: ModelBrowser(model: self))
 
+    /// A part of the app something asked to bring forward: the Forest tab for
+    /// a book's tree. Each shell owns its own tab or sidebar selection and
+    /// follows this; a fresh `id` per request means asking twice for the same
+    /// place still moves there.
+    struct SectionRequest: Equatable {
+        enum Section: Equatable {
+            case forest
+        }
+        let id = UUID()
+        let section: Section
+    }
+
+    /// The latest request to change what the window is showing.
+    private(set) var sectionRequest: SectionRequest?
+
+    /// Show the forest, beside one book's tree with its card open.
+    ///
+    /// :param slug: The tree's catalog slug, from `ForestHost.slug(genre:book:)`.
+    func showForest(tree slug: String) {
+        forest.show(tree: slug)
+        sectionRequest = SectionRequest(section: .forest)
+    }
+
     /// The app's own initializer: conversations go to Application Support.
     public convenience init() {
         self.init(store: ConversationStore.defaultDirectory().map(ConversationStore.init))

@@ -8,6 +8,9 @@
 // A NavigationStack rather than the split view it started as: the same drill
 // reads correctly on a phone and on a Mac window, and it is one code path.
 //
+// A book row carries a Tree button when the app has a forest with that
+// book's tree in it: the Forest tab, beside the tree, its card open.
+//
 // The genre list carries an author search. Results are grouped by author and
 // open into the same chapter list the drill reaches, so search is a shortcut
 // into the drill rather than a second way to read a book.
@@ -95,11 +98,15 @@ struct BrowseView: View {
                                 genre: shelved.genre, book: shelved.book.book,
                                 title: shelved.book.title ?? shelved.book.book)
                         ) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(shelved.book.title ?? shelved.book.book)
-                                Text(shelved.genre)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(shelved.book.title ?? shelved.book.book)
+                                    Text(shelved.genre)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                ForestTreeButton(genre: shelved.genre, book: shelved.book.book)
                             }
                         }
                     }
@@ -163,11 +170,15 @@ private struct BookListView: View {
                 value: BrowseStep.chapters(
                     genre: genre, book: book.book, title: book.title ?? book.book)
             ) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(book.title ?? book.book)
-                    if let author = book.author {
-                        Text(author).font(.caption).foregroundStyle(.secondary)
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(book.title ?? book.book)
+                        if let author = book.author {
+                            Text(author).font(.caption).foregroundStyle(.secondary)
+                        }
                     }
+                    Spacer()
+                    ForestTreeButton(genre: genre, book: book.book)
                 }
             }
         }

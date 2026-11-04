@@ -387,8 +387,14 @@ struct HitCardView: View {
                 Spacer()
                 scoreBar
             }
-            Text(headline)
-                .font(.callout.weight(.semibold))
+            HStack(alignment: .firstTextBaseline) {
+                Text(headline)
+                    .font(.callout.weight(.semibold))
+                Spacer(minLength: 8)
+                if let genre = treeGenre, let book = hit.book ?? hit.title {
+                    ForestTreeButton(genre: genre, book: book)
+                }
+            }
             if let preview {
                 Text(expanded ? preview.full : preview.short)
                     .font(.callout)
@@ -413,6 +419,13 @@ struct HitCardView: View {
         let title = hit.title ?? hit.name
         return [title, hit.author].compactMap { $0 }.filter { !$0.isEmpty }
             .joined(separator: " · ")
+    }
+
+    /// The genre the forest catalog files this passage's book under. A diary
+    /// hit from the worker may carry no genre; the catalog calls them all
+    /// `diaries`.
+    private var treeGenre: String? {
+        hit.genre ?? (hit.kgKind.lowercased().contains("diary") ? "diaries" : nil)
     }
 
     private var kgLabel: String {
