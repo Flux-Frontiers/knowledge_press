@@ -38,8 +38,13 @@ public struct SettingsView: View {
         @Bindable var model = model
         List {
             Section {
-                Text("📚 GutenbergKG")
-                    .font(.title2.bold())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("📚 The Knowledge Press")
+                        .font(.title2.bold())
+                    Text("The Forest")
+                        .font(.title3.italic())
+                        .foregroundStyle(.tint)
+                }
                 Text(model.statsCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
