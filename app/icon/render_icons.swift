@@ -1,14 +1,13 @@
 // © 2026 Eric G. Suchanek, PhD -- Flux-Frontiers -- SPDX-License-Identifier: LicenseRef-Flux-Frontiers-Proprietary
 // The Knowledge Press. Not redistributable; see app/LICENSE.
 //
-// Renders every app icon PNG from the press-seal SVGs. Run from the repo root
+// Renders the icon PNGs that are not the app icon itself: that one is the Icon
+// Composer document AppIcon.icon, which Xcode compiles. Run from the repo root
 // with `make icons`. The SVGs are the source of truth; the PNGs are committed
 // so a build never needs this script.
 //
-//   press-seal.svg       -> the 1024 px master, opaque as the App Store requires,
-//                           written byte-identical to its iOS and splash copies,
-//                           plus the proof strip
-//   press-seal-macos.svg -> the ten macOS sizes, with alpha
+//   press-seal.svg       -> the 1024 px master, opaque, written byte-identical
+//                           to its splash copy, plus the proof strip
 //   web/public/favicon.svg -> the web forest's PNG favicon, 32 px with alpha,
 //                           for browsers that skip an SVG icon
 //   press-seal.svg       -> also the 180 px apple-touch-icon, opaque, which
@@ -19,10 +18,8 @@ import UniformTypeIdentifiers
 
 let master = [
     "app/icon/AppIcon-1024.png",
-    "app/ios/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png",
     "app/GutenbergKGKit/Sources/KnowledgePressUI/Resources/AppIcon-1024.png",
 ]
-let macSet = "app/macos/Assets.xcassets/AppIcon.appiconset"
 let navy = NSColor(srgbRed: 0x15 / 255.0, green: 0x1b / 255.0, blue: 0x29 / 255.0, alpha: 1)
 
 func load(_ path: String) -> NSImage {
@@ -71,15 +68,6 @@ write(png(284, 128, alpha: false) {
         x += s + 24
     }
 }, "app/icon/AppIcon-proof.png")
-
-let tile = load("app/icon/press-seal-macos.svg")
-for pt in [16, 32, 128, 256, 512] {
-    for scale in [1, 2] {
-        let px = pt * scale
-        write(png(px, px, alpha: true) { tile.draw(in: NSRect(x: 0, y: 0, width: px, height: px)) },
-              "\(macSet)/AppIcon-\(pt)x\(pt)@\(scale)x.png")
-    }
-}
 
 let favicon = load("web/public/favicon.svg")
 write(png(32, 32, alpha: true) { favicon.draw(in: NSRect(x: 0, y: 0, width: 32, height: 32)) },

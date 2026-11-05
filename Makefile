@@ -64,7 +64,7 @@
 #   make docs-gallery  -- render the book gallery's tree portraits (needs make web-dev)
 #
 # The app icon (app/icon):
-#   make icons         -- re-render every icon PNG from the press-seal SVGs
+#   make icons         -- re-render the splash and bookmark PNGs from press-seal.svg
 #
 # App Store screenshots:
 #   make store-shots   -- caption screenshots/raw/ into screenshots/store/<version>/
@@ -172,10 +172,11 @@ web-books-publish:
 # ---------------------------------------------------------------------------
 # The app icon (app/icon)
 #
-# app/icon/press-seal.svg and press-seal-macos.svg are the artwork. This
-# re-renders the 1024 px master (with its iOS and splash copies), the proof
-# strip and the ten macOS sizes from them; commit the PNGs it writes. macOS
-# only, since it draws the SVGs with AppKit.
+# The app icon itself is app/icon/AppIcon.icon, an Icon Composer document that
+# Xcode compiles. app/icon/press-seal.svg is the artwork for everything else.
+# This re-renders the 1024 px master (with its splash copy), the proof strip
+# and the web PNGs from it; commit the PNGs it writes. macOS only, since it
+# draws the SVGs with AppKit.
 # ---------------------------------------------------------------------------
 
 icons:
