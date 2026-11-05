@@ -26,9 +26,10 @@ targets:
       # Siri phrases must be declared in the app's own module to be
       # extracted; the Mac target gets this file with its whole directory.
       - ../GutenbergKGKit/Sources/KnowledgePress/AppShortcuts.swift
-      # Rendered from app/icon/press-seal.svg by `make icons` and committed
-      # rather than built.
       - Assets.xcassets
+      # The app icon, shared with the Mac target: an Icon Composer document
+      # that Xcode compiles. Its name is ASSETCATALOG_COMPILER_APPICON_NAME.
+      - ../icon/AppIcon.icon
       - PrivacyInfo.xcprivacy
       # A folder reference, so the corpus keeps its layout inside the bundle
       # and CorpusPacks can open it as a directory. Empty in development and

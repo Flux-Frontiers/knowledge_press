@@ -11,6 +11,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The app icon is an Icon Composer document.** `app/icon/AppIcon.icon`
+  replaces the flat icon sets on iPhone, iPad and Mac. The seal's rim, ring,
+  face and KP are separate layers on the navy fill, so the system renders them
+  in its light, dark, clear and tinted appearances. `make icons` now renders
+  only the splash and web PNGs.
+
 ## [1.34.1] - 2026-11-05
 
 ### Fixed

@@ -31,8 +31,9 @@ targets:
     sources:
       - path: ../GutenbergKGKit/Sources/KnowledgePress
         name: Sources
-      # See app/ios/project.yml — generated, but committed.
       - Assets.xcassets
+      # See app/ios/project.yml: shared with the iOS target.
+      - ../icon/AppIcon.icon
       - PrivacyInfo.xcprivacy
       # See app/ios/project.yml: a folder reference, so the corpus keeps its
       # layout inside Contents/Resources. Empty in development and in CI;
