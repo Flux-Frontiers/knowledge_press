@@ -23,7 +23,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   capture under its caption on the press's navy ground, at the exact store
   size for iPhone, iPad and Mac, opaque, with a contact sheet per device,
   and fails on a wrong size, an alpha channel or a missing caption.
-  `docs/APP_STORE_LISTING.md` gains the eight-shot list for the Forest
+  `docs/APP_STORE_LISTING.md` gains the nine-shot list for the Forest
   release, the promotional text and description section that go live with
   it, and the featuring nomination.
 

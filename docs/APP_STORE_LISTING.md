@@ -166,8 +166,8 @@ the first three can appear in search results, so they carry the pitch. Every
 asset must suit a 4+ audience even though the app is rated 13+. No prices,
 URLs, award claims, Project Gutenberg logo, or other platforms' logos.
 
-The set below is for the first submitted version after 1.33.0: slot 05 shows
-title search in Browse, and slot 02's card shows Ask about this book with
+The set below is for the first submitted version after 1.33.0: slot 06 shows
+title search in Browse, and slot 03's card shows Ask about this book with
 the book-only scope, both of which came after 1.33.0. All shots use dark
 mode, the Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a
 set. iPad shots are landscape (rotate the Simulator with Cmd-Left
@@ -178,17 +178,18 @@ device.
 | Slot | Screen | Caption | Capture on |
 |---|---|---|---|
 | 01 | An answer with its source passages showing | Ask the classics. Every answer shows its sources. | Simulator |
-| 02 | The Forest, a tree's card open | Walk a forest where every tree is a book. | Simulator |
-| 03 | Source passages expanded, the ones the model read marked | See which passages the answer was written from. | Simulator |
-| 04 | The reader, a quiet passage (not *Macbeth* I.ii) | Read any book, chapter by chapter. | Simulator |
-| 05 | Browse, a title typed in the search field | Find any book by title or author. | Simulator |
-| 06 | Pepys's diary on a chosen date | Open Pepys's diary on any day. | Simulator |
-| 07 | An answer with Airplane Mode on in the status bar | Nothing you ask leaves your device. | Physical device |
-| 08 | The Siri or Shortcuts result | Ask from Siri and Shortcuts. | Physical device |
+| 02 | The Forest wide, no card open: the god's-eye view of the groves, or the start view around the redwood | Walk a forest where every tree is a book. | Simulator |
+| 03 | A tree's card open, Ask about this book showing | Ask any book a question. | Simulator |
+| 04 | Source passages expanded, the ones the model read marked | See which passages the answer was written from. | Simulator |
+| 05 | The reader, a quiet passage (not *Macbeth* I.ii) | Read any book, chapter by chapter. | Simulator |
+| 06 | Browse, an author or title typed in the search field ("Dickens", "divine") | Find any book by title or author. | Simulator |
+| 07 | Pepys's diary on a chosen date | Open Pepys's diary on any day. | Simulator |
+| 08 | An answer with Airplane Mode on in the status bar | Nothing you ask leaves your device. | Physical device |
+| 09 | The Siri or Shortcuts result | Ask from Siri and Shortcuts. | Physical device |
 
-Slots 07 and 08 need a real iPhone or iPad: the Simulator's status bar has no
+Slots 08 and 09 need a real iPhone or iPad: the Simulator's status bar has no
 Airplane Mode icon, and Siri in the Simulator is unreliable. On the Mac, skip
-them or use a Shortcuts window for 08.
+them or use a Shortcuts window for 09.
 
 ### Capturing
 
