@@ -170,7 +170,8 @@ The set below is for the first submitted version after 1.33.0: slot 05 shows
 title search in Browse, and slot 02's card shows Ask about this book with
 the book-only scope, both of which came after 1.33.0. All shots use dark
 mode, the Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a
-set.
+set. iPad shots are landscape (rotate the Simulator with Cmd-Left
+before capturing); iPhone shots are portrait.
 Captions are in `scripts/store_captions.tsv`, one per slot, the same on every
 device.
 
@@ -205,7 +206,7 @@ them or use a Shortcuts window for 08.
    crop as under "Mac screenshots" below, but end the ffmpeg output name in
    `.png` (the script reads PNG only) and save it in `screenshots/raw/mac/`.
 4. `make store-shots` writes `screenshots/store/<version>/<device>-<slot>.png`
-   at 1320x2868, 2064x2752 and 2880x1800, opaque, and a
+   at 1320x2868, 2752x2064 (iPad, landscape) and 2880x1800, opaque, and a
    `contact-<device>.png` per device. It fails if a size is wrong, a file has
    alpha, a slot has no caption, or a device has more than 10.
 5. Upload in slot order under each device size in App Store Connect.

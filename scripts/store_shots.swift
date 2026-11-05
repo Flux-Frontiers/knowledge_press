@@ -29,7 +29,7 @@ struct Device {
 
 let devices = [
     Device(name: "iphone", width: 1320, height: 2868, fontSize: 80, radius: 0.10),
-    Device(name: "ipad", width: 2064, height: 2752, fontSize: 100, radius: 0.025),
+    Device(name: "ipad", width: 2752, height: 2064, fontSize: 92, radius: 0.02),  // landscape
     Device(name: "mac", width: 2880, height: 1800, fontSize: 92, radius: 0.012),
 ]
 
@@ -176,6 +176,12 @@ for d in devices {
             continue
         }
         guard let shot = NSImage(contentsOfFile: "\(dir)/\(file)") else { fatalError("cannot load \(file)") }
+        // A capture in the other orientation would be shrunk to a strip.
+        if (shot.size.width > shot.size.height) != (d.width > d.height) {
+            print("FAIL \(dir)/\(file): \(d.width > d.height ? "portrait" : "landscape") capture, \(d.name) wants \(d.width > d.height ? "landscape" : "portrait")")
+            failures += 1
+            continue
+        }
         let data = compose(shot, caption, d)
         let out = "\(outDir)/\(d.name)-\(slot).png"
         try! data.write(to: URL(fileURLWithPath: out))
