@@ -26,6 +26,19 @@ On the Mac page "on your device" reads "on your Mac". The 261 count went to
 the Mac page with 1.32.0 on 2026-11-02. Promotional text changes without a
 new version, so the iOS page can be brought in line any time.
 
+### Next: the Forest (apply once 1.33.0 or later is live)
+
+The Forest first ships in the app in 1.33.0. Promotional text goes live on
+the current build the moment it is saved, so this replaces the text above
+only after a build with the Forest is on the store; before that it would
+describe a feature the store build lacks (Guideline 2.3).
+
+```text
+Walk a 3-D forest where every tree is a book, then ask it a question. 261 classics and four diaries on your device, and every answer shows its sources.
+```
+
+Mac: "on your Mac" for "on your device".
+
 ## Description (4000)
 
 The Knowledge Press is a library of 261 public-domain books and four
@@ -92,6 +105,23 @@ The Knowledge Press is not affiliated with Project Gutenberg. The texts are
 public domain; Project Gutenberg and the Internet Archive are acknowledged
 as their sources.
 
+### Next: the Forest section (for the first version after 1.33.0)
+
+The description is per version. Insert this section after READ, NOT JUST
+SEARCH in the first submitted version after 1.33.0. It needs that version:
+in 1.33.0, Ask about this book scopes the chat to the book's genre, and the
+book-only scope came after it (CHANGELOG, Unreleased). The same text serves
+the Mac.
+
+```text
+THE FOREST
+
+Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The forest works offline, like the rest of the app.
+```
+
+With this section the description is about 3,100 characters, under the 4,000
+limit.
+
 ## Keywords (100, comma-separated, no spaces)
 
 classics,books,library,philosophy,literature,offline,reader,search,shakespeare,plato,diaries,homer
@@ -127,6 +157,68 @@ builds, and the layout change is iPhone and iPad only):
 ### 1.28.0
 
 First App Store release.
+
+## Screenshots
+
+Apple's asset best practices: show the app in use, lead with the strongest
+feature, and tell a story in order. The store takes up to 10 per device, and
+the first three can appear in search results, so they carry the pitch. Every
+asset must suit a 4+ audience even though the app is rated 13+. No prices,
+URLs, award claims, Project Gutenberg logo, or other platforms' logos.
+
+The set below is for the first submitted version after 1.33.0: slot 06 shows
+title search in Browse, and slot 03's card shows Ask about this book with
+the book-only scope, both of which came after 1.33.0. All shots use dark
+mode, the Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a
+set. iPad shots are landscape (rotate the Simulator with Cmd-Left
+before capturing); iPhone shots are portrait.
+Captions are in `scripts/store_captions.tsv`, one per slot, the same on every
+device.
+
+| Slot | Screen | Caption | Capture on |
+|---|---|---|---|
+| 01 | An answer with its source passages showing | Ask the classics. Every answer shows its sources. | Simulator |
+| 02 | The Forest wide, no card open: the god's-eye view of the groves, or the start view around the redwood | Walk a forest where every tree is a book. | Simulator |
+| 03 | A tree's card open, Ask about this book showing | Ask any book a question. | Simulator |
+| 04 | Source passages expanded, the ones the model read marked | See which passages the answer was written from. | Simulator |
+| 05 | The reader, a quiet passage (not *Macbeth* I.ii) | Read any book, chapter by chapter. | Simulator |
+| 06 | Browse, an author or title typed in the search field ("Dickens", "divine") | Find any book by title or author. | Simulator |
+| 07 | Pepys's diary on a chosen date | Open Pepys's diary on any day. | Simulator |
+| 08 | An answer with Airplane Mode on in the status bar | Nothing you ask leaves your device. | Physical device |
+| 09 | The Siri or Shortcuts result | Ask from Siri and Shortcuts. | Physical device |
+
+Slots 08 and 09 need a real iPhone or iPad: the Simulator's status bar has no
+Airplane Mode icon, and Siri in the Simulator is unreliable. On the Mac, skip
+them or use a Shortcuts window for 09.
+
+### Capturing
+
+1. Stage the Forest and build: `make ios-stage-forest`, then
+   `make ios-sim SIM="iPhone 17 Pro Max"` (and `SIM="iPad Pro 13-inch (M5)"`).
+   Without the staged Forest the Forest tab is empty. The corpus must already
+   be exported (`gutenkg export-swift --verify` in gutenberg_kg), and
+   on-device answers need Apple Intelligence on this Mac.
+2. In Settings, clear the Worker field and pick On-device. Delete leftover
+   chats so the sidebar holds only the ones the shots need.
+3. `ios-sim-launch` sets the 9:41 status bar. Take each shot with
+   `make ios-sim-screenshot SIM=...`, which writes
+   `screenshots/<SIM>-<time>.png`, and move it to
+   `screenshots/raw/iphone/<slot>-<name>.png` (or `ipad/`). For the Mac,
+   crop as under "Mac screenshots" below, but end the ffmpeg output name in
+   `.png` (the script reads PNG only) and save it in `screenshots/raw/mac/`.
+4. `make store-shots` writes `screenshots/store/<version>/<device>-<slot>.png`
+   at 1320x2868, 2752x2064 (iPad, landscape) and 2880x1800, opaque, and a
+   `contact-<device>.png` per device. It fails if a size is wrong, a file has
+   alpha, a slot has no caption, or a device has more than 10.
+5. Upload in slot order under each device size in App Store Connect.
+
+## Featuring nomination
+
+Apple considers nominated apps for editorial featuring and asks for several
+weeks of lead time. When the first version after 1.33.0 is submitted,
+nominate it in App Store Connect (Apple's help page: "Nominate your app for
+featuring") as a new feature: the Forest, a 3-D forest of the library that works offline, with
+Ask about this book. Done only in App Store Connect; nothing in the repo.
 
 ## URLs
 
