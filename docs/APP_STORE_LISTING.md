@@ -15,7 +15,7 @@ The Knowledge Press
 
 ## Subtitle (30)
 
-A library that answers back
+Great books, searched offline
 
 ## Promotional text (170, changeable without a new version)
 
@@ -41,56 +41,40 @@ Mac: "on your Mac" for "on your device".
 
 ## Description (4000)
 
-The Knowledge Press is a library of 261 public-domain books and four
-diaries that you can search and question, entirely on your device.
+Per version. This text is for 1.34.1 and later: Ask about this book's
+book-only scope and the working Siri shortcut both need 1.34.1. Paragraphs
+are on one line each, so it pastes cleanly. The same text serves the Mac.
 
-Ask it anything: what Marcus Aurelius says about anger, how Darwin
-describes the Galapagos finches, where Pepys was on the day of the Great
-Fire. The app searches the whole library two ways at once, by meaning and by
-exact wording, and answers from the passages it found. Every answer shows
-its sources, and marks which passages the model actually read.
+```text
+The Knowledge Press is a library of 261 public-domain books and four diaries that you can search and question, entirely on your device.
+
+Ask it anything: what Marcus Aurelius says about anger, how Darwin describes the Galapagos finches, where Pepys was on the day of the Great Fire. The app searches the whole library two ways at once, by meaning and by exact wording, and answers from the passages it found. Every answer shows its sources, and marks which passages the model actually read.
 
 WORKS OFFLINE
 
-The books, the search index and the language model are all on the device.
-Nothing you ask is sent anywhere. There is no account, no sign-in, and no
-tracking. It works in airplane mode.
+The books, the search index and the language model are all on the device. Nothing you ask is sent anywhere. There is no account, no sign-in, and no tracking. It works in airplane mode.
 
 THE LIBRARY
 
-Twenty genres: philosophy, English, American, Russian, French, German and
-Spanish literature, the ancient and classical world, drama and Shakespeare,
-science fiction, horror, biography, letters, travel, natural history and
-sacred texts. Plato, Aristotle, Epictetus, Marcus Aurelius, Kant,
-Nietzsche, Homer, Dante, Cervantes, Austen, Dickens, Melville, Tolstoy,
-Dostoevsky, Twain, Poe, Shelley, Stoker, Verne, Wells, Darwin, Thoreau,
-Whitman, and more.
+Twenty genres: philosophy, English, American, Russian, French, German and Spanish literature, the ancient and classical world, drama and Shakespeare, science fiction, horror, biography, letters, travel, natural history and sacred texts. Plato, Aristotle, Epictetus, Marcus Aurelius, Kant, Nietzsche, Homer, Dante, Cervantes, Austen, Dickens, Melville, Tolstoy, Dostoevsky, Twain, Poe, Shelley, Stoker, Verne, Wells, Darwin, Thoreau, Whitman, and more.
 
-Four diaries, searchable by date: Samuel Pepys, John Evelyn (two volumes),
-and Boswell's journal of his tour of the Hebrides with Samuel Johnson.
+Four diaries, searchable by date: Samuel Pepys, John Evelyn (two volumes), and Boswell's journal of his tour of the Hebrides with Samuel Johnson.
 
 READ, NOT JUST SEARCH
 
-Browse the library by genre, open any book, and read it chapter by chapter.
-The diaries open by date. Every source passage under an answer can be read
-in full.
+Browse the library by genre, open any book, and read it chapter by chapter. The diaries open by date. Every source passage under an answer can be read in full.
+
+THE FOREST
+
+Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The forest works offline, like the rest of the app.
 
 ANSWERS YOU CAN CHECK
 
-The app searches first and writes second, and the order never changes. An
-answer is written only from what the search found, and each passage that
-reached the model is marked. If the passages do not support an answer, it
-says so instead of inventing one. The settings let you tune how many
-passages are read, how closely they must match, and how the model writes,
-and every answer records the settings that produced it.
+The app searches first and writes second, and the order never changes. An answer is written only from what the search found, and each passage that reached the model is marked. If the passages do not support an answer, it says so instead of inventing one. The settings let you tune how many passages are read, how closely they must match, and how the model writes, and every answer records the settings that produced it.
 
 CHOOSE WHERE THE MODEL RUNS
 
-On-device is the default and uses Apple Intelligence on your iPhone, iPad
-or Mac. Private Cloud is optional: it sends your question and the selected
-passages to Apple's Private Cloud Compute for a larger model, under Apple's
-privacy guarantees, and never to us. Or turn answers off and use the app as
-a search engine for the classics.
+On-device is the default and uses Apple Intelligence on your iPhone, iPad or Mac. Private Cloud is optional: it sends your question and the selected passages to Apple's Private Cloud Compute for a larger model, under Apple's privacy guarantees, and never to us. Or turn answers off and use the app as a search engine for the classics.
 
 ASK FROM SIRI
 
@@ -98,35 +82,44 @@ Ask The Knowledge Press from Siri and Shortcuts.
 
 REQUIREMENTS
 
-Search, reading and browsing work on any iPhone, iPad or Mac running iOS
-26, iPadOS 26 or macOS 26. Written answers need Apple Intelligence.
+Search, reading and browsing work on any iPhone, iPad or Mac running iOS 26, iPadOS 26 or macOS 26. Written answers need Apple Intelligence.
 
-The Knowledge Press is not affiliated with Project Gutenberg. The texts are
-public domain; Project Gutenberg and the Internet Archive are acknowledged
-as their sources.
-
-### Next: the Forest section (for the first version after 1.33.0)
-
-The description is per version. Insert this section after READ, NOT JUST
-SEARCH in the first submitted version after 1.33.0. It needs that version:
-in 1.33.0, Ask about this book scopes the chat to the book's genre, and the
-book-only scope came after it (CHANGELOG, Unreleased). The same text serves
-the Mac.
-
-```text
-THE FOREST
-
-Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The forest works offline, like the rest of the app.
+The Knowledge Press is not affiliated with Project Gutenberg. The texts are public domain; Project Gutenberg and the Internet Archive are acknowledged as their sources.
 ```
-
-With this section the description is about 3,100 characters, under the 4,000
-limit.
 
 ## Keywords (100, comma-separated, no spaces)
 
 classics,books,library,philosophy,literature,offline,reader,search,shakespeare,plato,diaries,homer
 
 ## What's New (per version)
+
+### 1.34.1
+
+Submitted 2026-11-05 for iOS, build 872. The Mac follows once its 1.32.0
+clears review.
+
+iOS:
+
+```text
+The Forest is here. Walk a 3-D forest where every tree is a book, right inside the app and with no network needed. Open a tree and tap Ask about this book to ask that book a question.
+
+Also new:
+- Tree buttons in Browse and on answer citations take you to that book's tree.
+- Browse search now finds titles as well as authors.
+- "Ask The Knowledge Press" now works with Siri.
+- The forest no longer stays zoomed in on iPhone after you tap the query field.
+```
+
+Mac (the zoom fix is iPhone only):
+
+```text
+The Forest is here. Walk a 3-D forest where every tree is a book, right inside the app and with no network needed. Open a tree and click Ask about this book to ask that book a question.
+
+Also new:
+- Tree buttons in Browse and on answer citations take you to that book's tree.
+- Browse search now finds titles as well as authors.
+- "Ask The Knowledge Press" now works with Siri.
+```
 
 ### 1.32.0
 
@@ -219,6 +212,19 @@ nominate it in App Store Connect (Apple's help page: "Nominate your app for
 featuring") as a new feature: the Forest, a 3-D forest of the library that works offline, with
 Ask about this book. Done only in App Store Connect; nothing in the repo.
 
+## Product page header
+
+iOS 27 shows a creative asset at the top of the product page. App Store
+Connect takes 5244x2950 or 3840x1646, no alpha. Apple's guidance keeps the
+focal point near the center, since each device crops differently.
+
+The 1.34.1 header is a render of the real forest: the start view of the
+redwood with its text hidden, the crescent moon of 2026-10-15 at dusk, leaves
+at their highest setting, 5244x2950. In Apple's preview the moon sits near
+the right edge on iPhone and well inside the frame on iPad. The file is
+`screenshots/store/header/header-crescent-down-5244x2950.png` (git-ignored).
+The Search Results asset is unset, so screenshots appear there.
+
 ## URLs
 
 - Support: https://flux-frontiers.github.io/knowledge_press/support.html
@@ -246,7 +252,7 @@ Resubmitted after the 2.1.0 rejection of October 1. The requested screen recordi
 
 ```text
 1. Screen recording
-Attached: recorded on a physical iPhone running the latest iOS, starting from launch and showing the typical flow. The app has no account registration, login or account deletion, no user-generated content shared with other users, and no paid content or in-app purchases, so none of those flows exist to show.
+Attached: recorded on a physical iPhone running the latest iOS, starting from launch and showing the typical flow. The app has no account registration, login or account deletion, no user-generated content shared with other users, and no paid content or in-app purchases, so none of those flows exist to show. The recording predates the Forest tab, described in item 3.
 
 2. Purpose and audience
 The Knowledge Press is a library of 261 public-domain books (philosophy, literature, history, science, drama, sacred texts) and four historical diaries (Samuel Pepys, John Evelyn, and Boswell's Hebrides journal), installed with the app. Readers ask a question in plain language; the app searches the whole library by meaning and by exact wording, then writes an answer only from the passages it found, and shows every source passage. It is for students, teachers, and general readers who want to explore the classics and check what the books actually say. It works offline: the books, the search index, and the language model are all on the device.
@@ -255,9 +261,10 @@ The Knowledge Press is a library of 261 public-domain books (philosophy, literat
 No login, account, or sample files are needed. The library is bundled in the app; nothing is downloaded.
 After a 3-second title screen, the Chat tab offers sample questions; tap one to see an answer with its sources.
 - Ask: type a question on the main screen, for example "What does Marcus Aurelius say about anger?". The answer appears with its source passages; tap a passage to read it in full. This works in airplane mode.
-- Browse: open Browse to see the library by genre, search by author, open any book, and read it chapter by chapter. The diaries open by date.
+- Browse: open Browse to see the library by genre, search by author or title, open any book, and read it chapter by chapter. The diaries open by date.
+- Forest: open the Forest tab to see each book as a tree in a 3-D forest. Drive with the on-screen stick, open a tree's card, read the book, or tap Ask about this book. It works offline.
 - Settings: choose the answer engine (On-device is the default), and tune how many passages are read.
-- Siri and Shortcuts: "Ask The Knowledge Press" runs a question from Siri or the Shortcuts app.
+- Siri and Shortcuts: say "Ask The Knowledge Press", then say the question when Siri asks. The app opens and answers. It also runs from the Shortcuts app.
 Written answers need Apple Intelligence enabled on the device. Without it, the app still searches, browses, and reads, and says why answers are off.
 
 4. External services
@@ -288,7 +295,8 @@ Apple wants it on a physical device on the latest OS, starting at launch. The
 
 Control Center records without the microphone unless it is turned on
 (long-press Screen Recording), which is why Siri is not in that recording.
-Trim the ends in Photos with **Edit**, then attach the `.mov` to the reply
+The 1.34.1 submission attached the same recording, trimmed to 2:33 to open on
+the Home Screen. Trim the ends in Photos with **Edit**, then attach the `.mov` to the reply
 and under App Review Information > Attachment.
 
 ## Availability
