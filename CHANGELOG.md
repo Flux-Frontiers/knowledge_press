@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.33.0] - 2026-11-04
+
 ### Added
 
 - **The forest is inside the app.** A **Forest** tab on iPhone, and **The

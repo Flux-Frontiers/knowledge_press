@@ -1,0 +1,105 @@
+{
+  "key": "1.33.0",
+  "branch": "main",
+  "timestamp": "2026-11-05T00:32:19.795490+00:00",
+  "version": "1.33.0",
+  "subject": "repo:knowledge_press",
+  "tool": "tscode-kg",
+  "tool_version": "0.8.0",
+  "tree_hash": "cd4a5a63154ff47bd253fe93c0f4597d3aa08c8c",
+  "metrics": {
+    "db_path": ".tscodekg/graph.sqlite",
+    "meaningful_nodes": 4395,
+    "module_count": 161,
+    "class_count": 11,
+    "function_count": 3840,
+    "method_count": 291,
+    "docstring_coverage": 0.061,
+    "snapshot_count": 11,
+    "vector_backend": "sqlite-vec",
+    "total_nodes": 4395,
+    "node_counts": {
+      "class": 11,
+      "function": 3840,
+      "interface": 1,
+      "method": 291,
+      "module": 161,
+      "type_alias": 91
+    },
+    "total_edges": 11262,
+    "edge_counts": {
+      "CALLS": 6614,
+      "CONTAINS": 4234,
+      "IMPORTS": 403,
+      "INHERITS": 11
+    },
+    "critical_issues": 7,
+    "complexity_median": 26.0
+  },
+  "hotspots": [
+    {
+      "name": "fn:site/assets/javascripts/bundle.d7400e89.min.js:m",
+      "callers": 79,
+      "callees": 2
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-Dr2Y3Ezq.js:i",
+      "callers": 62,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-Dr2Y3Ezq.js:n",
+      "callers": 44,
+      "callees": 3
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-Dr2Y3Ezq.js:t",
+      "callers": 35,
+      "callees": 1
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.d7400e89.min.js:E",
+      "callers": 33,
+      "callees": 1
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.d7400e89.min.js:b",
+      "callers": 27,
+      "callees": 2
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-Dr2Y3Ezq.js:r",
+      "callers": 26,
+      "callees": 3
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.d7400e89.min.js:h",
+      "callers": 26,
+      "callees": 13
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.d7400e89.min.js:w",
+      "callers": 25,
+      "callees": 0
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-Dr2Y3Ezq.js:a",
+      "callers": 23,
+      "callees": 0
+    }
+  ],
+  "issues": [
+    "[WARN] 1979 orphaned declarations: `K`, `fe`, `ge`, `q`, `te` (and 1974 more) \u2014 zero callers detected; verify these aren't dead code",
+    "[LOW] Low JSDoc coverage (6.3%) \u2014 semantic query quality will be poor; undocumented nodes embed only identifiers, not natural language",
+    "[WARN] `index-Dr2Y3Ezq.js` has 1363 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `service_worker_bin_prod.js` has 572 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `offscreendocument_main.js` has 541 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `bundle.d7400e89.min.js` has 328 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `offscreen_compiled.js` has 243 declarations \u2014 consider splitting into focused modules"
+  ],
+  "vs_previous": null,
+  "vs_baseline": {
+    "nodes": 4080,
+    "edges": 10451
+  }
+}
