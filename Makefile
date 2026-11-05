@@ -65,6 +65,9 @@
 #
 # The app icon (app/icon):
 #   make icons         -- re-render every icon PNG from the press-seal SVGs
+#
+# App Store screenshots:
+#   make store-shots   -- caption screenshots/raw/ into screenshots/store/<version>/
 
 GUTENBERG_KG_DIR ?= ../gutenberg_kg
 
@@ -88,7 +91,7 @@ define unstage_forest
 	@echo "$(1) emptied."
 endef
 
-.PHONY: icons ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-stage-forest ios-unstage-forest ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-stage-forest mac-unstage-forest mac-dev mac-dev-run mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill web-books web-books-publish
+.PHONY: icons store-shots ios-devices ios-generate ios-check ios-install-corpus ios-verify-corpus ios-launch ios-deploy ios-sim-build ios-sim-boot ios-sim-install-corpus ios-sim-launch ios-sim ios-sim-screenshot ios-deploy-all ios-push-all ios-sim-kill ios-stage-corpus ios-unstage-corpus ios-stage-forest ios-unstage-forest ios-archive ios-upload ios-build mac-generate mac-check mac-stage-corpus mac-unstage-corpus mac-stage-forest mac-unstage-forest mac-dev mac-dev-run mac-archive mac-upload web-install web-dev web-test web-build web-preview web-kill web-books web-books-publish
 
 # ---------------------------------------------------------------------------
 # The web forest (web/)
@@ -177,6 +180,21 @@ web-books-publish:
 
 icons:
 	swift app/icon/render_icons.swift
+
+# ---------------------------------------------------------------------------
+# App Store screenshots
+#
+# Captions the raw captures in screenshots/raw/<device>/<slot>-<name>.png
+# (device iphone, ipad or mac) with scripts/store_captions.tsv, at the exact
+# store size, opaque, into screenshots/store/<version>/ with a contact sheet
+# per device. The shot list and how to capture each one are in
+# docs/APP_STORE_LISTING.md under Screenshots. macOS only (AppKit).
+# ---------------------------------------------------------------------------
+
+STORE_VERSION = $(shell sed -n 's/^version: "\(.*\)"/\1/p' CITATION.cff)
+
+store-shots:
+	swift scripts/store_shots.swift screenshots/raw scripts/store_captions.tsv screenshots/store/$(STORE_VERSION)
 
 # ---------------------------------------------------------------------------
 # The Knowledge Press -- iPhone app (app/ios)

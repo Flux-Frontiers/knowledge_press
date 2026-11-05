@@ -42,7 +42,7 @@ export function StartScreen({
   return (
     <div className="start-screen absolute inset-0 z-20 flex flex-col overflow-y-auto overscroll-contain text-fg" style={{ touchAction: "pan-y" }}>
       <div className="mt-auto w-full max-w-2xl px-5 pt-24 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-10 sm:pb-12">
-        <p className="text-xs font-semibold tracking-[0.22em] text-fg/90 uppercase">GutenbergKG · Flux Frontiers</p>
+        <p className="text-xs font-semibold tracking-[0.22em] text-fg/90 uppercase">Flux Frontiers</p>
         <h1 className="font-display mt-3 text-5xl leading-none text-fg sm:text-7xl">The Knowledge Press</h1>
         <p className="font-display mt-1 text-2xl italic text-primary sm:text-3xl">The Forest</p>
         <p className="mt-4 max-w-xl text-base leading-relaxed text-fg/85">

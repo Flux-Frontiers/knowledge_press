@@ -1,0 +1,13 @@
+# Store screenshot captions: slot<TAB>caption. One caption per slot, the same
+# on every device. Raw captures are screenshots/raw/<device>/<slot>-<name>.png
+# with device iphone, ipad or mac; see docs/APP_STORE_LISTING.md, Screenshots.
+# Kept here because screenshots/ is git-ignored.
+01	Ask the classics. Every answer shows its sources.
+02	Walk a forest where every tree is a book.
+03	Ask any book a question.
+04	See which passages the answer was written from.
+05	Read any book, chapter by chapter.
+06	Find any book by title or author.
+07	Open Pepys's diary on any day.
+08	Nothing you ask leaves your device.
+09	Ask from Siri and Shortcuts.
