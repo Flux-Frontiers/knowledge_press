@@ -80,14 +80,14 @@ public final class PassagePack: @unchecked Sendable {
     /// searchable passages, so "all" excludes nothing and the dense scan can
     /// skip a 364 K-row round trip through SQLite.
     ///
-    /// :param genre: Genre slug, or nil for the whole pack.
+    /// :param scope: A genre or one book, or nil for the whole pack.
     /// :returns: Row indices into the sidecar, or nil to mean "everything".
-    public func eligibleVectorRows(genre: String?) throws -> [Int32]? {
-        guard let genre else { return nil }
+    public func eligibleVectorRows(scope: PassageScope?) throws -> [Int32]? {
+        guard let scope else { return nil }
         var rows: [Int32] = []
         try each(
-            "SELECT vector_index FROM passages WHERE vector_index IS NOT NULL AND genre = ?",
-            bind: [genre]
+            "SELECT vector_index FROM passages WHERE vector_index IS NOT NULL AND \(scope.condition(table: nil))",
+            bind: scope.bindings
         ) { statement in
             rows.append(Int32(sqlite3_column_int64(statement, 0)))
         }
@@ -104,25 +104,25 @@ public final class PassagePack: @unchecked Sendable {
     ///
     /// :param query: Raw query text.
     /// :param limit: Maximum ids to return.
-    /// :param genre: Genre slug, or nil.
+    /// :param scope: A genre or one book, or nil.
     /// :returns: Passage ids, best-first by BM25.
-    public func lexicalSearch(_ query: String, limit: Int, genre: String?) throws -> [String] {
+    public func lexicalSearch(_ query: String, limit: Int, scope: PassageScope?) throws -> [String] {
         // Phrase first, then any-term for recall. A rare phrase diluted in a
         // long chunk is exactly what the dense channel buries, so a literal
         // match deserves to seed the fusion; the OR form keeps a query with no
         // adjacent match from returning nothing at all.
-        let phrase = try search(expression: Self.phraseExpression(for: query), limit: limit, genre: genre)
+        let phrase = try search(expression: Self.phraseExpression(for: query), limit: limit, scope: scope)
         guard phrase.isEmpty else { return phrase }
-        return try search(expression: Self.matchExpression(for: query), limit: limit, genre: genre)
+        return try search(expression: Self.matchExpression(for: query), limit: limit, scope: scope)
     }
 
     /// One BM25 pass for an already-built FTS5 expression.
     ///
     /// :param expression: An FTS5 MATCH expression; "" returns no rows.
     /// :param limit: Maximum ids to return.
-    /// :param genre: Genre slug, or nil.
+    /// :param scope: A genre or one book, or nil.
     /// :returns: Passage ids, best-first by BM25.
-    private func search(expression: String, limit: Int, genre: String?) throws -> [String] {
+    private func search(expression: String, limit: Int, scope: PassageScope?) throws -> [String] {
         guard !expression.isEmpty else { return [] }
 
         var sql = """
@@ -130,9 +130,9 @@ public final class PassagePack: @unchecked Sendable {
              WHERE passages_fts MATCH ?
             """
         var bindings: [String] = [expression]
-        if let genre {
-            sql += " AND p.genre = ?"
-            bindings.append(genre)
+        if let scope {
+            sql += " AND \(scope.condition(table: "p"))"
+            bindings += scope.bindings
         }
         sql += " ORDER BY bm25(passages_fts) LIMIT \(max(1, limit))"
 
@@ -474,6 +474,36 @@ public final class PassagePack: @unchecked Sendable {
 
     private static func text(_ statement: OpaquePointer, _ column: Int32) -> String? {
         SQLiteConnection.string(statement, column)
+    }
+}
+
+/// The part of a pack a search is restricted to: one genre, or one book in it.
+///
+/// A book is matched on the `book` column. Diary passages have no `book`, so a
+/// diary is matched on its title, which is how its `diaries/<title>` key names
+/// it.
+public struct PassageScope: Sendable, Equatable {
+    public let genre: String
+    public let book: String?
+
+    public init(genre: String, book: String? = nil) {
+        self.genre = genre
+        self.book = book
+    }
+
+    /// The SQL condition, with one `?` per value in ``bindings``.
+    ///
+    /// :param table: The passages table's alias in the query, or nil.
+    func condition(table: String?) -> String {
+        let column = { (name: String) in table.map { "\($0).\(name)" } ?? name }
+        guard book != nil else { return "\(column("genre")) = ?" }
+        return "\(column("genre")) = ? AND (\(column("book")) = ?"
+            + " OR (\(column("book")) IS NULL AND \(column("title")) = ?))"
+    }
+
+    var bindings: [String] {
+        guard let book else { return [genre] }
+        return [genre, book, book]
     }
 }
 

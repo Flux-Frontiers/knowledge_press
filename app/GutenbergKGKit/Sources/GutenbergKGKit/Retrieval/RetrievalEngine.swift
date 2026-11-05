@@ -14,7 +14,7 @@ import Foundation
 public struct RetrievalRequest: Sendable, Equatable {
     /// The user's question, verbatim.
     public var query: String
-    /// `all`, `gutenberg`, `diary`, or a genre slug.
+    /// `all`, `gutenberg`, `diary`, a genre slug, or a `<genre>/<book>` key.
     public var corpus: String
     /// Passages to return for the hit cards. Synthesis may use fewer.
     public var k: Int

@@ -544,21 +544,19 @@ public final class AppModel {
         }
     }
 
-    /// Start a chat about one book: a new conversation, scoped to the book's
-    /// genre, with the input field opened on the book's name for the reader to
-    /// finish the question.
+    /// Start a chat about one book: a new conversation, scoped to the book
+    /// (`<genre>/<book>`, the worker's book key), with the input field opened
+    /// on the book's name for the reader to finish the question.
     ///
-    /// Retrieval scopes by genre, not by book, so the genre is the narrowest
-    /// scope there is; naming the book in the question does the rest. The
-    /// question is the reader's to write -- sending a stock one would spend an
-    /// answer on something nobody asked.
+    /// The question is the reader's to write -- sending a stock one would
+    /// spend an answer on something nobody asked.
     ///
     /// :param slug: The tree's catalog slug. One the catalog does not know
     ///     does nothing.
     func askAbout(tree slug: String) {
         guard let location = forest.server?.catalog.location(of: slug) else { return }
         newConversation()
-        corpus = location.genre
+        corpus = "\(location.genre)/\(location.book)"
         chatDraft = "In \(location.book), "
         sectionRequest = SectionRequest(section: .chat)
     }
@@ -827,8 +825,12 @@ public final class AppModel {
         ("horror", "a monster assembled from dead body parts"),
     ]
 
+    /// The scope picker's choices. A one-book scope (from the forest's Ask
+    /// about this book) is listed while it is the current one, so the picker
+    /// shows it instead of an empty selection.
     var corpusOptions: [String] {
-        ["all", "gutenberg", "diary"] + genres.map(\.genre)
+        let options = ["all", "gutenberg", "diary"] + genres.map(\.genre)
+        return options.contains(corpus) ? options : options + [corpus]
     }
 
     /// Sidebar header line, built from live stats (no hardcoded counts).

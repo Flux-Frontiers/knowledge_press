@@ -11,6 +11,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Ask about this book asks that book.** The forest card's button used to
+  scope the new chat to the book's genre, so the scope picker showed the
+  genre and the answer could cite other books in it. It now scopes the chat
+  to the book itself (`<genre>/<book>`, the key the worker already takes),
+  the picker shows the book, and on-device retrieval searches only that
+  book's passages, or a diary's.
+
 ## [1.33.0] - 2026-11-04
 
 ### Added
