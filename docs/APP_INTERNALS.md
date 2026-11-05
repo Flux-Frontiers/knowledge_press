@@ -317,7 +317,7 @@ the app. When the page has no `forest` message handler, as on the Pages site,
 | forest → app | `ready` | the page can take commands; anything queued is sent |
 | forest → app | `tree` | the card now shown (or none) |
 | forest → app | `pressed` | a book was read into the press |
-| forest → app | `ask` | **Ask about this book**: a new chat scoped to the genre, with a draft |
+| forest → app | `ask` | **Ask about this book**: a new chat scoped to the book (`<genre>/<book>`), with a draft |
 | app → forest | `goto` | drive to a tree and open its card, without reloading |
 | app → forest | `home` | back to the redwood |
 

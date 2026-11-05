@@ -19,12 +19,12 @@ there without starting over.
 ## From a tree to a question
 
 In the app, a tree's card has an **Ask about this book** button. It starts a
-new chat scoped to the book's genre, with *In <book>,* already typed in
+new chat scoped to that book alone, with *In <book>,* already typed in
 the question box. Finish the question and send it.
 
-Questions are scoped to a genre, not a single book, so the answer can also
-draw on other books in that genre. Naming the book in the question steers
-retrieval toward it.
+The scope picker shows the book as `<genre>/<book>`, and every passage in
+the answer comes from it. Pick another scope there to widen the question to
+the genre or the whole corpus.
 
 ## What stays where
 

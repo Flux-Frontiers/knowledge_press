@@ -80,6 +80,9 @@ private struct SplashView: View {
             VStack(spacing: 4) {
                 Text("The Knowledge Press")
                     .font(.title2.bold())
+                Text("The Forest")
+                    .font(.title3.italic())
+                    .foregroundStyle(.tint)
                 Text("A local, source-grounded way to ask better questions of great books.")
                     .font(.caption)
                     .foregroundStyle(.secondary)

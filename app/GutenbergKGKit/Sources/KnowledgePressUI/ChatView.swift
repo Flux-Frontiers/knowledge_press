@@ -70,6 +70,9 @@ struct ChatView: View {
         VStack(alignment: .leading, spacing: 2) {
             Text("📚 The Knowledge Press")
                 .font(.largeTitle.bold())
+            Text("The Forest")
+                .font(.title2.italic())
+                .foregroundStyle(.tint)
             Text("Semantic search across the Project Gutenberg corpus — \(model.statsCaption)")
                 .font(.caption)
                 .foregroundStyle(.secondary)

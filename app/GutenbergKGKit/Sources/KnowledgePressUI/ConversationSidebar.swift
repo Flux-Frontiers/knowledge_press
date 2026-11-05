@@ -74,7 +74,7 @@ struct ConversationSidebar: View {
 
             ConversationListView(search: $search)
         }
-        .navigationTitle("The Knowledge Press")
+        .navigationTitle("The Knowledge Press: The Forest")
         .safeAreaInset(edge: .bottom) {
             HStack {
                 #if os(macOS)

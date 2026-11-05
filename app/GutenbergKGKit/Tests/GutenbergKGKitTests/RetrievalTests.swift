@@ -133,10 +133,26 @@ private func makeTokenizer() -> WordPieceTokenizer {
 
     @Test func packSelectorsAreNotGenreFilters() {
         // "all", "gutenberg" and "diary" choose packs; anything else is a genre.
-        #expect(LocalRetrieval.genreScope(for: "all") == nil)
-        #expect(LocalRetrieval.genreScope(for: "gutenberg") == nil)
-        #expect(LocalRetrieval.genreScope(for: "diary") == nil)
-        #expect(LocalRetrieval.genreScope(for: "sacred-texts") == "sacred-texts")
+        #expect(LocalRetrieval.passageScope(for: "all") == nil)
+        #expect(LocalRetrieval.passageScope(for: "gutenberg") == nil)
+        #expect(LocalRetrieval.passageScope(for: "diary") == nil)
+        #expect(LocalRetrieval.passageScope(for: "sacred-texts") == PassageScope(genre: "sacred-texts"))
+    }
+
+    @Test func aBookKeyIsOneBook() {
+        #expect(
+            LocalRetrieval.passageScope(for: "shakespeare/Macbeth")
+                == PassageScope(genre: "shakespeare", book: "Macbeth"))
+        #expect(
+            LocalRetrieval.passageScope(for: "diaries/The Diary of Samuel Pepys \u{2014} Complete")
+                == PassageScope(genre: "diaries", book: "The Diary of Samuel Pepys \u{2014} Complete"))
+    }
+
+    @Test func aBookScopeMatchesTheBookOrADiarysTitle() {
+        let scope = PassageScope(genre: "shakespeare", book: "Macbeth")
+        #expect(scope.condition(table: "p") == "p.genre = ? AND (p.book = ? OR (p.book IS NULL AND p.title = ?))")
+        #expect(scope.bindings == ["shakespeare", "Macbeth", "Macbeth"])
+        #expect(PassageScope(genre: "horror").condition(table: nil) == "genre = ?")
     }
 }
 

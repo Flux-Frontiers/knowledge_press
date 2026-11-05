@@ -29,6 +29,9 @@ public struct AboutView: View {
             VStack(spacing: 4) {
                 Text("The Knowledge Press")
                     .font(.title2.bold())
+                Text("The Forest")
+                    .font(.title3.italic())
+                    .foregroundStyle(.tint)
                 Text(AppVersion.display)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)

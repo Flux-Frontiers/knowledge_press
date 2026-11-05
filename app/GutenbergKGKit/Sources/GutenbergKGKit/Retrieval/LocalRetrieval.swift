@@ -31,7 +31,7 @@ public struct LocalRetrieval: RetrievalEngine {
     public func retrieve(_ request: RetrievalRequest) async throws -> RetrievalResult {
         let started = Date()
         let query = try packs.embedder.embed(request.query)
-        let scope = Self.genreScope(for: request.corpus)
+        let scope = Self.passageScope(for: request.corpus)
         let oversample = max(request.k * 3, request.k)
 
         var perPack: [[Hit]] = []
@@ -45,7 +45,7 @@ public struct LocalRetrieval: RetrievalEngine {
                 text: request.query,
                 k: request.k,
                 oversample: oversample,
-                genre: scope,
+                scope: scope,
                 minScore: request.minScore,
                 semanticFloor: request.semanticFloor)
             perPack.append(found.hits)
@@ -109,7 +109,7 @@ public struct LocalRetrieval: RetrievalEngine {
         text: String,
         k: Int,
         oversample: Int,
-        genre: String?,
+        scope: PassageScope?,
         minScore: Double,
         semanticFloor: Double
     ) throws -> PackResults {
@@ -118,7 +118,7 @@ public struct LocalRetrieval: RetrievalEngine {
         var bestDense: Float = 0
 
         if let index = pack.vectors {
-            let eligible = try pack.eligibleVectorRows(genre: genre)
+            let eligible = try pack.eligibleVectorRows(scope: scope)
             let ranked = index.search(query: query, k: oversample, eligible: eligible)
             let names = try pack.ids(forVectorRows: ranked.map(\.row))
             for entry in ranked {
@@ -129,7 +129,7 @@ public struct LocalRetrieval: RetrievalEngine {
             bestDense = ranked.first?.similarity ?? 0
         }
 
-        let lexicalIDs = try pack.lexicalSearch(text, limit: oversample, genre: genre)
+        let lexicalIDs = try pack.lexicalSearch(text, limit: oversample, scope: scope)
 
         // Hydrate cosine for lexical-only hits so a BM25 rescue still shows a
         // real score rather than a placeholder.
@@ -326,14 +326,19 @@ public struct LocalRetrieval: RetrievalEngine {
             .map(\.element)
     }
 
-    /// The genre filter a corpus scope implies, or nil for no filter.
+    /// The passage filter a corpus scope implies, or nil for no filter.
     ///
-    /// `all`, `gutenberg` and `diary` select *packs*, not genres; anything else
-    /// is a genre slug. Same vocabulary as the worker's `corpus` parameter.
-    static func genreScope(for corpus: String) -> String? {
+    /// `all`, `gutenberg` and `diary` select *packs*, not genres; a
+    /// `<genre>/<book>` key is one book (a diary's key is `diaries/<title>`);
+    /// anything else is a genre slug. Same vocabulary as the worker's `corpus`
+    /// parameter.
+    static func passageScope(for corpus: String) -> PassageScope? {
         switch corpus {
         case "all", "gutenberg", "diary", "": return nil
-        default: return corpus
+        default:
+            guard let slash = corpus.firstIndex(of: "/") else { return PassageScope(genre: corpus) }
+            return PassageScope(
+                genre: String(corpus[..<slash]), book: String(corpus[corpus.index(after: slash)...]))
         }
     }
 

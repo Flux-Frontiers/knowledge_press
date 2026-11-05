@@ -106,7 +106,7 @@ struct CorpusScopePicker: View {
             ForEach(model.corpusOptions, id: \.self) { Text($0).tag($0) }
         }
         .help(
-            "all = DocKG + DiaryKG · gutenberg = DocKG only · diary = diaries only · <genre> = one genre"
+            "all = DocKG + DiaryKG · gutenberg = DocKG only · diary = diaries only · <genre> = one genre · <genre>/<book> = one book"
         )
     }
 }

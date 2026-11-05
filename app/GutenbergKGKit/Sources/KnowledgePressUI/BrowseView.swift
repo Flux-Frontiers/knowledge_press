@@ -11,9 +11,10 @@
 // A book row carries a Tree button when the app has a forest with that
 // book's tree in it: the Forest tab, beside the tree, its card open.
 //
-// The genre list carries an author search. Results are grouped by author and
-// open into the same chapter list the drill reaches, so search is a shortcut
-// into the drill rather than a second way to read a book.
+// The genre list carries a title and author search. Author results are
+// grouped by author, title results follow, and both open into the same
+// chapter list the drill reaches, so search is a shortcut into the drill
+// rather than a second way to read a book.
 
 import GutenbergKGKit
 import SwiftUI
@@ -23,7 +24,7 @@ struct BrowseView: View {
     @State private var path: [BrowseStep] = []
     @State private var loadError: String?
     @State private var query = ""
-    /// Every book in the corpus, for author search. Reloaded whenever the
+    /// Every book in the corpus, for search. Reloaded whenever the
     /// genre list changes, which is also when a corpus is installed.
     @State private var shelf: [ShelvedBook] = []
 
@@ -39,13 +40,13 @@ struct BrowseView: View {
         NavigationStack(path: $path) {
             Group {
                 if searching {
-                    authorResults
+                    searchResults
                 } else {
                     genreList
                 }
             }
             .navigationTitle("Corpus")
-            .searchable(text: $query, prompt: "Search authors")
+            .searchable(text: $query, prompt: "Search titles and authors")
             .navigationDestination(for: BrowseStep.self) { step in
                 destination(for: step)
             }
@@ -86,39 +87,56 @@ struct BrowseView: View {
 
     /// One section per matching author, each listing their books with the
     /// genre they are shelved under, since an author's books can sit in
-    /// several.
-    private var authorResults: some View {
+    /// several. Then a Titles section with the books whose title matches,
+    /// less those an author section already lists.
+    private var searchResults: some View {
         let matches = AuthorSearch.search(query, in: shelf)
+        let listed = Set(matches.flatMap { $0.books.map(\.id) })
+        let titles = AuthorSearch.searchTitles(query, in: shelf).filter { !listed.contains($0.id) }
         return List {
             ForEach(matches) { match in
                 Section {
                     ForEach(match.books) { shelved in
-                        NavigationLink(
-                            value: BrowseStep.chapters(
-                                genre: shelved.genre, book: shelved.book.book,
-                                title: shelved.book.title ?? shelved.book.book)
-                        ) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(shelved.book.title ?? shelved.book.book)
-                                    Text(shelved.genre)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                ForestTreeButton(genre: shelved.genre, book: shelved.book.book)
-                            }
-                        }
+                        resultRow(shelved, detail: shelved.genre)
                     }
                 } header: {
                     // Names as the catalog spells them, not shouted in caps.
                     Text(match.author).textCase(nil)
                 }
             }
+            if !titles.isEmpty {
+                Section("Titles") {
+                    ForEach(titles) { shelved in
+                        resultRow(
+                            shelved,
+                            detail: [shelved.book.author, shelved.genre].compactMap { $0 }
+                                .joined(separator: " · "))
+                    }
+                }
+            }
         }
         .overlay {
-            if matches.isEmpty {
+            if matches.isEmpty && titles.isEmpty {
                 ContentUnavailableView.search(text: query)
+            }
+        }
+    }
+
+    private func resultRow(_ shelved: ShelvedBook, detail: String) -> some View {
+        NavigationLink(
+            value: BrowseStep.chapters(
+                genre: shelved.genre, book: shelved.book.book,
+                title: shelved.book.title ?? shelved.book.book)
+        ) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(shelved.book.title ?? shelved.book.book)
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                ForestTreeButton(genre: shelved.genre, book: shelved.book.book)
             }
         }
     }

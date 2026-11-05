@@ -11,6 +11,32 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Search Browse by title.** The Corpus list's search field, which found
+  authors, now finds titles too: "raven" finds *The Raven and Other Poems*
+  and "divine" both Divine Comedies. Matching authors come first; a
+  **Titles** section follows with the other books whose title matches, by
+  the same rule (each word typed begins a word of the title, ignoring case
+  and accents).
+
+### Changed
+
+- **Branded The Knowledge Press: The Forest.** With the Family and the
+  Disulfides beside it, this edition names itself: the web forest's page
+  title and start screen, the docs site, the README, and in the app the
+  chat header, splash, About, sidebar and Mac window title. The Settings
+  header, which still said GutenbergKG from the app's first build, says the
+  same. The app's name
+  on the home screen and in the stores stays The Knowledge Press.
+
+- **Ask about this book asks that book.** The forest card's button used to
+  scope the new chat to the book's genre, so the scope picker showed the
+  genre and the answer could cite other books in it. It now scopes the chat
+  to the book itself (`<genre>/<book>`, the key the worker already takes),
+  the picker shows the book, and on-device retrieval searches only that
+  book's passages, or a diary's.
+
 ## [1.33.0] - 2026-11-04
 
 ### Added

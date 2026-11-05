@@ -1,4 +1,4 @@
-# The Knowledge Press
+# The Knowledge Press: The Forest
 
 The Knowledge Press reads a [GutenbergKG](https://flux-frontiers.github.io/gutenberg_kg/)
 corpus of public-domain books in two ways:
