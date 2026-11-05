@@ -62,6 +62,17 @@ struct ScopePersistenceTests {
         }
     }
 
+    @Test("a one-book scope is listed in the picker while it is current")
+    func bookScopeIsAPickerChoice() {
+        withScratchDefaults { _ in
+            let model = AppModel()
+            model.corpus = "shakespeare/Macbeth"
+            #expect(model.corpusOptions.last == "shakespeare/Macbeth")
+            model.corpus = "all"
+            #expect(!model.corpusOptions.contains("shakespeare/Macbeth"))
+        }
+    }
+
     @Test("with nothing stored the scope is the whole corpus")
     func defaultScopeIsEverything() {
         withScratchDefaults { _ in
