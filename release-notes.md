@@ -1,62 +1,53 @@
-# Release Notes -- v1.33.0
+# Release Notes -- v1.34.0
 
-> Released: 2026-11-04
+> Released: 2026-11-05
 
 ### Added
 
-- **The forest is inside the app.** A **Forest** tab on iPhone, and **The
-  forest** in the iPad and Mac sidebar, runs the same forest as the web
-  site, offline. The build ships inside the app and is served from the
-  bundle through a private `kp-forest://` scheme, and a tree's reader gets
-  its chapters from the app's corpus packs, so every installed book can be
-  read with the network off.
-- **Tree buttons.** Each Browse row and each citation card in an answer has
-  a **Tree** button that opens the forest beside that book's tree with its
-  card open. When the forest is already open it moves there without
-  reloading.
-- **Ask about this book.** In the app, a tree's card has a button that
-  starts a new chat scoped to the book's genre, with `In <book>, ` already
-  typed for you to finish.
+- **Search Browse by title.** The Corpus list's search field, which found
+  authors, now finds titles too: "raven" finds *The Raven and Other Poems*
+  and "divine" both Divine Comedies. Matching authors come first; a
+  **Titles** section follows with the other books whose title matches, by
+  the same rule (each word typed begins a word of the title, ignoring case
+  and accents).
+- **Captioned App Store screenshots.** `make store-shots` sets each raw
+  capture under its caption on the press's navy ground, at the exact store
+  size for iPhone, iPad and Mac, opaque, with a contact sheet per device,
+  and fails on a wrong size, an alpha channel or a missing caption.
+  `docs/APP_STORE_LISTING.md` gains the nine-shot list for the Forest
+  release, the promotional text and description section that go live with
+  it, and the featuring nomination.
 
 ### Changed
 
-- **The corpus grows to 265 works: 261 books and four diaries.** The forest catalog is regenerated
-  from gutenberg_kg's ten-book batch: Gogol's *The Mantle, and Other
-  Stories*, the letters of Lady Mary Wortley Montagu and of Charles Lamb,
-  Chekhov's *Plays, Second Series*, Synge's *The Playboy of the Western
-  World*, Poe's Raven Edition volumes 2-5, and Cicero's *De Officiis*.
-  The app's Swift packs are re-exported from the same bundle.
-- **Docs state the current count.** The forest guide, the web README and
-  FEATURES, and the runbook's export sample said 253 or 241 books; they
-  now say 261 books and four diaries.
-- **Archives stage the forest.** `make ios-archive`, `make mac-archive` and
-  `make mac-dev` build the web forest from the same checkout and copy it
-  into the app, as they already did for the corpus. They need Node 22 and
-  `make web-install`. `ios-check` and `mac-check` still build without it,
-  and the tab then says how to stage it.
-- **The iPhone and iPad app is on the App Store.** The README, the docs
-  home, the app guide and the App Store listing link it beside the Mac App
-  Store page, and the listing keeps the 1.32.0 What's New text.
+- **Branded The Knowledge Press: The Forest.** With the Family and the
+  Disulfides beside it, this edition names itself: the web forest's page
+  title and start screen, the docs site, the README, and in the app the
+  chat header, splash, About, sidebar and Mac window title. The Settings
+  header, which still said GutenbergKG from the app's first build, says the
+  same. The app's name
+  on the home screen and in the stores stays The Knowledge Press.
 
-### Removed
+- **Ask about this book asks that book.** The forest card's button used to
+  scope the new chat to the book's genre, so the scope picker showed the
+  genre and the answer could cite other books in it. It now scopes the chat
+  to the book itself (`<genre>/<book>`, the key the worker already takes),
+  the picker shows the book, and on-device retrieval searches only that
+  book's passages, or a diary's.
 
-- **No more synthesis traces.** Each on-device answer used to write a JSON
-  file of the exact prompt and completion to `Application Support/Diagnostics`,
-  kept for a Foundation Models bug report to Apple. Apple never answered, so
-  the app stops writing them, and the Settings caption that pointed at them
-  is gone.
+- **The start screen's eyebrow says Flux Frontiers.** It read
+  "GutenbergKG · Flux Frontiers", the last place the forest's own branding
+  still named the indexer. About and the moot settings keep GutenbergKG
+  where they mean the software.
 
 ### Fixed
 
-- **Plays and prose read as printed in Browse and the forest.** A play's
-  speaker names keep their own lines ("DUNCAN." no longer runs on from the
-  speech before it), now that gutenberg_kg builds the packs with doc-kg
-  0.30.0, which keeps each chunk's source line breaks. And the reader joins
-  two chunks with the whitespace the source has between them, read from the
-  pack's new `gap_after` column. It used to put a blank line at every seam,
-  so a paragraph or a verse line broke in the middle ("And choke their art."
-  / "The merciless Macdonwald" is one line of *Macbeth*). A pack without the
-  column reads as before.
+- **The forest no longer stays zoomed and cropped on iPhone.** Tapping the
+  forest's query field made iOS zoom the page in, since the field's text is
+  under 16 px, and the app's web view cannot scroll, so the forest stayed
+  cut off on both sides until it was reopened. The page's viewport now sets
+  `maximum-scale=1`, which stops that zoom; Safari still lets a reader
+  pinch-zoom the web forest.
 
 ---
 

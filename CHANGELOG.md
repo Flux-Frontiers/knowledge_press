@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.34.0] - 2026-11-05
+
 ### Added
 
 - **Search Browse by title.** The Corpus list's search field, which found
