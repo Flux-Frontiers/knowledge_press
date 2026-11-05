@@ -45,9 +45,10 @@ turns it off. See [Troubleshooting](troubleshooting.md#an-answer-stops-partway).
 ## Worker
 
 A server you run yourself, such as a Mac with a large model on it. Set its
-address under **Worker** in Settings. Then pick the provider (oMLX, Ollama
-or OpenAI) and a model. The app has no default worker and contacts none
-until you enter one. It is also the only engine that can draw illustrations.
+address under **Worker** in Settings. Then pick the provider (oMLX,
+Ollama, OpenAI or Anthropic) and a model. The app has no default worker and
+contacts none until you enter one. It is also the only engine that can draw
+illustrations.
 
 ## Passages only
 

@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Anthropic as a worker provider.** Settings lists **Anthropic (cloud)**
+  beside oMLX, Ollama and OpenAI, for a worker running gutenberg_kg with
+  kgmodule-utils 0.30.0 and an `ANTHROPIC_API_KEY`. The model list comes from
+  the worker. Under Auto, illustrations use the local image server when it
+  is up, as for oMLX.
 - **Illustrations show their render time**, under the picture, as answers show
   their synthesis time.
 - **Live moots are kept.** A moot that finishes is saved on the device under
