@@ -1,0 +1,105 @@
+{
+  "key": "1.34.1",
+  "branch": "main",
+  "timestamp": "2026-11-05T20:27:06.487226+00:00",
+  "version": "1.34.1",
+  "subject": "repo:knowledge_press",
+  "tool": "tscode-kg",
+  "tool_version": "0.8.1",
+  "tree_hash": "118712dda67d2eb50ba015d7d0a8ea7eff4b93bd",
+  "metrics": {
+    "db_path": ".tscodekg/graph.sqlite",
+    "meaningful_nodes": 5802,
+    "module_count": 163,
+    "class_count": 12,
+    "function_count": 4981,
+    "method_count": 554,
+    "docstring_coverage": 0.046,
+    "snapshot_count": 13,
+    "vector_backend": "sqlite-vec",
+    "total_nodes": 5802,
+    "node_counts": {
+      "class": 12,
+      "function": 4981,
+      "interface": 1,
+      "method": 554,
+      "module": 163,
+      "type_alias": 91
+    },
+    "total_edges": 14896,
+    "edge_counts": {
+      "CALLS": 8838,
+      "CONTAINS": 5639,
+      "IMPORTS": 403,
+      "INHERITS": 16
+    },
+    "critical_issues": 7,
+    "complexity_median": 33.0
+  },
+  "hotspots": [
+    {
+      "name": "fn:site/assets/javascripts/bundle.d7400e89.min.js:m",
+      "callers": 79,
+      "callees": 2
+    },
+    {
+      "name": "fn:app/ios/Forest/assets/index-DRKVnsdi.js:i",
+      "callers": 62,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-DPgB2XtB.js:i",
+      "callers": 62,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/ios/Forest/assets/index-DRKVnsdi.js:n",
+      "callers": 44,
+      "callees": 3
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-DPgB2XtB.js:n",
+      "callers": 44,
+      "callees": 3
+    },
+    {
+      "name": "fn:app/ios/Forest/assets/index-DRKVnsdi.js:t",
+      "callers": 35,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-DPgB2XtB.js:t",
+      "callers": 35,
+      "callees": 1
+    },
+    {
+      "name": "fn:site/assets/javascripts/bundle.d7400e89.min.js:E",
+      "callers": 33,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/ios/Forest/assets/index-DRKVnsdi.js:r",
+      "callers": 26,
+      "callees": 3
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-DPgB2XtB.js:r",
+      "callers": 26,
+      "callees": 3
+    }
+  ],
+  "issues": [
+    "[WARN] 2645 orphaned declarations: `K`, `fe`, `ge`, `q`, `te` (and 2640 more) \u2014 zero callers detected; verify these aren't dead code",
+    "[LOW] Low JSDoc coverage (4.8%) \u2014 semantic query quality will be poor; undocumented nodes embed only identifiers, not natural language",
+    "[WARN] `index-DPgB2XtB.js` has 1363 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `index-DRKVnsdi.js` has 1363 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `service_worker_bin_prod.js` has 572 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `offscreendocument_main.js` has 541 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `bundle.d7400e89.min.js` has 328 declarations \u2014 consider splitting into focused modules"
+  ],
+  "vs_previous": null,
+  "vs_baseline": {
+    "nodes": 5487,
+    "edges": 14085
+  }
+}

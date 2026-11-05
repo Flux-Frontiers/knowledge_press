@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.34.1] - 2026-11-05
+
 ### Fixed
 
 - **"Ask The Knowledge Press" works with Siri.** The Siri phrases were
