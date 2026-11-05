@@ -98,7 +98,7 @@ public struct PhoneRootView: View {
         TabView(selection: $tab) {
             NavigationStack {
                 ChatView(showsHeader: false)
-                    .navigationTitle(model.activeConversation?.title ?? "The Knowledge Press")
+                    .navigationTitle(model.activeConversation?.title ?? "The Knowledge Press: The Forest")
                     .toolbarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigation) {

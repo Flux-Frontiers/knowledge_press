@@ -13,6 +13,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Branded The Knowledge Press: The Forest.** With the Family and the
+  Disulfides beside it, this edition names itself: the web forest's page
+  title and start screen, the docs site, the README, and in the app the
+  chat header, splash, About, sidebar and Mac window title. The app's name
+  on the home screen and in the stores stays The Knowledge Press.
+
 - **Ask about this book asks that book.** The forest card's button used to
   scope the new chat to the book's genre, so the scope picker showed the
   genre and the answer could cite other books in it. It now scopes the chat
