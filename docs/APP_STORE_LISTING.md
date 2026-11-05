@@ -185,11 +185,10 @@ device.
 | 06 | Browse, an author or title typed in the search field ("Dickens", "divine") | Find any book by title or author. | Simulator |
 | 07 | Pepys's diary on a chosen date | Open Pepys's diary on any day. | Simulator |
 | 08 | An answer with Airplane Mode on in the status bar | Nothing you ask leaves your device. | Physical device |
-| 09 | The Siri or Shortcuts result | Ask from Siri and Shortcuts. | Physical device |
 
-Slots 08 and 09 need a real iPhone or iPad: the Simulator's status bar has no
-Airplane Mode icon, and Siri in the Simulator is unreliable. On the Mac, skip
-them or use a Shortcuts window for 09.
+Slot 08 needs a real iPhone or iPad: the Simulator's status bar has no
+Airplane Mode icon. On the Mac, skip it. A Siri slot was dropped: a Siri
+exchange does not read well as a still.
 
 ### Capturing
 
