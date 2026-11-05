@@ -19,6 +19,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   **Titles** section follows with the other books whose title matches, by
   the same rule (each word typed begins a word of the title, ignoring case
   and accents).
+- **Captioned App Store screenshots.** `make store-shots` sets each raw
+  capture under its caption on the press's navy ground, at the exact store
+  size for iPhone, iPad and Mac, opaque, with a contact sheet per device,
+  and fails on a wrong size, an alpha channel or a missing caption.
+  `docs/APP_STORE_LISTING.md` gains the eight-shot list for the Forest
+  release, the promotional text and description section that go live with
+  it, and the featuring nomination.
 
 ### Changed
 
