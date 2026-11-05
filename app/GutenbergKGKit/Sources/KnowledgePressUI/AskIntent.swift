@@ -25,9 +25,10 @@ public struct AskKnowledgePressIntent: AppIntent {
     @Parameter(title: "Question", requestValueDialog: "What do you want to ask?")
     public var question: String
 
-    public init() {
-        question = ""
-    }
+    /// Leaves `question` unset. Set to "" it counted as answered, so Siri
+    /// skipped the "What do you want to ask?" prompt and ran with an empty
+    /// question, which `send` drops: the shortcut ran and did nothing.
+    public init() {}
 
     public init(question: String) {
         self.question = question
@@ -40,30 +41,9 @@ public struct AskKnowledgePressIntent: AppIntent {
     }
 }
 
-/// Surfaces `AskKnowledgePressIntent` to Siri and the Shortcuts app.
-///
-/// One shortcut, not per-genre ones — corpus scope is already a Settings
-/// choice, and multiplying shortcuts by 21 genres would clutter Shortcuts
-/// for a distinction Siri phrasing cannot express cleanly anyway.
-///
-/// The phrase cannot embed `$question` — App Intents only allows an
-/// `AppEntity`/`AppEnum` parameter inside an invocation phrase, since Siri
-/// needs a bounded vocabulary to match against, and free text has none.
-/// Saying "Ask The Knowledge Press" triggers the intent with `question`
-/// still unset, and its `requestValueDialog` prompts for it by voice.
-public struct KnowledgePressShortcuts: AppShortcutsProvider {
-    public static var appShortcuts: [AppShortcut] {
-        AppShortcut(
-            intent: AskKnowledgePressIntent(),
-            phrases: [
-                "Ask \(.applicationName)",
-                "Ask \(.applicationName) a question",
-            ],
-            shortTitle: "Ask a Question",
-            systemImageName: "text.bubble"
-        )
-    }
-}
+// The Siri phrases (`KnowledgePressShortcuts`) are in the app target,
+// Sources/KnowledgePress/AppShortcuts.swift: Xcode extracts App Shortcuts
+// only from the app's own module.
 
 extension Notification.Name {
     /// Carries `["question": String]` in `userInfo`. Posted by
