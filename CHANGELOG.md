@@ -11,6 +11,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **"Ask The Knowledge Press" works with Siri.** The Siri phrases were
+  declared in the shared package, and Xcode registers App Shortcuts only
+  from the app's own module, so no build since the shortcut was added
+  offered it to Siri or listed it under App Shortcuts; only the bare action
+  appeared in the Shortcuts editor. The phrases now live in the app target,
+  on iPhone, iPad and Mac.
+
 ## [1.34.0] - 2026-11-05
 
 ### Added

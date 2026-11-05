@@ -23,6 +23,9 @@ targets:
     platform: iOS
     sources:
       - Sources
+      # Siri phrases must be declared in the app's own module to be
+      # extracted; the Mac target gets this file with its whole directory.
+      - ../GutenbergKGKit/Sources/KnowledgePress/AppShortcuts.swift
       # Rendered from app/icon/press-seal.svg by `make icons` and committed
       # rather than built.
       - Assets.xcassets
