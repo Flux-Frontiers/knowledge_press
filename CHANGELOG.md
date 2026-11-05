@@ -44,6 +44,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the picker shows the book, and on-device retrieval searches only that
   book's passages, or a diary's.
 
+- **The start screen's eyebrow says Flux Frontiers.** It read
+  "GutenbergKG · Flux Frontiers", the last place the forest's own branding
+  still named the indexer. About and the moot settings keep GutenbergKG
+  where they mean the software.
+
+### Fixed
+
+- **The forest no longer stays zoomed and cropped on iPhone.** Tapping the
+  forest's query field made iOS zoom the page in, since the field's text is
+  under 16 px, and the app's web view cannot scroll, so the forest stayed
+  cut off on both sides until it was reopened. The page's viewport now sets
+  `maximum-scale=1`, which stops that zoom; Safari still lets a reader
+  pinch-zoom the web forest.
+
 ## [1.33.0] - 2026-11-04
 
 ### Added

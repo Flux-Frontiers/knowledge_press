@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- maximum-scale=1: iOS zooms the page into a text field under 16px on focus, and the
+         app's web view cannot scroll back, so the forest stayed cropped on both sides.
+         Safari still lets a reader pinch-zoom; the app's forest handles pinch itself. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <title>The Knowledge Press: The Forest</title>
     <meta name="description" content="Explore a living forest of public-domain books, with gentle cart controls, seasonal light, and a personal reading press." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
