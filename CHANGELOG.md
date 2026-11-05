@@ -11,6 +11,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Search Browse by title.** The Corpus list's search field, which found
+  authors, now finds titles too: "raven" finds *The Raven and Other Poems*
+  and "divine" both Divine Comedies. Matching authors come first; a
+  **Titles** section follows with the other books whose title matches, by
+  the same rule (each word typed begins a word of the title, ignoring case
+  and accents).
+
 ### Changed
 
 - **Ask about this book asks that book.** The forest card's button used to

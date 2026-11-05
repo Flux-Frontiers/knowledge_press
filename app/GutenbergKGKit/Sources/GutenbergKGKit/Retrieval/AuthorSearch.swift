@@ -1,7 +1,7 @@
 // © 2026 Eric G. Suchanek, PhD — Flux-Frontiers · SPDX-License-Identifier: LicenseRef-Flux-Frontiers-Proprietary
 // The Knowledge Press. Not redistributable; see app/LICENSE.
 //
-// The Browse tab's author search. The catalog is small (a few hundred books),
+// The Browse tab's author and title search. The catalog is small (a few hundred books),
 // so every book is held in memory and matched here rather than in SQL: the
 // same code then serves the installed packs and the worker, and the matching
 // rules are testable without a corpus.
@@ -95,6 +95,25 @@ public enum AuthorSearch {
                 })
         }
         .sorted { $0.author.localizedStandardCompare($1.author) == .orderedAscending }
+    }
+
+    /// The books in `books` whose title answers `query`, by the same
+    /// word-prefix rule as an author name.
+    ///
+    /// A book with no title is matched on its folder name, which is what
+    /// Browse shows for it. Results are ordered by title.
+    ///
+    /// :param query: What the reader typed.
+    /// :param books: The whole catalog, as ``CorpusBrowser/shelf(genres:)``
+    ///     returns it.
+    /// :returns: The matching books; empty for a blank query.
+    public static func searchTitles(_ query: String, in books: [ShelvedBook]) -> [ShelvedBook] {
+        guard !words(query).isEmpty else { return [] }
+        return books.filter { matches(author: $0.book.title ?? $0.book.book, query: query) }
+            .sorted {
+                ($0.book.title ?? $0.book.book).localizedStandardCompare(
+                    $1.book.title ?? $1.book.book) == .orderedAscending
+            }
     }
 }
 

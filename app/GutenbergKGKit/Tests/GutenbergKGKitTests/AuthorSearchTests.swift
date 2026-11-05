@@ -90,6 +90,28 @@ struct AuthorSearchResultTests {
     }
 }
 
+struct TitleSearchTests {
+
+    @Test func aTitleWordPrefixMatches() {
+        #expect(AuthorSearch.searchTitles("wuther", in: shelf).map(\.book.title) == ["Wuthering Heights"])
+        #expect(AuthorSearch.searchTitles("ering", in: shelf).isEmpty)
+    }
+
+    @Test func titlesComeBackInTitleOrder() {
+        #expect(AuthorSearch.searchTitles("w", in: shelf).map(\.book.title) == [
+            "War and Peace", "What Is Art?", "Wuthering Heights",
+        ])
+    }
+
+    @Test func aBookWithNoAuthorIsFoundByTitle() {
+        #expect(AuthorSearch.searchTitles("bible", in: shelf).map(\.id) == ["sacred-texts/The Bible"])
+    }
+
+    @Test func aBlankQueryReturnsNothing() {
+        #expect(AuthorSearch.searchTitles(" ", in: shelf).isEmpty)
+    }
+}
+
 // MARK: - Against the installed catalog
 
 private var packsDirectory: URL? {
@@ -125,6 +147,13 @@ struct AuthorSearchCorpusTests {
         let first = try #require(match.books.first)
         let chapters = try await browser.chapters(genre: first.genre, book: first.book.book)
         #expect(!chapters.isEmpty)
+    }
+
+    @Test func titleSearchFindsBothDivineComedies() async throws {
+        let (_, books) = try await openShelf()
+        let titles = AuthorSearch.searchTitles("divine comedy", in: books).compactMap(\.book.title)
+        #expect(titles.count == 2)
+        #expect(titles.allSatisfy { $0.hasPrefix("The Divine Comedy") })
     }
 
     /// Names such as "Leo, graf Tolstoy" come out of gutenberg_kg's name

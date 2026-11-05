@@ -14,9 +14,10 @@ sidebar on iPad and Mac.
    forest at its tree; see [The forest in the app](forest.md).
 3. Tap a chapter to read it.
 
-To find an author, type in **Search authors** at the top of the Corpus list.
-Results are grouped by author, with each of their books below. Searching by
-title is not available yet.
+To find a book or an author, type in **Search titles and authors** at the
+top of the Corpus list. Each word you type has to begin a word of the name
+or title. Matching authors come first, each with their books below; then
+**Titles** lists the other books whose title matches.
 
 ## Read a chapter
 
