@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/brand-system/lockup-horizontal-paper.svg">
-    <img src="assets/brand-system/lockup-horizontal-ink.svg" alt="The Knowledge Press" width="560">
+    <img src="assets/brand-system/lockup-horizontal-ink.svg" alt="The Knowledge Press: The Forest" width="560">
   </picture>
 </p>
 
@@ -11,6 +11,8 @@
 [![Platforms](https://img.shields.io/badge/platforms-iOS%2026%20%7C%20macOS%2026%20%7C%20web-lightgrey.svg)](app/RUNBOOK.md)
 [![App](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/app.yml/badge.svg)](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/app.yml)
 [![Web](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/web.yml/badge.svg)](https://github.com/Flux-Frontiers/knowledge_press/actions/workflows/web.yml)
+
+# The Knowledge Press: The Forest
 
 The apps that read a [GutenbergKG](https://github.com/Flux-Frontiers/gutenberg_kg)
 corpus. GutenbergKG builds the library, a knowledge graph of public-domain books;

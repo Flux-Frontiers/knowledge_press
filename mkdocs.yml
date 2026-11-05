@@ -4,7 +4,7 @@
 # forest itself is the Pages root, which is why this is not the fleet's
 # docs.yml: that would replace the game with the guide.
 
-site_name: The Knowledge Press
+site_name: "The Knowledge Press: The Forest"
 site_description: The user guide for the Knowledge Press Forest, and notes on the iOS and macOS app.
 site_url: https://flux-frontiers.github.io/knowledge_press/docs/
 repo_url: https://github.com/Flux-Frontiers/knowledge_press

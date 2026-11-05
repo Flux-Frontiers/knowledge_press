@@ -44,7 +44,7 @@ struct KnowledgePressApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("The Knowledge Press") {
+        WindowGroup("The Knowledge Press: The Forest") {
             SplashOverlay {
                 MacRootView()
                     .environment(model)
