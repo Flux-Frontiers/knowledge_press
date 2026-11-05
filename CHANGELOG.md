@@ -21,7 +21,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   on iPhone, iPad and Mac. The intent also started with its question set to
   an empty string, which counted as answered, so Siri never asked "What do
   you want to ask?" and the app dropped the empty question. It now starts
-  unset, and Siri asks.
+  unset, and Siri asks. When Siri launched the app from closed, the
+  question also arrived before the app had opened its on-device corpus and
+  failed with "Could not connect to the server"; it now waits for the
+  corpus to open.
 
 ## [1.34.0] - 2026-11-05
 

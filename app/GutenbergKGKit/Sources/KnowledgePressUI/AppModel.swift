@@ -475,6 +475,8 @@ public final class AppModel {
     /// Why an installed corpus would not open, when one is present but broken.
     private(set) var packsError: String?
     private(set) var isLoadingPacks = false
+    /// The open in flight, shared by every caller of `loadCorpusPacks()`.
+    @ObservationIgnored private var packsLoad: Task<Void, Never>?
 
     /// True when a question can be answered with the network off: passages
     /// from the packs, answer from the built-in model.
@@ -583,10 +585,15 @@ public final class AppModel {
                   !question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             else { return }
             Task { @MainActor in
+                guard let self else { return }
+                // On a cold launch Siri's question lands before the launch
+                // has opened the packs, and without them retrieval falls
+                // back to the worker: "Could not connect to the server".
+                if self.packs == nil { await self.loadCorpusPacks() }
                 // A spoken question is its own chat, not a follow-up to
                 // whatever happened to be on screen.
-                self?.newConversation()
-                self?.send(question)
+                self.newConversation()
+                self.send(question)
             }
         }
 
@@ -953,7 +960,19 @@ public final class AppModel {
     ///
     /// Off the main actor: opening compiles the Core ML embedder, which takes
     /// seconds the first time and must not hold up the first frame.
+    ///
+    /// A call made while an open is in flight waits for that one instead of
+    /// starting a second: on a cold launch from Siri, the question and the
+    /// launch's own `.task` both ask for the packs at once.
     public func loadCorpusPacks() async {
+        if let packsLoad { return await packsLoad.value }
+        let load = Task { await openCorpusPacks() }
+        packsLoad = load
+        await load.value
+        packsLoad = nil
+    }
+
+    private func openCorpusPacks() async {
         isLoadingPacks = true
         defer { isLoadingPacks = false }
         let opened = await Task.detached(priority: .userInitiated) { () -> (CorpusPacks?, String?) in
