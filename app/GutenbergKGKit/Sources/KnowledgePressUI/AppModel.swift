@@ -579,7 +579,9 @@ public final class AppModel {
         askObserver = NotificationCenter.default.addObserver(
             forName: .askKnowledgePress, object: nil, queue: .main
         ) { [weak self] notification in
-            guard let question = notification.userInfo?["question"] as? String else { return }
+            guard let question = notification.userInfo?["question"] as? String,
+                  !question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            else { return }
             Task { @MainActor in
                 // A spoken question is its own chat, not a follow-up to
                 // whatever happened to be on screen.

@@ -18,7 +18,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   from the app's own module, so no build since the shortcut was added
   offered it to Siri or listed it under App Shortcuts; only the bare action
   appeared in the Shortcuts editor. The phrases now live in the app target,
-  on iPhone, iPad and Mac.
+  on iPhone, iPad and Mac. The intent also started with its question set to
+  an empty string, which counted as answered, so Siri never asked "What do
+  you want to ask?" and the app dropped the empty question. It now starts
+  unset, and Siri asks.
 
 ## [1.34.0] - 2026-11-05
 

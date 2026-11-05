@@ -25,9 +25,10 @@ public struct AskKnowledgePressIntent: AppIntent {
     @Parameter(title: "Question", requestValueDialog: "What do you want to ask?")
     public var question: String
 
-    public init() {
-        question = ""
-    }
+    /// Leaves `question` unset. Set to "" it counted as answered, so Siri
+    /// skipped the "What do you want to ask?" prompt and ran with an empty
+    /// question, which `send` drops: the shortcut ran and did nothing.
+    public init() {}
 
     public init(question: String) {
         self.question = question
