@@ -835,6 +835,17 @@ committed empty. An unstaged build still runs, and the Forest tab says
 `web/node_modules` is missing; run `make web-install` once. How the forest is
 served is in `docs/APP_INTERNALS.md` §9.
 
+There is no separate forest code for the app. A change under `web/` reaches
+the app only when the app is rebuilt with a target that stages the forest
+(`make mac-dev`, `make mac-dev-run`, `make mac-archive`, `make ios-archive`);
+an app built before the change keeps the old forest. The forest's book text
+comes from two places. In the app, `ForestServer` reads it from the Swift
+packs, so a re-export (`make export-swift` in gutenberg_kg) also needs an app
+rebuild or `make ios-push-all`. On the web site it comes from the `book-text`
+release asset, which changes only when `make web-books-publish` runs in
+gutenberg_kg. Both join chunks by the pack's `gap_after`, so they read the
+same when built from the same export.
+
 ### It shares one source file with `swift run`, on purpose
 
 The target compiles
