@@ -18,6 +18,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   face and KP are separate layers on the navy fill, so the system renders them
   in its light, dark, clear and tinted appearances. `make icons` now renders
   only the splash and web PNGs.
+- **Clean view hides the map.** It now also hides Guided tour and Read on
+  touch screens, leaving the drive stick.
+- **Guided tour and Read sit side by side** on touch screens.
+- **No worker is set by default.** The web forest no longer assumes
+  `http://localhost:8000`, and **Hold a new moot** appears only once a worker
+  is set.
+- **In the app, the forest uses the app's worker.** Its Settings no longer ask
+  for a second address. **Reset all settings** clears the worker address too.
+
+### Fixed
+
+- **The app's About page no longer offers `?meteors=` links**, since the app
+  has no address bar.
 
 ## [1.34.1] - 2026-11-05
 

@@ -34,8 +34,11 @@ is parked while they are open. Every setting is saved in this browser.
 
 | Setting | What it does |
 | --- | --- |
-| GutenbergKG worker | Where the worker that holds a [new moot](moots.md#hold-a-new-moot) listens. `http://localhost:8000` by default. |
+| GutenbergKG worker | Where the worker that holds a [new moot](moots.md#hold-a-new-moot) listens, for example `http://localhost:8000`. Empty by default. |
 | Moot token | Only if the worker sets `MOOT_TOKEN`. Kept in this browser. |
+
+In the app, the worker is the one in the app's Settings, under **Worker**, so
+this section shows only the token, and only when a worker is set.
 
 ## Environment
 

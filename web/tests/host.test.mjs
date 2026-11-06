@@ -66,6 +66,17 @@ test("malformed commands are dropped, not thrown", () => {
   off();
   assert.deepEqual(heard, []);
   assert.deepEqual(parseCommand('{"kind":"goto","slug":"hamlet","extra":1}'), { kind: "goto", slug: "hamlet" });
+  assert.deepEqual(parseCommand('{"kind":"worker","url":""}'), { kind: "worker", url: "" });
+  assert.equal(parseCommand('{"kind":"worker"}'), null);
+});
+
+test("a settings reset clears the worker and tells the host", () => {
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  useGame.getState().setPreferences({ mootWorker: "http://box:8000", mootToken: "t" });
+  const posted = withHandler(() => useGame.getState().resetSettings());
+  assert.equal(useGame.getState().preferences.mootWorker, "");
+  assert.equal(useGame.getState().preferences.mootToken, "");
+  assert.deepEqual(posted, [{ kind: "resetSettings" }]);
 });
 
 test("the store tells the host when a card comes up and when a book is pressed", () => {

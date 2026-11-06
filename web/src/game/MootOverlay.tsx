@@ -3,7 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BOOKS } from "./catalog";
 import type { Forest } from "./forest";
 import type { Book } from "./catalogTypes";
-import { LIVE_TURNS, nextLiveTurn, startLiveMoot, stepAfter, stopLiveMoot, type LiveRequest, type WorkerSettings } from "./liveMoots";
+import { host } from "./host";
+import { LIVE_TURNS, liveWorkerUrl, nextLiveTurn, startLiveMoot, stepAfter, stopLiveMoot, type LiveRequest, type WorkerSettings } from "./liveMoots";
 import { getMoot, getMootIndex, markText, MOOT_COLORS, mootBooks, readingMs, spokenText, type Moot, type MootEntry, type MootTurn } from "./moots";
 import { canSpeak, hush, speak, speaking, unlockSpeech } from "./speech";
 import { useGame } from "./store";
@@ -101,11 +102,12 @@ function HoldMoot() {
   const [second, setSecond] = useState("");
   const [topic, setTopic] = useState("");
   const [turns, setTurns] = useState(8);
-  const worker = useGame((s) => s.preferences.mootWorker);
+  const worker = useGame((s) => liveWorkerUrl(host.available, s.hostWorker, s.preferences.mootWorker));
   const byLabel = useMemo(() => new Map(BOOKS.map((b) => [bookLabel(b), b])), []);
   const a = byLabel.get(first);
   const b = byLabel.get(second);
   const ready = Boolean(a && b && a !== b);
+  if (!worker) return null;
   if (!open) {
     return (
       <button type="button" onClick={() => setOpen(true)}
@@ -142,7 +144,7 @@ function HoldMoot() {
         </select>
       </label>
       {a && b && a === b ? <p className="text-xs text-muted">Pick two different books.</p> : null}
-      <p className="text-xs text-muted">Worker: <code className="text-fg">{worker}</code>. Change it in Settings, under Live moots.</p>
+      <p className="text-xs text-muted">Worker: <code className="text-fg">{worker}</code>. Change it in {host.available ? "the app's Settings, under Worker" : "Settings, under Live moots"}.</p>
       <div className="flex gap-2">
         <button type="submit" disabled={!ready} className="min-h-11 rounded-md bg-primary px-4 text-primary-fg disabled:opacity-50">Start the moot</button>
         <button type="button" onClick={() => setOpen(false)} className="min-h-11 rounded-md px-4 text-muted">Cancel</button>
@@ -206,7 +208,7 @@ type LiveState = { total: number; done: boolean; error: string | null; retry: ()
  */
 export function LiveMootPlayer({ request, forest }: { request: LiveRequest; forest: Forest }) {
   const close = () => useGame.getState().playMoot(null);
-  const url = useGame((s) => s.preferences.mootWorker);
+  const url = useGame((s) => liveWorkerUrl(host.available, s.hostWorker, s.preferences.mootWorker));
   const token = useGame((s) => s.preferences.mootToken);
   // The worker this moot started on, kept for the stop on close.
   const worker = useRef<WorkerSettings>({ url, token });

@@ -144,8 +144,11 @@ export type GameStore = {
   liveMoot: LiveRequest | null;
   /** The tree speaking in the moot, by slug, and its moot color: Trees.tsx rings it. */
   mootSpeaker: { slug: string; color: string } | null;
-  /** Hide the HUD's buttons, cards and search, leaving the map and the driving controls. */
+  /** Hide the HUD's buttons, map, cards and search, and Guided tour and Read, leaving the drive stick. */
   cleanView: boolean;
+  /** The app's worker address, when the app hosts the forest; "" for none (ForestHost). */
+  hostWorker: string;
+  setHostWorker: (url: string) => void;
   /** `?shot=`: a fixed camera on one tree, with no game on screen (portrait.ts). */
   portrait: Portrait | null;
   setPortrait: (portrait: Portrait | null) => void;
@@ -256,6 +259,8 @@ export const useGame = create<GameStore>((set, get) => ({
     set({ preferences: readPreferences(), groundCamera: "follow", season: autoSeason(get().place), timeMode: "live" });
     set(readSky("live", get().place));
     persist(get());
+    // The app keeps the worker address; a reset clears that too.
+    host.post({ kind: "resetSettings" });
   },
   paused: false,
   season: autoSeason(initial.place),
@@ -294,6 +299,8 @@ export const useGame = create<GameStore>((set, get) => ({
   liveMoot: null,
   mootSpeaker: null,
   cleanView: false,
+  hostWorker: "",
+  setHostWorker: (url) => set({ hostWorker: url }),
   portrait: null,
   setPortrait: (portrait) => set({ portrait }),
   setTimeMode: (timeMode) => set({ timeMode, ...readSky(timeMode, get().place) }),

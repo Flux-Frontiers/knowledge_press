@@ -19,6 +19,7 @@ struct ForestEventTests {
         #expect(ForestEvent(messageBody: ["kind": "tree", "slug": "hamlet"]) == .tree(slug: "hamlet"))
         #expect(ForestEvent(messageBody: ["kind": "pressed", "slug": "hamlet"]) == .pressed(slug: "hamlet"))
         #expect(ForestEvent(messageBody: ["kind": "ask", "slug": "hamlet"]) == .ask(slug: "hamlet"))
+        #expect(ForestEvent(messageBody: ["kind": "resetSettings"]) == .resetSettings)
     }
 
     @Test func extraFieldsAreIgnored() {
@@ -59,6 +60,8 @@ struct ForestCommandTests {
     @Test func commandsAreTheJSONHostTsParses() throws {
         #expect(try decode(ForestCommand.goto(slug: "hamlet").json) == ["kind": "goto", "slug": "hamlet"])
         #expect(try decode(ForestCommand.home.json) == ["kind": "home"])
+        #expect(try decode(ForestCommand.worker(url: "http://mac.local:8000").json) == ["kind": "worker", "url": "http://mac.local:8000"])
+        #expect(try decode(ForestCommand.worker(url: "").json) == ["kind": "worker", "url": ""])
     }
 
     @Test func theScriptCallsTheBridgeWithAStringLiteral() throws {

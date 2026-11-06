@@ -23,6 +23,18 @@ export const LIVE_TURNS = [4, 6, 8, 10, 12] as const;
 type Fetch = typeof fetch;
 
 /**
+ * The worker a new moot would use: in the app its own worker address, on the
+ * web the forest's setting. "" means none, and no moot can be held.
+ *
+ * :param hosted: Whether the forest runs inside the app.
+ * :param hostWorker: The address the app sent.
+ * :param saved: The forest's own setting.
+ */
+export function liveWorkerUrl(hosted: boolean, hostWorker: string, saved: string): string {
+  return (hosted ? hostWorker : saved).trim();
+}
+
+/**
  * Where the player goes when a turn ends: the next turn, or, in a live moot
  * that has caught up with its worker, one past the last arrived turn, where
  * it waits for the next; `null` stops it at the end.

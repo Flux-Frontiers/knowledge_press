@@ -140,7 +140,7 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 
 /* A phone on its side (~375-430px tall): stacked above the controls, the card
    rode up over the top bar. The search goes on the bottom edge between the
-   left stick (~8.5rem) and the right stick with its buttons (~15.5rem); the
+   left stick (~8.5rem) and the row of buttons (~12rem, room kept to 15.5rem); the
    card sits on the left above the left stick, without its excerpt. */
 @media (pointer: coarse) and (max-height: 500px) {
   .search-dock {
@@ -157,7 +157,7 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 }
 
 /* Tablets, either orientation: from ~700px there is room between the joystick
-   (~124px) and the buttons (~172px) for the 22rem search bar, so it sits on the
+   (~124px) and the row of buttons (~190px) for the 22rem search bar, so it sits on the
    bottom edge and the book card just above the joystick. Phones keep the stack. */
 @media (pointer: coarse) and (min-width: 700px) {
   .search-dock { bottom: calc(1rem + env(safe-area-inset-bottom)); }

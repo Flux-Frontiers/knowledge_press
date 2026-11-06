@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DEFAULT_MOOT_WORKER } from "./preferences";
+import { host } from "./host";
 import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
 import { canSpeak, mootVoiceNames, onVoicesChanged, unlockSpeech } from "./speech";
 import { USER_GUIDE_URL } from "./links";
@@ -10,6 +10,7 @@ export function PauseOverlay() {
   const paused = useGame((s) => s.paused);
   const pause = useGame((s) => s.pause);
   const prefs = useGame((s) => s.preferences);
+  const hostWorker = useGame((s) => s.hostWorker);
   const setPreferences = useGame((s) => s.setPreferences);
   const season = useGame((s) => s.season);
   const setSeason = useGame((s) => s.setSeason);
@@ -110,19 +111,24 @@ export function PauseOverlay() {
           <input type="checkbox" checked={prefs.weather} onChange={(e) => setPreferences({ weather: e.target.checked })} />
         </label>
       </div>
+      {/* In the app the worker is set in the app's own Settings; with none, there is nothing to set here. */}
+      {host.available && !hostWorker.trim() ? null : (<>
       <h3 className="mb-3 text-xs tracking-[0.2em] text-primary uppercase">Live moots</h3>
       <div className="mb-5 grid gap-4 text-sm">
+        {host.available ? null : (
         <label className="grid gap-2">
-          <span>GutenbergKG worker<span className="block text-xs text-muted">Holds a new moot and makes each turn. See the Moots guide.</span></span>
-          <input type="url" value={prefs.mootWorker} spellCheck={false} placeholder={DEFAULT_MOOT_WORKER}
+          <span>GutenbergKG worker<span className="block text-xs text-muted">Optional. Set it to hold a new moot; the worker makes each turn. See the Moots guide.</span></span>
+          <input type="url" value={prefs.mootWorker} spellCheck={false} placeholder="http://localhost:8000"
             onChange={(e) => setPreferences({ mootWorker: e.target.value })} className="rounded-md border border-border bg-bg p-2" />
         </label>
+        )}
         <label className="grid gap-2">
           <span>Moot token<span className="block text-xs text-muted">Only if the worker sets MOOT_TOKEN</span></span>
           <input type="password" value={prefs.mootToken} autoComplete="off"
             onChange={(e) => setPreferences({ mootToken: e.target.value })} className="rounded-md border border-border bg-bg p-2" />
         </label>
       </div>
+      </>)}
       <div className="rounded-md bg-bg p-3 text-sm leading-relaxed text-muted">
         <p><span className="text-fg">WASD</span> drive · <span className="text-fg">Drag</span> or <span className="text-fg">arrows</span> look around · <span className="text-fg">Space</span> brake</p>
         <p><span className="text-fg">Shift</span> hurry · <span className="text-fg">E</span> read · <span className="text-fg">C</span> camera</p>
@@ -133,7 +139,7 @@ export function PauseOverlay() {
         <a href={USER_GUIDE_URL} target="_blank" rel="noopener" className="text-primary underline">Read the user guide</a>
       </p>
       <button type="button" className="mt-3 min-h-11 w-full rounded-md border border-border text-muted"
-        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome? Your press and visited groves are kept.")) resetSettings(); }}>
+        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome and the worker address? Your press and visited groves are kept.")) resetSettings(); }}>
         Reset all settings
       </button>
       <button type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
