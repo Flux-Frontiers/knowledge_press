@@ -240,7 +240,7 @@ export function Trees({
           <mesh geometry={subjectBark && ci === forest.trees[only!]!.chunk ? subjectBark : bark[ci]} material={barkMats[chunk.species]} castShadow receiveShadow />
           <instancedMesh ref={(m) => { leafRefs.current[ci] = m; }}
             args={[leafGeoms[chunk.species], materials.leaf, Math.max(1, chunk.leafCount)]} customDepthMaterial={materials.depth}
-            castShadow={!COARSE_POINTER} receiveShadow />
+            castShadow={!COARSE_POINTER} receiveShadow={!COARSE_POINTER} />
         </group>
       ))}
       <instancedMesh ref={ringRef} args={[undefined, undefined, forest.trees.length]} frustumCulled={false}>

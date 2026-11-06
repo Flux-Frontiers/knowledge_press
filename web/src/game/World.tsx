@@ -78,7 +78,8 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
   });
   const ambientColor = useMemo(() => new Color(pal.ambient).lerp(new Color(DAY_OVERRIDE.ambient), t), [t, pal.ambient]);
   const hemiIntensity = 0.78 * (1 + (DAY_OVERRIDE.hemiIntensity - 1) * t);
-  const detail = useGame((s) => s.preferences.detail);
+  const shadows = useGame((s) => s.preferences.shadows);
+  const undergrowth = useGame((s) => s.preferences.undergrowth);
   const groundTexture = useGroundTexture();
   const groundColor = useMemo(() => {
     const night = new Color(pal.ground);
@@ -96,7 +97,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
       <color attach="background" args={[skyColor]} />
       <fogExp2 ref={fog} attach="fog" args={[fogColor, fogDensity]} />
       <hemisphereLight color={ambientColor} groundColor={groundColor} intensity={hemiIntensity} />
-      <Sunlight light={sky.light} detail={detail} />
+      <Sunlight light={sky.light} shadows={shadows} />
       <Sky sky={sky} season={season} />
       <MeteorSky sky={sky} />
       <directionalLight position={[-30, 20, -40]} intensity={0.2} color="#8aa0b8" />
@@ -114,7 +115,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
       ) : null}
       {portrait ? null : <GroveGrounds forest={forest} ground={groundColor} winter={season === "winter"} />}
       {portrait ? null : <Roads forest={forest} circuit={travelMode === "circuit"} />}
-      {detail && <ForestFloor forest={forest} season={season} />}
+      {undergrowth && <ForestFloor forest={forest} season={season} />}
       {portrait ? null : (<>
         <LanternTrail forest={forest} selectedGrove={selectedGrove} query={query} searchPick={searchPick} />
         <Signposts forest={forest} />
