@@ -106,10 +106,11 @@ The Knowledge Press is not affiliated with Project Gutenberg. The texts are
 public domain; Project Gutenberg and the Internet Archive are acknowledged
 as their sources.
 
-### Next: the Forest section (for the first version after 1.33.0)
+### The Forest section (in the description since iOS 1.34.1)
 
-The description is per version. Insert this section after READ, NOT JUST
-SEARCH in the first submitted version after 1.33.0. It needs that version:
+The description is per version. This section went in after READ, NOT JUST
+SEARCH in iOS 1.34.1, the first version submitted after 1.33.0, and stays in
+later versions. It needs that version:
 in 1.33.0, Ask about this book scopes the chat to the book's genre, and the
 book-only scope came after it (CHANGELOG, Unreleased). The same text serves
 the Mac.
@@ -132,10 +133,10 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 ### 1.34.1
 
 iOS submitted 2026-11-05 and approved 2026-11-06 (submission
-`b571e655-428a-4cdc-bd8b-cbd7fb810c2f`). It is later than 1.33.0, so once it
-is live on the iOS page the Forest items marked "Next" in this file apply
-there: the promotional text, the description section, the screenshot set and
-the featuring nomination.
+`b571e655-428a-4cdc-bd8b-cbd7fb810c2f`). The Forest section of the
+description went in with it. It is later than 1.33.0, so once it is live on
+the iOS page the other Forest items in this file apply there: the
+promotional text, the screenshot set and the featuring nomination.
 
 ### 1.32.0
 
