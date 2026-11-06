@@ -177,9 +177,8 @@ asset must suit a 4+ audience even though the app is rated 13+. No prices,
 URLs, award claims, Project Gutenberg logo, or other platforms' logos.
 
 The set below went in with iOS 1.34.1, the first version submitted after
-1.33.0: slot 06 shows
-title search in Browse, and slot 03's card shows Ask about this book with
-the book-only scope, both of which came after 1.33.0. All shots use dark
+1.33.0: slot 06 shows title search in Browse, and slot 03's card shows Ask
+about this book with the book-only scope, both of which came after 1.33.0. All shots use dark
 mode, the Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a
 set. iPad shots are landscape (rotate the Simulator with Cmd-Left
 before capturing); iPhone shots are portrait.
