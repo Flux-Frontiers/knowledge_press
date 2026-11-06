@@ -4,7 +4,10 @@ export type Preferences = {
   /** "god" looks down on the whole forest from above the hub. */
   camera: "follow" | "high" | "cart" | "god";
   motion: boolean;
-  detail: boolean;
+  /** The sun's shadows. Off by default: on an iPad mini they halved the frame rate. */
+  shadows: boolean;
+  /** Grass and stones on the forest floor. */
+  undergrowth: boolean;
   /** Leaf complexity; see LEAF_SCALE. */
   leaves: LeafDetail;
   /** Show triangles, draw calls, leaves and frame rate. */
@@ -49,7 +52,9 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     camera: value?.camera === "high" || value?.camera === "cart" || value?.camera === "god" ? value.camera : "follow",
     motion: typeof value?.motion === "boolean" ? value.motion
       : !(typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches),
-    detail: typeof value?.detail === "boolean" ? value.detail : true,
+    // The old `detail` setting is ignored on purpose: it was saved on for everyone, so reading it would keep shadows on.
+    shadows: value?.shadows === true,
+    undergrowth: value?.undergrowth !== false,
     // Touch devices start at Low.
     leaves: value?.leaves && value.leaves in LEAF_SCALE ? value.leaves
       : typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches ? "low" : "medium",

@@ -281,6 +281,22 @@ extension ForestHost: WKNavigationDelegate {
 }
 
 extension ForestHost: WKUIDelegate {
+    /// A `target="_blank"` link (the user guide). A web view opens none of
+    /// these on its own, so it goes to the reader's browser.
+    func webView(
+        _ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
+        for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures
+    ) -> WKWebView? {
+        if let url = navigationAction.request.url, ["http", "https"].contains(url.scheme) {
+            #if os(iOS)
+                UIApplication.shared.open(url)
+            #else
+                NSWorkspace.shared.open(url)
+            #endif
+        }
+        return nil
+    }
+
     /// `window.confirm` (Empty the press). Without this the page's button
     /// does nothing: WebKit answers false when no delegate does.
     func webView(

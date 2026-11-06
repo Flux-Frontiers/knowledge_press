@@ -104,15 +104,15 @@ const PLANE_HALF: [number, number][] = [
 ];
 
 // A fir spray rather than a lone needle: slender needles either side of a stem,
-// angled toward the tip, longest mid-spray.
+// angled toward the tip, longest mid-spray. Six pointed needles a side, three
+// points each: about 40 triangles a leaf, where twelve blunt ones were 101.
 const FIR_HALF: [number, number][] = (() => {
   const out: [number, number][] = [];
-  const n = 12;
+  const n = 6;
   for (let k = 0; k < n; k++) {
-    const y = 0.86 - (1.62 * k) / (n - 1);
-    const reach = 0.12 + 0.2 * Math.sin((Math.PI * (k + 1)) / (n + 1));
-    // Flat, blunt needles: wide at the stem, a squared-off tip.
-    out.push([0.05, y + 0.045], [reach, y + 0.12], [reach + 0.01, y + 0.08], [0.05, y - 0.04]);
+    const y = 0.8 - (1.5 * k) / (n - 1);
+    const reach = 0.14 + 0.2 * Math.sin((Math.PI * (k + 1)) / (n + 1));
+    out.push([0.05, y + 0.06], [reach, y + 0.2], [0.05, y - 0.06]);
   }
   out.push([0.04, -1]);
   return out;
@@ -125,7 +125,8 @@ const PINE_HALF: [number, number][] = (() => {
   for (let k = 0; k < n; k++) {
     const y = 0.68 - (1.2 * k) / (n - 1);
     const reach = 0.3 + 0.28 * Math.sin((Math.PI * (k + 1)) / (n + 1));
-    out.push([0.04, y + 0.03], [reach, y + 0.3], [reach + 0.015, y + 0.26], [0.04, y - 0.05]);
+    // Pointed, three points a needle (a blunt fourth cost 14 triangles a leaf).
+    out.push([0.04, y + 0.03], [reach, y + 0.3], [0.04, y - 0.05]);
   }
   out.push([0.035, -1]);
   return out;
@@ -139,7 +140,8 @@ export const SPECIES: Species[] = [
   {
     // English oak: short bole, broad low dome, long gnarled horizontal limbs.
     name: "oak", common: "English oak", latin: "Quercus robur",
-    barkAspect: 2, leaf: { shape: "outline", half: OAK_HALF, smooth: true }, foliageShift: [0, 0, 0],
+    // Its lobes as drawn, unsmoothed: half the triangles of the spline, still lobed at leaf size.
+    barkAspect: 2, leaf: { shape: "outline", half: OAK_HALF, smooth: false }, foliageShift: [0, 0, 0],
     habit: { envelope: "dome", whorl: 1, droop: 0.05, leader: 0, width: 1.55, clearBole: 0.22, spread: 1.1, lift: 0.6, tropism: 0.02, influence: 16, step: 1.1, jitter: 0.24, pipeExp: 2 },
   },
   {
@@ -229,7 +231,7 @@ export function leafOutline(leaf: LeafShape): [number, number][] {
     return withStalk([...right, [0, -1], ...left.slice(0, -1)].map(([x, y]) => [x * k, y]));
   }
   const right = [[0, 1] as [number, number], ...leaf.half];
-  // Two samples per span: ~73 triangles for the oak instead of 180, still round at leaf size.
+  // Two samples per span: fewer triangles than the full spline, still round at leaf size.
   const half = leaf.smooth ? catmullRom(right, 2) : right;
   const bottom = half[half.length - 1]!;
   const full: [number, number][] = [...half, [0, bottom[1] - 0.02], ...half.slice(1).reverse().map(([x, y]) => [-x, y] as [number, number])];

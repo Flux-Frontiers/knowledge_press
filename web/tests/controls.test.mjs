@@ -125,6 +125,16 @@ test("input reset clears held keyboard, touch axes, look and interaction edges",
   input.resetInput();
 });
 
+test("shadows start off, undergrowth and wind start on, and a saved choice is kept", () => {
+  assert.equal(readPreferences().shadows, false);
+  assert.equal(readPreferences().undergrowth, true);
+  assert.equal(readPreferences().motion, true);
+  assert.equal(readPreferences({ detail: true }).shadows, false, "the old setting no longer turns shadows on");
+  assert.equal(readPreferences({ shadows: true }).shadows, true);
+  assert.equal(readPreferences({ undergrowth: false }).undergrowth, false);
+  assert.equal(readPreferences({ motion: false }).motion, false);
+});
+
 test("old or malformed preferences have usable defaults and bounded sensitivity", () => {
   assert.equal(readPreferences().pace, "gentle");
   assert.equal(readPreferences({ sensitivity: NaN }).sensitivity, 1);

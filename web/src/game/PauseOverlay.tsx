@@ -89,8 +89,12 @@ export function PauseOverlay() {
         <label className="flex items-center justify-between gap-4">Show geometry & frame rate
           <input type="checkbox" checked={prefs.stats} onChange={(e) => setPreferences({ stats: e.target.checked })} />
         </label>
-        <label className="flex items-center justify-between gap-4">Shadows & forest floor detail
-          <input type="checkbox" checked={prefs.detail} onChange={(e) => setPreferences({ detail: e.target.checked })} />
+        <label className="flex items-center justify-between gap-4">
+          <span>Shadows<span className="block text-xs text-muted">Costly on tablets and phones</span></span>
+          <input type="checkbox" checked={prefs.shadows} onChange={(e) => setPreferences({ shadows: e.target.checked })} />
+        </label>
+        <label className="flex items-center justify-between gap-4">Undergrowth
+          <input type="checkbox" checked={prefs.undergrowth} onChange={(e) => setPreferences({ undergrowth: e.target.checked })} />
         </label>
       </div>
       <h3 className="mb-3 text-xs tracking-[0.2em] text-primary uppercase">Environment</h3>
