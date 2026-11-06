@@ -5,7 +5,8 @@ in one place. Character limits are Apple's.
 
 Store page: <https://apps.apple.com/us/app/the-knowledge-press/id6812116080>
 (Apple ID `6812116080`). Both apps are live: the Mac since 2026-10-28, the
-iPhone and iPad app since iOS 1.30.0 was released on 2026-11-02. They are one
+iPhone and iPad app since iOS 1.30.0 was released on 2026-11-02. iOS 1.34.1,
+which carries the Forest, was approved by 2026-11-06. They are one
 Universal Purchase on the same record, so the same link serves both;
 `?mt=12` opens the Mac tab.
 
@@ -127,6 +128,14 @@ limit.
 classics,books,library,philosophy,literature,offline,reader,search,shakespeare,plato,diaries,homer
 
 ## What's New (per version)
+
+### 1.34.1
+
+iOS submitted 2026-11-05 and approved by 2026-11-06 (submission
+`b571e655-428a-4cdc-bd8b-cbd7fb810c2f`). It is later than 1.33.0, so once it
+is live on the iOS page the Forest items marked "Next" in this file apply
+there: the promotional text, the description section, the screenshot set and
+the featuring nomination.
 
 ### 1.32.0
 
