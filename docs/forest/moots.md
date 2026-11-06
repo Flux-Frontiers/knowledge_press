@@ -40,6 +40,8 @@ GutenbergKG worker running on your computer, with a language model behind
 it; the [GutenbergKG Moots guide](https://flux-frontiers.github.io/gutenberg_kg/MOOTS/#live-moots-from-the-forest)
 covers the setup.
 
+**Hold a new moot** appears once a worker is set; none is set at first.
+
 1. In **Moots**, choose **Hold a new moot**.
 2. Type in **First book** and **Second book** and pick each from the list.
 3. Give a **Topic**, choose how many **Turns**, and choose **Start the moot**.
@@ -58,7 +60,9 @@ Which forest you use matters:
 | The forest's dev server on your computer (`http://localhost:5173`) | works | works |
 | The published forest | works after you allow access to your local network when Chrome asks | does not work: Safari will not let a secure page reach your computer |
 
-The worker's address is set in [Settings](settings.md#live-moots).
+The worker's address is set in [Settings](settings.md#live-moots). In the app
+it is the address in the app's Settings, under **Worker**, and the worker must
+also allow the origin `kp-forest://forest` in `GUTENKG_CORS_ORIGINS`.
 
 From a phone or iPad on your network, open the dev server as
 `http://<your-mac>.local:5173` (see [Book text](../BOOK_TEXT.md)) and set the

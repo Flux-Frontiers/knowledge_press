@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { host } from "./host";
 import { canLocate, locate } from "./location";
 import { SHOWERS, showerZhr } from "./meteors";
 import { planetPositions } from "./planets";
@@ -120,8 +121,10 @@ export function NightSky() {
               ))
               : "No major shower is active; a few sporadic meteors an hour still fall."}{" "}
             Coming up: {night.coming.map(({ s, days }) => `the ${s.name}, peaking ${date(night.now + days * DAY)}`).join("; ")}.
-            Set the clock to Night or Live to watch; real rates are slow, so add <code>?meteors=10</code> to the
-            address for ten times as many, or <code>?meteors=geminids:20</code> to see a shower at its peak.
+            Set the clock to Night or Live to watch; real rates are slow
+            {/* The app has no address bar. */}
+            {host.available ? "." : <>, so add <code>?meteors=10</code> to the
+            address for ten times as many, or <code>?meteors=geminids:20</code> to see a shower at its peak.</>}
           </dd>
         </div>
         <div>

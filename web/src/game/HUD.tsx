@@ -134,7 +134,7 @@ export function HUD({ forest }: { forest: Forest }) {
               type="button"
               onClick={() => { toggleCleanView(); (document.activeElement as HTMLElement | null)?.blur(); }}
               className={"size-11 place-items-center rounded-md border border-border bg-surface " + (clean ? "grid" : "hidden sm:grid")}
-              aria-label={clean ? "Show the buttons again" : "Clean view: hide the buttons, keep the map"}
+              aria-label={clean ? "Show the buttons again" : "Clean view: hide the buttons and the map"}
               title={clean ? "Show the buttons" : "Clean view"}
             >
               {clean ? <Eye className="size-4" strokeWidth={1.75} /> : <EyeOff className="size-4" strokeWidth={1.75} />}
@@ -256,7 +256,7 @@ export function HUD({ forest }: { forest: Forest }) {
           </div>
 
           {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it. */}
-          <div className="pointer-events-auto w-28 sm:w-40">
+          {clean ? null : <div className="pointer-events-auto w-28 sm:w-40">
             <Minimap forest={forest} x={x} z={z} yaw={yaw} pins={query.trim() ? results : []} picked={searchPick} />
             {selected ? (
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
@@ -274,7 +274,7 @@ export function HUD({ forest }: { forest: Forest }) {
             ) : (
               <p className="mt-1 text-xs text-faint">Tap a grove for its books</p>
             )}
-          </div>
+          </div>}
         </div>
       </header>
 

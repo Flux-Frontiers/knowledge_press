@@ -106,6 +106,7 @@ export function ForestApp() {
     if (!forest) return;
     const off = host.on((command) => {
       const st = useGame.getState();
+      if (command.kind === "worker") { st.setHostWorker(command.url); return; }
       const slug = command.kind === "goto" ? command.slug : null;
       const tree = slug ? treeBySlug(slug, forest.trees) : undefined;
       if (slug && !tree) return;

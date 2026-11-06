@@ -543,6 +543,8 @@ public final class AppModel {
             ForestHost.log("pressed: \(slug)")
         case .ready:
             ForestHost.log("ready")
+        case .resetSettings:
+            workerURLString = ""
         }
     }
 
