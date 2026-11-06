@@ -134,9 +134,9 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 iOS submitted 2026-11-05 and approved 2026-11-06 (submission
 `b571e655-428a-4cdc-bd8b-cbd7fb810c2f`). The Forest section of the
-description went in with it. It is later than 1.33.0, so once it is live on
-the iOS page the other Forest items in this file apply there: the
-promotional text, the screenshot set and the featuring nomination.
+description and the eight-shot screenshot set went in with it. It is later
+than 1.33.0, so once it is live on the iOS page the remaining Forest items in
+this file apply there: the promotional text and the featuring nomination.
 
 ### 1.32.0
 
@@ -176,7 +176,8 @@ the first three can appear in search results, so they carry the pitch. Every
 asset must suit a 4+ audience even though the app is rated 13+. No prices,
 URLs, award claims, Project Gutenberg logo, or other platforms' logos.
 
-The set below is for the first submitted version after 1.33.0: slot 06 shows
+The set below went in with iOS 1.34.1, the first version submitted after
+1.33.0: slot 06 shows
 title search in Browse, and slot 03's card shows Ask about this book with
 the book-only scope, both of which came after 1.33.0. All shots use dark
 mode, the Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a
