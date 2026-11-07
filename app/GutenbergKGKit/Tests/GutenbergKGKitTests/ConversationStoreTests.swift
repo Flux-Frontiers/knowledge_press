@@ -56,6 +56,7 @@ struct ConversationStoreTests {
         try withScratchStore { store in
             var first = completedTurn()
             first.imageFile = "images/\(UUID().uuidString).png"
+            first.imageRenderMs = 12_345
             var second = ChatTurn(question: "and Purgatory?", corpus: "all", engine: .onDevice)
             second.retrieval = RetrievalResult(hits: [hit()], kgsQueried: 1, searchMs: 9)
             second.synthesisFailure = .cancelled
@@ -76,6 +77,8 @@ struct ConversationStoreTests {
             #expect(loaded.turns[0].metrics?.passagesDropped == 20)
             #expect(loaded.turns[0].engine == .onDevice)
             #expect(loaded.turns[0].imageFile == first.imageFile)
+            #expect(loaded.turns[0].imageRenderMs == 12_345)
+            #expect(loaded.turns[1].imageRenderMs == nil)
             #expect(loaded.turns[1].synthesisFailure == .cancelled)
             // Ids survive, so a render started before a reload still lands on
             // the turn it belongs to.

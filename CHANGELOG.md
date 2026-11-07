@@ -13,6 +13,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Illustrations show their render time**, under the picture, as answers show
+  their synthesis time.
 - **Live moots are kept.** A moot that finishes is saved on the device under
   **Your moots**, plays back with no worker, and can be deleted. One closed
   early is not saved.
@@ -40,6 +42,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Share as PDF shows that it is working.** On iPhone and iPad a "Preparing
+  PDF..." indicator shows during the render, and the share sheet opens once the
+  file is ready, in place of a half-drawn sheet.
 - **The app's About page no longer offers `?meteors=` links**, since the app
   has no address bar.
 - **The drive stick and buttons no longer sit on top of the reader** or an
