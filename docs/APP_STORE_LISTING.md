@@ -5,7 +5,8 @@ in one place. Character limits are Apple's.
 
 Store page: <https://apps.apple.com/us/app/the-knowledge-press/id6812116080>
 (Apple ID `6812116080`). Both apps are live: the Mac since 2026-10-28, the
-iPhone and iPad app since iOS 1.30.0 was released on 2026-11-02. They are one
+iPhone and iPad app since iOS 1.30.0 was released on 2026-11-02. iOS 1.34.1,
+which carries the Forest, was approved on 2026-11-06. They are one
 Universal Purchase on the same record, so the same link serves both;
 `?mt=12` opens the Mac tab.
 
@@ -105,10 +106,11 @@ The Knowledge Press is not affiliated with Project Gutenberg. The texts are
 public domain; Project Gutenberg and the Internet Archive are acknowledged
 as their sources.
 
-### Next: the Forest section (for the first version after 1.33.0)
+### The Forest section (in the description since iOS 1.34.1; Mac to follow)
 
-The description is per version. Insert this section after READ, NOT JUST
-SEARCH in the first submitted version after 1.33.0. It needs that version:
+The description is per version. This section went in after READ, NOT JUST
+SEARCH in iOS 1.34.1, the first version submitted after 1.33.0, and stays in
+later versions. It needs that version:
 in 1.33.0, Ask about this book scopes the chat to the book's genre, and the
 book-only scope came after it (CHANGELOG, Unreleased). The same text serves
 the Mac.
@@ -127,6 +129,19 @@ limit.
 classics,books,library,philosophy,literature,offline,reader,search,shakespeare,plato,diaries,homer
 
 ## What's New (per version)
+
+### 1.34.1
+
+iOS submitted 2026-11-05 and approved 2026-11-06 (submission
+`b571e655-428a-4cdc-bd8b-cbd7fb810c2f`). The Forest section of the
+description and the eight-shot screenshot set went in with it. It is later
+than 1.33.0, so once it is live on the iOS page the remaining Forest items in
+this file apply there: the promotional text and the featuring nomination.
+
+The Mac has no version with the Forest submitted yet: as of 2026-11-07 the
+earlier Mac submission is still in review. The next Mac version needs the
+same Forest description section and the Mac screenshot set; the Mac
+promotional text waits until it is live.
 
 ### 1.32.0
 
@@ -166,9 +181,9 @@ the first three can appear in search results, so they carry the pitch. Every
 asset must suit a 4+ audience even though the app is rated 13+. No prices,
 URLs, award claims, Project Gutenberg logo, or other platforms' logos.
 
-The set below is for the first submitted version after 1.33.0: slot 06 shows
-title search in Browse, and slot 03's card shows Ask about this book with
-the book-only scope, both of which came after 1.33.0. All shots use dark
+The set below went in with iOS 1.34.1, the first version submitted after
+1.33.0: slot 06 shows title search in Browse, and slot 03's card shows Ask
+about this book with the book-only scope, both of which came after 1.33.0. All shots use dark
 mode, the Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a
 set. iPad shots are landscape (rotate the Simulator with Cmd-Left
 before capturing); iPhone shots are portrait.
