@@ -66,11 +66,10 @@ per-machine artifacts, not something a commit can carry for you.
 - [x] Entitlement declared in `app/ios/project.yml`, ready for a signed build
 - [x] Failure now explains itself in the chat turn instead of showing
       Apple's opaque boilerplate
-- [x] Apple Developer account active (renewal submitted 2026-09-02; portal
-      lagged the order confirmation by a few hours, as expected — resolved).
-      A **Developer ID Application** certificate is now in the login keychain.
-      Note what that is and is not: it signs a Mac app for
-      distribution outside the App Store, it does not sign iOS device builds,
+- [x] Apple Developer account active. A **Developer ID Application**
+      certificate is now in the login keychain. Note what that is and is
+      not: it signs a Mac app for distribution outside the App Store, it
+      does not sign iOS device builds,
       and it carries no restricted entitlement, so it moves nothing below.
 - [x] App ID registered in Certificates, Identifiers & Profiles —
       `com.fluxfrontiers.knowledgepress`, explicit, no capabilities enabled
@@ -84,16 +83,14 @@ per-machine artifacts, not something a commit can carry for you.
       ```sh
       security find-identity -v -p codesigning
       ```
-- [x] Enrolled in the App Store Small Business Program — submitted
-      2026-09-02, **approved 2026-09-14**.
 - [x] App record created in App Store Connect — "The Knowledge Press",
-      iOS + macOS (Universal Purchase), SKU `com.fluxfrontiers.knowledgepress`,
-      Full Access. The SKU and the platform set are permanent; the display
-      name is not, and is the one field that may still be edited.
+      iOS + macOS (Universal Purchase). The SKU and the platform set are
+      permanent; the display name is not, and is the one field that may
+      still be edited.
 - [x] PCC entitlement requested via Apple's [direct
       form](https://developer.apple.com/contact/request/private-cloud-compute/)
-      — unblocked by the SBP approval above and submitted the same day,
-      2026-09-14.
+      — here it was unblocked only once the account was in the App Store
+      Small Business Program.
 - [x] Capability granted on the App ID in Certificates, Identifiers & Profiles
       — **granted 2026-09-14**, same day as the request. The checkbox does
       not appear under the main Capabilities list where you would look for
@@ -101,9 +98,9 @@ per-machine artifacts, not something a commit can carry for you.
       save that existing provisioning profiles are now invalid. Believe that
       warning — see below.
 - [x] Signed `app/ios` build run on real iOS 27 hardware — **2026-09-14,
-      and Private Cloud Compute answers.** Installed and launched on
-      EgsBrainPhone (iPhone 17 Pro) and Fermi (iPad mini, A17 Pro). This was
-      the only way to get the answer; `swift run` never could.
+      and Private Cloud Compute answers.** Installed and launched on an
+      iPhone 17 Pro and an iPad mini (A17 Pro). This was the only way to
+      get the answer; `swift run` never could.
 
 ### What the entitlement cost, in wasted builds
 
@@ -993,33 +990,6 @@ Verified 2026-09-27 up to the upload: archive, then export to a 313 MB
 network.client under a Cloud Managed Apple Distribution certificate. The
 floor is macOS 26 (`LSMinimumSystemVersion`), and `LSApplicationCategoryType`
 is `public.app-category.books`, which Mac uploads require.
-
-### First submission
-
-Status as of 2026-11-02: **both apps are approved and live**; iOS 1.30.0 was
-released on 2026-11-02. Still open: a clean install of the iPhone store
-build -- the only way to prove it finds its bundled corpus. The Mac build
-has passed that check, installed from the Mac App Store on 2026-10-30.
-
-- [x] Answers verified on the phone with the network off -- section 6's
-      item, and the claim the whole product rests on
-- [x] Screenshots, description, keywords, support URL, age rating in App Store
-      Connect -- App Store Connect blocks a submission without them
-- [x] A privacy policy URL, which App Store Connect requires even when the
-      privacy manifest declares no collection
-- [x] iPhone app approved -- 1.30.0 approved and released 2026-11-02
-- [ ] A clean install of the iPhone store build, from TestFlight or, once
-      approved, the App Store, on a device that has never had a development
-      build -- not yet done. The only way to prove the bundled corpus is found
-- [x] macOS added as a platform on the App Store Connect record, Mac
-      screenshots, then a first `make mac-upload` -- the Mac app was
-      submitted and **approved for distribution 2026-10-28**. Apple allows up
-      to 24 hours before it appears on the Mac App Store, and only once the
-      paid-apps agreement in Agreements, Tax, and Banking is in effect.
-- [x] A clean install of the Mac store build -- done 2026-10-30 straight
-      from the Mac App Store, which proves more than TestFlight would: the
-      shipped build, on a clean install, finds its bundled corpus and
-      answers. App Review alone would not have shown that.
 
 ## 9. Troubleshooting
 
