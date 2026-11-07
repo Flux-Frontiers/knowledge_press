@@ -55,11 +55,6 @@ export function PauseOverlay() {
         <label className="grid gap-2">Steering response · {prefs.sensitivity.toFixed(1)}×
           <input type="range" min="0.5" max="1.5" step="0.1" value={prefs.sensitivity} onChange={(e) => setPreferences({ sensitivity: Number(e.target.value) })} />
         </label>
-        <label className="flex items-center justify-between gap-4">Camera · C
-          <select value={prefs.camera} onChange={(e) => setPreferences({ camera: e.target.value as typeof prefs.camera })} className="rounded-md border border-border bg-bg p-2">
-            <option value="follow">Behind the cart</option><option value="high">High view</option><option value="cart">In the cart</option><option value="god">God's eye · the whole forest</option>
-          </select>
-        </label>
         <label className="flex items-center justify-between gap-4">Wind & gentle cart motion
           <input type="checkbox" checked={prefs.motion} onChange={(e) => setPreferences({ motion: e.target.checked })} />
         </label>
