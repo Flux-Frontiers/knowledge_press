@@ -48,6 +48,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **A follow-up question stays in the conversation's scope.** After a suggested
+  question or Ask about this book, a follow-up searched whatever the picker had
+  been set to before, and a reopened conversation did too. A conversation now
+  keeps its scope, and a new one returns to the scope you chose in the picker.
 - **Share as PDF shows that it is working.** On iPhone and iPad a "Preparing
   PDF..." indicator shows during the render, and the share sheet opens once the
   file is ready, in place of a half-drawn sheet.

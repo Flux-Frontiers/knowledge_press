@@ -220,6 +220,19 @@ public final class AppModel {
 
     private var storedCorpus: String = AppModel.initialCorpus()
 
+    /// Search this conversation in `scope`, without changing the saved lens:
+    /// follow-up questions stay in it, and the next conversation does not.
+    ///
+    /// :param scope: A genre, or a one-book `<genre>/<book>` key.
+    private func scopeConversation(to scope: String) {
+        storedCorpus = scope
+    }
+
+    /// Back to the reader's saved lens, when a conversation's own scope ends.
+    private func restoreSavedScope() {
+        storedCorpus = AppModel.initialCorpus()
+    }
+
     static let corpusKey = "corpus"
 
     static func initialCorpus() -> String {
@@ -563,7 +576,7 @@ public final class AppModel {
     func askAbout(tree slug: String) {
         guard let location = forest.server?.catalog.location(of: slug) else { return }
         newConversation()
-        corpus = "\(location.genre)/\(location.book)"
+        scopeConversation(to: "\(location.genre)/\(location.book)")
         chatDraft = "In \(location.book), "
         sectionRequest = SectionRequest(section: .chat)
     }
@@ -640,6 +653,7 @@ public final class AppModel {
     /// A no-op on an empty buffer, so tapping it twice cannot produce two
     /// empty conversations -- or any at all.
     public func newConversation() {
+        restoreSavedScope()
         guard !turns.isEmpty else { return }
         cancel()
         persistActiveConversation()
@@ -663,6 +677,12 @@ public final class AppModel {
             guard let self, let loaded else { return }
             self.activeConversation = loaded
             self.turns = loaded.turns
+            // A follow-up continues in the scope the conversation left off in.
+            if let scope = loaded.turns.last?.corpus {
+                self.scopeConversation(to: scope)
+            } else {
+                self.restoreSavedScope()
+            }
         }
     }
 
@@ -673,6 +693,7 @@ public final class AppModel {
             cancel()
             turns.removeAll()
             activeConversation = nil
+            restoreSavedScope()
         }
         conversations.removeAll { $0.id == id }
         pendingPersist = Task { [weak self] in
@@ -695,6 +716,7 @@ public final class AppModel {
         } else {
             cancel()
             turns.removeAll()
+            restoreSavedScope()
         }
     }
 
@@ -1054,6 +1076,8 @@ public final class AppModel {
         guard !text.isEmpty, !isQuerying else { return }
 
         let scope = corpusOverride ?? corpus
+        // A suggested question starts its conversation in its own scope.
+        if turns.isEmpty, corpusOverride != nil { scopeConversation(to: scope) }
         let turn = ChatTurn(question: text, corpus: scope, engine: engine)
         turns.append(turn)
         isQuerying = true
