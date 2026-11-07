@@ -66,11 +66,10 @@ per-machine artifacts, not something a commit can carry for you.
 - [x] Entitlement declared in `app/ios/project.yml`, ready for a signed build
 - [x] Failure now explains itself in the chat turn instead of showing
       Apple's opaque boilerplate
-- [x] Apple Developer account active (renewal submitted 2026-09-02; portal
-      lagged the order confirmation by a few hours, as expected — resolved).
-      A **Developer ID Application** certificate is now in the login keychain.
-      Note what that is and is not: it signs a Mac app for
-      distribution outside the App Store, it does not sign iOS device builds,
+- [x] Apple Developer account active. A **Developer ID Application**
+      certificate is now in the login keychain. Note what that is and is
+      not: it signs a Mac app for distribution outside the App Store, it
+      does not sign iOS device builds,
       and it carries no restricted entitlement, so it moves nothing below.
 - [x] App ID registered in Certificates, Identifiers & Profiles —
       `com.fluxfrontiers.knowledgepress`, explicit, no capabilities enabled
@@ -84,16 +83,14 @@ per-machine artifacts, not something a commit can carry for you.
       ```sh
       security find-identity -v -p codesigning
       ```
-- [x] Enrolled in the App Store Small Business Program — submitted
-      2026-09-02, **approved 2026-09-14**.
 - [x] App record created in App Store Connect — "The Knowledge Press",
-      iOS + macOS (Universal Purchase), SKU `com.fluxfrontiers.knowledgepress`,
-      Full Access. The SKU and the platform set are permanent; the display
-      name is not, and is the one field that may still be edited.
+      iOS + macOS (Universal Purchase). The SKU and the platform set are
+      permanent; the display name is not, and is the one field that may
+      still be edited.
 - [x] PCC entitlement requested via Apple's [direct
       form](https://developer.apple.com/contact/request/private-cloud-compute/)
-      — unblocked by the SBP approval above and submitted the same day,
-      2026-09-14.
+      — here it was unblocked only once the account was in the App Store
+      Small Business Program.
 - [x] Capability granted on the App ID in Certificates, Identifiers & Profiles
       — **granted 2026-09-14**, same day as the request. The checkbox does
       not appear under the main Capabilities list where you would look for
@@ -101,9 +98,9 @@ per-machine artifacts, not something a commit can carry for you.
       save that existing provisioning profiles are now invalid. Believe that
       warning — see below.
 - [x] Signed `app/ios` build run on real iOS 27 hardware — **2026-09-14,
-      and Private Cloud Compute answers.** Installed and launched on
-      EgsBrainPhone (iPhone 17 Pro) and Fermi (iPad mini, A17 Pro). This was
-      the only way to get the answer; `swift run` never could.
+      and Private Cloud Compute answers.** Installed and launched on an
+      iPhone 17 Pro and an iPad mini (A17 Pro). This was the only way to
+      get the answer; `swift run` never could.
 
 ### What the entitlement cost, in wasted builds
 
