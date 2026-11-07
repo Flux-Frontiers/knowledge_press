@@ -88,6 +88,26 @@ public struct ContextBudgeter: Sendable {
         /// source dominating the prompt.
         public static let onDevice = Budget(maxPassages: 10)
 
+        /// The on-device default sized to the window the OS reports.
+        ///
+        /// `SystemLanguageModel.contextSize` is 4,096 on iOS 26 and 8,192 on
+        /// the newer chips under iOS 27. Passage length grows with the
+        /// window and the passage count does not: ten passages at 500
+        /// characters spend under half of 4,096, so a wider window is better
+        /// used on longer excerpts than on more of them, and
+        /// `maxPassagesPerSource` keeps the extra text from being one book
+        /// repeated.
+        ///
+        /// :param contextWindow: The model's reported context size.
+        public static func onDevice(contextWindow: Int) -> Budget {
+            var budget = onDevice
+            guard contextWindow > budget.contextWindow else { return budget }
+            budget.maxCharactersPerPassage =
+                budget.maxCharactersPerPassage * contextWindow / budget.contextWindow
+            budget.contextWindow = contextWindow
+            return budget
+        }
+
         /// Parity with the worker's server-class synthesis.
         public static let worker = Budget(
             contextWindow: 32_768,

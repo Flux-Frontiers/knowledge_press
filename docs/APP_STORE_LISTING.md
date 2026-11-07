@@ -4,10 +4,9 @@ The text in App Store Connect, kept here so the next release can update it
 in one place. Character limits are Apple's.
 
 Store page: <https://apps.apple.com/us/app/the-knowledge-press/id6812116080>
-(Apple ID `6812116080`). Both apps are live: the Mac since 2026-10-28, the
-iPhone and iPad app since iOS 1.30.0 was released on 2026-11-02. They are one
-Universal Purchase on the same record, so the same link serves both;
-`?mt=12` opens the Mac tab.
+(Apple ID `6812116080`). The iPhone, iPad and Mac apps are one Universal
+Purchase on the same record, so the same link serves both; `?mt=12` opens the
+Mac tab.
 
 ## Name (30)
 
@@ -121,9 +120,6 @@ Also new:
 
 ### 1.32.0
 
-Submitted 2026-11-02 for both platforms, build 826. iOS is set to release on
-approval.
-
 iOS:
 
 ```text
@@ -157,14 +153,13 @@ the first three can appear in search results, so they carry the pitch. Every
 asset must suit a 4+ audience even though the app is rated 13+. No prices,
 URLs, award claims, Project Gutenberg logo, or other platforms' logos.
 
-The set below is for the first submitted version after 1.33.0: slot 06 shows
-title search in Browse, and slot 03's card shows Ask about this book with
-the book-only scope, both of which came after 1.33.0. All shots use dark
-mode, the Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a
-set. iPad shots are landscape (rotate the Simulator with Cmd-Left
-before capturing); iPhone shots are portrait.
-Captions are in `scripts/store_captions.tsv`, one per slot, the same on every
-device.
+The set below is for versions after 1.33.0: slot 06 shows title search in
+Browse, and slot 03's card shows Ask about this book with the book-only
+scope, both of which came after 1.33.0. All shots use dark mode, the
+Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a set. iPad
+shots are landscape (rotate the Simulator with Cmd-Left before capturing);
+iPhone shots are portrait. Captions are in `scripts/store_captions.tsv`, one
+per slot, the same on every device.
 
 | Slot | Screen | Caption | Capture on |
 |---|---|---|---|
@@ -202,14 +197,6 @@ exchange does not read well as a still.
    alpha, a slot has no caption, or a device has more than 10.
 5. Upload in slot order under each device size in App Store Connect.
 
-## Featuring nomination
-
-Apple considers nominated apps for editorial featuring and asks for several
-weeks of lead time. When the first version after 1.33.0 is submitted,
-nominate it in App Store Connect (Apple's help page: "Nominate your app for
-featuring") as a new feature: the Forest, a 3-D forest of the library that works offline, with
-Ask about this book. Done only in App Store Connect; nothing in the repo.
-
 ## Product page header
 
 iOS 27 shows a creative asset at the top of the product page. App Store
@@ -229,106 +216,25 @@ The Search Results asset is unset, so screenshots appear there.
 - Privacy policy: https://flux-frontiers.github.io/knowledge_press/privacy.html
 - Marketing (optional): https://github.com/Flux-Frontiers/knowledge_press
 
-## Review notes (App Review Information)
-
-App Review rejected build 725 (1.28.0) and asked for a screen recording and
-written answers, and for the answers to stay in the Notes field for future
-submissions. The block below is what went into Notes and the reply on
-2026-10-05 (about 3,500 characters; the field holds 4,000). Paste it
-unchanged unless the app has changed, and keep item 3 in step with the build
-being submitted.
-
-A reply in App Review messages does not resubmit a rejected build. On
-2026-10-06 the build went back for review this way: **Edit** on the rejected
-item, Notes replaced with the block below under a one-line lead, the
-recording attached under Attachment, **Save**, **Update Review**, then
-**Resubmit to App Review**. The lead used then:
-
-```text
-Resubmitted after the 2.1.0 rejection of October 1. The requested screen recording and answers are below and in our App Review reply of October 5; the recording is also under Attachment.
-```
-
-```text
-1. Screen recording
-Attached: recorded on a physical iPhone running the latest iOS, starting from launch and showing the typical flow. The app has no account registration, login or account deletion, no user-generated content shared with other users, and no paid content or in-app purchases, so none of those flows exist to show. The recording predates the Forest tab, described in item 3.
-
-2. Purpose and audience
-The Knowledge Press is a library of 261 public-domain books (philosophy, literature, history, science, drama, sacred texts) and four historical diaries (Samuel Pepys, John Evelyn, and Boswell's Hebrides journal), installed with the app. Readers ask a question in plain language; the app searches the whole library by meaning and by exact wording, then writes an answer only from the passages it found, and shows every source passage. It is for students, teachers, and general readers who want to explore the classics and check what the books actually say. It works offline: the books, the search index, and the language model are all on the device.
-
-3. Setup and main features
-No login, account, or sample files are needed. The library is bundled in the app; nothing is downloaded.
-After a 3-second title screen, the Chat tab offers sample questions; tap one to see an answer with its sources.
-- Ask: type a question on the main screen, for example "What does Marcus Aurelius say about anger?". The answer appears with its source passages; tap a passage to read it in full. This works in airplane mode.
-- Browse: open Browse to see the library by genre, search by author or title, open any book, and read it chapter by chapter. The diaries open by date.
-- Forest: open the Forest tab to see each book as a tree in a 3-D forest. Drive with the on-screen stick, open a tree's card, read the book, or tap Ask about this book. It works offline.
-- Settings: choose the answer engine (On-device is the default), and tune how many passages are read.
-- Siri and Shortcuts: say "Ask The Knowledge Press", then say the question when Siri asks. The app opens and answers. It also runs from the Shortcuts app.
-Written answers need Apple Intelligence enabled on the device. Without it, the app still searches, browses, and reads, and says why answers are off.
-
-4. External services
-- Apple Foundation Models, on device (default answer engine). No data leaves the device.
-- Apple Private Cloud Compute (optional, chosen by the user in Settings). The question and the retrieved passages go to Apple under Apple's Private Cloud Compute commitments, not to us.
-- Worker (optional, off unless the user enters a server address). Sends the question to a server the user runs themselves. We operate no server, and it is not needed for review.
-- Siri and Shortcuts through App Intents.
-There are no accounts, analytics, advertising, crash reporting, third-party SDKs, or payment processors. The search embedder (BAAI bge-small-en-v1.5, MIT license) runs on device with Core ML.
-
-5. Regional differences
-The app's features and content are the same in every region. The only difference is Apple's: written answers use Apple Intelligence, which is available only in the regions and languages Apple supports. Where it is unavailable, the app still searches, browses, and reads the full library. The books are in English.
-
-6. Third-party material and regulation
-The app does not operate in a regulated industry. All 261 books and four diaries are public domain in the United States. The texts come from Project Gutenberg and the Internet Archive, which the app acknowledges as sources. Project Gutenberg's header and license text are removed from each book, as its license permits for public-domain works. The app is not affiliated with Project Gutenberg and does not use its trademark in the app's name or branding.
-```
-
-### The screen recording
-
-Apple wants it on a physical device on the latest OS, starting at launch. The
-2026-10-05 recording ran 2:15 on an iPhone in Airplane Mode:
-
-1. Home Screen, Airplane Mode on in Control Center, launch the app.
-2. Chat: ask "What does Marcus Aurelius say about anger?", let it finish,
-   open a source passage.
-3. Browse: a genre, a book, **Next** once; Pepys's diary by date.
-4. Settings: the engine picker on On-device, then **Delete all
-   conversations** to show the user can delete their data.
-
-Control Center records without the microphone unless it is turned on
-(long-press Screen Recording), which is why Siri is not in that recording.
-The 1.34.1 submission attached the same recording, trimmed to 2:33 to open on
-the Home Screen. Trim the ends in Photos with **Edit**, then attach the `.mov` to the reply
-and under App Review Information > Attachment.
-
 ## Availability
 
-All storefronts except China mainland. App Review held 1.28.0 (725) on
-2026-10-16 under Guideline 2.1: an app with book content offered in China
-mainland needs an Internet Publishing License from the National Press and
-Publication Administration in the developer's name, which we do not have.
-China mainland was removed under Distribution > Pricing and Availability >
-App Availability, and the same build was resubmitted. The setting belongs to
-the app, so later versions keep it. Hong Kong, Macau and Taiwan are separate
-storefronts and stay in.
+All storefronts except China mainland. The setting belongs to the app, so
+later versions keep it. Hong Kong, Macau and Taiwan are separate storefronts
+and stay in.
+
+App Review notes and the submission history are kept outside this
+repository.
 
 ## The Mac version
 
 Same record as iOS (Universal Purchase): name, subtitle, category, age
 rating, privacy, availability and price are shared. The macOS version page
-has its own text; the first one, 1.30.0 (790), was submitted 2026-10-18 with
-the iOS promotional text, description, keywords and URLs above, copyright
-"2026 Eric G. Suchanek, PhD", and the review notes above changed in four
-places:
-
-- A one-line lead: this is the Mac version of the same app and record, and
-  the answers given for iOS apply unchanged except where noted.
-- Item 1: the recording was made on an iPhone; the Mac app has the same
-  features and flow.
-- Items 2-4: "on the Mac" for "on the device", "click" for "tap", and
-  "with networking off" for "in airplane mode". The 3-second title-screen
-  line is dropped.
-- Item 5: the app is not offered in China mainland.
+has its own text: the iOS promotional text, description, keywords and URLs
+above, with "on your Mac" for "on your device".
 
 The blocks above count the 1.32.0 corpus: 261 books plus four diaries, 265
-works in all. The description and review notes are per version, so the
-count changes only when a new version's text is edited.
+works in all. The description is per version, so the count changes only when
+a new version's text is edited.
 
 ### Mac screenshots
 

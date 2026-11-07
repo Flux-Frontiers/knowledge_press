@@ -21,6 +21,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **On-device answers use the window the device has.** Devices that report an
+  8,192-token window (the newer chips under iOS 27 and macOS 27) get passages
+  twice as long; others are unchanged. The turn's provenance names the window.
+- **The on-device model stays warm between questions.** The session readied
+  when the chat opens now answers the next question instead of being
+  discarded, and a fresh one is readied after each answer.
 - **The forest draws faster.** Fir, pine and oak leaves use far fewer triangles,
   and on touch screens leaves no longer receive shadows.
 - **Shadows and undergrowth are separate settings.** Shadows are off by default,
