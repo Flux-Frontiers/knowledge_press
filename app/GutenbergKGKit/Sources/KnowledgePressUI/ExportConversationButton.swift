@@ -73,7 +73,7 @@ struct ExportedConversationPDF: Transferable {
     }
 
     @MainActor
-    private func render() -> Data {
+    fileprivate func render() -> Data {
         ConversationPDF.render(conversation) { turn in
             if let b64 = inlineImages[turn.id], let data = Data(base64Encoded: b64) {
                 return data
@@ -83,11 +83,44 @@ struct ExportedConversationPDF: Transferable {
     }
 }
 
+#if os(iOS)
+    /// Open the system share sheet on a finished file.
+    ///
+    /// `ShareLink` opens its sheet first and asks for the file after, so a long
+    /// PDF render leaves the sheet half drawn. Presented from UIKit, not with
+    /// SwiftUI's `.sheet`: this button lives in a toolbar and swaps its content
+    /// for the indicator, and a `.sheet` there closed as soon as it opened.
+    ///
+    /// :param url: The file to share.
+    /// :returns: False when there is no window to present from.
+    @MainActor
+    private func presentShareSheet(_ url: URL) -> Bool {
+        let scene = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first { $0.activationState == .foregroundActive }
+        guard var top = scene?.keyWindow?.rootViewController else { return false }
+        while let presented = top.presentedViewController { top = presented }
+        let sheet = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        // On iPad it is a popover, which needs an anchor: under the toolbar's trailing end.
+        if let popover = sheet.popoverPresentationController {
+            popover.sourceView = top.view
+            popover.sourceRect = CGRect(
+                x: top.view.bounds.maxX - 60, y: top.view.safeAreaInsets.top, width: 1, height: 1)
+            popover.permittedArrowDirections = .up
+        }
+        top.present(sheet, animated: true)
+        return true
+    }
+#endif
+
 struct ExportConversationButton: View {
     @Environment(AppModel.self) private var model
     #if os(macOS)
         @State private var markdownExport: ExportedConversation?
         @State private var pdfExport: ExportedConversationPDF?
+    #else
+        @State private var preparingPDF = false
+        @State private var pdfFailure: String?
     #endif
 
     var body: some View {
@@ -95,10 +128,49 @@ struct ExportConversationButton: View {
             #if os(macOS)
                 saveMenu(conversation)
             #else
-                shareMenu(conversation)
+                Group {
+                    if preparingPDF {
+                        HStack(spacing: 6) {
+                            ProgressView()
+                            Text("Preparing PDF...").font(.caption)
+                        }
+                        .accessibilityElement(children: .combine)
+                    } else {
+                        shareMenu(conversation)
+                    }
+                }
+                .alert(
+                    "The PDF could not be made",
+                    isPresented: Binding(
+                        get: { pdfFailure != nil },
+                        set: { if !$0 { pdfFailure = nil } })
+                ) {
+                    Button("OK", role: .cancel) {}
+                } message: {
+                    Text(pdfFailure ?? "")
+                }
             #endif
         }
     }
+
+    #if os(iOS)
+        /// Render the PDF, showing that it is under way, then open the share sheet.
+        private func sharePDF(_ export: ExportedConversationPDF) {
+            preparingPDF = true
+            Task {
+                // Let the menu finish closing, since a sheet presented on top of it goes
+                // with it, and let the indicator draw, since the render holds the main actor.
+                try? await Task.sleep(for: .milliseconds(400))
+                do {
+                    let url = try temporaryFile(export.render(), named: export.filename)
+                    if !presentShareSheet(url) { pdfFailure = "No window to share from." }
+                } catch {
+                    pdfFailure = error.localizedDescription
+                }
+                preparingPDF = false
+            }
+        }
+    #endif
 
     #if os(macOS)
         /// The Mac share menu offers only Copy for these files, so the Mac
@@ -155,16 +227,18 @@ struct ExportConversationButton: View {
         ) {
             Label("Share as Markdown", systemImage: "doc.plaintext")
         }
-        ShareLink(
-            item: ExportedConversationPDF(
-                conversation: conversation,
-                inlineImages: inlineImages,
-                imageURLs: imageURLs(conversation),
-                filename: ConversationPDF.filename(for: conversation)),
-            preview: SharePreview(conversation.title)
-        ) {
-            Label("Share as PDF (with images)", systemImage: "doc.richtext")
-        }
+        let pdf = ExportedConversationPDF(
+            conversation: conversation,
+            inlineImages: inlineImages,
+            imageURLs: imageURLs(conversation),
+            filename: ConversationPDF.filename(for: conversation))
+        #if os(iOS)
+            Button("Share as PDF (with images)", systemImage: "doc.richtext") { sharePDF(pdf) }
+        #else
+            ShareLink(item: pdf, preview: SharePreview(conversation.title)) {
+                Label("Share as PDF (with images)", systemImage: "doc.richtext")
+            }
+        #endif
     }
 
     private var inlineImages: [ChatTurn.ID: String] {

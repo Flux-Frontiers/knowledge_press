@@ -235,6 +235,11 @@ struct AssistantTurnView: View {
                         .font(.caption)
                     }
                 }
+                if let ms = turn.imageRenderMs {
+                    Text("🎨 render \(ms.formatted()) ms")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 if let error = turn.imageError {
                     Label(error, systemImage: "exclamationmark.triangle")
                         .font(.caption2)
