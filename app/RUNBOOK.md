@@ -994,33 +994,6 @@ network.client under a Cloud Managed Apple Distribution certificate. The
 floor is macOS 26 (`LSMinimumSystemVersion`), and `LSApplicationCategoryType`
 is `public.app-category.books`, which Mac uploads require.
 
-### First submission
-
-Status as of 2026-11-02: **both apps are approved and live**; iOS 1.30.0 was
-released on 2026-11-02. Still open: a clean install of the iPhone store
-build -- the only way to prove it finds its bundled corpus. The Mac build
-has passed that check, installed from the Mac App Store on 2026-10-30.
-
-- [x] Answers verified on the phone with the network off -- section 6's
-      item, and the claim the whole product rests on
-- [x] Screenshots, description, keywords, support URL, age rating in App Store
-      Connect -- App Store Connect blocks a submission without them
-- [x] A privacy policy URL, which App Store Connect requires even when the
-      privacy manifest declares no collection
-- [x] iPhone app approved -- 1.30.0 approved and released 2026-11-02
-- [ ] A clean install of the iPhone store build, from TestFlight or, once
-      approved, the App Store, on a device that has never had a development
-      build -- not yet done. The only way to prove the bundled corpus is found
-- [x] macOS added as a platform on the App Store Connect record, Mac
-      screenshots, then a first `make mac-upload` -- the Mac app was
-      submitted and **approved for distribution 2026-10-28**. Apple allows up
-      to 24 hours before it appears on the Mac App Store, and only once the
-      paid-apps agreement in Agreements, Tax, and Banking is in effect.
-- [x] A clean install of the Mac store build -- done 2026-10-30 straight
-      from the Mac App Store, which proves more than TestFlight would: the
-      shipped build, on a clean install, finds its bundled corpus and
-      answers. App Review alone would not have shown that.
-
 ## 9. Troubleshooting
 
 These are the failures I expect, in the order I think they are likely.
