@@ -92,9 +92,6 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 ### 1.34.1
 
-Submitted 2026-11-05 for iOS, build 872. The Mac follows once its 1.32.0
-clears review.
-
 iOS:
 
 ```text
