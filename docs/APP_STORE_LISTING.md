@@ -139,9 +139,9 @@ than 1.33.0, so once it is live on the iOS page the remaining Forest items in
 this file apply there: the promotional text and the featuring nomination.
 
 The Mac has no version with the Forest submitted yet: as of 2026-11-07 the
-earlier Mac submission is still in review. The next Mac version needs the same Forest description
-section and the Mac screenshot set; the Mac promotional text waits until it
-is live.
+earlier Mac submission is still in review. The next Mac version needs the
+same Forest description section and the Mac screenshot set; the Mac
+promotional text waits until it is live.
 
 ### 1.32.0
 
