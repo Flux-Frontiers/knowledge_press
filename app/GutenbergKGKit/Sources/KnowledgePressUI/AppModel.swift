@@ -397,8 +397,8 @@ public final class AppModel {
     /// Persisted as JSON, for the same reason the worker address is: a
     /// reader comparing answers at two temperatures should not find the
     /// slider back at its default after a relaunch. Applied per question --
-    /// the backend is built fresh in `synthesisBackend`, so a change here is
-    /// in force for the very next answer.
+    /// `synthesisBackend` rebuilds the backend when this changes, so a change
+    /// here is in force for the very next answer.
     var synthesisTuning: SynthesisTuning {
         get { storedSynthesisTuning }
         set {
@@ -918,12 +918,24 @@ public final class AppModel {
         return client
     }
 
-    /// Built per question rather than held, so `synthesisTuning` applies to
-    /// the next answer. `onDevice` and `privateCloud` stay as the long-lived
-    /// handles for availability, quota and prewarming.
+    /// The on-device backend built for the current `synthesisTuning`, kept
+    /// until the tuning changes: the session `prewarmOnDevice()` readies
+    /// lives on this instance, so the question has to reach the same one.
+    private var tunedOnDevice: (backend: any SynthesisBackend, tuning: SynthesisTuning)?
+
+    private var onDeviceBackend: (any SynthesisBackend)? {
+        if let cached = tunedOnDevice, cached.tuning == synthesisTuning { return cached.backend }
+        guard let backend = makeOnDeviceSynthesis(tuning: synthesisTuning) else { return nil }
+        tunedOnDevice = (backend, synthesisTuning)
+        return backend
+    }
+
+    /// Resolved per question, so `synthesisTuning` applies to the next
+    /// answer. `onDevice` and `privateCloud` stay as the long-lived handles
+    /// for availability and quota.
     private var synthesisBackend: (any SynthesisBackend)? {
         switch engine {
-        case .onDevice: return makeOnDeviceSynthesis(tuning: synthesisTuning)
+        case .onDevice: return onDeviceBackend
         case .privateCloud: return makePrivateCloudSynthesis(tuning: synthesisTuning)
         case .worker, .off: return nil
         }
@@ -1017,11 +1029,14 @@ public final class AppModel {
         }
     }
 
-    /// Load the built-in model's weights so the first answer starts promptly.
+    /// Ready the built-in model so the next answer starts promptly.
+    ///
+    /// Warms the tuned backend that will answer, not the long-lived
+    /// `onDevice` handle: the warmed session is kept on the instance.
     public func prewarmOnDevice() {
         #if canImport(FoundationModels)
             if #available(iOS 26.0, macOS 26.0, *),
-                let backend = onDevice as? OnDeviceSynthesis
+                let backend = onDeviceBackend as? OnDeviceSynthesis
             {
                 backend.prewarm()
             }

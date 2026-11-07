@@ -260,3 +260,47 @@ private let lorem = String(repeating: "conformity to universal law ", count: 200
         #expect(!SynthesisFailure.noPassages.isRecoverableRemotely)
     }
 }
+
+@Suite struct OnDeviceBudgetTests {
+
+    @Test func wideWindowLengthensPassagesNotCount() {
+        let wide = ContextBudgeter.Budget.onDevice(contextWindow: 8192)
+        #expect(wide.contextWindow == 8192)
+        #expect(wide.maxCharactersPerPassage == 1000)
+        #expect(wide.maxPassages == ContextBudgeter.Budget.onDevice.maxPassages)
+        #expect(wide.maxPassagesPerSource == ContextBudgeter.Budget.onDevice.maxPassagesPerSource)
+    }
+
+    @Test func reportedWindowNeverShrinksTheDefault() {
+        #expect(ContextBudgeter.Budget.onDevice(contextWindow: 4096) == .onDevice)
+        #expect(ContextBudgeter.Budget.onDevice(contextWindow: 2048) == .onDevice)
+    }
+}
+
+#if canImport(FoundationModels)
+    /// Runs the real on-device model where it exists (a Mac with Apple
+    /// Intelligence on); skips silently elsewhere, CI included.
+    @Suite struct OnDeviceSynthesisLiveTests {
+
+        @available(macOS 26.0, iOS 26.0, *)
+        @Test func warmedSessionAnswersAndNamesItsWindow() async throws {
+            let backend = OnDeviceSynthesis()
+            guard case .available = backend.availability else { return }
+            backend.prewarm()
+            let passage = hit(
+                id: "kant-1",
+                content: "Act only according to that maxim whereby you can at the same time will that it should become a universal law.")
+            var text = ""
+            var model = ""
+            for try await event in backend.synthesize(question: "What is the categorical imperative?", passages: [passage]) {
+                if case .completed(let answer, let metrics) = event {
+                    text = answer
+                    model = metrics.model
+                }
+            }
+            #expect(!text.isEmpty)
+            #expect(model.contains("-token window"))
+            #expect(model.contains("\(OnDeviceSynthesis.reportedContextWindow)"))
+        }
+    }
+#endif

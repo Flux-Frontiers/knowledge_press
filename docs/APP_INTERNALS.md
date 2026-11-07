@@ -166,8 +166,8 @@ launching does not freeze while the embedder loads.
                     10 hits ◄────┘
                         ▼
               ContextBudgeter ──2──► OnDeviceSynthesis
-              packs 5 into              Apple Foundation
-              4,096 tokens              Models · ~3B
+              packs 10 into             Apple Foundation
+              4,096-8,192 tokens        Models · ~3B
                                               │
      ChatView ◄────────────────────────────────┘
      3 · cumulative snapshots, many per second
@@ -227,9 +227,10 @@ open when they disagree — the failure has no other symptom.
 **Foundation Models — the answer.** Since iOS 26, Apple ships a roughly
 3-billion-parameter language model as part of the OS and any app may call it.
 No bundled weights, no per-token cost, nothing leaving the device. The price is
-a context window of about 4,096 tokens for instructions, passages, question and
-answer together — against the twelve passages the worker feeds a server-class
-model. That is what `ContextBudgeter` is for.
+a context window of 4,096 tokens for instructions, passages, question and
+answer together (8,192 on the newer chips under iOS 27 and macOS 27, which the
+model reports as `contextSize`) — against the twelve passages the worker feeds
+a server-class model. That is what `ContextBudgeter` is for.
 
 **Accelerate — the vector scan.** No neural network, just SIMD. `VectorIndex`
 memory-maps the `.vectors` sidecar and multiplies straight out of the mapping
