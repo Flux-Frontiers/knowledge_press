@@ -11,6 +11,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Live moots are kept.** A moot that finishes is saved on the device under
+  **Your moots**, plays back with no worker, and can be deleted. One closed
+  early is not saved.
+
 ### Changed
 
 - **The forest draws faster.** Fir, pine and oak leaves use far fewer triangles,
