@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -13,6 +13,7 @@ import { ReaderPanel } from "./Reader";
 import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import { host } from "./host";
+import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
@@ -73,6 +74,8 @@ export function HUD({ forest }: { forest: Forest }) {
   const clean = useGame((s) => s.cleanView);
   const toggleCleanView = useGame((s) => s.toggleCleanView);
   const silent = useGame((s) => s.preferences.silent);
+  const camera = useGame((s) => s.preferences.camera);
+  const stepCamera = () => setPreferences({ camera: nextCamera(camera) });
   const godEye = useGame((s) => s.preferences.camera === "god" && !s.flight);
   const tourStop = useGame((s) => s.tourStop);
   const touring = tourStop ? forest.groves.find((g) => g.genre === tourStop) : undefined;
@@ -159,6 +162,15 @@ export function HUD({ forest }: { forest: Forest }) {
               </button>
               <button
                 type="button"
+                onClick={() => { stepCamera(); (document.activeElement as HTMLElement | null)?.blur(); }}
+                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
+                aria-label={`Camera: ${CAMERA_NAME[camera]}. Tap for ${CAMERA_NAME[nextCamera(camera)]}`}
+                title={`Camera · ${CAMERA_NAME[camera]} · C`}
+              >
+                <Video className="size-4" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
                 onClick={() => setPreferences({ silent: !silent })}
                 className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
                 aria-label={silent ? "Silent mode on: turn pop-up cards back on" : "Turn on silent mode: no pop-up cards"}
@@ -227,7 +239,7 @@ export function HUD({ forest }: { forest: Forest }) {
                   "grid size-11 place-items-center rounded-md border sm:hidden " +
                   (menuOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
                 }
-                aria-label="More: time of day, silent mode, screenshot, clean view, moots, settings, about, exit"
+                aria-label="More: time of day, camera, silent mode, screenshot, clean view, moots, settings, about, exit"
                 aria-expanded={menuOpen}
               >
                 <Ellipsis className="size-4" strokeWidth={1.75} />
@@ -236,6 +248,7 @@ export function HUD({ forest }: { forest: Forest }) {
                 <div className="fixed inset-0 z-30 sm:hidden" onClick={() => setMenuOpen(false)} aria-hidden />
                 <ul className="absolute top-full right-0 z-40 mt-2 w-60 rounded-lg border border-border bg-surface py-1 sm:hidden">
                   <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
+                  <MenuItem icon={<Video className="size-4" strokeWidth={1.75} />} label={`Camera · ${CAMERA_NAME[camera]}`} onClick={stepCamera} />
                   <MenuItem icon={silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
                     label={silent ? "Silent · no pop-up cards" : "Pop-up cards on"} onClick={() => setPreferences({ silent: !silent })} />
                   <MenuItem icon={<Camera className="size-4" strokeWidth={1.75} />} label="Screenshot"

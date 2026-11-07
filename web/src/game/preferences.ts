@@ -44,6 +44,14 @@ export type LeafDetail = "low" | "medium" | "high" | "ultra";
  */
 export const LEAF_SCALE: Record<LeafDetail, number> = { low: 0.1, medium: 0.25, high: 0.5, ultra: 1 };
 
+/** The camera views' names, in the order the C key and the bar's button step through them. */
+export const CAMERA_NAME = { follow: "Behind the cart", high: "High view", cart: "In the cart", god: "God's eye" } as const;
+
+/** The view after this one. */
+export function nextCamera(camera: Preferences["camera"]): Preferences["camera"] {
+  return ({ follow: "high", high: "cart", cart: "god", god: "follow" } as const)[camera];
+}
+
 export function readPreferences(value?: Partial<Preferences>): Preferences {
   return {
     pace: value?.pace === "brisk" ? "brisk" : "gentle",

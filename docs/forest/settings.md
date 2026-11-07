@@ -10,7 +10,6 @@ is parked while they are open. Every setting is saved in this browser.
 | --- | --- |
 | Driving pace | **Gentle exploration** or **Brisk driving**: how fast the cart goes. |
 | Look sensitivity | How far a push on the arrows or the stick turns the view. |
-| Camera | Behind the cart, high view, in the cart, or god's eye. ++c++ steps through them. |
 | Wind and gentle cart motion | The leaves move in the wind and the cart sways. Off by default when your system asks for reduced motion. |
 
 ## Detail and performance

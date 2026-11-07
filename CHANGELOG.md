@@ -26,6 +26,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **The forest's camera view is one tap away.** A button in the top bar, or an
+  item in the phone's menu, steps through the views, in place of the row in
+  Settings. The C key still works.
+- **Delete all conversations is last in Settings.**
+- **Worker sits under Answers in Settings**, beside the engine that uses it.
 - **On-device answers use the window the device has.** Devices that report an
   8,192-token window (the newer chips under iOS 27 and macOS 27) get passages
   twice as long; others are unchanged. The turn's provenance names the window.

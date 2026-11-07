@@ -88,20 +88,13 @@ public struct SettingsView: View {
                 }
             }
 
+            workerSection
+
             synthesisSection
 
             illustrationSection
 
-            Section {
-                Button("🗑️ Delete all conversations", role: .destructive) {
-                    confirmingDelete = true
-                }
-                .disabled(model.conversations.isEmpty && model.turns.isEmpty)
-            }
-
             corpusSection
-
-            workerSection
 
             Section {
                 Button("❓ Help") { showingHelpList = true }
@@ -113,6 +106,13 @@ public struct SettingsView: View {
                     // a reader already in Settings should not have to leave it.
                     Button("ℹ️ About") { showingAbout = true }
                 #endif
+            }
+
+            Section {
+                Button("🗑️ Delete all conversations", role: .destructive) {
+                    confirmingDelete = true
+                }
+                .disabled(model.conversations.isEmpty && model.turns.isEmpty)
             }
         }
         .confirmationDialog(
