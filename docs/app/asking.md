@@ -30,11 +30,15 @@ answer is.
 The scope is remembered when you close the app. A question asked with a
 scope other than **all** shows the scope as a small tag beside it.
 
+A conversation keeps its scope. A follow-up question searches the same part of
+the library, including after you reopen the conversation. A new conversation
+returns to the scope you last chose in the picker.
+
 ## Start from a suggestion
 
 An empty chat offers five questions. Each carries a tag naming the part of the
-corpus it searches. Tapping one asks it at once, with that scope, without
-changing your own scope setting.
+corpus it searches. Tapping one asks it at once and keeps that scope for the
+conversation, without changing your own scope setting.
 
 | Tag | Question |
 | --- | --- |
