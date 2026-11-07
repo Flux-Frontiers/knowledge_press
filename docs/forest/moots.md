@@ -53,6 +53,11 @@ turn while the current one is read, so after the first the wait is usually
 short. Closing the moot ends it on the worker. If a turn fails, choose
 **Try again**.
 
+A moot that reaches its last turn is saved on this device under **Your moots**,
+and plays back with no worker or model. A moot you close early is not saved.
+Saved moots stay in this browser or app, and **Reset all settings** leaves them
+alone. To remove one, choose its trash button.
+
 Which forest you use matters:
 
 | Forest | Chrome | Safari |

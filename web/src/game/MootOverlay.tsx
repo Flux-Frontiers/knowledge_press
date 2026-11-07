@@ -1,4 +1,4 @@
-import { ChevronRight, Pause, Play, Volume2, VolumeX, X } from "lucide-react";
+import { ChevronRight, Pause, Play, Trash2, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BOOKS } from "./catalog";
 import type { Forest } from "./forest";
@@ -8,6 +8,7 @@ import { LIVE_TURNS, liveWorkerUrl, nextLiveTurn, startLiveMoot, stepAfter, stop
 import { getMoot, getMootIndex, markText, MOOT_COLORS, mootBooks, readingMs, spokenText, type Moot, type MootEntry, type MootTurn } from "./moots";
 import { canSpeak, hush, speak, speaking, unlockSpeech } from "./speech";
 import { useGame } from "./store";
+import { deleteYourMoot, listYourMoots, saveYourMoot, yourMoot, yourMootEntry } from "./yourMoots";
 
 type Load<T> = { state: "loading" } | { state: "error"; message: string } | { state: "ready"; value: T };
 
@@ -53,10 +54,16 @@ function CloseButton({ onClose, label }: { onClose: () => void; label: string })
   );
 }
 
-/** The saved moots from moots/index.json: title, date and turns; picking one plays it. */
+/** The reader's own moots, then the shipped ones from moots/index.json: title, date and turns; picking one plays it. */
 export function MootList() {
   const close = () => useGame.getState().openMoots(false);
   const [index, retry] = useLoad(getMootIndex, []);
+  const [yours, setYours] = useState(listYourMoots);
+  const remove = (id: string) => {
+    if (!window.confirm("Delete this moot from this device?")) return;
+    deleteYourMoot(id);
+    setYours(listYourMoots());
+  };
   return (
     <Frame label="moots-title" onClose={close}>
       <header className="flex items-start gap-3 border-b border-border p-4 sm:px-6">
@@ -68,6 +75,13 @@ export function MootList() {
       </header>
       <div className="min-h-0 flex-1 overflow-auto p-4 sm:px-6">
         <HoldMoot />
+        {yours.length ? (<>
+          <h3 className="mb-2 text-xs tracking-[0.2em] text-primary uppercase">Your moots</h3>
+          <ul className="mb-4 grid gap-2">
+            {yours.map((m) => <MootRow key={m.id} moot={yourMootEntry(m)} onDelete={() => remove(m.id)} />)}
+          </ul>
+          <h3 className="mb-2 text-xs tracking-[0.2em] text-primary uppercase">From the press</h3>
+        </>) : null}
         {index.state === "error" ? (
           <div className="grid gap-3 text-sm leading-relaxed text-muted">
             <p className="text-fg">The moots could not be fetched: {index.message}.</p>
@@ -153,9 +167,9 @@ function HoldMoot() {
   );
 }
 
-function MootRow({ moot }: { moot: MootEntry }) {
+function MootRow({ moot, onDelete }: { moot: MootEntry; onDelete?: () => void }) {
   return (
-    <li>
+    <li className="flex items-stretch gap-2">
       <button type="button"
         onClick={() => {
           // Speech is only allowed from a tap, and this is one; the moot speaks once it has loaded.
@@ -169,6 +183,12 @@ function MootRow({ moot }: { moot: MootEntry }) {
         </span>
         <ChevronRight className="size-4 shrink-0 text-muted" strokeWidth={1.75} />
       </button>
+      {onDelete ? (
+        <button type="button" onClick={onDelete} aria-label={`Delete ${moot.title}`} title="Delete"
+          className="grid w-11 shrink-0 place-items-center rounded-lg border border-border bg-bg/40 text-muted hover:border-primary">
+          <Trash2 className="size-4" strokeWidth={1.75} />
+        </button>
+      ) : null}
     </li>
   );
 }
@@ -176,7 +196,10 @@ function MootRow({ moot }: { moot: MootEntry }) {
 /** A saved moot, played turn by turn: one speech bubble per turn, each spoken in its tree's voice. */
 export function MootPlayer({ id, forest }: { id: string; forest: Forest }) {
   const close = () => useGame.getState().playMoot(null);
-  const [moot, retry] = useLoad(() => getMoot(id), [id]);
+  const [moot, retry] = useLoad(() => {
+    const mine = yourMoot(id);
+    return mine ? Promise.resolve(mine) : getMoot(id);
+  }, [id]);
   return (
     <Frame label="moot-title" onClose={close}>
       {moot.state === "ready" ? <MootPlayback moot={moot.value} forest={forest} onClose={close} /> : (
@@ -199,7 +222,7 @@ export function MootPlayer({ id, forest }: { id: string; forest: Forest }) {
 }
 
 /** A live moot's progress, which MootPlayback waits on when it catches up. */
-type LiveState = { total: number; done: boolean; error: string | null; retry: () => void };
+type LiveState = { total: number; done: boolean; saved: boolean | null; error: string | null; retry: () => void };
 
 /**
  * A moot a worker is holding: started on open, each turn asked for as soon as
@@ -216,6 +239,8 @@ export function LiveMootPlayer({ request, forest }: { request: LiveRequest; fore
   const [moot, setMoot] = useState<Moot | null>(null);
   const [total, setTotal] = useState(request.turns);
   const [done, setDone] = useState(false);
+  const [saved, setSaved] = useState<boolean | null>(null);
+  const held = useRef<Moot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
@@ -230,15 +255,18 @@ export function LiveMootPlayer({ request, forest }: { request: LiveRequest; fore
           const started = await startLiveMoot(worker.current, request);
           if (!live) { void stopLiveMoot(worker.current, started.mootId); return; }
           mootId.current = id = started.mootId;
+          held.current = started.moot;
           setMoot(started.moot);
           setTotal(started.total);
         }
         for (;;) {
           const next = await nextLiveTurn(worker.current, id);
           if (!live) return;
-          setMoot((m) => (m ? { ...m, turns: [...m.turns, next.turn] } : m));
+          held.current = { ...held.current!, turns: [...held.current!.turns, next.turn] };
+          setMoot(held.current);
           if (next.done) {
             mootId.current = null;
+            setSaved(saveYourMoot(held.current));
             setDone(true);
             return;
           }
@@ -261,7 +289,7 @@ export function LiveMootPlayer({ request, forest }: { request: LiveRequest; fore
   const retry = () => { setError(null); setAttempt((n) => n + 1); };
   return (
     <Frame label="moot-title" onClose={close}>
-      {moot ? <MootPlayback moot={moot} forest={forest} onClose={close} live={{ total, done, error, retry }} /> : (
+      {moot ? <MootPlayback moot={moot} forest={forest} onClose={close} live={{ total, done, saved, error, retry }} /> : (
         <>
           <header className="flex items-start gap-3 border-b border-border p-4 sm:px-6">
             <h2 id="moot-title" className="min-w-0 flex-1 font-display text-2xl leading-tight">A live moot</h2>
@@ -389,7 +417,7 @@ function MootPlayback({ moot, forest, onClose, live }: { moot: Moot; forest: For
           <h2 id="moot-title" className="font-display text-2xl leading-tight sm:text-3xl">
             <em style={{ color: MOOT_COLORS[0] }}>{names[0]}</em> and <em style={{ color: MOOT_COLORS[1] }}>{names[1]}</em>
           </h2>
-          <p className="text-sm text-muted">{moot.date}{moot.model ? ` · ${moot.model}` : ""}{live ? " · live" : ""}</p>
+          <p className="text-sm text-muted">{moot.date}{moot.model ? ` · ${moot.model}` : ""}{live ? " · live" : ""}{live?.saved === true ? " · saved to Your moots" : live?.saved === false ? " · could not be saved on this device" : ""}</p>
         </div>
         <CloseButton onClose={onClose} label="Close the moot" />
       </header>

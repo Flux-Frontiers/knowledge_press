@@ -19,25 +19,23 @@ Great books, searched offline
 
 ## Promotional text (170, changeable without a new version)
 
-261 classic books and four diaries on your device. Ask a question, get an
-answer written from the passages it found, with every source shown.
-
-On the Mac page "on your device" reads "on your Mac". The 261 count went to
-the Mac page with 1.32.0 on 2026-11-02. Promotional text changes without a
-new version, so the iOS page can be brought in line any time.
-
-### Next: the Forest (apply once 1.33.0 or later is live)
-
-The Forest first ships in the app in 1.33.0. Promotional text goes live on
-the current build the moment it is saved, so this replaces the text above
-only after a build with the Forest is on the store; before that it would
-describe a feature the store build lacks (Guideline 2.3).
+Live on iOS since 2026-11-06, with 1.34.1:
 
 ```text
 Walk a 3-D forest where every tree is a book, then ask it a question. 261 classics and four diaries on your device, and every answer shows its sources.
 ```
 
-Mac: "on your Mac" for "on your device".
+Promotional text goes live on the current build the moment it is saved.
+
+### Mac: apply once a build with the Forest is live
+
+The Mac page keeps this until then, since the Forest text would describe a
+feature its store build lacks (Guideline 2.3):
+
+261 classic books and four diaries on your Mac. Ask a question, get an
+answer written from the passages it found, with every source shown.
+
+Then use the iOS text above, with "on your Mac" for "on your device".
 
 ## Description (4000)
 
