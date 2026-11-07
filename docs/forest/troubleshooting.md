@@ -28,7 +28,7 @@ checkout with its packs exported. See [Book text](../BOOK_TEXT.md).
 In settings:
 
 1. Set **Leaf complexity** to **Low**.
-2. Turn off **Shadows and forest floor detail**.
+2. Turn off **Shadows** and **Undergrowth**.
 3. Turn off **Wind and gentle cart motion**.
 
 **Show geometry and frame rate** tells you what you gained. On a phone the

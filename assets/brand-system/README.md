@@ -28,10 +28,11 @@ before using them outside this project.
 | `fonts/` | Merriweather Bold, the face of the KP and the name, with its license (`OFL.txt`) | Rebuilding |
 | `build.py` | Writes every SVG above, and the KP in the app icon and favicon | See [Rebuilding](#rebuilding) |
 
-The app icon is not here. Its sources are `app/icon/press-seal.svg` (the seal
-on the navy square) and `press-seal-macos.svg` (the macOS tile); `make icons`
-renders the PNGs. The web favicon is `web/public/favicon.svg`. All three carry
-the same KP, written by `build.py`.
+The app icon is not here. It is the Icon Composer document
+`app/icon/AppIcon.icon`, which Xcode compiles. `app/icon/press-seal.svg` (the
+seal on the navy square) is the source of the splash and bookmark PNGs, which
+`make icons` renders. The web favicon is `web/public/favicon.svg`. All three
+carry the same KP, written by `build.py`.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="lockup-stacked-paper.svg">
@@ -98,11 +99,13 @@ running text, write "The Knowledge Press" in whatever face the text uses.
 ## Rebuilding
 
 `build.py` traces the KP and the name from `fonts/Merriweather-Bold.ttf`
-and writes every SVG in this folder, plus the KP in `app/icon/press-seal.svg`,
-`app/icon/press-seal-macos.svg` and `web/public/favicon.svg`, so the brand
-marks, the app icon and the favicon share one KP. The seal's proportions and
-the KP's size and overlap are constants at the top of the script. After a
-rebuild, run `make icons` (macOS) to re-render the app icon PNGs. `build.py`
+and writes every SVG in this folder, plus the KP in
+`app/icon/AppIcon.icon/Assets/seal-kp.svg`, `app/icon/press-seal.svg` and
+`web/public/favicon.svg`, so the brand marks, the app icon and the favicon
+share one KP. The seal's proportions and the KP's size and overlap are
+constants at the top of the script; the app icon's other layers hold their own
+copies of the proportions. After a rebuild, run `make icons` (macOS) to
+re-render the splash and bookmark PNGs. `build.py`
 itself runs anywhere, with two packages:
 
 ```

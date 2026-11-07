@@ -13,12 +13,14 @@ export type HostEvent =
   | { kind: "ready" } // the forest has grown and commands are heard
   | { kind: "tree"; slug: string } // a tree's card opened
   | { kind: "pressed"; slug: string } // a book read into the press (E at a tree)
-  | { kind: "ask"; slug: string }; // the card's Ask about this book
+  | { kind: "ask"; slug: string } // the card's Ask about this book
+  | { kind: "resetSettings" }; // Reset all settings: the host clears what it keeps for the forest
 
 /** What the host asks of the forest. */
 export type HostCommand =
   | { kind: "goto"; slug: string } // fly to this tree and open its card
-  | { kind: "home" }; // back to the corpus redwood
+  | { kind: "home" } // back to the corpus redwood
+  | { kind: "worker"; url: string }; // the app's worker address, "" for none
 
 type MessageHandler = { postMessage(body: unknown): void };
 type HostWindow = { webkit?: { messageHandlers?: { forest?: MessageHandler } }; __forestHost?: { dispatch(json: unknown): void } };
@@ -40,9 +42,10 @@ export function parseCommand(json: unknown): HostCommand | null {
     try { c = JSON.parse(json); } catch { return null; }
   }
   if (!c || typeof c !== "object") return null;
-  const { kind, slug } = c as { kind?: unknown; slug?: unknown };
+  const { kind, slug, url } = c as { kind?: unknown; slug?: unknown; url?: unknown };
   if (kind === "home") return { kind };
   if (kind === "goto" && typeof slug === "string" && slug) return { kind, slug };
+  if (kind === "worker" && typeof url === "string") return { kind, url };
   return null;
 }
 

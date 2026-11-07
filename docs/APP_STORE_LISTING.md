@@ -14,81 +14,64 @@ The Knowledge Press
 
 ## Subtitle (30)
 
-A library that answers back
+Great books, searched offline
 
 ## Promotional text (170, changeable without a new version)
 
-261 classic books and four diaries on your device. Ask a question, get an
-answer written from the passages it found, with every source shown.
-
-On the Mac page "on your device" reads "on your Mac". Promotional text
-changes without a new version.
-
-### Next: the Forest (apply once 1.33.0 or later is live)
-
-The Forest first ships in the app in 1.33.0. Promotional text goes live on
-the current build the moment it is saved, so this replaces the text above
-only after a build with the Forest is on the store; before that it would
-describe a feature the store build lacks (Guideline 2.3).
+Live on iOS since 2026-11-06, with 1.34.1:
 
 ```text
 Walk a 3-D forest where every tree is a book, then ask it a question. 261 classics and four diaries on your device, and every answer shows its sources.
 ```
 
-Mac: "on your Mac" for "on your device".
+Promotional text goes live on the current build the moment it is saved.
+
+### Mac: apply once a build with the Forest is live
+
+The Mac page keeps this until then, since the Forest text would describe a
+feature its store build lacks (Guideline 2.3):
+
+261 classic books and four diaries on your Mac. Ask a question, get an
+answer written from the passages it found, with every source shown.
+
+Then use the iOS text above, with "on your Mac" for "on your device".
 
 ## Description (4000)
 
-The Knowledge Press is a library of 261 public-domain books and four
-diaries that you can search and question, entirely on your device.
+Per version. This text is for 1.34.1 and later: Ask about this book's
+book-only scope and the working Siri shortcut both need 1.34.1. Paragraphs
+are on one line each, so it pastes cleanly. The same text serves the Mac.
 
-Ask it anything: what Marcus Aurelius says about anger, how Darwin
-describes the Galapagos finches, where Pepys was on the day of the Great
-Fire. The app searches the whole library two ways at once, by meaning and by
-exact wording, and answers from the passages it found. Every answer shows
-its sources, and marks which passages the model actually read.
+```text
+The Knowledge Press is a library of 261 public-domain books and four diaries that you can search and question, entirely on your device.
+
+Ask it anything: what Marcus Aurelius says about anger, how Darwin describes the Galapagos finches, where Pepys was on the day of the Great Fire. The app searches the whole library two ways at once, by meaning and by exact wording, and answers from the passages it found. Every answer shows its sources, and marks which passages the model actually read.
 
 WORKS OFFLINE
 
-The books, the search index and the language model are all on the device.
-Nothing you ask is sent anywhere. There is no account, no sign-in, and no
-tracking. It works in airplane mode.
+The books, the search index and the language model are all on the device. Nothing you ask is sent anywhere. There is no account, no sign-in, and no tracking. It works in airplane mode.
 
 THE LIBRARY
 
-Twenty genres: philosophy, English, American, Russian, French, German and
-Spanish literature, the ancient and classical world, drama and Shakespeare,
-science fiction, horror, biography, letters, travel, natural history and
-sacred texts. Plato, Aristotle, Epictetus, Marcus Aurelius, Kant,
-Nietzsche, Homer, Dante, Cervantes, Austen, Dickens, Melville, Tolstoy,
-Dostoevsky, Twain, Poe, Shelley, Stoker, Verne, Wells, Darwin, Thoreau,
-Whitman, and more.
+Twenty genres: philosophy, English, American, Russian, French, German and Spanish literature, the ancient and classical world, drama and Shakespeare, science fiction, horror, biography, letters, travel, natural history and sacred texts. Plato, Aristotle, Epictetus, Marcus Aurelius, Kant, Nietzsche, Homer, Dante, Cervantes, Austen, Dickens, Melville, Tolstoy, Dostoevsky, Twain, Poe, Shelley, Stoker, Verne, Wells, Darwin, Thoreau, Whitman, and more.
 
-Four diaries, searchable by date: Samuel Pepys, John Evelyn (two volumes),
-and Boswell's journal of his tour of the Hebrides with Samuel Johnson.
+Four diaries, searchable by date: Samuel Pepys, John Evelyn (two volumes), and Boswell's journal of his tour of the Hebrides with Samuel Johnson.
 
 READ, NOT JUST SEARCH
 
-Browse the library by genre, open any book, and read it chapter by chapter.
-The diaries open by date. Every source passage under an answer can be read
-in full.
+Browse the library by genre, open any book, and read it chapter by chapter. The diaries open by date. Every source passage under an answer can be read in full.
+
+THE FOREST
+
+Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The forest works offline, like the rest of the app.
 
 ANSWERS YOU CAN CHECK
 
-The app searches first and writes second, and the order never changes. An
-answer is written only from what the search found, and each passage that
-reached the model is marked. If the passages do not support an answer, it
-says so instead of inventing one. The settings let you tune how many
-passages are read, how closely they must match, and how the model writes,
-and every answer records the settings that produced it.
+The app searches first and writes second, and the order never changes. An answer is written only from what the search found, and each passage that reached the model is marked. If the passages do not support an answer, it says so instead of inventing one. The settings let you tune how many passages are read, how closely they must match, and how the model writes, and every answer records the settings that produced it.
 
 CHOOSE WHERE THE MODEL RUNS
 
-On-device is the default and uses Apple Intelligence on your iPhone, iPad
-or Mac. Private Cloud is optional: it sends your question and the selected
-passages to Apple's Private Cloud Compute for a larger model, under Apple's
-privacy guarantees, and never to us. Or turn answers off and use the app as
-a search engine for the classics.
+On-device is the default and uses Apple Intelligence on your iPhone, iPad or Mac. Private Cloud is optional: it sends your question and the selected passages to Apple's Private Cloud Compute for a larger model, under Apple's privacy guarantees, and never to us. Or turn answers off and use the app as a search engine for the classics.
 
 ASK FROM SIRI
 
@@ -96,35 +79,44 @@ Ask The Knowledge Press from Siri and Shortcuts.
 
 REQUIREMENTS
 
-Search, reading and browsing work on any iPhone, iPad or Mac running iOS
-26, iPadOS 26 or macOS 26. Written answers need Apple Intelligence.
+Search, reading and browsing work on any iPhone, iPad or Mac running iOS 26, iPadOS 26 or macOS 26. Written answers need Apple Intelligence.
 
-The Knowledge Press is not affiliated with Project Gutenberg. The texts are
-public domain; Project Gutenberg and the Internet Archive are acknowledged
-as their sources.
-
-### The Forest section
-
-The description is per version. This section goes after READ, NOT JUST
-SEARCH, in every version from the first one after 1.33.0. It needs that
-version: in 1.33.0, Ask about this book scopes the chat to the book's genre,
-and the book-only scope came after it (CHANGELOG, Unreleased). The same text
-serves the Mac.
-
-```text
-THE FOREST
-
-Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The forest works offline, like the rest of the app.
+The Knowledge Press is not affiliated with Project Gutenberg. The texts are public domain; Project Gutenberg and the Internet Archive are acknowledged as their sources.
 ```
-
-With this section the description is about 3,100 characters, under the 4,000
-limit.
 
 ## Keywords (100, comma-separated, no spaces)
 
 classics,books,library,philosophy,literature,offline,reader,search,shakespeare,plato,diaries,homer
 
 ## What's New (per version)
+
+### 1.34.1
+
+Submitted 2026-11-05 for iOS, build 872. The Mac follows once its 1.32.0
+clears review.
+
+iOS:
+
+```text
+The Forest is here. Walk a 3-D forest where every tree is a book, right inside the app and with no network needed. Open a tree and tap Ask about this book to ask that book a question.
+
+Also new:
+- Tree buttons in Browse and on answer citations take you to that book's tree.
+- Browse search now finds titles as well as authors.
+- "Ask The Knowledge Press" now works with Siri.
+- The forest no longer stays zoomed in on iPhone after you tap the query field.
+```
+
+Mac (the zoom fix is iPhone only):
+
+```text
+The Forest is here. Walk a 3-D forest where every tree is a book, right inside the app and with no network needed. Open a tree and click Ask about this book to ask that book a question.
+
+Also new:
+- Tree buttons in Browse and on answer citations take you to that book's tree.
+- Browse search now finds titles as well as authors.
+- "Ask The Knowledge Press" now works with Siri.
+```
 
 ### 1.32.0
 
@@ -204,6 +196,19 @@ exchange does not read well as a still.
    `contact-<device>.png` per device. It fails if a size is wrong, a file has
    alpha, a slot has no caption, or a device has more than 10.
 5. Upload in slot order under each device size in App Store Connect.
+
+## Product page header
+
+iOS 27 shows a creative asset at the top of the product page. App Store
+Connect takes 5244x2950 or 3840x1646, no alpha. Apple's guidance keeps the
+focal point near the center, since each device crops differently.
+
+The 1.34.1 header is a render of the real forest: the start view of the
+redwood with its text hidden, the crescent moon of 2026-10-15 at dusk, leaves
+at their highest setting, 5244x2950. In Apple's preview the moon sits near
+the right edge on iPhone and well inside the frame on iPad. The file is
+`screenshots/store/header/header-crescent-down-5244x2950.png` (git-ignored).
+The Search Results asset is unset, so screenshots appear there.
 
 ## URLs
 

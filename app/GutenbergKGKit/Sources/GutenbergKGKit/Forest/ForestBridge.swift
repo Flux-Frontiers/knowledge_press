@@ -21,6 +21,8 @@ public enum ForestEvent: Equatable, Sendable {
     case pressed(slug: String)
     /// The card's Ask about this book.
     case ask(slug: String)
+    /// Reset all settings: clear what the app keeps for the forest.
+    case resetSettings
 
     /// The WebKit message handler's name, on both sides.
     public static let handlerName = "forest"
@@ -42,6 +44,10 @@ public enum ForestEvent: Equatable, Sendable {
             self = .ready
             return
         }
+        if kind == "resetSettings" {
+            self = .resetSettings
+            return
+        }
         guard let slug = fields["slug"] as? String, !slug.isEmpty else { return nil }
         switch kind {
         case "tree": self = .tree(slug: slug)
@@ -58,6 +64,8 @@ public enum ForestCommand: Equatable, Sendable {
     case goto(slug: String)
     /// Back to the corpus redwood.
     case home
+    /// The app's worker address, empty for none. Live moots use it.
+    case worker(url: String)
 
     /// The command as the JSON `host.ts` parses.
     public var json: String {
@@ -65,6 +73,7 @@ public enum ForestCommand: Equatable, Sendable {
         switch self {
         case .goto(let slug): fields = ["kind": "goto", "slug": slug]
         case .home: fields = ["kind": "home"]
+        case .worker(let url): fields = ["kind": "worker", "url": url]
         }
         let data = (try? JSONSerialization.data(withJSONObject: fields, options: [.sortedKeys])) ?? Data()
         return String(decoding: data, as: UTF8.self)

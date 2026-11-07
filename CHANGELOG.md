@@ -11,6 +11,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Illustrations show their render time**, under the picture, as answers show
+  their synthesis time.
+- **Live moots are kept.** A moot that finishes is saved on the device under
+  **Your moots**, plays back with no worker, and can be deleted. One closed
+  early is not saved.
+
 ### Changed
 
 - **On-device answers use the window the device has.** Devices that report an
@@ -19,6 +27,36 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **The on-device model stays warm between questions.** The session readied
   when the chat opens now answers the next question instead of being
   discarded, and a fresh one is readied after each answer.
+- **The forest draws faster.** Fir, pine and oak leaves use far fewer triangles,
+  and on touch screens leaves no longer receive shadows.
+- **Shadows and undergrowth are separate settings.** Shadows are off by default,
+  including on devices that had them on, since on an iPad mini turning them off
+  about doubled the frame rate. Undergrowth and wind stay on by default.
+- **The app icon is an Icon Composer document.** `app/icon/AppIcon.icon`
+  replaces the flat icon sets on iPhone, iPad and Mac. The seal's rim, ring,
+  face and KP are separate layers on the navy fill, so the system renders them
+  in its light, dark, clear and tinted appearances. `make icons` now renders
+  only the splash and web PNGs.
+- **Clean view hides the map.** It now also hides Guided tour and Read on
+  touch screens, leaving the drive stick.
+- **Guided tour and Read sit side by side** on touch screens.
+- **No worker is set by default.** The web forest no longer assumes
+  `http://localhost:8000`, and **Hold a new moot** appears only once a worker
+  is set.
+- **In the app, the forest uses the app's worker.** Its Settings no longer ask
+  for a second address. **Reset all settings** clears the worker address too.
+
+### Fixed
+
+- **Share as PDF shows that it is working.** On iPhone and iPad a "Preparing
+  PDF..." indicator shows during the render, and the share sheet opens once the
+  file is ready, in place of a half-drawn sheet.
+- **The app's About page no longer offers `?meteors=` links**, since the app
+  has no address bar.
+- **The drive stick and buttons no longer sit on top of the reader** or an
+  exhibit's plaque on touch screens, where they covered Previous and Next.
+- **The forest's user guide links open in the browser** from the app; they did
+  nothing before.
 
 ## [1.34.1] - 2026-11-05
 

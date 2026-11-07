@@ -71,6 +71,10 @@ final class ForestHost: NSObject {
     /// taps before the forest has grown should land at the second tree.
     @ObservationIgnored private var pendingCommand: ForestCommand?
 
+    /// The app's worker address, sent to the page when it is ready and when
+    /// it changes. Kept apart from `pendingCommand`, which a tree tap replaces.
+    @ObservationIgnored private var workerURL = ""
+
     /// What the app does with the forest's events. Set by `AppModel`, which
     /// owns this host; called on the main actor.
     @ObservationIgnored var onEvent: (ForestEvent) -> Void = { _ in }
@@ -115,15 +119,27 @@ final class ForestHost: NSObject {
         send(.goto(slug: slug))
     }
 
+    /// Tell the page the app's worker address, now or when it says `ready`.
+    ///
+    /// :param url: The address from the app's Settings; empty for none.
+    func setWorker(url: String) {
+        workerURL = url
+        if pageReady { evaluate(.worker(url: url)) }
+    }
+
     /// Deliver a command now if the page is listening, or when it says `ready`.
     ///
     /// :param command: What to ask of the forest.
     func send(_ command: ForestCommand) {
-        guard let webViewStorage, pageReady else {
+        guard pageReady else {
             pendingCommand = command
             return
         }
-        webViewStorage.evaluateJavaScript(command.script) { _, error in
+        evaluate(command)
+    }
+
+    private func evaluate(_ command: ForestCommand) {
+        webViewStorage?.evaluateJavaScript(command.script) { _, error in
             if let error { Self.log("command \(command) failed: \(error.localizedDescription)") }
         }
     }
@@ -133,6 +149,7 @@ final class ForestHost: NSObject {
     fileprivate func receive(_ event: ForestEvent) {
         if case .ready = event {
             pageReady = true
+            evaluate(.worker(url: workerURL))
             if let pendingCommand {
                 self.pendingCommand = nil
                 send(pendingCommand)
@@ -264,6 +281,22 @@ extension ForestHost: WKNavigationDelegate {
 }
 
 extension ForestHost: WKUIDelegate {
+    /// A `target="_blank"` link (the user guide). A web view opens none of
+    /// these on its own, so it goes to the reader's browser.
+    func webView(
+        _ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
+        for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures
+    ) -> WKWebView? {
+        if let url = navigationAction.request.url, ["http", "https"].contains(url.scheme) {
+            #if os(iOS)
+                UIApplication.shared.open(url)
+            #else
+                NSWorkspace.shared.open(url)
+            #endif
+        }
+        return nil
+    }
+
     /// `window.confirm` (Empty the press). Without this the page's button
     /// does nothing: WebKit answers false when no delegate does.
     func webView(
@@ -334,6 +367,9 @@ struct ForestView: View {
                     ))
             }
         }
+        // On showing the tab and on every change, including from a Mac's
+        // separate Settings window.
+        .task(id: model.workerURLString) { host.setWorker(url: model.workerURLString) }
         .alert(
             host.confirmation?.message ?? "",
             isPresented: Binding(

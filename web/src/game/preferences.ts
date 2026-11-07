@@ -4,7 +4,10 @@ export type Preferences = {
   /** "god" looks down on the whole forest from above the hub. */
   camera: "follow" | "high" | "cart" | "god";
   motion: boolean;
-  detail: boolean;
+  /** The sun's shadows. Off by default: on an iPad mini they halved the frame rate. */
+  shadows: boolean;
+  /** Grass and stones on the forest floor. */
+  undergrowth: boolean;
   /** Leaf complexity; see LEAF_SCALE. */
   leaves: LeafDetail;
   /** Show triangles, draw calls, leaves and frame rate. */
@@ -21,14 +24,11 @@ export type Preferences = {
   speakMoots: boolean;
   /** Each tree's voice by name, first tree first; "" picks one automatically. */
   mootVoices: [string, string];
-  /** The GutenbergKG worker that holds live moots (liveMoots.ts). */
+  /** The GutenbergKG worker that holds live moots (liveMoots.ts); "" for none, the default. */
   mootWorker: string;
   /** The worker's MOOT_TOKEN, when it sets one; "" otherwise. */
   mootToken: string;
 };
-
-/** Where a local GutenbergKG worker listens. */
-export const DEFAULT_MOOT_WORKER = "http://localhost:8000";
 
 export type FogLevel = "clear" | "light" | "normal" | "heavy";
 
@@ -52,7 +52,9 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     camera: value?.camera === "high" || value?.camera === "cart" || value?.camera === "god" ? value.camera : "follow",
     motion: typeof value?.motion === "boolean" ? value.motion
       : !(typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches),
-    detail: typeof value?.detail === "boolean" ? value.detail : true,
+    // The old `detail` setting is ignored on purpose: it was saved on for everyone, so reading it would keep shadows on.
+    shadows: value?.shadows === true,
+    undergrowth: value?.undergrowth !== false,
     // Touch devices start at Low.
     leaves: value?.leaves && value.leaves in LEAF_SCALE ? value.leaves
       : typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches ? "low" : "medium",
@@ -65,7 +67,7 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     mootVoices: Array.isArray(value?.mootVoices) && value.mootVoices.length === 2
       && value.mootVoices.every((n) => typeof n === "string")
       ? [value.mootVoices[0], value.mootVoices[1]] : ["", ""],
-    mootWorker: typeof value?.mootWorker === "string" && value.mootWorker.trim() ? value.mootWorker.trim() : DEFAULT_MOOT_WORKER,
+    mootWorker: typeof value?.mootWorker === "string" && value.mootWorker.trim() ? value.mootWorker.trim() : "",
     mootToken: typeof value?.mootToken === "string" ? value.mootToken : "",
   };
 }

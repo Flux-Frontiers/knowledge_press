@@ -102,6 +102,9 @@ public struct ChatTurn: Identifiable, Sendable, Codable {
     /// The illustration on disk, as a path relative to the conversation
     /// directory. Set once the store has written the PNG.
     var imageFile: String?
+    /// How long the illustration took, from the tap: the prompt rewrite and
+    /// the render. Nil on a turn saved before this was kept.
+    var imageRenderMs: Int?
     /// Set when rendering was attempted and failed — always network-only,
     /// so a failure here is ordinary (no worker configured, no reachable
     /// worker) rather than exceptional.
@@ -119,7 +122,7 @@ public struct ChatTurn: Identifiable, Sendable, Codable {
     /// a fact about the conversation, and the image bytes live beside it.
     enum CodingKeys: String, CodingKey {
         case id, question, corpus, engine, retrieval, answer, metrics
-        case synthesisFailure, errorMessage, imageFile, imageError
+        case synthesisFailure, errorMessage, imageFile, imageRenderMs, imageError
     }
 
     var isStreaming: Bool {
@@ -543,6 +546,8 @@ public final class AppModel {
             ForestHost.log("pressed: \(slug)")
         case .ready:
             ForestHost.log("ready")
+        case .resetSettings:
+            workerURLString = ""
         }
     }
 
@@ -1108,6 +1113,7 @@ public final class AppModel {
                 }
             }
             do {
+                let started = ContinuousClock.now
                 let prompt = try await client.rewrite(rawPrompt, backend: backend)
                 let imageBackend = Self.resolveImageBackend(
                     choice: imageBackendChoice, textBackend: backend,
@@ -1116,6 +1122,7 @@ public final class AppModel {
                     prompt: prompt, imageBackend: imageBackend, size: imageResolution.size)
                 guard let i = turns.firstIndex(where: { $0.id == id }) else { return }
                 turns[i].generatedImage = image
+                turns[i].imageRenderMs = Int(started.duration(to: .now) / .milliseconds(1))
                 // Creates the conversation if this render beat it to it, so
                 // there is a directory to put the PNG in.
                 persistActiveConversation()
