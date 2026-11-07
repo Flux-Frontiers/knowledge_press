@@ -106,7 +106,7 @@ The Knowledge Press is not affiliated with Project Gutenberg. The texts are
 public domain; Project Gutenberg and the Internet Archive are acknowledged
 as their sources.
 
-### The Forest section (in the description since iOS 1.34.1)
+### The Forest section (in the description since iOS 1.34.1; Mac to follow)
 
 The description is per version. This section went in after READ, NOT JUST
 SEARCH in iOS 1.34.1, the first version submitted after 1.33.0, and stays in
@@ -137,6 +137,11 @@ iOS submitted 2026-11-05 and approved 2026-11-06 (submission
 description and the eight-shot screenshot set went in with it. It is later
 than 1.33.0, so once it is live on the iOS page the remaining Forest items in
 this file apply there: the promotional text and the featuring nomination.
+
+Mac 1.34.1 is not submitted yet: as of 2026-11-07 the earlier Mac submission
+is still in review. When it goes in, it needs the same Forest description
+section and the Mac screenshot set; the Mac promotional text waits until it
+is live.
 
 ### 1.32.0
 
