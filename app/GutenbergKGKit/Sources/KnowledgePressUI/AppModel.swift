@@ -850,6 +850,7 @@ public final class AppModel {
         ("oMLX (local MLX)", "omlx"),
         ("Ollama (local)", "ollama"),
         ("OpenAI (cloud)", "openai"),
+        ("Anthropic (cloud)", "anthropic"),
     ]
 
     /// Genre-tagged starter queries shown when the chat is empty.
