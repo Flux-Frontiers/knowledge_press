@@ -111,3 +111,40 @@ test("opening a book closes the side panels; closing it leaves them shut", () =>
   assert.equal(st().readingSlug, null);
   assert.equal(st().libraryOpen, false);
 });
+
+test("god's eye opens with the book card closed, and a later tap still opens one", () => {
+  globalThis.window ??= { localStorage: { getItem: () => null, setItem: () => {} } };
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().setPreferences({ camera: "follow" });
+  st().setNearby("hamlet", 3, 0);
+  st().pinTree("macbeth");
+  assert.equal(st().cardSlug, "hamlet");
+  st().setPreferences({ camera: "god" });
+  assert.equal(st().pinnedSlug, null);
+  assert.equal(st().cardSlug, null);
+  assert.equal(st().nearbyDismissed, "hamlet");
+  // A tree tapped from above is pinned as before.
+  st().pinTree("lear");
+  assert.equal(st().pinnedSlug, "lear");
+  // Staying in god's eye does not clear it again.
+  st().setPreferences({ camera: "god" });
+  assert.equal(st().pinnedSlug, "lear");
+  st().setPreferences({ camera: "follow" });
+});
+
+test("fly there closes the card for the flight and opens it on landing", () => {
+  globalThis.window ??= { localStorage: { getItem: () => null, setItem: () => {} } };
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().setPreferences({ camera: "god" });
+  st().pinTree("lear");
+  st().flyTo({ x: 10, z: 10, yaw: 0 }, "King Lear", "lear");
+  assert.equal(st().pinnedSlug, null);
+  assert.equal(st().flight?.reopen, "lear");
+  st().endFlight();
+  assert.equal(st().flight, null);
+  assert.equal(st().pinnedSlug, "lear");
+  assert.notEqual(st().preferences.camera, "god");
+  st().pinTree(null);
+});

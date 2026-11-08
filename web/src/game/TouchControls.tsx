@@ -25,7 +25,7 @@ export function TouchControls() {
         onMove={(x, y) => { const a = stickAxes(x, y); setTouchAxes(a.throttle, a.steer); }}
         onRelease={() => setTouchAxes(0, 0)} />
       {/* No look stick: a drag anywhere else on the forest looks around (Player.tsx). */}
-      {clean ? null : <div className="pointer-events-auto flex items-end gap-2">
+      {clean ? null : <div className="pointer-events-auto flex items-center gap-2">
         <button type="button" className="min-h-11 rounded-full border border-border bg-surface px-4 text-sm" onClick={toggleCircuit}>
           {travelMode === "circuit" ? "End tour" : "Guided tour"}
         </button>

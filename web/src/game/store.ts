@@ -180,6 +180,8 @@ export type GameStore = {
   /** :param pinnedDist: distance from the pinned tree, m; Infinity when none is pinned. */
   setNearby: (slug: string | null, dist: number, speed: number, pinnedDist?: number) => void;
   pinTree: (slug: string | null) => void;
+  /** Close the book card, pinned or nearby; god's eye and a fly-to start from a clear view. */
+  clearCards: () => void;
   dismissNearby: () => void;
   dismissQuestHint: (id: string) => void;
   setPose: (x: number, z: number, yaw: number, speed: number) => void;
@@ -210,9 +212,10 @@ export type GameStore = {
   /** The ground camera last in use: where a dive from god's eye lands. */
   groundCamera: GroundCamera;
   /** A dive from god's eye down to the cart, under way (Player.tsx animates it). */
-  flight: { to: GroundCamera } | null;
+  flight: { to: GroundCamera; reopen: string | null } | null;
   /** Jump the cart to a pose and dive the god's-eye camera down to it. */
-  flyTo: (pose: JumpPose, toast?: string) => void;
+  /** :param reopen: The tree whose card closes for the flight and opens again on landing. */
+  flyTo: (pose: JumpPose, toast?: string, reopen?: string) => void;
   endFlight: () => void;
 };
 
@@ -250,7 +253,9 @@ export const useGame = create<GameStore>((set, get) => ({
   preferences: initial.preferences,
   setPreferences: (patch) => {
     const preferences = readPreferences({ ...get().preferences, ...patch });
+    const intoGodEye = preferences.camera === "god" && get().preferences.camera !== "god";
     set(preferences.camera === "god" ? { preferences } : { preferences, groundCamera: preferences.camera });
+    if (intoGodEye) get().clearCards();
     persist(get());
   },
   resetSettings: () => {
@@ -382,6 +387,7 @@ export const useGame = create<GameStore>((set, get) => ({
     else set(cardSlug === s.cardSlug ? { nearbyDist } : { nearbyDist, cardSlug, ...pin });
   },
   pinTree: (pinnedSlug) => set({ pinnedSlug }),
+  clearCards: () => set({ pinnedSlug: null, cardSlug: null, nearbyDismissed: get().nearbySlug }),
   dismissNearby: () => {
     const { nearbySlug, pinnedSlug } = get();
     if (pinnedSlug) set({ pinnedSlug: null });
@@ -432,15 +438,18 @@ export const useGame = create<GameStore>((set, get) => ({
   clearJump: () => set({ jump: null }),
   groundCamera: initial.preferences.camera === "god" ? "follow" : initial.preferences.camera,
   flight: null,
-  flyTo: (pose, toast) => {
+  flyTo: (pose, toast, reopen) => {
+    // The cards close so the flight can be watched; `reopen`'s card comes back on landing.
+    get().clearCards();
     get().requestJump(pose, toast);
-    set({ flight: { to: get().groundCamera } });
+    set({ flight: { to: get().groundCamera, reopen: reopen ?? null } });
   },
   endFlight: () => {
     const flight = get().flight;
     if (!flight) return;
     set({ flight: null });
     get().setPreferences({ camera: flight.to });
+    if (flight.reopen) get().pinTree(flight.reopen);
   },
 }));
 
