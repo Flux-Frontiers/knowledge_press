@@ -90,6 +90,37 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 ## What's New (per version)
 
+### 1.40.0
+
+iOS:
+
+```text
+A smoother forest and a new icon.
+
+- A new app icon, in light, dark, clear and tinted styles.
+- The forest draws faster, with a shorter top bar and a camera button. Shadows have their own setting.
+- On iPad, switch between Chat, Browse and the Forest from a bar at the bottom.
+- Pepys's diary opens from its tree in the forest.
+- A follow-up question stays in the part of the library you first asked about.
+- On newer iPhones and iPads, on-device answers read longer passages.
+- Share as PDF opens faster.
+- Moots held with your own GutenbergKG worker are now kept on the device.
+```
+
+Mac (the first Mac version with the Forest; the Mac last shipped 1.32.0):
+
+```text
+The Forest is here. Walk a 3-D forest where every tree is a book, right inside the app and with no network needed. Open a tree and click Ask about this book to ask that book a question.
+
+Also new:
+- A new app icon, in light, dark, clear and tinted styles.
+- Tree buttons in Browse and on answer citations take you to that book's tree.
+- Browse search finds titles as well as authors.
+- A follow-up question stays in the part of the library you first asked about.
+- On newer Macs, on-device answers read longer passages.
+- Moots held with your own GutenbergKG worker are now kept on the device.
+```
+
 ### 1.34.1
 
 iOS:
@@ -235,20 +266,29 @@ a new version's text is edited.
 
 ### Mac screenshots
 
-Apple takes 1280x800, 1440x900, 2560x1600 or 2880x1800. On a 14-inch
-MacBook Pro (3024x1964), zoom the window (double-click its title bar), take
-a full-screen capture with Cmd-Shift-3, and crop off the 74 px menu bar;
-what is left is exactly 16:10:
+Apple takes 1280x800, 1440x900, 2560x1600 or 2880x1800. The 1.40.0 set is
+captured from the app's window, not the screen: size the window to exactly
+1440x900 points, which on a Retina display is 2880x1800 pixels, and capture
+just that window with no shadow:
 
 ```sh
-ffmpeg -i in.png -vf "crop=3024:1890:0:74,scale=2880:1800:flags=lanczos" -q:v 2 out.jpg
+osascript -e 'tell application "System Events" to tell process "KnowledgePress" to set size of window 1 to {1440, 900}'
+screencapture -x -o -l<window-id> out.png   # window id from CGWindowListCopyWindowInfo
 ```
 
-Clear the Worker field in Settings first, or every answer shows "Cannot
-reach the worker" and a Render button. The 1.30.0 set, in order: the start
-screen with sample questions; "what did marcus aurelius say about anger?"
-with Source passages open; Pepys on 1 January 1660 in the reader; *Macbeth*
-I.ii in the reader.
+Resizing needs Accessibility permission for the app that runs the script. Save
+each capture opaque at 2880x1800 as `screenshots/raw/mac/<slot>-<name>.png`;
+`make store-shots` captions it. The forest pauses and opens its settings when
+its window loses focus, so capture a forest scene after a short delay, with the
+window in front and the panel closed.
+
+Clear the Worker field in Settings first, or every answer shows "Cannot reach
+the worker" and a Render button. Set Scope to **all** and turn off the forest's
+**Show geometry & frame rate**. The 1.40.0 set uses slots 01-07 of the table
+above; slot 08 is skipped on the Mac. Slot 01 asks "marcus aurelius on death",
+slot 03 is *Moby Dick*'s card at dawn, slot 04 asks "In Moby Dick, why does Ahab
+hunt the whale?", slot 05 is *Pride and Prejudice* chapter II, slot 06 searches
+"dickens", and slot 07 is Pepys on 2 September 1666.
 
 ## Category
 
