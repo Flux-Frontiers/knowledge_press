@@ -26,6 +26,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Chat, Browse and Forest switch from the bottom on iPad**, as the phone's tabs
+  do, without opening the sidebar.
 - **God's eye starts from a clear view.** Switching to it closes the open book
   card and the redwood's card. **Fly there** hides the cards during the flight,
   so the dive can be watched, and opens the tree's card on landing.
