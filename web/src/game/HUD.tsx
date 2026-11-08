@@ -21,18 +21,10 @@ const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as 
 export function HUD({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
   const timeMode = useGame((s) => s.timeMode);
-  const sunEvent = useGame((s) => s.sunEvent);
-  const moonName = useGame((s) => s.moonName);
   // The sky ticks every few seconds; subscribing re-renders the clock with it.
   useGame((s) => s.sky);
   const clock = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const timeLabel = timeMode === "live" ? clock(new Date()) : TIME_NAME[timeMode];
-  const timeTitle =
-    timeMode === "live"
-      ? `Live clock${sunEvent ? ` · ${sunEvent.kind} ${clock(sunEvent.at)}` : ""} · ${moonName} · tap for dawn`
-      : timeMode === "night"
-        ? `Night · ${moonName} · tap for the live clock`
-        : `${TIME_NAME[timeMode]} · tap for ${TIME_NAME[timeMode === "dawn" ? "day" : timeMode === "day" ? "dusk" : "night"].toLowerCase()}`;
   const toggleTimeOfDay = useGame((s) => s.toggleTimeOfDay);
   const query = useGame((s) => s.query);
   const setQuery = useGame((s) => s.setQuery);
@@ -139,8 +131,8 @@ export function HUD({ forest }: { forest: Forest }) {
           </div>
         )}
         <div className="ml-auto flex flex-col items-end gap-2">
-          {/* Phones keep Home, Browse and the menu in the bar. From sm up the bar adds clean view, screenshot, the
-              clock and the camera; silent mode, moots, settings, About and exit stay in the menu at every size. */}
+          {/* Phones keep Home, Browse and the menu in the bar. From sm up the bar adds clean view, screenshot and
+              the camera; the clock, silent mode, moots, settings, About and exit stay in the menu at every size. */}
           <div className="pointer-events-auto relative flex flex-wrap items-center justify-end gap-2">
             <button
               type="button"
@@ -160,15 +152,6 @@ export function HUD({ forest }: { forest: Forest }) {
               <Camera className="size-4" strokeWidth={1.75} />
             </button>
             {clean ? null : (<>
-              <button
-                type="button"
-                onClick={toggleTimeOfDay}
-                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
-                aria-label={timeTitle}
-                title={timeTitle}
-              >
-                <TimeIcon mode={timeMode} />
-              </button>
               <button
                 type="button"
                 onClick={() => { stepCamera(); (document.activeElement as HTMLElement | null)?.blur(); }}
@@ -207,7 +190,7 @@ export function HUD({ forest }: { forest: Forest }) {
                   "grid size-11 place-items-center rounded-md border " +
                   (menuOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
                 }
-                aria-label="More: silent mode, moots, settings, about, exit, and on a phone the other buttons too"
+                aria-label="More: time of day, silent mode, moots, settings, about, exit, and on a phone the other buttons too"
                 aria-expanded={menuOpen}
               >
                 <Ellipsis className="size-4" strokeWidth={1.75} />
@@ -215,7 +198,7 @@ export function HUD({ forest }: { forest: Forest }) {
               {menuOpen ? (<>
                 <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} aria-hidden />
                 <ul className="absolute top-full right-0 z-40 mt-2 w-60 rounded-lg border border-border bg-surface py-1">
-                  <MenuItem phoneOnly icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
+                  <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
                   <MenuItem phoneOnly icon={<Video className="size-4" strokeWidth={1.75} />} label={`Camera · ${CAMERA_NAME[camera]}`} onClick={stepCamera} />
                   <MenuItem icon={silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
                     label={silent ? "Silent · no pop-up cards" : "Pop-up cards on"} onClick={() => setPreferences({ silent: !silent })} />
