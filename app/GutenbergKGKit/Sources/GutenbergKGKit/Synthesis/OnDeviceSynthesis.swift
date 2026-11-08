@@ -9,6 +9,7 @@
 // exists and why a fresh session is created per question.
 
 import Foundation
+import Synchronization
 
 #if canImport(FoundationModels)
     import FoundationModels
@@ -18,20 +19,43 @@ import Foundation
     public struct OnDeviceSynthesis: SynthesisBackend {
 
         public let label = "On-device"
-        public let modelDescription = "Apple Foundation Models (on-device)"
+        /// Names the window too, so a turn's provenance shows which budget
+        /// the device was given.
+        public var modelDescription: String {
+            "Apple Foundation Models (on-device, \(budgeter.budget.contextWindow)-token window)"
+        }
 
         private let budgeter: ContextBudgeter
         private let tuning: SynthesisTuning
+        /// The session warmed for the next question, if one is ready.
+        private let standby = Standby()
 
-        /// :param budget: Context limits; defaults to the on-device window.
+        /// :param budget: Context limits; nil sizes the on-device default to
+        ///     the window the OS reports (see `reportedContextWindow`).
         /// :param tuning: Decoding, packing and prompt settings. The
         ///     temperature default lives there: it was 0 for determinism,
         ///     but greedy decoding degenerates into repeated text when
         ///     several passages share a source (e.g. "circles of Hell"
         ///     pulling three Divine Comedy chunks).
-        public init(budget: ContextBudgeter.Budget = .onDevice, tuning: SynthesisTuning = .default) {
+        public init(budget: ContextBudgeter.Budget? = nil, tuning: SynthesisTuning = .default) {
+            let budget = budget ?? .onDevice(contextWindow: Self.reportedContextWindow)
             self.budgeter = ContextBudgeter(budget: tuning.apply(to: budget))
             self.tuning = tuning
+        }
+
+        /// `SystemLanguageModel.contextSize`, or the 4,096 the model had
+        /// before the OS reported one.
+        ///
+        /// The property arrived in the 26.4 SDK (back-deployed to 26.0) and
+        /// only reports anything other than 4,096 on iOS 27 / macOS 27, so
+        /// it is read on the Xcode 27 toolchain alone: an older CI SDK then
+        /// still builds, and loses nothing it could have shown.
+        public static var reportedContextWindow: Int {
+            #if compiler(>=6.4)
+                return SystemLanguageModel.default.contextSize
+            #else
+                return ContextBudgeter.Budget.onDevice.contextWindow
+            #endif
         }
 
         /// The system model, with the guardrail relaxed when tuning asks.
@@ -52,13 +76,38 @@ import Foundation
             }
         }
 
-        /// Load model weights ahead of the first question.
+        /// Load model weights and the instructions ahead of the next question.
         ///
         /// Call this when the chat view appears: the first answer then starts
-        /// streaming without the one-off load pause.
+        /// streaming without the one-off load pause. The warmed session is
+        /// kept and answers the next question, so the cached instruction
+        /// prefix is used rather than thrown away; it is warmed again after
+        /// each answer. Apple asks for about a second of lead, which typing
+        /// the question provides.
         public func prewarm() {
-            guard availability.isAvailable else { return }
-            LanguageModelSession(model: model, instructions: tuning.instructionText).prewarm()
+            guard availability.isAvailable, standby.isEmpty else { return }
+            let session = LanguageModelSession(model: model, instructions: tuning.instructionText)
+            session.prewarm()
+            standby.put(session)
+        }
+
+        /// One warmed session, handed over once.
+        private final class Standby: Sendable {
+            private let slot = Mutex<LanguageModelSession?>(nil)
+
+            var isEmpty: Bool { slot.withLock { $0 == nil } }
+
+            /// Keeps `session` unless one is already waiting.
+            func put(_ session: LanguageModelSession) {
+                slot.withLock { $0 = $0 ?? session }
+            }
+
+            func take() -> LanguageModelSession? {
+                slot.withLock { session in
+                    defer { session = nil }
+                    return session
+                }
+            }
         }
 
         public func synthesize(
@@ -101,12 +150,16 @@ import Foundation
 
             // A session per question, deliberately. The framework charges the
             // whole transcript against the context window, so a long-lived
-            // session would spend the 4K budget on history that the passages
-            // need — and each turn is independently grounded anyway.
-            let session = LanguageModelSession(model: model, instructions: tuning.instructionText)
+            // session would spend the budget on history that the passages
+            // need — and each turn is independently grounded anyway. The
+            // session is the one `prewarm()` readied when there is one.
+            let session =
+                standby.take()
+                ?? LanguageModelSession(model: model, instructions: tuning.instructionText)
             try await streamFoundationModelsAnswer(
                 session: session, question: question, packed: packed, tuning: tuning,
                 modelDescription: modelDescription, into: continuation)
+            prewarm()
         }
 
         static func describe(_ reason: SystemLanguageModel.Availability.UnavailableReason) -> String {
@@ -331,7 +384,7 @@ import Foundation
 /// the framework — the provider picker then offers only remote backends, the
 /// same way chat.py falls back when no local model is reported.
 public func makeOnDeviceSynthesis(
-    budget: ContextBudgeter.Budget = .onDevice,
+    budget: ContextBudgeter.Budget? = nil,
     tuning: SynthesisTuning = .default
 ) -> (any SynthesisBackend)? {
     #if canImport(FoundationModels)

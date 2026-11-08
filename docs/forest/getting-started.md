@@ -68,9 +68,11 @@ On a phone or tablet the controls are on screen:
 - **Pinch:** in god's eye, zooms toward the point between your fingers.
 
 Everything else is in the top bar: home, **Browse** (groves, every book and
-the press), and the three-dot menu, which holds the clock, silent mode, the
-screenshot button, clean view, settings, About and **Exit to the start
-screen**. On a wider screen these are buttons in the bar; Exit is the last.
+the press), and the three-dot menu. On a phone the menu holds the clock, the
+camera view, silent mode, the screenshot button, clean view, settings, Moots,
+About and **Exit to the start screen**. On a wider screen the camera,
+screenshot and clean view are buttons in the bar, and the menu keeps the clock,
+silent mode, Moots, settings, About and Exit.
 
 ### Gamepad
 

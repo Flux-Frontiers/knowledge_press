@@ -40,7 +40,63 @@ struct ConversationLifecycleTests {
         return turn
     }
 
-    @Test("the first completed turn creates a conversation named after the question")
+    @Test("a suggested question's scope lasts the conversation and does not become the lens")
+    func suggestedScopeLastsTheConversation() async throws {
+        try await withModel { model, _ in
+            model.corpus = "philosophy"
+            model.send("pillar of salt", corpusOverride: "sacred-texts")
+            model.cancel()
+            #expect(model.turns[0].corpus == "sacred-texts")
+            #expect(model.corpus == "sacred-texts")
+            #expect(AppModel.initialCorpus() == "philosophy")
+
+            // Asking again from further back must not move the conversation.
+            model.corpus = "horror"
+            model.send("pillar of salt", corpusOverride: "sacred-texts")
+            model.cancel()
+            #expect(model.corpus == "horror")
+
+            model.newConversation()
+            #expect(model.corpus == "horror", "a scope picked by hand is the new lens")
+        }
+    }
+
+    @Test("a new conversation goes back to the lens, even with an empty chat")
+    func newConversationRestoresTheLens() async throws {
+        try await withModel { model, _ in
+            model.send("pillar of salt", corpusOverride: "sacred-texts")
+            model.cancel()
+            #expect(model.corpus == "sacred-texts")
+            model.newConversation()
+            #expect(model.corpus == "all")
+            model.newConversation()
+            #expect(model.corpus == "all")
+        }
+    }
+
+    @Test("reopening a conversation continues in its scope; leaving it restores the lens")
+    func reopenedConversationKeepsItsScope() async throws {
+        try await withModel { model, store in
+            model.turns = [
+                completedTurn("the categorical imperative", corpus: "all"),
+                completedTurn("and moral duty", corpus: "philosophy"),
+            ]
+            model.persistActiveConversation()
+            await model.pendingPersist?.value
+            let id = try #require(model.activeConversation?.id)
+
+            let relaunched = AppModel(store: store)
+            await relaunched.pendingPersist?.value
+            #expect(relaunched.corpus == "all")
+            relaunched.select(id)
+            await relaunched.pendingPersist?.value
+            #expect(relaunched.corpus == "philosophy")
+
+            relaunched.deleteActiveConversation()
+            #expect(relaunched.corpus == "all")
+        }
+    }
+
     func firstTurnCreatesAConversation() async throws {
         try await withModel { model, store in
             #expect(model.activeConversation == nil)

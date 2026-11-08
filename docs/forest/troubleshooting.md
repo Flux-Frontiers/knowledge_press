@@ -1,14 +1,17 @@
 # Troubleshooting
 
-## The tour is silent
+## The tour or a moot is silent
 
 Narration is off by default. Open settings and turn on **Read each grove
-aloud on the ring**, then start the tour.
+aloud on the ring**, then start the tour. A moot reads aloud when **Read moots
+aloud** is on, which it is by default.
 
 If it is on and you still hear nothing on an iPhone or iPad, check **Silent
-Mode**. iOS mutes the browser's speech when the device is silenced, even
-though video in another tab still plays. Open Control Center and turn Silent
-Mode off, then reload the page and tap once before starting the tour.
+Mode**. iOS mutes the forest's speech when the device is silenced, in Safari
+and in the Knowledge Press app alike, even though video still plays. This is
+how iOS treats speech from a web page, so turning the ringer back on is the
+fix. Open Control Center and turn Silent Mode off. In Safari, reload the page
+and tap once before starting the tour; in the app, just try again.
 
 If narration works on one device and not another, the second device is
 usually silenced or has its ringer volume down. Speech follows the ringer
@@ -28,7 +31,7 @@ checkout with its packs exported. See [Book text](../BOOK_TEXT.md).
 In settings:
 
 1. Set **Leaf complexity** to **Low**.
-2. Turn off **Shadows and forest floor detail**.
+2. Turn off **Shadows** and **Undergrowth**.
 3. Turn off **Wind and gentle cart motion**.
 
 **Show geometry and frame rate** tells you what you gained. On a phone the

@@ -15,13 +15,13 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
   const query = useGame((s) => s.query);
   const playing = useGame((s) => s.playing);
-  const detail = useGame((s) => s.preferences.detail);
+  const shadows = useGame((s) => s.preferences.shadows);
   const picker = useRef<((e: MouseEvent) => TreeSite | null) | null>(null);
 
   return (
     <Canvas
       // "percentage" is PCFShadowMap, which three r186 makes soft itself; "soft" asks for the removed PCFSoftShadowMap.
-      shadows={detail ? "percentage" : false}
+      shadows={shadows ? "percentage" : false}
       camera={{ position: [forest.spawn.x, 6.2, forest.spawn.z + 10], fov: 58, near: 0.12, far: 560 }}
       dpr={[1, PHONE ? 1 : COARSE_POINTER ? 1.25 : 1.5]}
       gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}

@@ -11,6 +11,86 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Anthropic as a worker provider.** Settings lists **Anthropic (cloud)**
+  beside oMLX, Ollama and OpenAI, for a worker running gutenberg_kg with
+  kgmodule-utils 0.30.0 and an `ANTHROPIC_API_KEY`. The model list comes from
+  the worker. Under Auto, illustrations use the local image server when it
+  is up, as for oMLX.
+- **Illustrations show their render time**, under the picture, as answers show
+  their synthesis time.
+- **Live moots are kept.** A moot that finishes is saved on the device under
+  **Your moots**, plays back with no worker, and can be deleted. One closed
+  early is not saved.
+
+### Changed
+
+- **Chat, Browse and Forest switch from the bottom on iPad**, as the phone's tabs
+  do, without opening the sidebar.
+- **God's eye starts from a clear view.** Switching to it closes the open book
+  card and the redwood's card. **Fly there** hides the cards during the flight,
+  so the dive can be watched, and opens the tree's card on landing.
+- **The forest's title card reads "Knowledge Press - *The Forest*".**
+- **A shorter top bar in the forest.** Clean view, screenshot, the camera, home
+  and Browse stay in the bar; the clock, silent mode, Moots, settings, About and
+  Exit move to the three-dot menu, which now shows on every screen size.
+- **Shadows on means every shadow.** Touch screens no longer skip the leaves'
+  and the redwood's shadows or use a smaller shadow map. Shadows stay off by
+  default.
+- **Book and tour cards on tablets sit beside the drive stick**, just above the
+  search bar, leaving the middle of the view clear.
+- **The forest's camera view is one tap away.** A button in the top bar, or an
+  item in the phone's menu, steps through the views, in place of the row in
+  Settings. The C key still works.
+- **Delete all conversations is last in Settings.**
+- **Worker sits under Answers in Settings**, beside the engine that uses it.
+- **On-device answers use the window the device has.** Devices that report an
+  8,192-token window (the newer chips under iOS 27 and macOS 27) get passages
+  twice as long; others are unchanged. The turn's provenance names the window.
+- **The on-device model stays warm between questions.** The session readied
+  when the chat opens now answers the next question instead of being
+  discarded, and a fresh one is readied after each answer.
+- **The forest draws faster.** Fir, pine and oak leaves use far fewer triangles.
+- **Shadows and undergrowth are separate settings.** Shadows are off by default,
+  including on devices that had them on, since on an iPad mini turning them off
+  about doubled the frame rate. Undergrowth and wind stay on by default.
+- **The app icon is an Icon Composer document.** `app/icon/AppIcon.icon`
+  replaces the flat icon sets on iPhone, iPad and Mac. The seal's rim, ring,
+  face and KP are separate layers on the navy fill, so the system renders them
+  in its light, dark, clear and tinted appearances. `make icons` now renders
+  only the splash and web PNGs.
+- **Clean view hides the map.** It now also hides Guided tour and Read on
+  touch screens, leaving the drive stick.
+- **Guided tour and Read sit side by side** on touch screens.
+- **No worker is set by default.** The web forest no longer assumes
+  `http://localhost:8000`, and **Hold a new moot** appears only once a worker
+  is set.
+- **In the app, the forest uses the app's worker.** Its Settings no longer ask
+  for a second address. **Reset all settings** clears the worker address too.
+
+### Fixed
+
+- **The on-device context window shows its real size.** The Answers section
+  always said 4,096 tokens; it now shows what the model reports, 8,192 on newer
+  devices under iOS 27 and macOS 27.
+- **Pepys opens from the forest.** In the app the forest's reader built a
+  diary entry by entry, three queries for each of Pepys's 3,358 days, and never
+  finished. A diary now loads in one query: about 3 seconds for Pepys on a Mac.
+- **A follow-up question stays in the conversation's scope.** After a suggested
+  question or Ask about this book, a follow-up searched whatever the picker had
+  been set to before, and a reopened conversation did too. A conversation now
+  keeps its scope, and a new one returns to the scope you chose in the picker.
+- **Share as PDF shows that it is working.** On iPhone and iPad a "Preparing
+  PDF..." indicator shows during the render, and the share sheet opens once the
+  file is ready, in place of a half-drawn sheet.
+- **The app's About page no longer offers `?meteors=` links**, since the app
+  has no address bar.
+- **The drive stick and buttons no longer sit on top of the reader** or an
+  exhibit's plaque on touch screens, where they covered Previous and Next.
+- **The forest's user guide links open in the browser** from the app; they did
+  nothing before.
+
 ## [1.34.1] - 2026-11-05
 
 ### Fixed

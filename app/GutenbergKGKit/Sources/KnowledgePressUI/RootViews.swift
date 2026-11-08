@@ -266,6 +266,21 @@ public struct PadRootView: View {
                         ToolbarItem(placement: .secondaryAction) {
                             ExportConversationButton()
                         }
+                        // The phone's three tabs, as a bar along the bottom: a
+                        // quick way between them, also in portrait with the
+                        // sidebar hidden.
+                        #if os(iOS)
+                            ToolbarItem(placement: .bottomBar) {
+                                Picker("Section", selection: section) {
+                                    Label("Chat", systemImage: "text.bubble").tag(SidebarItem.chat)
+                                    Label("Browse", systemImage: "books.vertical").tag(SidebarItem.browse)
+                                    Label("Forest", systemImage: "tree").tag(SidebarItem.forest)
+                                }
+                                .pickerStyle(.segmented)
+                                .labelStyle(.titleAndIcon)
+                                .fixedSize()
+                            }
+                        #endif
                     }
                     .deleteConversationConfirmation($confirmingDelete)
             }
@@ -287,6 +302,27 @@ public struct PadRootView: View {
         .onChange(of: model.sectionRequest) { _, request in
             if let request { selection = SidebarItem(request.section) }
         }
+    }
+
+    /// The bottom bar's choice: Chat stands for the chat row and any saved
+    /// conversation. Choosing Chat returns to the open conversation, so its
+    /// row stays highlighted.
+    private var section: Binding<SidebarItem> {
+        Binding(
+            get: {
+                switch selection {
+                case .browse: .browse
+                case .forest: .forest
+                case .chat, .conversation, .none: .chat
+                }
+            },
+            set: { item in
+                if item == .chat, let id = model.activeConversation?.id {
+                    selection = .conversation(id)
+                } else {
+                    selection = item
+                }
+            })
     }
 
     @ViewBuilder

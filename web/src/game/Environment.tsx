@@ -263,7 +263,7 @@ export function textureAnisotropy(n: number): number {
  * The one shadow-casting light, from the sun, the moon or the stars (sky.ts),
  * kept on a modest shadow map around the cart instead of covering the forest.
  */
-export function Sunlight({ light: l, detail }: { light: SkyState["light"]; detail: boolean }) {
+export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shadows: boolean }) {
   const light = useRef<DirectionalLight>(null);
   const target = useMemo(() => new Object3D(), []);
   // Never from below the ground: a sun on the horizon still lights from just above it.
@@ -282,8 +282,8 @@ export function Sunlight({ light: l, detail }: { light: SkyState["light"]; detai
     <primitive object={target} />
     {/* With no shadow to cast (night, twilight, a low sun) the shadow pass is skipped entirely. */}
     <directionalLight ref={light} target={target} color={l.color}
-      intensity={l.intensity} castShadow={detail && l.shadow > 0.01} shadow-intensity={l.shadow}
-      shadow-mapSize={COARSE_POINTER ? [1024, 1024] : [2048, 2048]} shadow-camera-left={-40} shadow-camera-right={40}
+      intensity={l.intensity} castShadow={shadows && l.shadow > 0.01} shadow-intensity={l.shadow}
+      shadow-mapSize={[2048, 2048]} shadow-camera-left={-40} shadow-camera-right={40}
       shadow-camera-top={40} shadow-camera-bottom={-40} shadow-camera-near={1} shadow-camera-far={160}
       shadow-bias={-0.0002} shadow-normalBias={0.08} />
   </>;

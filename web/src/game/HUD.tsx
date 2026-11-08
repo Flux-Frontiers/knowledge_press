@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -13,6 +13,7 @@ import { ReaderPanel } from "./Reader";
 import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import { host } from "./host";
+import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
@@ -20,18 +21,10 @@ const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as 
 export function HUD({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
   const timeMode = useGame((s) => s.timeMode);
-  const sunEvent = useGame((s) => s.sunEvent);
-  const moonName = useGame((s) => s.moonName);
   // The sky ticks every few seconds; subscribing re-renders the clock with it.
   useGame((s) => s.sky);
   const clock = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const timeLabel = timeMode === "live" ? clock(new Date()) : TIME_NAME[timeMode];
-  const timeTitle =
-    timeMode === "live"
-      ? `Live clock${sunEvent ? ` · ${sunEvent.kind} ${clock(sunEvent.at)}` : ""} · ${moonName} · tap for dawn`
-      : timeMode === "night"
-        ? `Night · ${moonName} · tap for the live clock`
-        : `${TIME_NAME[timeMode]} · tap for ${TIME_NAME[timeMode === "dawn" ? "day" : timeMode === "day" ? "dusk" : "night"].toLowerCase()}`;
   const toggleTimeOfDay = useGame((s) => s.toggleTimeOfDay);
   const query = useGame((s) => s.query);
   const setQuery = useGame((s) => s.setQuery);
@@ -73,7 +66,11 @@ export function HUD({ forest }: { forest: Forest }) {
   const clean = useGame((s) => s.cleanView);
   const toggleCleanView = useGame((s) => s.toggleCleanView);
   const silent = useGame((s) => s.preferences.silent);
+  const camera = useGame((s) => s.preferences.camera);
+  const stepCamera = () => setPreferences({ camera: nextCamera(camera) });
   const godEye = useGame((s) => s.preferences.camera === "god" && !s.flight);
+  // No cards during a flight, so the dive can be watched; the tree's card opens on landing.
+  const flying = useGame((s) => s.flight !== null);
   const tourStop = useGame((s) => s.tourStop);
   const touring = tourStop ? forest.groves.find((g) => g.genre === tourStop) : undefined;
   const tourNote = useGame((s) => s.tourNote);
@@ -82,7 +79,7 @@ export function HUD({ forest }: { forest: Forest }) {
   // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
   const shownSlug = pinnedSlug ?? (silent ? null : cardSlug);
   const nearby = shownSlug ? forest.trees.find((t) => t.book.slug === shownSlug) : undefined;
-  const showBook = Boolean(nearby && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
+  const showBook = !flying && Boolean(nearby && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
   const bookDist = nearby ? Math.hypot(nearby.x - x, nearby.z - z) : Infinity;
   const pressed = nearby ? library.includes(nearby.book.slug) : false;
   // The redwood's card shows on the hub plaza; once closed it stays closed until the cart leaves.
@@ -90,7 +87,9 @@ export function HUD({ forest }: { forest: Forest }) {
   const [redwoodClosed, setRedwoodClosed] = useState(false);
   const leftHub = hubDist > 20;
   useEffect(() => { if (leftHub) setRedwoodClosed(false); }, [leftHub]);
-  const atRedwood = !silent && !pinnedSlug && hubDist < 16 && !redwoodClosed;
+  // God's eye opens on a clear view; the redwood's card waits until the cart leaves the hub.
+  useEffect(() => { if (godEye) setRedwoodClosed(true); }, [godEye]);
+  const atRedwood = !flying && !silent && !pinnedSlug && hubDist < 16 && !redwoodClosed;
   const progress = questProgress({ library, grovesVisited, season });
   const nextQuest = QUESTS.find((q) => !q.done({ library, grovesVisited, season }));
   const selected = forest.groves.find((g) => g.genre === selectedGrove);
@@ -112,7 +111,11 @@ export function HUD({ forest }: { forest: Forest }) {
       <header className="pointer-events-none flex items-start justify-between gap-3 p-3 sm:p-4">
         {clean ? null : (
           <div className="rounded-lg border border-border bg-surface/90 px-3 py-2">
-            <p className="font-display text-lg leading-none">Knowledge Press</p>
+            {/* On a phone the subtitle takes its own line, so the card stays narrow enough for the buttons. */}
+            <p className="font-display text-lg leading-none">
+              Knowledge Press<span className="hidden sm:inline"> - </span>
+              <em className="mt-0.5 block whitespace-nowrap sm:mt-0 sm:inline">The Forest</em>
+            </p>
             <p className="mt-1 text-xs text-muted">
               {forest.trees.length} trees · {SEASONS[season].label}
               {" · "}
@@ -128,13 +131,14 @@ export function HUD({ forest }: { forest: Forest }) {
           </div>
         )}
         <div className="ml-auto flex flex-col items-end gap-2">
-          {/* Phones keep Home, Browse and a menu in the bar; the other buttons join them from sm up. */}
+          {/* Phones keep Home, Browse and the menu in the bar. From sm up the bar adds clean view, screenshot and
+              the camera; the clock, silent mode, moots, settings, About and exit stay in the menu at every size. */}
           <div className="pointer-events-auto relative flex flex-wrap items-center justify-end gap-2">
             <button
               type="button"
               onClick={() => { toggleCleanView(); (document.activeElement as HTMLElement | null)?.blur(); }}
               className={"size-11 place-items-center rounded-md border border-border bg-surface " + (clean ? "grid" : "hidden sm:grid")}
-              aria-label={clean ? "Show the buttons again" : "Clean view: hide the buttons, keep the map"}
+              aria-label={clean ? "Show the buttons again" : "Clean view: hide the buttons and the map"}
               title={clean ? "Show the buttons" : "Clean view"}
             >
               {clean ? <Eye className="size-4" strokeWidth={1.75} /> : <EyeOff className="size-4" strokeWidth={1.75} />}
@@ -150,21 +154,12 @@ export function HUD({ forest }: { forest: Forest }) {
             {clean ? null : (<>
               <button
                 type="button"
-                onClick={toggleTimeOfDay}
+                onClick={() => { stepCamera(); (document.activeElement as HTMLElement | null)?.blur(); }}
                 className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
-                aria-label={timeTitle}
-                title={timeTitle}
+                aria-label={`Camera: ${CAMERA_NAME[camera]}. Tap for ${CAMERA_NAME[nextCamera(camera)]}`}
+                title={`Camera · ${CAMERA_NAME[camera]} · C`}
               >
-                <TimeIcon mode={timeMode} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setPreferences({ silent: !silent })}
-                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
-                aria-label={silent ? "Silent mode on: turn pop-up cards back on" : "Turn on silent mode: no pop-up cards"}
-                title={silent ? "Silent · tap for pop-up cards" : "Pop-up cards · tap for silent"}
-              >
-                {silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
+                <Video className="size-4" strokeWidth={1.75} />
               </button>
               <button
                 type="button"
@@ -190,57 +185,26 @@ export function HUD({ forest }: { forest: Forest }) {
               </button>
               <button
                 type="button"
-                onClick={() => useGame.getState().openMoots(true)}
-                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
-                aria-label="Moots: books that talk to each other" title="Moots"
-              >
-                <MessagesSquare className="size-4" strokeWidth={1.75} />
-              </button>
-              <button
-                type="button"
-                onClick={() => pause(true)}
-                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
-                aria-label="Controls and settings" title="Controls and settings · Esc"
-              >
-                <Settings2 className="size-4" strokeWidth={1.75} />
-              </button>
-              <button
-                type="button"
-                onClick={() => useGame.getState().toggleHelp()}
-                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
-                aria-label="About the forest and tonight's sky" title="About · ?"
-              >
-                <Info className="size-4" strokeWidth={1.75} />
-              </button>
-              <button
-                type="button"
-                onClick={() => useGame.getState().exit()}
-                className="hidden size-11 place-items-center rounded-md border border-border bg-surface sm:grid"
-                aria-label="Exit to the start screen" title="Exit to the start screen"
-              >
-                <LogOut className="size-4" strokeWidth={1.75} />
-              </button>
-              <button
-                type="button"
                 onClick={() => setMenuOpen(!menuOpen)}
                 className={
-                  "grid size-11 place-items-center rounded-md border sm:hidden " +
+                  "grid size-11 place-items-center rounded-md border " +
                   (menuOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
                 }
-                aria-label="More: time of day, silent mode, screenshot, clean view, moots, settings, about, exit"
+                aria-label="More: time of day, silent mode, moots, settings, about, exit, and on a phone the other buttons too"
                 aria-expanded={menuOpen}
               >
                 <Ellipsis className="size-4" strokeWidth={1.75} />
               </button>
               {menuOpen ? (<>
-                <div className="fixed inset-0 z-30 sm:hidden" onClick={() => setMenuOpen(false)} aria-hidden />
-                <ul className="absolute top-full right-0 z-40 mt-2 w-60 rounded-lg border border-border bg-surface py-1 sm:hidden">
+                <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} aria-hidden />
+                <ul className="absolute top-full right-0 z-40 mt-2 w-60 rounded-lg border border-border bg-surface py-1">
                   <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
+                  <MenuItem phoneOnly icon={<Video className="size-4" strokeWidth={1.75} />} label={`Camera · ${CAMERA_NAME[camera]}`} onClick={stepCamera} />
                   <MenuItem icon={silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
                     label={silent ? "Silent · no pop-up cards" : "Pop-up cards on"} onClick={() => setPreferences({ silent: !silent })} />
-                  <MenuItem icon={<Camera className="size-4" strokeWidth={1.75} />} label="Screenshot"
+                  <MenuItem phoneOnly icon={<Camera className="size-4" strokeWidth={1.75} />} label="Screenshot"
                     onClick={() => { setMenuOpen(false); saveScreenshot(COARSE_POINTER); }} />
-                  <MenuItem icon={<EyeOff className="size-4" strokeWidth={1.75} />} label="Clean view"
+                  <MenuItem phoneOnly icon={<EyeOff className="size-4" strokeWidth={1.75} />} label="Clean view"
                     onClick={() => { setMenuOpen(false); toggleCleanView(); }} />
                   <MenuItem icon={<MessagesSquare className="size-4" strokeWidth={1.75} />} label="Moots"
                     onClick={() => { setMenuOpen(false); useGame.getState().openMoots(true); }} />
@@ -256,7 +220,7 @@ export function HUD({ forest }: { forest: Forest }) {
           </div>
 
           {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it. */}
-          <div className="pointer-events-auto w-28 sm:w-40">
+          {clean ? null : <div className="pointer-events-auto w-28 sm:w-40">
             <Minimap forest={forest} x={x} z={z} yaw={yaw} pins={query.trim() ? results : []} picked={searchPick} />
             {selected ? (
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
@@ -274,7 +238,7 @@ export function HUD({ forest }: { forest: Forest }) {
             ) : (
               <p className="mt-1 text-xs text-faint">Tap a grove for its books</p>
             )}
-          </div>
+          </div>}
         </div>
       </header>
 
@@ -472,9 +436,10 @@ function TimeIcon({ mode }: { mode: TimeMode }) {
   return <Icon className="size-4" strokeWidth={1.75} />;
 }
 
-function MenuItem({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
+/** A menu row; `phoneOnly` rows are buttons in the bar from sm up, so the menu drops them there. */
+function MenuItem({ icon, label, onClick, phoneOnly }: { icon: React.ReactNode; label: string; onClick: () => void; phoneOnly?: boolean }) {
   return (
-    <li>
+    <li className={phoneOnly ? "sm:hidden" : undefined}>
       <button type="button" onClick={onClick}
         className="flex min-h-11 w-full items-center gap-3 px-3 text-left text-sm hover:bg-bg">
         {icon}
@@ -500,12 +465,11 @@ function jumpToTree(t: TreeSite) {
   (document.activeElement as HTMLElement | null)?.blur();
 }
 
-/** From god's eye: put the cart at the tree and dive the camera down to it. */
+/** From god's eye: put the cart at the tree and dive the camera down to it, its card shut until landing. */
 function flyToTree(t: TreeSite) {
   const s = useGame.getState();
   s.selectGrove(null);
-  s.pinTree(t.book.slug);
-  s.flyTo(treeApproach(t, s.x, s.z), t.book.title);
+  s.flyTo(treeApproach(t, s.x, s.z), t.book.title, t.book.slug);
 }
 
 function jumpHome(forest: Forest) {

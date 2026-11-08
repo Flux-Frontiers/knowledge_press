@@ -5,10 +5,11 @@ import { useGame } from "./store";
 
 export function TouchControls() {
   const collect = useGame((s) => s.collect);
+  const clean = useGame((s) => s.cleanView);
   const nearbySlug = useGame((s) => s.nearbySlug);
   const pressed = useGame((s) => (s.nearbySlug ? s.library.includes(s.nearbySlug) : false));
   const nearbyDist = useGame((s) => s.nearbyDist);
-  const blocked = useGame((s) => s.paused || s.libraryOpen || s.atlasOpen || s.catalogOpen || s.mootsOpen || Boolean(s.mootId));
+  const blocked = useGame((s) => s.paused || s.libraryOpen || s.atlasOpen || s.catalogOpen || s.mootsOpen || Boolean(s.mootId) || Boolean(s.readingSlug) || Boolean(s.plaque));
   const toggleCircuit = useGame((s) => s.toggleCircuit);
   const travelMode = useGame((s) => s.travelMode);
 
@@ -24,7 +25,7 @@ export function TouchControls() {
         onMove={(x, y) => { const a = stickAxes(x, y); setTouchAxes(a.throttle, a.steer); }}
         onRelease={() => setTouchAxes(0, 0)} />
       {/* No look stick: a drag anywhere else on the forest looks around (Player.tsx). */}
-      <div className="pointer-events-auto flex flex-col items-end gap-2">
+      {clean ? null : <div className="pointer-events-auto flex items-center gap-2">
         <button type="button" className="min-h-11 rounded-full border border-border bg-surface px-4 text-sm" onClick={toggleCircuit}>
           {travelMode === "circuit" ? "End tour" : "Guided tour"}
         </button>
@@ -33,7 +34,7 @@ export function TouchControls() {
           onClick={() => { if (nearbySlug && nearbyDist < 6.8) collect(nearbySlug, bookBySlug(nearbySlug)?.title ?? "Book"); }}>
           {pressed ? "In press" : "Read"}
         </button>
-      </div>
+      </div>}
     </div>
   );
 }

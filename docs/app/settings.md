@@ -27,6 +27,15 @@ is in the sidebar as well.
 
 **Engine** picks who writes the answer; see [Answer engines](engines.md).
 
+## Worker
+
+The address of a server you run. Type it and tap **Test**. The app reports the
+number of books and genres it found, or why it could not reach it. On an
+iPhone or iPad, `localhost` means the device itself, so use your Mac's name or
+address instead. A GutenbergKG worker answers only its own Mac unless it is
+started with `WORKER_BIND=0.0.0.0` in its `docker/.env`; anyone on your
+network can use it then. See [Answer engines](engines.md#worker).
+
 ## Synthesis
 
 These shape how the model writes. They apply from the next answer.
@@ -49,11 +58,6 @@ cannot draw them on its own. The three resolutions are Preview (768 × 512),
 Standard (1152 × 768) and Full (1536 × 1024). A smaller one renders faster.
 **Backend** lists only the image sources the worker reports as ready now.
 
-## Delete all conversations
-
-Removes every saved chat, including their answers and illustrations. It asks
-first and cannot be undone.
-
 ## Corpus information
 
 Shows where the books are kept. With the corpus installed, it reads
@@ -61,16 +65,12 @@ Shows where the books are kept. With the corpus installed, it reads
 size. **Search and answers both run here. Airplane mode changes nothing.**
 appears when you are on the on-device engine.
 
-## Worker
-
-The address of a server you run. Type it and tap **Test**. The app reports the
-number of books and genres it found, or why it could not reach it. On an
-iPhone or iPad, `localhost` means the device itself, so use your Mac's name or
-address instead. A GutenbergKG worker answers only its own Mac unless it is
-started with `WORKER_BIND=0.0.0.0` in its `docker/.env`; anyone on your
-network can use it then. See [Answer engines](engines.md#worker).
-
 ## Help and About
 
 **Help** opens the in-app Help. **About** (on iPhone and iPad; on a Mac it is
 in the app menu) shows the version and the corpus counts.
+
+## Delete all conversations
+
+Removes every saved chat, including their answers and illustrations. It asks
+first and cannot be undone.

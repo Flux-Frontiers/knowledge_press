@@ -7,8 +7,8 @@
 
 Traces the KP ligature from fonts/Merriweather-Bold.ttf (SIL OFL 1.1) and
 writes it into the seal wherever the seal is drawn: every SVG in this
-folder except colors.css, the app icon sources app/icon/press-seal.svg and
-press-seal-macos.svg, and web/public/favicon.svg. The name is the same face,
+folder except colors.css, the app icon's KP layer, app/icon/press-seal.svg,
+and web/public/favicon.svg. The name is the same face,
 kerned by HarfBuzz and traced to outlines. Run `make icons` afterwards to
 re-render the app icon PNGs. See README.md for how to run it.
 """
@@ -37,7 +37,7 @@ KP_CAP, KP_OVERLAP = 260, 0.10
 # The seal is drawn in these files too; build.py rewrites the KP path in each.
 SEAL_FILES = [
     "app/icon/press-seal.svg",
-    "app/icon/press-seal-macos.svg",
+    "app/icon/AppIcon.icon/Assets/seal-kp.svg",
     "web/public/favicon.svg",
 ]
 

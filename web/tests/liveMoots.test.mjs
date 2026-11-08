@@ -76,10 +76,18 @@ test("the player steps to the next turn, waits on a live worker, and stops at th
   assert.equal(stepAfter(0, 0, false), 1);
 });
 
-test("the worker setting defaults to a local worker and keeps what was saved", () => {
-  const { readPreferences, DEFAULT_MOOT_WORKER } = prefs();
-  assert.equal(readPreferences().mootWorker, DEFAULT_MOOT_WORKER);
-  assert.equal(readPreferences({ mootWorker: "  " }).mootWorker, DEFAULT_MOOT_WORKER);
+test("the app's address decides in the app, the forest's setting on the web, and none means none", () => {
+  const { liveWorkerUrl } = live();
+  assert.equal(liveWorkerUrl(true, "http://mac.local:8000", "http://box:8000"), "http://mac.local:8000");
+  assert.equal(liveWorkerUrl(true, " ", "http://box:8000"), "");
+  assert.equal(liveWorkerUrl(false, "http://mac.local:8000", "http://box:8000"), "http://box:8000");
+  assert.equal(liveWorkerUrl(false, "", ""), "");
+});
+
+test("no worker is set by default, and the setting keeps what was saved", () => {
+  const { readPreferences } = prefs();
+  assert.equal(readPreferences().mootWorker, "");
+  assert.equal(readPreferences({ mootWorker: "  " }).mootWorker, "");
   assert.equal(readPreferences({ mootWorker: "http://box:8000" }).mootWorker, "http://box:8000");
   assert.equal(readPreferences({ mootToken: 3 }).mootToken, "");
 });

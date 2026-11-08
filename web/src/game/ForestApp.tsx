@@ -13,7 +13,7 @@ import { getForest, treeApproach, type Forest, type TreeSite } from "./forest";
 import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
 import { requestPlace } from "./location";
-import { LEAF_SCALE } from "./preferences";
+import { nextCamera, LEAF_SCALE } from "./preferences";
 import { resetSim } from "./sim";
 import { unlockSpeechOnGesture } from "./speech";
 import { useGame } from "./store";
@@ -106,6 +106,7 @@ export function ForestApp() {
     if (!forest) return;
     const off = host.on((command) => {
       const st = useGame.getState();
+      if (command.kind === "worker") { st.setHostWorker(command.url); return; }
       const slug = command.kind === "goto" ? command.slug : null;
       const tree = slug ? treeBySlug(slug, forest.trees) : undefined;
       if (slug && !tree) return;
@@ -210,10 +211,7 @@ export function ForestApp() {
       if (e.code === "KeyG") st.toggleAtlas();
       if (e.code === "KeyB") st.toggleCatalog();
       if (e.code === "KeyQ") st.toggleCircuit();
-      if (e.code === "KeyC") {
-        const next = { follow: "high", high: "cart", cart: "god", god: "follow" } as const;
-        st.setPreferences({ camera: next[st.preferences.camera] });
-      }
+      if (e.code === "KeyC") st.setPreferences({ camera: nextCamera(st.preferences.camera) });
       if (e.code === "KeyH" && forest) {
         st.selectGrove(null);
         st.requestJump(forest.home, "Home · the corpus redwood");

@@ -102,6 +102,9 @@ public struct ChatTurn: Identifiable, Sendable, Codable {
     /// The illustration on disk, as a path relative to the conversation
     /// directory. Set once the store has written the PNG.
     var imageFile: String?
+    /// How long the illustration took, from the tap: the prompt rewrite and
+    /// the render. Nil on a turn saved before this was kept.
+    var imageRenderMs: Int?
     /// Set when rendering was attempted and failed — always network-only,
     /// so a failure here is ordinary (no worker configured, no reachable
     /// worker) rather than exceptional.
@@ -119,7 +122,7 @@ public struct ChatTurn: Identifiable, Sendable, Codable {
     /// a fact about the conversation, and the image bytes live beside it.
     enum CodingKeys: String, CodingKey {
         case id, question, corpus, engine, retrieval, answer, metrics
-        case synthesisFailure, errorMessage, imageFile, imageError
+        case synthesisFailure, errorMessage, imageFile, imageRenderMs, imageError
     }
 
     var isStreaming: Bool {
@@ -216,6 +219,19 @@ public final class AppModel {
     }
 
     private var storedCorpus: String = AppModel.initialCorpus()
+
+    /// Search this conversation in `scope`, without changing the saved lens:
+    /// follow-up questions stay in it, and the next conversation does not.
+    ///
+    /// :param scope: A genre, or a one-book `<genre>/<book>` key.
+    private func scopeConversation(to scope: String) {
+        storedCorpus = scope
+    }
+
+    /// Back to the reader's saved lens, when a conversation's own scope ends.
+    private func restoreSavedScope() {
+        storedCorpus = AppModel.initialCorpus()
+    }
 
     static let corpusKey = "corpus"
 
@@ -397,8 +413,8 @@ public final class AppModel {
     /// Persisted as JSON, for the same reason the worker address is: a
     /// reader comparing answers at two temperatures should not find the
     /// slider back at its default after a relaunch. Applied per question --
-    /// the backend is built fresh in `synthesisBackend`, so a change here is
-    /// in force for the very next answer.
+    /// `synthesisBackend` rebuilds the backend when this changes, so a change
+    /// here is in force for the very next answer.
     var synthesisTuning: SynthesisTuning {
         get { storedSynthesisTuning }
         set {
@@ -543,6 +559,8 @@ public final class AppModel {
             ForestHost.log("pressed: \(slug)")
         case .ready:
             ForestHost.log("ready")
+        case .resetSettings:
+            workerURLString = ""
         }
     }
 
@@ -558,7 +576,7 @@ public final class AppModel {
     func askAbout(tree slug: String) {
         guard let location = forest.server?.catalog.location(of: slug) else { return }
         newConversation()
-        corpus = "\(location.genre)/\(location.book)"
+        scopeConversation(to: "\(location.genre)/\(location.book)")
         chatDraft = "In \(location.book), "
         sectionRequest = SectionRequest(section: .chat)
     }
@@ -635,6 +653,7 @@ public final class AppModel {
     /// A no-op on an empty buffer, so tapping it twice cannot produce two
     /// empty conversations -- or any at all.
     public func newConversation() {
+        restoreSavedScope()
         guard !turns.isEmpty else { return }
         cancel()
         persistActiveConversation()
@@ -658,6 +677,12 @@ public final class AppModel {
             guard let self, let loaded else { return }
             self.activeConversation = loaded
             self.turns = loaded.turns
+            // A follow-up continues in the scope the conversation left off in.
+            if let scope = loaded.turns.last?.corpus {
+                self.scopeConversation(to: scope)
+            } else {
+                self.restoreSavedScope()
+            }
         }
     }
 
@@ -668,6 +693,7 @@ public final class AppModel {
             cancel()
             turns.removeAll()
             activeConversation = nil
+            restoreSavedScope()
         }
         conversations.removeAll { $0.id == id }
         pendingPersist = Task { [weak self] in
@@ -690,6 +716,7 @@ public final class AppModel {
         } else {
             cancel()
             turns.removeAll()
+            restoreSavedScope()
         }
     }
 
@@ -823,6 +850,7 @@ public final class AppModel {
         ("oMLX (local MLX)", "omlx"),
         ("Ollama (local)", "ollama"),
         ("OpenAI (cloud)", "openai"),
+        ("Anthropic (cloud)", "anthropic"),
     ]
 
     /// Genre-tagged starter queries shown when the chat is empty.
@@ -918,12 +946,24 @@ public final class AppModel {
         return client
     }
 
-    /// Built per question rather than held, so `synthesisTuning` applies to
-    /// the next answer. `onDevice` and `privateCloud` stay as the long-lived
-    /// handles for availability, quota and prewarming.
+    /// The on-device backend built for the current `synthesisTuning`, kept
+    /// until the tuning changes: the session `prewarmOnDevice()` readies
+    /// lives on this instance, so the question has to reach the same one.
+    private var tunedOnDevice: (backend: any SynthesisBackend, tuning: SynthesisTuning)?
+
+    private var onDeviceBackend: (any SynthesisBackend)? {
+        if let cached = tunedOnDevice, cached.tuning == synthesisTuning { return cached.backend }
+        guard let backend = makeOnDeviceSynthesis(tuning: synthesisTuning) else { return nil }
+        tunedOnDevice = (backend, synthesisTuning)
+        return backend
+    }
+
+    /// Resolved per question, so `synthesisTuning` applies to the next
+    /// answer. `onDevice` and `privateCloud` stay as the long-lived handles
+    /// for availability and quota.
     private var synthesisBackend: (any SynthesisBackend)? {
         switch engine {
-        case .onDevice: return makeOnDeviceSynthesis(tuning: synthesisTuning)
+        case .onDevice: return onDeviceBackend
         case .privateCloud: return makePrivateCloudSynthesis(tuning: synthesisTuning)
         case .worker, .off: return nil
         }
@@ -1017,11 +1057,14 @@ public final class AppModel {
         }
     }
 
-    /// Load the built-in model's weights so the first answer starts promptly.
+    /// Ready the built-in model so the next answer starts promptly.
+    ///
+    /// Warms the tuned backend that will answer, not the long-lived
+    /// `onDevice` handle: the warmed session is kept on the instance.
     public func prewarmOnDevice() {
         #if canImport(FoundationModels)
             if #available(iOS 26.0, macOS 26.0, *),
-                let backend = onDevice as? OnDeviceSynthesis
+                let backend = onDeviceBackend as? OnDeviceSynthesis
             {
                 backend.prewarm()
             }
@@ -1034,6 +1077,8 @@ public final class AppModel {
         guard !text.isEmpty, !isQuerying else { return }
 
         let scope = corpusOverride ?? corpus
+        // A suggested question starts its conversation in its own scope.
+        if turns.isEmpty, corpusOverride != nil { scopeConversation(to: scope) }
         let turn = ChatTurn(question: text, corpus: scope, engine: engine)
         turns.append(turn)
         isQuerying = true
@@ -1093,6 +1138,7 @@ public final class AppModel {
                 }
             }
             do {
+                let started = ContinuousClock.now
                 let prompt = try await client.rewrite(rawPrompt, backend: backend)
                 let imageBackend = Self.resolveImageBackend(
                     choice: imageBackendChoice, textBackend: backend,
@@ -1101,6 +1147,7 @@ public final class AppModel {
                     prompt: prompt, imageBackend: imageBackend, size: imageResolution.size)
                 guard let i = turns.firstIndex(where: { $0.id == id }) else { return }
                 turns[i].generatedImage = image
+                turns[i].imageRenderMs = Int(started.duration(to: .now) / .milliseconds(1))
                 // Creates the conversation if this render beat it to it, so
                 // there is a directory to put the PNG in.
                 persistActiveConversation()
