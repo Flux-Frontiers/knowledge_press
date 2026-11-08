@@ -20,6 +20,8 @@ declare global {
     __shotExtent?: (slug: string) => import("./portrait").Extent | null;
     /** One frame for a set of books, so they are all shot at the same scale. */
     __shotFrame?: (slugs: string[]) => import("./portrait").Frame;
+    /** With `?profile`: the renderer and scene, for profiling scripts (ForestCanvas.tsx). */
+    __forestProfile?: { gl: import("three").WebGLRenderer; scene: import("three").Scene; camera: import("three").Camera; game: typeof import("./store").useGame };
   }
 }
 

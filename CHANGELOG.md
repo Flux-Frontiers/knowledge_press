@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **`web/scripts/profile.mjs`** measures where the forest's frame goes: triangles,
+  draw calls and render time per camera view and leaf level, with and without
+  the leaves, and the shadow pass on its own. It runs in headless Chromium with
+  software WebGL, so its times compare cases rather than predict a device; its
+  counts are exact. `?profile` hands it the renderer.
 - **Anthropic as a worker provider.** Settings lists **Anthropic (cloud)**
   beside oMLX, Ollama and OpenAI, for a worker running gutenberg_kg with
   kgmodule-utils 0.30.0 and an `ANTHROPIC_API_KEY`. The model list comes from
@@ -26,6 +31,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Far groves draw fewer, larger leaves.** Past 45 m a grove draws a share
+  of its leaves that falls with the square of the distance, each enlarged so
+  the crown covers as much, down to a ninth of them at three times their size.
+  The god's-eye view at Ultra drew 13.0M triangles, 11.3M of them leaves; it
+  now draws 3.2M, and the view from the cart at Ultra 1.7M instead of 4.9M.
+  Leaves the season has dropped are no longer drawn at all. A tree's portrait
+  still draws every leaf. The technique is Solstice's, after Unreal's Nanite
+  foliage ([SamG-Coder/solstice](https://github.com/SamG-Coder/solstice), MIT).
+- **The shadow map is redrawn only when it is stale.** It was drawn every
+  frame; now every other frame while the cart moves, every fourth at rest in
+  the wind, at once when the sun moves, and otherwise about twice a second. Its
+  camera sits on whole shadow texels, so shadow edges keep still as the cart
+  drives. Also from Solstice, which redraws a shadow cascade only when its view
+  changes.
+- **`?nolod`** turns both off, to compare.
 - **God's eye starts from a clear view.** Switching to it closes the open book
   card and the redwood's card. **Fly there** hides the cards during the flight,
   so the dive can be watched, and opens the tree's card on landing.

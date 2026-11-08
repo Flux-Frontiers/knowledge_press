@@ -6,6 +6,7 @@ import type { SkyState } from "./sky";
 import { planetPositions } from "./planets";
 import { starBuffers } from "./stars";
 import { fogMix, overcast, weather } from "./weather";
+import { shadowStale, snapToTexels, type ShadowState } from "./foliageLod";
 import { mulberry32 } from "./math";
 import type { SeasonName } from "./seasons";
 import { sim } from "./sim";
@@ -259,20 +260,49 @@ export function textureAnisotropy(n: number): number {
   return WEBKIT ? 1 : n;
 }
 
+/** The shadow camera's half-width, metres, and the shadow map's size; one texel is 2 * SHADOW_HALF / SHADOW_MAP. */
+const SHADOW_HALF = 40;
+const SHADOW_MAP = 2048;
+/** `?nolod` also redraws the shadow map every frame, to compare (foliageLod.ts). */
+const SHADOW_CACHE = typeof window === "undefined" || !new URLSearchParams(window.location.search).has("nolod");
+
 /**
  * The one shadow-casting light, from the sun, the moon or the stars (sky.ts),
  * kept on a modest shadow map around the cart instead of covering the forest.
+ * The map is redrawn only when it is stale (foliageLod.ts shadowStale), and
+ * centred on whole texels so its edges keep still as the cart drives.
  */
 export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shadows: boolean }) {
   const light = useRef<DirectionalLight>(null);
   const target = useMemo(() => new Object3D(), []);
+  const gl = useThree((t) => t.gl);
+  const last = useRef<ShadowState | null>(null);
   // Never from below the ground: a sun on the horizon still lights from just above it.
   const dir = useMemo(() => new Vector3(l.dir[0], Math.max(l.dir[1], 0.05), l.dir[2]).normalize(), [l.dir]);
+  const casting = shadows && l.shadow > 0.01;
+  useEffect(() => {
+    if (!SHADOW_CACHE) return;
+    gl.shadowMap.autoUpdate = false;
+    return () => { gl.shadowMap.autoUpdate = true; };
+  }, [gl]);
+  // A map that has just started casting has nothing in it yet.
+  useEffect(() => { last.current = null; }, [casting]);
   useFrame(() => {
     if (!light.current) return;
-    target.position.set(sim.x, 0, sim.z);
-    light.current.position.set(sim.x + dir.x * 80, dir.y * 80, sim.z + dir.z * 80);
+    const d: [number, number, number] = [dir.x, dir.y, dir.z];
+    const [tx, ty, tz] = SHADOW_CACHE ? snapToTexels(sim.x, sim.z, d, (2 * SHADOW_HALF) / SHADOW_MAP) : [sim.x, 0, sim.z];
+    target.position.set(tx, ty, tz);
+    light.current.position.set(tx + dir.x * 80, ty + dir.y * 80, tz + dir.z * 80);
     target.updateMatrixWorld();
+    if (SHADOW_CACHE && casting) {
+      const g = useGame.getState();
+      if (shadowStale(last.current, sim.x, sim.z, d, g.preferences.motion && !g.paused)) {
+        gl.shadowMap.needsUpdate = true;
+        last.current = { x: sim.x, z: sim.z, dir: d, frames: 0 };
+      } else if (last.current) {
+        last.current.frames++;
+      }
+    }
     // Fog and cloud take the sun's strength and soften its shadows.
     const o = overcast(weather);
     light.current.intensity = l.intensity * (1 - 0.7 * o);
@@ -282,9 +312,9 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
     <primitive object={target} />
     {/* With no shadow to cast (night, twilight, a low sun) the shadow pass is skipped entirely. */}
     <directionalLight ref={light} target={target} color={l.color}
-      intensity={l.intensity} castShadow={shadows && l.shadow > 0.01} shadow-intensity={l.shadow}
-      shadow-mapSize={[2048, 2048]} shadow-camera-left={-40} shadow-camera-right={40}
-      shadow-camera-top={40} shadow-camera-bottom={-40} shadow-camera-near={1} shadow-camera-far={160}
+      intensity={l.intensity} castShadow={casting} shadow-intensity={l.shadow}
+      shadow-mapSize={[SHADOW_MAP, SHADOW_MAP]} shadow-camera-left={-SHADOW_HALF} shadow-camera-right={SHADOW_HALF}
+      shadow-camera-top={SHADOW_HALF} shadow-camera-bottom={-SHADOW_HALF} shadow-camera-near={1} shadow-camera-far={160}
       shadow-bias={-0.0002} shadow-normalBias={0.08} />
   </>;
 }

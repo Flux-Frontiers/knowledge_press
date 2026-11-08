@@ -47,6 +47,7 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
       <World forest={forest} season={season} />
       <Trees forest={forest} season={season} query={query} />
       <StatsSampler />
+      <ProfileHook />
       <ScreenshotCapture />
       <TreePicker forest={forest} picker={picker} />
       <GodEyeZoom forest={forest} />
@@ -72,6 +73,17 @@ function StatsSampler() {
     s.setStats({ tris: gl.info.render.triangles, calls: gl.info.render.calls, fps: acc.current.frames / acc.current.t });
     acc.current = { t: 0, frames: 0 };
   });
+  return null;
+}
+
+/** With `?profile` in the URL, hands the renderer to a test script (`window.__forestProfile`); otherwise does nothing. */
+function ProfileHook() {
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has("profile")) return;
+    window.__forestProfile = { gl, scene, camera, game: useGame };
+    return () => { window.__forestProfile = undefined; };
+  }, [gl, scene, camera]);
   return null;
 }
 
