@@ -245,6 +245,10 @@ struct ModelBrowser: CorpusBrowser {
     func chapter(genre: String, book: String, sectionId: String) async throws -> ChapterContent {
         try await current().chapter(genre: genre, book: book, sectionId: sectionId)
     }
+
+    func wholeBook(genre: String, book: String) async throws -> [BookChapterText] {
+        try await current().wholeBook(genre: genre, book: book)
+    }
 }
 
 /// Forwards the page's `forest` messages to the host without retaining it.
