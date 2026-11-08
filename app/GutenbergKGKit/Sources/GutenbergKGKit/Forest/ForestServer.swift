@@ -113,16 +113,10 @@ public final class ForestServer: Sendable {
     private static func encodeBook(genre: String, book: String, from browser: any CorpusBrowser)
         async throws -> Data?
     {
-        let list = try await browser.chapters(genre: genre, book: book)
-        guard !list.isEmpty else { return nil }
-        var chapters: [BookText.Chapter] = []
-        chapters.reserveCapacity(list.count)
-        for (position, entry) in list.enumerated() {
-            let content = try await browser.chapter(genre: genre, book: book, sectionId: entry.id)
-            let title = content.title ?? entry.title ?? "Chapter \(position + 1)"
-            chapters.append(.init(title: title, text: content.text))
-        }
-        return try JSONEncoder().encode(BookText(chapters: chapters))
+        let whole = try await browser.wholeBook(genre: genre, book: book)
+        guard !whole.isEmpty else { return nil }
+        return try JSONEncoder().encode(
+            BookText(chapters: whole.map { .init(title: $0.title, text: $0.text) }))
     }
 
     /// The path with its query, fragment and leading slashes removed, and

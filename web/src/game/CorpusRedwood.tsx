@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DoubleSide, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, RepeatWrapping, RGBADepthPacking, SRGBColorSpace } from "three";
-import { COARSE_POINTER, textureAnisotropy } from "./Environment";
+import { textureAnisotropy } from "./Environment";
 import { HUB_PLAQUE_DIR, HUB_PLAQUE_DIST, type Forest } from "./forest";
 import type { SeasonName } from "./seasons";
 import { Lectern } from "./Signposts";
@@ -210,8 +210,7 @@ export function CorpusRedwood({ forest, season }: { forest: Forest; season: Seas
 
   return (
     <group>
-      {/* Touch devices skip the redwood's shadows, as they do the book trees' leaves. */}
-      <mesh geometry={bark} material={barkMat} castShadow={!COARSE_POINTER} receiveShadow />
+      <mesh geometry={bark} material={barkMat} castShadow receiveShadow />
       {/* Tapping the trunk lists every book. An invisible cone takes the click:
           hit-testing the bark itself, one limb per book, on every pointer move costs too much. */}
       <mesh position={[0, c.height * 0.3, 0]}
@@ -221,7 +220,7 @@ export function CorpusRedwood({ forest, season }: { forest: Forest; season: Seas
         <meshBasicMaterial visible={false} />
       </mesh>
       <instancedMesh ref={ref} args={[spray, sprayMat, Math.max(1, c.foliage.count)]} customDepthMaterial={sprayDepth}
-        castShadow={!COARSE_POINTER} receiveShadow={!COARSE_POINTER} />
+        castShadow receiveShadow />
       <RedwoodPlaque forest={forest} />
       <UplightFixtures radius={c.baseRadius + 0.5} count={6} pool={3.5} />
     </group>

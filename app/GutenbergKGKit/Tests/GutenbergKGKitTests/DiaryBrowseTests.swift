@@ -101,6 +101,26 @@ struct DiaryBrowseTests {
         #expect(last.nextId == nil)
     }
 
+    @Test func wholeDiaryInOneQueryMatchesEntryByEntry() throws {
+        let diaries = try openDiaries()
+        for kgName in ["johnson", "evelyn-volume-1"] {
+            let entries = try diaries.diaryEntries(kgName: kgName)
+            let oneByOne = try entries.map { entry in
+                let content = try #require(try diaries.diaryEntry(kgName: kgName, timestamp: entry.id))
+                return BookChapterText(title: content.title ?? "", text: content.text)
+            }
+            #expect(try diaries.diaryText(kgName: kgName) == oneByOne, "\(kgName)")
+        }
+    }
+
+    @Test func pepysOpensWholeQuickly() async throws {
+        let browser = try openBrowser()
+        let start = ContinuousClock.now
+        let whole = try await browser.wholeBook(genre: "diaries", book: "The Diary of Samuel Pepys — Complete")
+        #expect(whole.count == 3358)
+        #expect(start.duration(to: .now) < .seconds(5))
+    }
+
     @Test func unknownTimestampReturnsNil() throws {
         let diaries = try openDiaries()
         #expect(try diaries.diaryEntry(kgName: "johnson", timestamp: "1000-01-01T00:00") == nil)

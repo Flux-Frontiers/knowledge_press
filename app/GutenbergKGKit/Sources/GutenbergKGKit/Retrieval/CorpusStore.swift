@@ -428,6 +428,41 @@ public final class PassagePack: @unchecked Sendable {
             nextId: next)
     }
 
+    /// Every dated entry of one diary with its text, earliest first, in one
+    /// query: the same entries and text as ``diaryEntries(kgName:)`` and
+    /// ``diaryEntry(kgName:timestamp:)`` give one at a time.
+    ///
+    /// :param kgName: The diary's identity in this pack.
+    /// :returns: One chapter per dated entry, titled with its date.
+    public func diaryText(kgName: String) throws -> [BookChapterText] {
+        var out: [BookChapterText] = []
+        var current: String?
+        var text = ""
+        func flush() {
+            if let current, !text.isEmpty {
+                out.append(BookChapterText(title: Self.formatDiaryDate(current), text: text))
+            }
+        }
+        try each(
+            """
+            SELECT timestamp, content FROM passages
+             WHERE kg_name = ? AND timestamp IS NOT NULL
+             ORDER BY timestamp, file_path, char_start
+            """,
+            bind: [kgName]
+        ) { statement in
+            let timestamp = Self.text(statement, 0)
+            if timestamp != current {
+                flush()
+                current = timestamp
+                text = ""
+            }
+            text += (text.isEmpty ? "" : "\n\n") + (Self.text(statement, 1) ?? "")
+        }
+        flush()
+        return out
+    }
+
     /// A diary timestamp (`"1645-02-15T00:00"`) as a reading date.
     ///
     /// The stored value is not full ISO 8601 — no seconds, no timezone — so a

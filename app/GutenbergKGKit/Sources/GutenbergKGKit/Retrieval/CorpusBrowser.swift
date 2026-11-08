@@ -15,6 +15,43 @@ public protocol CorpusBrowser: Sendable {
     func listBooks(genre: String) async throws -> [Book]
     func chapters(genre: String, book: String) async throws -> [Chapter]
     func chapter(genre: String, book: String, sectionId: String) async throws -> ChapterContent
+    /// Every chapter of one book, in reading order: the forest's reader takes a
+    /// book whole.
+    func wholeBook(genre: String, book: String) async throws -> [BookChapterText]
+}
+
+/// One chapter of a whole book, as the forest's reader shows it.
+public struct BookChapterText: Sendable, Equatable {
+    public let title: String
+    public let text: String
+
+    public init(title: String, text: String) {
+        self.title = title
+        self.text = text
+    }
+}
+
+extension CorpusBrowser {
+    /// The list, then each chapter in turn. Fine for a book's few dozen
+    /// chapters; a diary's thousands of entries need ``LocalBrowser``'s single
+    /// query instead.
+    public func wholeBook(genre: String, book: String) async throws -> [BookChapterText] {
+        try await chapterByChapter(genre: genre, book: book)
+    }
+
+    /// ``wholeBook(genre:book:)`` one chapter at a time.
+    func chapterByChapter(genre: String, book: String) async throws -> [BookChapterText] {
+        let list = try await chapters(genre: genre, book: book)
+        var out: [BookChapterText] = []
+        out.reserveCapacity(list.count)
+        for (position, entry) in list.enumerated() {
+            let content = try await chapter(genre: genre, book: book, sectionId: entry.id)
+            out.append(
+                BookChapterText(
+                    title: content.title ?? entry.title ?? "Chapter \(position + 1)", text: content.text))
+        }
+        return out
+    }
 }
 
 extension WorkerClient: CorpusBrowser {}
@@ -110,6 +147,17 @@ public struct LocalBrowser: CorpusBrowser {
             throw BrowseError.unknownBook("diaries/\(book)")
         }
         return try pack.diaryEntries(kgName: kgName)
+    }
+
+    /// A diary whole, in one query. Entry by entry, Pepys's 3,358 days took
+    /// three queries each, two of them scans of the pack, and the forest's
+    /// reader never finished opening it.
+    public func wholeBook(genre: String, book: String) async throws -> [BookChapterText] {
+        guard genre == "diaries" else { return try await chapterByChapter(genre: genre, book: book) }
+        guard let pack = diaryPack(), let kgName = try pack.diaryIdentity(title: book) else {
+            throw BrowseError.unknownBook("diaries/\(book)")
+        }
+        return try pack.diaryText(kgName: kgName)
     }
 
     private func diaryChapter(book: String, sectionId: String) throws -> ChapterContent? {
