@@ -70,9 +70,9 @@ On a phone or tablet the controls are on screen:
 Everything else is in the top bar: home, **Browse** (groves, every book and
 the press), and the three-dot menu. On a phone the menu holds the clock, the
 camera view, silent mode, the screenshot button, clean view, settings, Moots,
-About and **Exit to the start screen**. On a wider screen the clock, camera,
-screenshot and clean view are buttons in the bar, and the menu keeps silent
-mode, Moots, settings, About and Exit.
+About and **Exit to the start screen**. On a wider screen the camera,
+screenshot and clean view are buttons in the bar, and the menu keeps the clock,
+silent mode, Moots, settings, About and Exit.
 
 ### Gamepad
 

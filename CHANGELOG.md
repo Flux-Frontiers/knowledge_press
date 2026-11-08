@@ -30,9 +30,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   card and the redwood's card. **Fly there** hides the cards during the flight,
   so the dive can be watched, and opens the tree's card on landing.
 - **The forest's title card reads "Knowledge Press - *The Forest*".**
-- **A shorter top bar in the forest.** Clean view, screenshot, the clock, the
-  camera, home and Browse stay in the bar; silent mode, Moots, settings, About
-  and Exit move to the three-dot menu, which now shows on every screen size.
+- **A shorter top bar in the forest.** Clean view, screenshot, the camera, home
+  and Browse stay in the bar; the clock, silent mode, Moots, settings, About and
+  Exit move to the three-dot menu, which now shows on every screen size.
 - **Shadows on means every shadow.** Touch screens no longer skip the leaves'
   and the redwood's shadows or use a smaller shadow map. Shadows stay off by
   default.
