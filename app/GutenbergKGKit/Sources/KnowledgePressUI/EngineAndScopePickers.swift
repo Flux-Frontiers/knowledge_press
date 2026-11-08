@@ -18,6 +18,16 @@ import SwiftUI
 struct AnswerEnginePicker: View {
     @Environment(AppModel.self) private var model
 
+    /// The window the on-device model reports: 8,192 on newer devices under
+    /// iOS 27 and macOS 27, else 4,096. It was a fixed 4,096 here, which
+    /// stopped being true when the budget began reading it.
+    private static var onDeviceWindow: Int {
+        #if canImport(FoundationModels)
+            if #available(iOS 26.0, macOS 26.0, *) { return OnDeviceSynthesis.reportedContextWindow }
+        #endif
+        return 4_096
+    }
+
     var body: some View {
         @Bindable var model = model
         Picker("Engine", selection: $model.engine) {
@@ -43,7 +53,7 @@ struct AnswerEnginePicker: View {
                     .font(.caption)
                     .foregroundStyle(.orange)
             } else {
-                Text("Context window 4,096 tokens — up to 5 passages reach the model.")
+                Text("Context window \(Self.onDeviceWindow.formatted()) tokens — up to 5 passages reach the model.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

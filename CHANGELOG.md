@@ -69,6 +69,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The on-device context window shows its real size.** The Answers section
+  always said 4,096 tokens; it now shows what the model reports, 8,192 on newer
+  devices under iOS 27 and macOS 27.
 - **Pepys opens from the forest.** In the app the forest's reader built a
   diary entry by entry, three queries for each of Pepys's 3,358 days, and never
   finished. A diary now loads in one query: about 3 seconds for Pepys on a Mac.
