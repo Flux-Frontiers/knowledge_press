@@ -27,7 +27,7 @@ ingestion pipeline and the on-device pack format are documented on the
 | Find out why an answer stopped early | [App troubleshooting](app/troubleshooting.md#an-answer-stops-partway) |
 | Know what the trees, groves and roads mean | [The forest](forest/the-forest.md) |
 | Find a particular book | [Finding books](forest/finding.md) |
-| Hear the guided tour on an iPad | [Troubleshooting](forest/troubleshooting.md#the-tour-is-silent) |
+| Hear the guided tour or a moot on an iPad | [Troubleshooting](forest/troubleshooting.md#the-tour-or-a-moot-is-silent) |
 | Read books in a local checkout | [Book text](BOOK_TEXT.md) |
 
 The source is at
