@@ -103,6 +103,7 @@ function CartCargo({ load }: { load: readonly CartBook[] }) {
 }
 
 export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelRight, load }: CartProps) {
+  const aim = useMemo(() => new Object3D(), []);
   // A row of books standing in the bed, heights and widths varied by position.
   const books = useMemo(() => Array.from({ length: 9 }, (_, k) => ({
     x: -0.42 + k * 0.105,
@@ -196,9 +197,11 @@ export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelR
             bed but not its own cap and hook, which at arm's length in the cart view
             clipped to white at night along with the ground under it. */}
         {light ? (
-          <spotLight position={[0, -0.14, 0]} color="#f6e7c2" intensity={2.6} angle={1.2} penumbra={0.5} distance={18} decay={2}>
-            <object3D attach="target" position={[0, -1, 0.5]} />
-          </spotLight>
+          <>
+            <spotLight position={[0, -0.14, 0]} target={aim} color="#f6e7c2" intensity={2.6} angle={1.2} penumbra={0.5} distance={18} decay={2} />
+            {/* The target must hang in the scene graph for the light to follow it; here it rides with the cart. */}
+            <primitive object={aim} position={[0, -1.14, 0.5]} />
+          </>
         ) : null}
       </group>
 
