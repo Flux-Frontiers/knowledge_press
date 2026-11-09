@@ -107,13 +107,28 @@ public final class PassagePack: @unchecked Sendable {
     /// :param scope: A genre or one book, or nil.
     /// :returns: Passage ids, best-first by BM25.
     public func lexicalSearch(_ query: String, limit: Int, scope: PassageScope?) throws -> [String] {
+        try lexicalMatches(query, limit: limit, scope: scope).ids
+    }
+
+    /// ``lexicalSearch(_:limit:scope:)``, plus whether the ids are literal
+    /// matches of the whole query.
+    ///
+    /// :param query: Raw query text.
+    /// :param limit: Maximum ids to return.
+    /// :param scope: A genre or one book, or nil.
+    /// :returns: Passage ids best-first by BM25, and true when every one of
+    ///     them holds the query's terms adjacent and in order. A one-term
+    ///     query is never a phrase: its "phrase" is any row with the word.
+    public func lexicalMatches(
+        _ query: String, limit: Int, scope: PassageScope?
+    ) throws -> (ids: [String], isPhrase: Bool) {
         // Phrase first, then any-term for recall. A rare phrase diluted in a
         // long chunk is exactly what the dense channel buries, so a literal
         // match deserves to seed the fusion; the OR form keeps a query with no
         // adjacent match from returning nothing at all.
         let phrase = try search(expression: Self.phraseExpression(for: query), limit: limit, scope: scope)
-        guard phrase.isEmpty else { return phrase }
-        return try search(expression: Self.matchExpression(for: query), limit: limit, scope: scope)
+        guard phrase.isEmpty else { return (phrase, Self.terms(in: query).count > 1) }
+        return (try search(expression: Self.matchExpression(for: query), limit: limit, scope: scope), false)
     }
 
     /// One BM25 pass for an already-built FTS5 expression.

@@ -25,6 +25,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **An exact phrase answers from the passage that holds it.** When a question
+  is a phrase the corpus contains and the search by meaning missed it, the
+  answer is written from the matching passages alone; the hit cards still
+  show every result. "pillar of salt" answered from Genesis and then reported
+  that passages from Kings and the Quran "do not mention a pillar of salt".
 - **Ride the ring from god's eye** dives to the cart where it stands and then
   sets off, instead of riding the ring from above.
 - **The cart's lantern no longer blinds at night.** Its glass glows a warm
