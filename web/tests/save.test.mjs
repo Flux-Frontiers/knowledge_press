@@ -105,3 +105,22 @@ test("exit goes back to the start screen with every panel shut and the tour over
   assert.equal(st().helpOpen, false);
   assert.equal(st().query, "");
 });
+
+test("the tour started from god's eye dives to the cart first", () => {
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const { sim } = require(`${process.env.FOREST_TEST_BUILD}/sim.js`);
+  const st = () => useGame.getState();
+  if (st().travelMode === "circuit") st().toggleCircuit();
+  st().setPreferences({ camera: "high" });
+  st().setPreferences({ camera: "god" });
+  sim.x = 12; sim.z = -7; sim.yaw = 0.5;
+  st().toggleCircuit();
+  assert.equal(st().travelMode, "circuit");
+  assert.deepEqual(st().jump, { x: 12, z: -7, yaw: 0.5 });
+  assert.deepEqual(st().flight, { to: "high", reopen: null });
+  st().endFlight();
+  assert.equal(st().preferences.camera, "high");
+  assert.equal(st().travelMode, "circuit");
+  st().toggleCircuit();
+  assert.equal(st().flight, null);
+});
