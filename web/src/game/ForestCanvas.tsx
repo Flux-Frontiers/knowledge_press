@@ -11,7 +11,11 @@ import { Trees } from "./Trees";
 import { World } from "./World";
 import { useGame } from "./store";
 
-export function ForestCanvas({ forest }: { forest: Forest }) {
+export function ForestCanvas({ forest, onDrawn }: {
+  forest: Forest;
+  /** Called once the forest has drawn its first frame, geometry uploaded and shaders compiled. */
+  onDrawn?: () => void;
+}) {
   const season = useGame((s) => s.season);
   const query = useGame((s) => s.query);
   const playing = useGame((s) => s.playing);
@@ -47,6 +51,7 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
       <World forest={forest} season={season} />
       <Trees forest={forest} season={season} query={query} />
       <StatsSampler />
+      {onDrawn ? <FirstFrame forest={forest} onDrawn={onDrawn} /> : null}
       <ScreenshotCapture />
       <TreePicker forest={forest} picker={picker} />
       <GodEyeZoom forest={forest} />
@@ -54,6 +59,20 @@ export function ForestCanvas({ forest }: { forest: Forest }) {
       <Player forest={forest} playing={playing} />
     </Canvas>
   );
+}
+
+/**
+ * Reports the forest's first drawn frame. useFrame runs before its frame renders,
+ * so the second call means the first frame, which uploads the geometry and
+ * compiles the shaders, is on screen; a regrown forest starts the count again.
+ */
+function FirstFrame({ forest, onDrawn }: { forest: Forest; onDrawn: () => void }) {
+  const frames = useRef(0);
+  useEffect(() => { frames.current = 0; }, [forest]);
+  useFrame(() => {
+    if (frames.current < 2 && ++frames.current === 2) onDrawn();
+  });
+  return null;
 }
 
 /** Twice a second, copy the renderer's last-frame counts into the store for the HUD readout. */

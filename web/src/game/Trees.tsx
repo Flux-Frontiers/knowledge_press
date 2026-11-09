@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, RepeatWrapping, RGBADepthPacking, Shape, ShapeGeometry, SRGBColorSpace, TextureLoader, Vector2 } from "three";
-import { textureAnisotropy } from "./Environment";
+import { COARSE_POINTER, textureAnisotropy } from "./Environment";
 import { useGame } from "./store";
 import type { Forest } from "./forest";
 import { bookMatchesQuery } from "./forest";
+import { leafFraction, leafHash, leafOrder } from "./leafLod";
 import { SEASONS, type SeasonName } from "./seasons";
 import { leafOutline, SPECIES, type LeafShape, type Species } from "./species";
 
@@ -39,10 +40,13 @@ function leafGeometry(leaf: LeafShape) {
 
 function keepLeaf(i: number, density: number): boolean {
   if (density >= 0.999) return true;
-  // Mix adjacent indices; the old sequence kept almost every early winter leaf.
-  const h = ((Math.imul(i + 1, 1664525) ^ Math.imul(i + 7, 1013904223)) >>> 0) / 4294967296;
-  return h < density;
+  return leafHash(i) < density;
 }
+
+/** Groves nearer than this, metres from the camera to the grove's edge, draw every leaf. */
+const LEAF_FULL = COARSE_POINTER ? 60 : 110;
+/** The fewest leaves a far grove keeps, as a fraction of its own. */
+const LEAF_FLOOR = 0.15;
 
 export function Trees({
   forest,
@@ -134,6 +138,9 @@ export function Trees({
   const leafGeoms = useMemo(() => SPECIES.map((s) => leafGeometry(s.leaf)), []);
   const leafRefs = useRef<(InstancedMesh | null)[]>([]);
   const chunkRefs = useRef<(Group | null)[]>([]);
+  const orders = useMemo(() => forest.chunks.map((c) => leafOrder(c.leafStart, c.leafCount)), [forest]);
+  // Per grove, the slots up to the last leaf with any size; the frame loop cuts the count below it by distance.
+  const kept = useRef<number[]>([]);
   useEffect(() => () => bark.forEach((g) => g.dispose()), [bark]);
   useEffect(() => () => leafGeoms.forEach((g) => g.dispose()), [leafGeoms]);
   useEffect(() => () => {
@@ -151,11 +158,17 @@ export function Trees({
     // hidden chunks also drop out of the shadow pass.
     const density = scene.fog && "density" in scene.fog ? (scene.fog.density as number) : 0;
     const cutoff = density > 0 ? 2.6 / density : Infinity;
+    // God's eye sees every grove from far above; thinning there would bare the whole forest.
+    const thin = s.preferences.camera !== "god" && s.portrait === null;
     forest.chunks.forEach((c, i) => {
       const g = chunkRefs.current[i];
       if (!g) return;
       const subject = s.portrait ? forest.trees[s.portrait.tree]!.chunk : null;
-      g.visible = subject !== null ? i === subject : Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius < cutoff;
+      const dist = Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius;
+      g.visible = subject !== null ? i === subject : dist < cutoff;
+      const mesh = leafRefs.current[i];
+      const full = kept.current[i] ?? c.leafCount;
+      if (mesh) mesh.count = thin ? Math.max(1, Math.ceil(full * leafFraction(dist, LEAF_FULL, LEAF_FLOOR))) : full;
     });
   });
 
@@ -190,13 +203,16 @@ export function Trees({
       if (!mesh) return;
       const [dh, ds, dl] = SPECIES[chunk.species]!.foliageShift;
       const foliage = palette.foliage.map((hex) => new Color(hex).offsetHSL(dh, ds, dl));
+      const order = orders[ci]!;
+      let last = -1;
       for (let n = 0; n < chunk.leafCount; n++) {
-        const i = chunk.leafStart + n;
+        const i = chunk.leafStart + order[n]!;
         const treeI = treeIndex[i]!;
         const dim = match && !match.has(treeI);
         const visible = keepLeaf(i, palette.density) && !dim;
         dummy.position.set(pos[i * 3]!, pos[i * 3 + 1]!, pos[i * 3 + 2]!);
         const s = visible ? 1 : match && dim && only === null ? 0.15 : 0;
+        if (s > 0) last = n;
         dummy.scale.set(scale[i * 3]! * s, scale[i * 3 + 1]! * s, scale[i * 3 + 2]! * s);
         dummy.quaternion.set(quat[i * 4]!, quat[i * 4 + 1]!, quat[i * 4 + 2]!, quat[i * 4 + 3]!);
         dummy.updateMatrix();
@@ -207,11 +223,12 @@ export function Trees({
       }
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      kept.current[ci] = last + 1;
       mesh.count = chunk.leafCount;
       // Bounds from the real instances, so frustum culling can skip this grove.
       mesh.computeBoundingSphere();
     });
-  }, [forest, palette, match, only]);
+  }, [forest, palette, match, only, orders]);
 
   useLayoutEffect(() => {
     const mesh = ringRef.current;

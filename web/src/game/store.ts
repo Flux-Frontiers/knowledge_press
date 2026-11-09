@@ -5,6 +5,7 @@ import { seasonFor, type SeasonName } from "./seasons";
 import type { LiveRequest } from "./liveMoots";
 import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
+import { sim } from "./sim";
 import { clearTourHeard } from "./tourScript";
 import type { Portrait } from "./portrait";
 import type { GroundCamera } from "./godEye";
@@ -418,10 +419,18 @@ export const useGame = create<GameStore>((set, get) => ({
   setTourNote: (tourNote) => { if (get().tourNote !== tourNote) set({ tourNote }); },
   toggleCircuit: () => {
     const next = get().travelMode === "circuit" ? "free" : "circuit";
+    const toast = next === "circuit" ? "Riding the ring · steer to hop off" : "Free drive";
+    if (next === "circuit" && get().preferences.camera === "god") {
+      // Setting off from god's eye: dive to the cart where it stands, then ride.
+      get().clearCards();
+      get().requestJump({ x: sim.x, z: sim.z, yaw: sim.yaw }, toast);
+      set({ travelMode: "circuit", flight: { to: get().groundCamera, reopen: null } });
+      return;
+    }
     set({
       travelMode: next,
       ...(next === "free" ? { selectedGrove: null } : {}),
-      toast: next === "circuit" ? "Riding the ring · steer to hop off" : "Free drive",
+      toast,
     });
   },
   requestJump: (jump, toast) => {

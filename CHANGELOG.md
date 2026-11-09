@@ -11,6 +11,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Far groves draw fewer leaves.** Past 60 m from a grove's edge on a touch
+  screen (110 m with a pointer) its leaves thin as 1 / distance, down to 15
+  percent, and the shadow pass thins with them; god's eye still draws every
+  leaf. An iPad mini (A20 Pro) at Clear fog, Ultra and shadows on goes from
+  23 to 60 fps.
+- **Touch screens start at High leaf complexity**, not Low.
+- **Start driving and Guided tour wait for the forest's first frame**, which
+  uploads the geometry and compiles the shaders, instead of enabling on the
+  forest's data and stalling on the press.
+
+### Fixed
+
+- **Ride the ring from god's eye** dives to the cart where it stands and then
+  sets off, instead of riding the ring from above.
+
 ## [1.40.0] - 2026-11-08
 
 The Forest gets faster and tidier, saves the moots you hold, and the app gains

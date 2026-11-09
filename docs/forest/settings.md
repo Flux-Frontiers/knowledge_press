@@ -15,7 +15,7 @@ opens the settings. The cart is parked while they are open. Every setting is sav
 
 | Setting | What it does |
 | --- | --- |
-| Leaf complexity | How many of each book's passages are drawn as leaves: **Low** one in ten, **Medium** one in four, **High** one in two, **Ultra** every one. Every level keeps the trees in proportion. Touch devices start at Low. Changing it regrows the forest. |
+| Leaf complexity | How many of each book's passages are drawn as leaves: **Low** one in ten, **Medium** one in four, **High** one in two, **Ultra** every one. Every level keeps the trees in proportion. Touch devices start at High. Changing it regrows the forest. |
 | Shadows | The sun's and moon's shadows. Off by default; on an iPad mini, turning them off about doubled the frame rate. |
 | Undergrowth | Grass and stones on the forest floor. On by default. |
 | Show geometry and frame rate | A readout of triangles, draw calls, leaves and frames per second. |

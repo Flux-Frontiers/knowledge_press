@@ -288,3 +288,18 @@ test("a skipped diary year leaves bare trunk", () => {
   const ratio = (y[2] - y[1]) / (y[1] - y[0]);
   assert.ok(Math.abs(ratio - 4) < 0.3, `ratio ${ratio.toFixed(2)}`);
 });
+
+test("far groves draw a prefix of their leaves, thinned by distance", () => {
+  const { leafOrder, leafFraction } = require(`${process.env.FOREST_TEST_BUILD}/leafLod.js`);
+  const order = leafOrder(1000, 500);
+  assert.deepEqual([...order].sort((a, b) => a - b), [...Array(500).keys()]);
+  // The same hash keepLeaf uses, so the season's kept leaves are the first slots.
+  const hash = (i) => ((Math.imul(i + 1, 1664525) ^ Math.imul(i + 7, 1013904223)) >>> 0) / 4294967296;
+  for (let n = 1; n < order.length; n++) assert.ok(hash(1000 + order[n - 1]) <= hash(1000 + order[n]));
+  assert.equal(leafFraction(10, 60, 0.15), 1);
+  assert.equal(leafFraction(60, 60, 0.15), 1);
+  assert.ok(Math.abs(leafFraction(120, 60, 0.15) - 0.5) < 1e-9);
+  assert.equal(leafFraction(2000, 60, 0.15), 0.15);
+  let prev = 1;
+  for (let d = 0; d < 600; d += 5) { const f = leafFraction(d, 60, 0.15); assert.ok(f <= prev && f >= 0.15); prev = f; }
+});

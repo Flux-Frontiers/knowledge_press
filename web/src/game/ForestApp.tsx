@@ -21,6 +21,10 @@ import { useGame } from "./store";
 export function ForestApp() {
   const [mounted, setMounted] = useState(false);
   const [forest, setForest] = useState<Forest | null>(null);
+  // The start buttons wait for the forest's first frame, not just its data: the first
+  // frame uploads the geometry and compiles the shaders, and that is the stall.
+  const [drawn, setDrawn] = useState(false);
+  useEffect(() => setDrawn(false), [forest]);
   const playing = useGame((s) => s.playing);
   const play = useGame((s) => s.play);
   const setToast = useGame((s) => s.setToast);
@@ -240,7 +244,7 @@ export function ForestApp() {
       {shot ? null : <img src={nightStill ? "start/night.webp" : "start/day.webp"} alt="" className="absolute inset-0 size-full object-cover" />}
       {mounted && forest ? (
         <div className="forest-fade-in absolute inset-0">
-          <ForestCanvas forest={forest} />
+          <ForestCanvas forest={forest} onDrawn={() => setDrawn(true)} />
         </div>
       ) : null}
       {playing && forest && !shot ? (
@@ -251,8 +255,8 @@ export function ForestApp() {
         </>
       ) : shot ? null : (
         <StartScreen
-          ready={Boolean(forest)}
-          growing={!forest}
+          ready={Boolean(forest) && drawn}
+          growing={!forest || !drawn}
           opensAt={linked?.book.title}
           onEnter={(tour) => {
             if (forest) {
