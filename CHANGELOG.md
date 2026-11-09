@@ -27,6 +27,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Ride the ring from god's eye** dives to the cart where it stands and then
   sets off, instead of riding the ring from above.
+- **The cart's lantern no longer blinds at night.** Its glass glows a warm
+  flame colour instead of clipping to white, and its light is a spot hung
+  below the glass and aimed down the road, so the lamp's own cap and hook,
+  which fill the view from the cart, stay dark.
 
 ## [1.40.0] - 2026-11-08
 

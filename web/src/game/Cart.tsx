@@ -18,6 +18,8 @@ const OAK = "#8a5a36";
 const OAK_DARK = "#5e3b22";
 const IRON = "#2b2d30";
 const BRASS = "#b08a3e";
+/** The flame seen through the lantern's glass: warm, and dim enough not to clip to white at night. */
+const GLOW = "#ffb257";
 const SPINES = ["#7a2e2e", "#2e3a5a", "#3d4a32", "#6b4a1e", "#4a2e4a", "#8a6a2a", "#2e4a4a"];
 
 /** A spoked wheel in the yz plane, turning about x: iron tire, oak spokes, a hub. */
@@ -101,6 +103,7 @@ function CartCargo({ load }: { load: readonly CartBook[] }) {
 }
 
 export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelRight, load }: CartProps) {
+  const aim = useMemo(() => new Object3D(), []);
   // A row of books standing in the bed, heights and widths varied by position.
   const books = useMemo(() => Array.from({ length: 9 }, (_, k) => ({
     x: -0.42 + k * 0.105,
@@ -184,13 +187,22 @@ export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelR
         </mesh>
         <mesh>
           <cylinderGeometry args={[0.08, 0.08, 0.2, 8]} />
-          <meshStandardMaterial color={lanternColor} emissive={lanternColor} emissiveIntensity={1.4} />
+          <meshStandardMaterial color={lanternColor} emissive={GLOW} emissiveIntensity={0.85} />
         </mesh>
         <mesh position={[0, -0.11, 0]}>
           <cylinderGeometry args={[0.1, 0.09, 0.04, 8]} />
           <meshStandardMaterial color={BRASS} metalness={0.7} roughness={0.35} />
         </mesh>
-        {light ? <pointLight color="#f6e7c2" intensity={6.5} distance={18} decay={2} /> : null}
+        {/* Hung below the glass and aimed down, so the lamp lights the road and the
+            bed but not its own cap and hook, which at arm's length in the cart view
+            clipped to white at night along with the ground under it. */}
+        {light ? (
+          <>
+            <spotLight position={[0, -0.14, 0]} target={aim} color="#f6e7c2" intensity={2.6} angle={1.2} penumbra={0.5} distance={18} decay={2} />
+            {/* The target must hang in the scene graph for the light to follow it; here it rides with the cart. */}
+            <primitive object={aim} position={[0, -1.14, 0.5]} />
+          </>
+        ) : null}
       </group>
 
       {/* Two tall spoked wheels carry it; two small ones steer at the front. */}
