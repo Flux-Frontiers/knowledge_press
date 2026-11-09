@@ -36,6 +36,7 @@ public struct LocalRetrieval: RetrievalEngine {
 
         var perPack: [[Hit]] = []
         var rescued: Set<String> = []
+        var phraseMatched: Set<String> = []
 
         for pack in packs.packs {
             guard Self.pack(pack, matches: request.corpus) else { continue }
@@ -50,6 +51,7 @@ public struct LocalRetrieval: RetrievalEngine {
                 semanticFloor: request.semanticFloor)
             perPack.append(found.hits)
             rescued.formUnion(found.lexicallyRescued)
+            phraseMatched.formUnion(found.phraseMatched)
         }
         let packsSearched = perPack.count
 
@@ -84,10 +86,17 @@ public struct LocalRetrieval: RetrievalEngine {
             : (perPack.first ?? [])
         if hits.count > request.k { hits = Array(hits.prefix(request.k)) }
 
+        // Only a literal match the dense channel missed narrows synthesis.
+        // When cosine found the phrase too, its neighbors are on the subject
+        // and worth reading: "circles of Hell" matches one aside in Les
+        // Miserables, and the passages that answer it are Dante's.
+        let literal = hits.map(\.nodeId).filter(phraseMatched.contains)
+        let missedByDense = !literal.isEmpty && literal.allSatisfy(rescued.contains)
         return RetrievalResult(
             hits: hits,
             kgsQueried: packsSearched,
-            searchMs: Int(Date().timeIntervalSince(started) * 1000))
+            searchMs: Int(Date().timeIntervalSince(started) * 1000),
+            phraseMatched: missedByDense ? literal : nil)
     }
 
     // MARK: - One pack
@@ -101,6 +110,8 @@ public struct LocalRetrieval: RetrievalEngine {
     struct PackResults {
         let hits: [Hit]
         let lexicallyRescued: Set<String>
+        /// Hits that hold the whole query as a literal phrase.
+        var phraseMatched: Set<String> = []
     }
 
     private func search(
@@ -129,7 +140,8 @@ public struct LocalRetrieval: RetrievalEngine {
             bestDense = ranked.first?.similarity ?? 0
         }
 
-        let lexicalIDs = try pack.lexicalSearch(text, limit: oversample, scope: scope)
+        let lexical = try pack.lexicalMatches(text, limit: oversample, scope: scope)
+        let lexicalIDs = lexical.ids
 
         // Hydrate cosine for lexical-only hits so a BM25 rescue still shows a
         // real score rather than a placeholder.
@@ -174,7 +186,8 @@ public struct LocalRetrieval: RetrievalEngine {
         }
         return PackResults(
             hits: hits,
-            lexicallyRescued: rescued.intersection(hits.map(\.nodeId)))
+            lexicallyRescued: rescued.intersection(hits.map(\.nodeId)),
+            phraseMatched: lexical.isPhrase ? Set(lexicalIDs) : [])
     }
 
     // MARK: - Fusion and scope

@@ -59,7 +59,7 @@ public struct QueryOrchestrator: Sendable {
 
                     do {
                         let stream = synthesis.synthesize(
-                            question: request.query, passages: result.hits)
+                            question: request.query, passages: result.synthesisHits)
                         for try await event in stream {
                             switch event {
                             case .partial(let text):
