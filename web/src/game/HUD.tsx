@@ -219,8 +219,9 @@ export function HUD({ forest }: { forest: Forest }) {
             </>)}
           </div>
 
-          {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it. */}
-          {clean ? null : <div className="pointer-events-auto w-28 sm:w-40">
+          {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it.
+              Not in god's eye, which is already the map. */}
+          {clean || godEye ? null : <div className="pointer-events-auto w-28 sm:w-40">
             <Minimap forest={forest} x={x} z={z} yaw={yaw} pins={query.trim() ? results : []} picked={searchPick} />
             {selected ? (
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
