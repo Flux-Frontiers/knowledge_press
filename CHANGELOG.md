@@ -27,6 +27,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the ground cameras.
 - **Fly there lands quietly.** The book's card no longer pops up when the
   cart sets down beside the tree; tap the tree to open it.
+- **On an upright phone the search bar sits right of the stick**, just above
+  the Guided tour button, instead of across the middle of the view. The book
+  card drops to just above the stick.
 - **Settings sections fold.** Search, Worker, Synthesis, Illustrations and
   Corpus information open and close from their headings. Search starts open,
   the others closed, and the app remembers which you left open.
