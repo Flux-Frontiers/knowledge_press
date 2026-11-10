@@ -31,6 +31,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **The iPad's forest fills the screen.** The bar of sidebar, Delete and New
+  chat buttons along the top is hidden while the Forest is showing; the
+  Chat, Browse and Forest bar at the bottom stays.
 - **Fly there lands behind the cart**, where the pressed books show over the
   tailboard, rather than in whichever ground view was used last. Riding the
   ring from god's eye still lands in that view.
