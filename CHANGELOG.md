@@ -13,6 +13,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **The Landing Field**, a new exhibit: a raised pad in an open glade, kept
+  for in-app events. It is placed after the other exhibits, so they keep
+  their glades.
+- **The visitor event** (`web/src/game/events.ts`), staged on the landing
+  field during a booked window, or now with `?event=visitor`. An Art Techno
+  craft flies in over the redwood, comes down over the pad on its legs and
+  lowers a lift. A faceless sentinel steps off, then a visitor wearing the
+  head of the Art Techno statue of Knowledge, who holds out a slate. While
+  the rider sits still, the camera follows the landing in clean view. The
+  craft hums (WebAudio, no files), and a meteor swarm falls from five
+  radiants. It adds about 60 KB, including a 44 KB head model. No dates are
+  booked yet.
 - **`web/scripts/profile.mjs`** measures where the forest's frame goes:
   triangles, draw calls and render time per camera view and leaf level, with
   and without the leaves, and the shadow pass on its own. It runs in headless

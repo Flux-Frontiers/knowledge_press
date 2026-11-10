@@ -11,6 +11,7 @@ import {
   MeshBasicMaterial,
   MeshStandardMaterial,
   Object3D,
+  PointLight,
   Vector2,
   type BufferGeometry,
 } from "three";
@@ -52,8 +53,8 @@ const RIM_LIGHTS = 48;
 const TRACES = 16;
 /** Legs at these bearings, clear of the way out toward the road at 0. */
 const LEG_BEARINGS = [Math.PI / 3, Math.PI, (5 * Math.PI) / 3];
-const LEG_TOP_R = 3.0;
-const LEG_FOOT_R = 4.1;
+const LEG_TOP_R = 4.0;
+const LEG_FOOT_R = 4.6;
 /** The craft is modeled 4.6 m in radius and drawn at SAUCER_R. */
 const BASE_R = 4.6;
 const K = SAUCER_R / BASE_R;
@@ -64,6 +65,9 @@ const WELL_H = 2.0;
 /** Seconds into the landing: null until it starts. Kept for the session, so it plays once. */
 let landingT: number | null = null;
 let sighed = false;
+/** The camera is the landing's (cinema weight past half), and whether clean view was turned on for it. */
+let holding = false;
+let cleanedForShot = false;
 
 const PALETTE = {
   obsidian: "#161d1a", panel: "#121a17", copper: "#c77c48", gold: "#d4af5a",
@@ -97,13 +101,17 @@ function useMaterials() {
       shaft: new MeshBasicMaterial({ color: PALETTE.mint, transparent: true, opacity: 0, blending: AdditiveBlending, depthWrite: false, side: DoubleSide }),
       iris: new MeshBasicMaterial({ color: "#e8fff6", transparent: true, opacity: 0, blending: AdditiveBlending, depthWrite: false, side: DoubleSide }),
       visor: new MeshBasicMaterial({ color: "#5fe0b8", transparent: true, opacity: 0.15 }),
+      // The figures in less metal than the craft, so the light under it shows them, not just glints.
+      fgold: new MeshStandardMaterial({ color: PALETTE.gold, metalness: 0.35, roughness: 0.42, envMap: env, flatShading: true }),
+      fcopper: new MeshStandardMaterial({ color: PALETTE.copper, metalness: 0.35, roughness: 0.45, envMap: env, flatShading: true }),
+      fobsidian: new MeshStandardMaterial({ color: "#2a3330", metalness: 0.3, roughness: 0.5, envMap: env, flatShading: true }),
       band: new MeshStandardMaterial({ color: PALETTE.green, emissive: PALETTE.green, emissiveIntensity: 0.5, roughness: 0.35, flatShading: true }),
     };
   }, []);
   useEffect(() => () => Object.values(m).forEach((x) => x.dispose()), [m]);
   // The painted sky fades with the real one, as on the flame.
   const daylight = useGame((s) => s.sky.daylight);
-  for (const k of ["obsidian", "panel", "copper", "gold"] as const) m[k].envMapIntensity = 0.05 + 0.95 * daylight;
+  for (const k of ["obsidian", "panel", "copper", "gold", "fgold", "fcopper", "fobsidian"] as const) m[k].envMapIntensity = 0.05 + 0.95 * daylight;
   return m;
 }
 
@@ -166,7 +174,7 @@ function Limb({ at, len, top, bottom, sides, m, mat, via, setRef, children }: {
   return (
     <group position={at} ref={setRef}>
       <mesh position={[0, -len / 2, 0]} material={mat}><cylinderGeometry args={[top, bottom, len, sides]} /></mesh>
-      {via ? <mesh rotation={[Math.PI / 2, 0, 0]} material={m.gold}><cylinderGeometry args={[top * 0.55, top * 0.55, top * 2.1, 8]} /></mesh> : null}
+      {via ? <mesh rotation={[Math.PI / 2, 0, 0]} material={m.fgold}><cylinderGeometry args={[top * 0.55, top * 0.55, top * 2.1, 8]} /></mesh> : null}
       {children}
     </group>
   );
@@ -182,29 +190,29 @@ function Sentinel({ m, groupRef, limbs, sweepRef }: { m: Materials; groupRef: Re
   return (
     <group ref={groupRef} visible={false}>
       {[-0.2, 0.2].map((z, i) => (
-        <Limb key={z} at={[0, 1.15, z]} len={1.15} top={0.17} bottom={0.13} sides={6} m={m} mat={m.obsidian} via
+        <Limb key={z} at={[0, 1.15, z]} len={1.15} top={0.17} bottom={0.13} sides={6} m={m} mat={m.fobsidian} via
           setRef={(g) => { if (i) limbs.legR = g; else limbs.legL = g; }}>
-          <mesh position={[0.06, -1.12, 0]} material={m.copper}><boxGeometry args={[0.42, 0.08, 0.24]} /></mesh>
+          <mesh position={[0.06, -1.12, 0]} material={m.fcopper}><boxGeometry args={[0.42, 0.08, 0.24]} /></mesh>
         </Limb>
       ))}
-      <mesh position={[0, 1.62, 0]} material={m.copper}><cylinderGeometry args={[0.44, 0.33, 0.95, 8]} /></mesh>
-      <mesh position={[0.3, 1.66, 0]} material={m.obsidian}><boxGeometry args={[0.14, 0.62, 0.42]} /></mesh>
+      <mesh position={[0, 1.62, 0]} material={m.fcopper}><cylinderGeometry args={[0.44, 0.33, 0.95, 8]} /></mesh>
+      <mesh position={[0.3, 1.66, 0]} material={m.fobsidian}><boxGeometry args={[0.14, 0.62, 0.42]} /></mesh>
       {[-0.1, 0, 0.1].map((z) => (
-        <mesh key={z} position={[0.375, 1.66, z]} material={m.gold}><boxGeometry args={[0.012, 0.56, 0.025]} /></mesh>
+        <mesh key={z} position={[0.375, 1.66, z]} material={m.fgold}><boxGeometry args={[0.012, 0.56, 0.025]} /></mesh>
       ))}
       {[-0.5, 0.5].map((z) => [0, 1, 2, 3].map((k) => (
-        <mesh key={`${z}${k}`} position={[0, 2.0 + k * 0.055, z * (1 - k * 0.08)]} material={m.copper}>
+        <mesh key={`${z}${k}`} position={[0, 2.0 + k * 0.055, z * (1 - k * 0.08)]} material={m.fcopper}>
           <boxGeometry args={[0.42 - k * 0.06, 0.03, 0.28]} />
         </mesh>
       )))}
       {[-0.56, 0.56].map((z, i) => (
-        <Limb key={z} at={[0, 2.0, z]} len={1.0} top={0.12} bottom={0.09} sides={6} m={m} mat={m.obsidian} via
+        <Limb key={z} at={[0, 2.0, z]} len={1.0} top={0.12} bottom={0.09} sides={6} m={m} mat={m.fobsidian} via
           setRef={(g) => { if (i) limbs.armR = g; else limbs.armL = g; }} />
       ))}
-      <mesh position={[0, 2.22, 0]} material={m.gold}><cylinderGeometry args={[0.13, 0.16, 0.1, 8]} /></mesh>
-      <mesh position={[0, 2.42, 0]} material={m.obsidian}><cylinderGeometry args={[0.22, 0.25, 0.32, 8]} /></mesh>
-      <mesh position={[0, 2.62, 0]} material={m.obsidian}><cylinderGeometry args={[0.15, 0.21, 0.1, 8]} /></mesh>
-      <mesh position={[0, 2.71, 0]} material={m.gold}><cylinderGeometry args={[0.07, 0.13, 0.07, 8]} /></mesh>
+      <mesh position={[0, 2.22, 0]} material={m.fgold}><cylinderGeometry args={[0.13, 0.16, 0.1, 8]} /></mesh>
+      <mesh position={[0, 2.42, 0]} material={m.fobsidian}><cylinderGeometry args={[0.22, 0.25, 0.32, 8]} /></mesh>
+      <mesh position={[0, 2.62, 0]} material={m.fobsidian}><cylinderGeometry args={[0.15, 0.21, 0.1, 8]} /></mesh>
+      <mesh position={[0, 2.71, 0]} material={m.fgold}><cylinderGeometry args={[0.07, 0.13, 0.07, 8]} /></mesh>
       {/* The band where eyes would be, and the light that sweeps along it. */}
       <mesh position={[0.22, 2.45, 0]} material={m.visor}><boxGeometry args={[0.06, 0.06, 0.34]} /></mesh>
       <mesh ref={sweepRef} position={[0.255, 2.45, 0]} material={m.lights} visible={false}><boxGeometry args={[0.02, 0.065, 0.08]} /></mesh>
@@ -224,7 +232,7 @@ function useHead(m: Materials): Object3D | null {
         o.geometry.computeVertexNormals();
         const band = (o.material as { name?: string }).name === "band";
         (o.material as MeshStandardMaterial).dispose();
-        o.material = band ? m.band : m.gold;
+        o.material = band ? m.band : m.fgold;
       });
       if (live) setHead(gltf.scene);
     }, undefined, () => { /* no head: the visitor stays headless rather than breaking the scene */ });
@@ -243,25 +251,25 @@ function Guest({ m, groupRef, limbs }: { m: Materials; groupRef: Ref<Group>; lim
   return (
     <group ref={groupRef} visible={false}>
       {[-0.11, 0.11].map((z, i) => (
-        <Limb key={z} at={[0, 0.9, z]} len={0.9} top={0.095} bottom={0.065} sides={6} m={m} mat={m.gold}
+        <Limb key={z} at={[0, 0.9, z]} len={0.9} top={0.095} bottom={0.065} sides={6} m={m} mat={m.fgold}
           setRef={(g) => { if (i) limbs.legR = g; else limbs.legL = g; }}>
-          <mesh position={[0, -0.45, z > 0 ? 0.075 : -0.075]} material={m.copper}><boxGeometry args={[0.02, 0.8, 0.012]} /></mesh>
-          <mesh position={[0.05, -0.88, 0]} material={m.gold}><boxGeometry args={[0.22, 0.06, 0.1]} /></mesh>
+          <mesh position={[0, -0.45, z > 0 ? 0.075 : -0.075]} material={m.fcopper}><boxGeometry args={[0.02, 0.8, 0.012]} /></mesh>
+          <mesh position={[0.05, -0.88, 0]} material={m.fgold}><boxGeometry args={[0.22, 0.06, 0.1]} /></mesh>
         </Limb>
       ))}
-      <mesh position={[0, 1.2, 0]} material={m.gold}><cylinderGeometry args={[0.2, 0.17, 0.62, 8]} /></mesh>
+      <mesh position={[0, 1.2, 0]} material={m.fgold}><cylinderGeometry args={[0.2, 0.17, 0.62, 8]} /></mesh>
       <mesh position={[0, 0.97, 0]} material={m.band}><cylinderGeometry args={[0.185, 0.185, 0.07, 8]} /></mesh>
       {[-0.07, 0, 0.07].map((z) => (
-        <mesh key={z} position={[0.18, 0.97, z]} rotation={[0, 0, Math.PI / 2]} material={m.gold}><cylinderGeometry args={[0.022, 0.022, 0.02, 8]} /></mesh>
+        <mesh key={z} position={[0.18, 0.97, z]} rotation={[0, 0, Math.PI / 2]} material={m.fgold}><cylinderGeometry args={[0.022, 0.022, 0.02, 8]} /></mesh>
       ))}
-      <mesh position={[0, 1.5, 0]} material={m.gold}><cylinderGeometry args={[0.12, 0.2, 0.08, 8]} /></mesh>
+      <mesh position={[0, 1.5, 0]} material={m.fgold}><cylinderGeometry args={[0.12, 0.2, 0.08, 8]} /></mesh>
       {[-0.26, 0.26].map((z, i) => (
-        <Limb key={z} at={[0, 1.46, z]} len={0.62} top={0.06} bottom={0.045} sides={6} m={m} mat={m.gold}
+        <Limb key={z} at={[0, 1.46, z]} len={0.62} top={0.06} bottom={0.045} sides={6} m={m} mat={m.fgold}
           setRef={(g) => { if (i) limbs.armR = g; else limbs.armL = g; }}>
           {i ? (
             <group position={[0.07, -0.66, 0]} rotation={[0, 0, 0.35]}>
-              <mesh material={m.gold}><boxGeometry args={[0.24, 0.035, 0.31]} /></mesh>
-              <mesh position={[0, 0.02, 0]} material={m.obsidian}><boxGeometry args={[0.21, 0.02, 0.28]} /></mesh>
+              <mesh material={m.fgold}><boxGeometry args={[0.24, 0.035, 0.31]} /></mesh>
+              <mesh position={[0, 0.02, 0]} material={m.fobsidian}><boxGeometry args={[0.21, 0.02, 0.28]} /></mesh>
               <mesh position={[0, 0.034, 0]} material={m.die}><boxGeometry args={[0.05, 0.012, 0.05]} /></mesh>
             </group>
           ) : null}
@@ -377,6 +385,7 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
   const robot = useRef<Group>(null);
   const guest = useRef<Group>(null);
   const sweep = useRef<Mesh>(null);
+  const lamp = useRef<PointLight>(null);
   const robotLimbs = useMemo(newLimbs, []);
   const guestLimbs = useMemo(newLimbs, []);
   const tint = useMemo(() => ({ c: new Color(), mint: new Color(PALETTE.mint), green: new Color(PALETTE.green), white: new Color("#ffffff") }), []);
@@ -453,6 +462,8 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
       dust.current.scale.setScalar(1 + 2.2 * p.dust);
       m.dust.opacity = 0.35 * (1 - p.dust);
     }
+    // The light under the craft: up as the legs come down, full once the iris opens, stronger by night.
+    if (lamp.current) lamp.current.intensity = 60 * Math.max(p.iris, 0.4 * p.legs) * (0.55 + 0.45 * (1 - s.sky.daylight));
     poseWalker(robot.current, robotLimbs, p.robot, 0.35, dt);
     poseWalker(guest.current, guestLimbs, p.guest, 0.5, dt);
     m.visor.opacity = 0.15 + 0.85 * p.visor;
@@ -466,6 +477,15 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
     // The camera follows the landing while the rider sits still, and lets go a little after.
     const watching = landingT < VISITOR_END + 3 && s.preferences.motion && cinema.idle > 1.2 && Math.abs(sim.speed) < 0.3;
     cinema.weight += ((watching ? 1 : 0) - cinema.weight) * (1 - Math.exp(-1.6 * dt));
+    // Clean view while the camera is the landing's, put back as it was after.
+    if (!holding && cinema.weight > 0.5) {
+      holding = true;
+      if (!s.cleanView) { useGame.setState({ cleanView: true }); cleanedForShot = true; }
+    } else if (holding && cinema.weight < 0.5) {
+      holding = false;
+      if (cleanedForShot && useGame.getState().cleanView) useGame.setState({ cleanView: false });
+      cleanedForShot = false;
+    }
     if (cinema.weight > 0.001) {
       const shot = visitorShot(t);
       toWorld(shot.cam, cinema.cam);
@@ -488,17 +508,17 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
         {LEG_BEARINGS.map((a, i) => (
           <group key={a} position={[Math.cos(a) * LEG_TOP_R, 0.3, Math.sin(a) * LEG_TOP_R]} rotation={[0, -a, 0]}>
             <group rotation={[0, 0, legTilt]} ref={(g) => { legs.current[i] = g; }}>
-              <mesh position={[0, -legLen / 2, 0]} material={m.copper}><boxGeometry args={[0.16, legLen, 0.16]} /></mesh>
-              <mesh position={[0, -legLen, 0]} rotation={[0, 0, -legTilt]} material={m.gold}><cylinderGeometry args={[0.38, 0.45, 0.08, 8]} /></mesh>
+              <mesh position={[0, -legLen / 2, 0]} material={m.copper}><boxGeometry args={[0.24, legLen, 0.24]} /></mesh>
+              <mesh position={[0, -legLen, 0]} rotation={[0, 0, -legTilt]} material={m.gold}><cylinderGeometry args={[0.5, 0.6, 0.08, 8]} /></mesh>
             </group>
           </group>
         ))}
       </group>
       <mesh ref={beam} material={m.beam} visible={false}>
-        <cylinderGeometry args={[2.2, 4.8, 1, 16, 1, true]} />
+        <cylinderGeometry args={[3.6, 8.0, 1, 16, 1, true]} />
       </mesh>
       <mesh ref={dust} rotation={[-Math.PI / 2, 0, 0]} position={[0, PAD_TOP + 0.03, 0]} material={m.dust} visible={false}>
-        <ringGeometry args={[4.6, 5.4, 32]} />
+        <ringGeometry args={[8.2, 9.2, 48]} />
       </mesh>
       {/* The lift: a gold platform ringed in copper, in a shaft of light from the iris to the pad. */}
       <group ref={lift} visible={false}>
@@ -508,6 +528,8 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
       <mesh ref={shaft} position={[0, PAD_TOP + LEG_H / 2, 0]} material={m.shaft} visible={false}>
         <cylinderGeometry args={[SHAFT_R * 0.97, SHAFT_R * 0.97, LEG_H, 16, 1, true]} />
       </mesh>
+      {/* One real light, only while the event is on: under the rim on the road side, over where the two stand. */}
+      <pointLight ref={lamp} position={[8.0, 3.4, 1.2]} color="#e4fbf1" intensity={0} distance={20} decay={2} />
       <Sentinel m={m} groupRef={robot} limbs={robotLimbs} sweepRef={sweep} />
       <Guest m={m} groupRef={guest} limbs={guestLimbs} />
     </>

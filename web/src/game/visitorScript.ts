@@ -10,25 +10,29 @@
 /** Height of the pad the craft rests on. */
 export const PAD_TOP = 0.35;
 export const PAD_R = 5;
-/** As wide as the pad. */
-export const SAUCER_R = PAD_R;
+/** 17 m across: it overhangs the pad and roofs most of the paved plaza. */
+export const SAUCER_R = 8.5;
 /** The craft's belly stands this high over the pad on its legs: room for the sentinel under it. */
 export const LEG_H = 3.3;
 export const REST_Y = PAD_TOP + LEG_H;
-/** Above every crown in the forest (the tallest tree is 22 m). */
-export const CRUISE_Y = 30;
+/**
+ * The approach flies above everything in the forest, the corpus redwood
+ * included (63 m with the 1.40 corpus; the tests check it against the real
+ * forest), and comes down only over the pad. The camera follows it in.
+ */
+export const CRUISE_Y = 75;
 /** The lift's shaft up the craft's axis, and its platform. Everything above the belly stays inside it. */
 export const SHAFT_R = 1.05;
 export const LIFT_R = 0.9;
 
 const T_APPROACH = 14;
 /** Down the column to a hover low enough to be in the rider's view, then settle. */
-const T_HOVER = 17;
-const HOVER_Y = 8.5;
-const T_SETTLE = 20.5;
-const T_LANDED = 23;
-const T_IRIS = 25;
-const T_LIFT = 27;
+const T_HOVER = 21;
+const HOVER_Y = 9;
+const T_SETTLE = 24.5;
+const T_LANDED = 27;
+const T_IRIS = 29;
+const T_LIFT = 31;
 const LIFT_SPEED = 0.8;
 const RIDE = (REST_Y - PAD_TOP) / LIFT_SPEED;
 const ROBOT_SPEED = 0.9;

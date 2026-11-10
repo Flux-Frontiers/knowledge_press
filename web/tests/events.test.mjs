@@ -25,10 +25,10 @@ test("the landing field keeps its own glade and leaves the other exhibits where 
   const f = getForest();
   const e = f.exhibits.find((x) => x.id === "landing");
   assert.ok(e, "landing field placed");
-  // Positions before the field was added (1.40.0); placement is greedy, and the field is last.
+  // Positions with the field left out (develop at #140); placement is greedy, and the field is last.
   const before = {
-    mysterium: [24.049, 37.235], flame: [-54.382, -83.82], helix: [-78.078, 63.619], darrieus: [121.932, -58.905],
-    savonius: [-16.057, 99.427], dna: [96.878, 27.537], mast: [-136.989, -32.606], sundial: [3.962, -130.756],
+    mysterium: [24.889, 36.257], flame: [-73.581, -107.828], helix: [-77.038, 64.138], darrieus: [74.616, -66.639],
+    savonius: [98.42, 19.023], dna: [-16.842, 128.644], mast: [-96.292, -29.267], sundial: [23.135, -96.919],
   };
   for (const [id, [x, z]] of Object.entries(before)) {
     const x2 = f.exhibits.find((v) => v.id === id);
@@ -36,18 +36,28 @@ test("the landing field keeps its own glade and leaves the other exhibits where 
   }
 });
 
-test("visitor: the craft comes in above every crown and only drops in the clear column over the pad", () => {
+test("visitor: the craft comes in above every crown and the redwood, and drops only where no leaf reaches", () => {
   const { getForest } = require(`${build}/forest.js`);
   const { visitorPose, VISITOR_END, REST_Y, SAUCER_R } = require(`${build}/visitorScript.js`);
   const f = getForest();
   const e = f.exhibits.find((x) => x.id === "landing");
+  const face = Math.atan2(-(e.roadZ - e.z), e.roadX - e.x);
   const tallest = Math.max(...f.trees.map((t) => t.height));
-  // Nearest trunk to the pad, less the craft's radius: room for the crowns beside the column.
-  const nearest = Math.min(...f.trees.map((t) => Math.hypot(t.x - e.x, t.z - e.z) - t.trunkRadius));
-  assert.ok(nearest - SAUCER_R > 8, `only ${(nearest - SAUCER_R).toFixed(1)} m between the craft and a trunk`);
+  // No leaf above the pad within the craft's rim, plus 2 m.
+  const L = f.leaves;
+  let nearest = Infinity;
+  for (let i = 0; i < L.count; i++) {
+    if (L.pos[i * 3 + 1] < 2) continue;
+    nearest = Math.min(nearest, Math.hypot(L.pos[i * 3] - e.x, L.pos[i * 3 + 2] - e.z));
+  }
+  assert.ok(nearest > SAUCER_R + 2, `a leaf ${nearest.toFixed(1)} m from the column, rim at ${SAUCER_R} m`);
+  const redwood = f.corpusTree;
   for (let t = 0; t <= VISITOR_END; t += 0.05) {
-    const [x, y, z] = visitorPose(t).saucer;
-    if (y < tallest + 2) assert.ok(Math.hypot(x, z) < 1e-6, `at ${t.toFixed(2)} s the craft is low (${y.toFixed(1)} m) off the column`);
+    const [lx, y, lz] = visitorPose(t).saucer;
+    if (y < tallest + 2) assert.ok(Math.hypot(lx, lz) < 1e-6, `at ${t.toFixed(2)} s the craft is low (${y.toFixed(1)} m) off the column`);
+    // The redwood's crown reaches under 20 m from its axis (the redwood test).
+    const x = e.x + lx * Math.cos(face) + lz * Math.sin(face), z = e.z - lx * Math.sin(face) + lz * Math.cos(face);
+    if (y < redwood.height + 3) assert.ok(Math.hypot(x, z) > 20 + SAUCER_R, `at ${t.toFixed(2)} s the craft is in the redwood`);
   }
   const end = visitorPose(VISITOR_END + 100);
   assert.ok(Math.abs(end.saucer[1] - REST_Y) < 1e-9 && end.saucer[0] === 0 && end.saucer[2] === 0, "the craft stands on the pad");
