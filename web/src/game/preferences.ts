@@ -63,9 +63,9 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     // The old `detail` setting is ignored on purpose: it was saved on for everyone, so reading it would keep shadows on.
     shadows: value?.shadows === true,
     undergrowth: value?.undergrowth !== false,
-    // Touch devices start at Low.
+    // Touch devices start at High.
     leaves: value?.leaves && value.leaves in LEAF_SCALE ? value.leaves
-      : typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches ? "low" : "medium",
+      : typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches ? "high" : "medium",
     stats: value?.stats === true,
     silent: value?.silent === true,
     fog: value?.fog && value.fog in FOG_SCALE ? value.fog : "normal",

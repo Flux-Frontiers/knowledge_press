@@ -50,7 +50,7 @@ import Synchronization
         /// only reports anything other than 4,096 on iOS 27 / macOS 27, so
         /// it is read on the Xcode 27 toolchain alone: an older CI SDK then
         /// still builds, and loses nothing it could have shown.
-        static var reportedContextWindow: Int {
+        public static var reportedContextWindow: Int {
             #if compiler(>=6.4)
                 return SystemLanguageModel.default.contextSize
             #else

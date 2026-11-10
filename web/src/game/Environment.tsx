@@ -6,7 +6,7 @@ import type { SkyState } from "./sky";
 import { planetPositions } from "./planets";
 import { starBuffers } from "./stars";
 import { fogMix, overcast, weather } from "./weather";
-import { shadowStale, snapToTexels, type ShadowState } from "./foliageLod";
+import { shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
 import { mulberry32 } from "./math";
 import type { SeasonName } from "./seasons";
 import { sim } from "./sim";
@@ -263,13 +263,13 @@ export function textureAnisotropy(n: number): number {
 /** The shadow camera's half-width, metres, and the shadow map's size; one texel is 2 * SHADOW_HALF / SHADOW_MAP. */
 const SHADOW_HALF = 40;
 const SHADOW_MAP = 2048;
-/** `?nolod` also redraws the shadow map every frame, to compare (foliageLod.ts). */
+/** `?nolod` also redraws the shadow map every frame, to compare (shadowCache.ts). */
 const SHADOW_CACHE = typeof window === "undefined" || !new URLSearchParams(window.location.search).has("nolod");
 
 /**
  * The one shadow-casting light, from the sun, the moon or the stars (sky.ts),
  * kept on a modest shadow map around the cart instead of covering the forest.
- * The map is redrawn only when it is stale (foliageLod.ts shadowStale), and
+ * The map is redrawn only when it is stale (shadowCache.ts shadowStale), and
  * centred on whole texels so its edges keep still as the cart drives.
  */
 export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shadows: boolean }) {

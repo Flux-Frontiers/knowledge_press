@@ -5,6 +5,7 @@ import { seasonFor, type SeasonName } from "./seasons";
 import type { LiveRequest } from "./liveMoots";
 import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
+import { sim } from "./sim";
 import { clearTourHeard } from "./tourScript";
 import type { Portrait } from "./portrait";
 import type { GroundCamera } from "./godEye";
@@ -418,10 +419,18 @@ export const useGame = create<GameStore>((set, get) => ({
   setTourNote: (tourNote) => { if (get().tourNote !== tourNote) set({ tourNote }); },
   toggleCircuit: () => {
     const next = get().travelMode === "circuit" ? "free" : "circuit";
+    const toast = next === "circuit" ? "Riding the ring · steer to hop off" : "Free drive";
+    if (next === "circuit" && get().preferences.camera === "god") {
+      // Setting off from god's eye: dive to the cart where it stands, then ride.
+      get().clearCards();
+      get().requestJump({ x: sim.x, z: sim.z, yaw: sim.yaw }, toast);
+      set({ travelMode: "circuit", flight: { to: get().groundCamera, reopen: null } });
+      return;
+    }
     set({
       travelMode: next,
       ...(next === "free" ? { selectedGrove: null } : {}),
-      toast: next === "circuit" ? "Riding the ring · steer to hop off" : "Free drive",
+      toast,
     });
   },
   requestJump: (jump, toast) => {
@@ -452,6 +461,17 @@ export const useGame = create<GameStore>((set, get) => ({
     if (flight.reopen) get().pinTree(flight.reopen);
   },
 }));
+
+/**
+ * The book R opens in the reader: the tree whose card is showing, else the
+ * nearest tree within reading range; none during a dive from god's eye.
+ */
+export function readerTarget(s: Pick<GameStore, "flight" | "pinnedSlug" | "cardSlug" | "nearbyDismissed" | "nearbySlug" | "nearbyDist" | "preferences">): string | null {
+  if (s.flight) return null;
+  if (s.pinnedSlug) return s.pinnedSlug;
+  if (!s.preferences.silent && s.cardSlug && s.cardSlug !== s.nearbyDismissed) return s.cardSlug;
+  return s.nearbySlug && s.nearbyDist < READ_RANGE ? s.nearbySlug : null;
+}
 
 /** The tree whose card is up, as HUD.tsx decides it: a pinned tree, or the one the cart slowed beside. */
 function shownCard(s: GameStore): string | null {

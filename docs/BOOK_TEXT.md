@@ -71,8 +71,9 @@ read-only token, so the workflows that download it run with
 
 1. Drive up to a tree and slow down until its card appears, or click the tree
    to pin its card.
-2. Click **Open the book**. Books you have read into the press also have an
-   **Open** link in the press (**L**).
+2. Click **Open the book**, or press **R**. On a phone or tablet, the **Read**
+   button beside the stick opens a book already in your press. Books you have
+   read into the press also have an **Open** link in the press (**L**).
 3. Pick a chapter from the list, or use **Previous** and **Next**. A diary's
    chapters are its dated entries.
 4. Press **Esc** or the close button to return to the forest. Driving and the

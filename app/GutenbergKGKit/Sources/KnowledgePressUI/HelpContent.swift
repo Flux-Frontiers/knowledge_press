@@ -55,11 +55,18 @@ public enum HelpContent {
     /// Every topic, in the order the list shows them: what the app does
     /// first, then the controls, then the things that go wrong.
     public static let topics: [HelpTopic] = [
-        howItWorks, answerEngines, synthesis, search, whenAnswersStop, privacy,
+        howItWorks, answerEngines, synthesis, search, worker, illustrations, whenAnswersStop,
+        privacy,
     ]
 
     /// The topic the Synthesis section's info button opens.
     public static let synthesisTopicID = "synthesis"
+
+    /// The topic the Worker section's info button opens.
+    public static let workerTopicID = "worker"
+
+    /// The topic the Illustrations section's info button opens.
+    public static let illustrationsTopicID = "illustrations"
 
     public static func topic(id: String) -> HelpTopic? {
         topics.first { $0.id == id }
@@ -195,6 +202,64 @@ public enum HelpContent {
                 paragraphs: [
                     "Narrowing to a genre is the most effective setting on this page. An unscoped search spreads a small context window across every book in the library; narrowing to *sacred texts* or *diaries* spends all of it where the answer actually is.",
                     "Scope is remembered between launches, deliberately -- it is a lens you chose, not a preference to be reset.",
+                ]),
+        ])
+
+    static let worker = HelpTopic(
+        id: workerTopicID,
+        title: "Worker",
+        symbol: "server.rack",
+        summary: "A server you run yourself, and when you need one",
+        sections: [
+            HelpSection(
+                heading: "You probably do not need one",
+                paragraphs: [
+                    "A worker is a server you run yourself, such as a Mac with a large model on it. The app has no default worker and contacts none until you enter an address.",
+                    "With the corpus installed, search runs on this device and the worker plays no part in it. The worker is used for two things only: the **Worker** answer engine, and illustrations.",
+                ]),
+            HelpSection(
+                heading: "Installing one",
+                paragraphs: [
+                    "The worker is GutenbergKG, the project that builds this corpus. It runs in Docker on a Mac, Linux or Windows machine.",
+                    "Clone `https://github.com/Flux-Frontiers/gutenberg_kg`, then in that folder run `make pull-worker-image` to fetch the published image and `make run` to start the worker on port 8000. `make up` starts the chat page and an image server as well, which illustrations need.",
+                    "Answers also need a model for the worker to call: oMLX, Ollama, OpenAI or Anthropic. The [GutenbergKG installation guide](https://flux-frontiers.github.io/gutenberg_kg/INSTALLATION/) covers that, building the image yourself, and what to check when a phone cannot reach the worker.",
+                ]),
+            HelpSection(
+                heading: "Setting the address",
+                paragraphs: [
+                    "Type the address and tap **Test**. The app reports the number of books and genres it found, or why it could not reach the server.",
+                    "On an iPhone or iPad, `localhost` means the device itself, not your Mac. Use the Mac's name or its IP address.",
+                    "A GutenbergKG worker answers only its own Mac unless it is started with `WORKER_BIND=0.0.0.0` in its `docker/.env`. Anyone on your network can use it then.",
+                ]),
+            HelpSection(
+                heading: "Clearing it",
+                paragraphs: [
+                    "Empty the field and the app goes back to contacting nothing. **Reset all settings** clears it too.",
+                ]),
+        ])
+
+    static let illustrations = HelpTopic(
+        id: illustrationsTopicID,
+        title: "Illustrations",
+        symbol: "paintpalette",
+        summary: "Render, resolution, and where pictures come from",
+        sections: [
+            HelpSection(
+                heading: "Pictures come from a worker",
+                paragraphs: [
+                    "Under some answers there is a **Render** button, which asks your worker to draw an illustration of the answer. The app cannot draw one on its own, so the button appears only when a worker is set up and reachable.",
+                ]),
+            HelpSection(
+                heading: "Resolution",
+                paragraphs: [
+                    "**Preview** is 768 × 512, **Standard** is 1152 × 768 and **Full** is 1536 × 1024. A smaller picture renders faster.",
+                    "Preview is the default. The largest size is the one most likely to time out on a phone.",
+                ]),
+            HelpSection(
+                heading: "Backend",
+                paragraphs: [
+                    "Which image source draws the picture. **Auto** follows the answer provider: OpenAI images for OpenAI, the local image server for oMLX or Ollama.",
+                    "Only the backends the worker reports as ready right now are listed, so the list can change between launches.",
                 ]),
         ])
 

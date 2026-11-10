@@ -47,11 +47,30 @@ public struct RetrievalResult: Sendable, Codable {
     public let hits: [Hit]
     public let kgsQueried: Int
     public let searchMs: Int?
+    /// Ids of the hits that hold the whole query as a literal phrase, in hit
+    /// order, when the dense channel found none of them. Nil otherwise (and
+    /// for a stored turn or a worker result, which do not record it).
+    public let phraseMatched: [String]?
 
-    public init(hits: [Hit], kgsQueried: Int, searchMs: Int?) {
+    public init(hits: [Hit], kgsQueried: Int, searchMs: Int?, phraseMatched: [String]? = nil) {
         self.hits = hits
         self.kgsQueried = kgsQueried
         self.searchMs = searchMs
+        self.phraseMatched = phraseMatched
+    }
+
+    /// The hits synthesis should read.
+    ///
+    /// When the query is a phrase the corpus holds and cosine did not find
+    /// it, those passages are the answer and the rest are off the subject.
+    /// The on-device model narrates every passage it is handed, so for
+    /// "pillar of salt" it quoted Genesis and then reported that the pillars
+    /// in Kings and a passage of the Quran "do not mention a pillar of salt".
+    /// The cards still show every hit; only synthesis is narrowed.
+    public var synthesisHits: [Hit] {
+        guard let phraseMatched, !phraseMatched.isEmpty else { return hits }
+        let literal = Set(phraseMatched)
+        return hits.filter { literal.contains($0.nodeId) }
     }
 }
 

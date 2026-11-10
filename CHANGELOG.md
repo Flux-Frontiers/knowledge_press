@@ -13,98 +13,153 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- **`web/scripts/profile.mjs`** measures where the forest's frame goes: triangles,
-  draw calls and render time per camera view and leaf level, with and without
-  the leaves, and the shadow pass on its own. It runs in headless Chromium with
-  software WebGL, so its times compare cases rather than predict a device; its
-  counts are exact. `?profile` hands it the renderer.
-- **Anthropic as a worker provider.** Settings lists **Anthropic (cloud)**
-  beside oMLX, Ollama and OpenAI, for a worker running gutenberg_kg with
-  kgmodule-utils 0.30.0 and an `ANTHROPIC_API_KEY`. The model list comes from
-  the worker. Under Auto, illustrations use the local image server when it
-  is up, as for oMLX.
-- **Illustrations show their render time**, under the picture, as answers show
-  their synthesis time.
-- **Live moots are kept.** A moot that finishes is saved on the device under
-  **Your moots**, plays back with no worker, and can be deleted. One closed
-  early is not saved.
+- **`web/scripts/profile.mjs`** measures where the forest's frame goes:
+  triangles, draw calls and render time per camera view and leaf level, with
+  and without the leaves, and the shadow pass on its own. It runs in headless
+  Chromium with software WebGL, so its times compare cases rather than predict
+  a device; its counts are exact. `?profile` hands it the renderer.
+- **R opens the book** in the reader: the tree whose card is showing, or
+  else the nearest tree within reach. The card's button reads **Open the book
+  · R**, and the key lists in About, the start screen and the guide include it.
+- **Pan in god's eye.** Drag with the mouse or one finger to move the map,
+  the ground following the pointer; two fingers pan as they pinch. How far
+  the view can pan grows as it zooms in, so all the way out it stays over the
+  hub. A drag that ends over a tree does not open its card.
+- **Reset all settings**, at the bottom of Settings, puts search, synthesis
+  and illustrations back to their defaults and clears the worker address. The
+  corpus scope, the answer engine and your conversations are kept.
 
 ### Changed
 
-- **Far groves draw fewer, larger leaves.** Past 45 m a grove draws a share
-  of its leaves that falls with the square of the distance, each enlarged so
-  the crown covers as much, down to a ninth of them at three times their size.
-  The god's-eye view at Ultra drew 13.0M triangles, 11.3M of them leaves; it
-  now draws 3.2M, and the view from the cart at Ultra 1.7M instead of 4.9M.
-  Leaves the season has dropped are no longer drawn at all. A tree's portrait
-  still draws every leaf. The technique is Solstice's, after Unreal's Nanite
-  foliage ([SamG-Coder/solstice](https://github.com/SamG-Coder/solstice), MIT).
+- **God's eye draws fewer, larger leaves.** Far groves there now thin too, but
+  each leaf kept is enlarged so the crown covers as much, which the ground's
+  thinning by count alone cannot do from above: past 45 m a grove draws a share
+  falling as 1 / distance², each leaf scaled by 1 / sqrt(share), down to a ninth
+  of them at three times their size. It eases in from the ground's thinning
+  between 25 and 90 m above the crowns, so a dive to the cart and the climb
+  back land without a change. At Ultra god's eye drew 13.0M triangles, 11.3M
+  of them leaves; it now draws about 3M. The technique is Solstice's, after
+  Unreal's Nanite foliage
+  ([SamG-Coder/solstice](https://github.com/SamG-Coder/solstice), MIT).
 - **The shadow map is redrawn only when it is stale.** It was drawn every
   frame; now every other frame while the cart moves, every fourth at rest in
   the wind, at once when the sun moves, and otherwise about twice a second. Its
   camera sits on whole shadow texels, so shadow edges keep still as the cart
-  drives. Also from Solstice, which redraws a shadow cascade only when its view
-  changes.
+  drives. Also after Solstice, which redraws a shadow cascade only when its
+  view changes.
 - **`?nolod`** turns both off, to compare.
-- **God's eye starts from a clear view.** Switching to it closes the open book
-  card and the redwood's card. **Fly there** hides the cards during the flight,
-  so the dive can be watched, and opens the tree's card on landing.
-- **The forest's title card reads "Knowledge Press - *The Forest*".**
-- **A shorter top bar in the forest.** Clean view, screenshot, the clock, the
-  camera, home and Browse stay in the bar; silent mode, Moots, settings, About
-  and Exit move to the three-dot menu, which now shows on every screen size.
-- **Shadows on means every shadow.** Touch screens no longer skip the leaves'
-  and the redwood's shadows or use a smaller shadow map. Shadows stay off by
-  default.
-- **Book and tour cards on tablets sit beside the drive stick**, just above the
-  search bar, leaving the middle of the view clear.
-- **The forest's camera view is one tap away.** A button in the top bar, or an
-  item in the phone's menu, steps through the views, in place of the row in
-  Settings. The C key still works.
-- **Delete all conversations is last in Settings.**
-- **Worker sits under Answers in Settings**, beside the engine that uses it.
-- **On-device answers use the window the device has.** Devices that report an
-  8,192-token window (the newer chips under iOS 27 and macOS 27) get passages
-  twice as long; others are unchanged. The turn's provenance names the window.
-- **The on-device model stays warm between questions.** The session readied
-  when the chat opens now answers the next question instead of being
-  discarded, and a fresh one is readied after each answer.
-- **The forest draws faster.** Fir, pine and oak leaves use far fewer triangles.
-- **Shadows and undergrowth are separate settings.** Shadows are off by default,
-  including on devices that had them on, since on an iPad mini turning them off
-  about doubled the frame rate. Undergrowth and wind stay on by default.
-- **The app icon is an Icon Composer document.** `app/icon/AppIcon.icon`
-  replaces the flat icon sets on iPhone, iPad and Mac. The seal's rim, ring,
-  face and KP are separate layers on the navy fill, so the system renders them
-  in its light, dark, clear and tinted appearances. `make icons` now renders
-  only the splash and web PNGs.
-- **Clean view hides the map.** It now also hides Guided tour and Read on
-  touch screens, leaving the drive stick.
-- **Guided tour and Read sit side by side** on touch screens.
-- **No worker is set by default.** The web forest no longer assumes
-  `http://localhost:8000`, and **Hold a new moot** appears only once a worker
-  is set.
-- **In the app, the forest uses the app's worker.** Its Settings no longer ask
-  for a second address. **Reset all settings** clears the worker address too.
+- **No minimap in god's eye**, which is already the map. It comes back once
+  a dive from god's eye has landed.
+- **Fly there no longer flashes the book's title** as the dive starts. The
+  book's card still opens on landing.
+- **The card's Read into the press button is called Press the book.**
+- **The touch Read button is called Press**, after what it does: it reads the
+  nearest tree into the press. Beside a tree already in the press it says
+  **Read** and opens the book in the reader.
+- **On an upright phone the search bar sits right of the stick**, just above
+  the Guided tour button, instead of across the middle of the view. The book
+  card drops to just above the stick.
+- **Settings sections fold.** Search, Worker, Synthesis, Illustrations and
+  Corpus information open and close from their headings. Search starts open,
+  the others closed, and the app remembers which you left open.
+- **About links to the Knowledge Press guide**, with a credit line to
+  GutenbergKG's docs, in place of the GutenbergKG repository.
+- **The list of chats is called Conversations**, and **Delete all
+  conversations** moved from Settings to the bottom of that list.
+- **Far groves draw fewer leaves.** Past 60 m from a grove's edge on a touch
+  screen (110 m with a pointer) its leaves thin as 1 / distance, down to 15
+  percent, and the shadow pass thins with them; god's eye still draws every
+  leaf. An iPad mini (A20 Pro) at Clear fog, Ultra and shadows on goes from
+  23 to 60 fps.
+- **Touch screens start at High leaf complexity**, not Low.
+- **Start driving and Guided tour wait for the forest's first frame**, which
+  uploads the geometry and compiles the shaders, instead of enabling on the
+  forest's data and stalling on the press.
 
 ### Fixed
 
-- **Pepys opens from the forest.** In the app the forest's reader built a
-  diary entry by entry, three queries for each of Pepys's 3,358 days, and never
-  finished. A diary now loads in one query: about 3 seconds for Pepys on a Mac.
-- **A follow-up question stays in the conversation's scope.** After a suggested
-  question or Ask about this book, a follow-up searched whatever the picker had
-  been set to before, and a reopened conversation did too. A conversation now
-  keeps its scope, and a new one returns to the scope you chose in the picker.
-- **Share as PDF shows that it is working.** On iPhone and iPad a "Preparing
-  PDF..." indicator shows during the render, and the share sheet opens once the
-  file is ready, in place of a half-drawn sheet.
-- **The app's About page no longer offers `?meteors=` links**, since the app
-  has no address bar.
-- **The drive stick and buttons no longer sit on top of the reader** or an
-  exhibit's plaque on touch screens, where they covered Previous and Next.
-- **The forest's user guide links open in the browser** from the app; they did
-  nothing before.
+- **An exact phrase answers from the passage that holds it.** When a question
+  is a phrase the corpus contains and the search by meaning missed it, the
+  answer is written from the matching passages alone; the hit cards still
+  show every result. "pillar of salt" answered from Genesis and then reported
+  that passages from Kings and the Quran "do not mention a pillar of salt".
+- **Ride the ring from god's eye** dives to the cart where it stands and then
+  sets off, instead of riding the ring from above.
+- **The cart's lantern no longer blinds at night.** Its glass glows a warm
+  flame colour instead of clipping to white, and its light is a spot hung
+  below the glass and aimed down the road, so the lamp's own cap and hook,
+  which fill the view from the cart, stay dark.
+
+## [1.40.0] - 2026-11-08
+
+The Forest gets faster and tidier, saves the moots you hold, and the app gains
+a new icon, an iPad bottom bar, and fixes for diaries, PDF sharing and follow-up
+questions.
+
+### Added
+
+- **A new app icon.** `app/icon/AppIcon.icon`, an Icon Composer document,
+  replaces the flat icon sets on iPhone, iPad and Mac. The seal's rim, ring,
+  face and KP are separate layers, so the system draws them in its light, dark,
+  clear and tinted styles. `make icons` now renders only the splash and web PNGs.
+- **Chat, Browse and Forest from the bottom on iPad**, as the phone's tabs do,
+  without opening the sidebar. Chat returns to the open conversation.
+- **Live moots are kept.** A moot that finishes is saved on the device under
+  **Your moots**, plays back with no worker, and can be deleted. One closed
+  early is not saved.
+- **Illustrations show their render time** under the picture, as answers show
+  their synthesis time.
+- **Anthropic as a worker provider.** Settings lists **Anthropic (cloud)** beside
+  oMLX, Ollama and OpenAI, for a worker running gutenberg_kg 1.34.0 or later
+  with an `ANTHROPIC_API_KEY`. The model list comes from the worker.
+
+### Changed
+
+- **The forest draws faster.** Fir, pine and oak leaves use far fewer triangles.
+- **Shadows have their own setting, off by default.** It used to share a switch
+  with the undergrowth; turning shadows off about doubled the frame rate on an
+  iPad mini. When on, every shadow is drawn, on touch screens too. Undergrowth
+  and wind stay on by default. Devices that had the old switch on start with
+  shadows off.
+- **A shorter top bar in the forest:** clean view, screenshot, the camera, home
+  and Browse. The clock, silent mode, Moots, settings, About and Exit move to the
+  three-dot menu, which now shows at every screen size. The camera button steps
+  through the four views, in place of the row in Settings; the C key still works.
+- **The forest's title card reads "Knowledge Press - *The Forest*".**
+- **Touch screens:** Guided tour and Read sit side by side, centered on the
+  search bar. On tablets the book and tour cards sit beside the drive stick,
+  above the search bar. Clean view also hides the map, Guided tour and Read,
+  leaving the drive stick.
+- **God's eye starts from a clear view.** Switching to it closes the open cards.
+  **Fly there** hides them during the flight and opens the tree's card on
+  landing.
+- **No worker is set by default.** The web forest no longer assumes
+  `http://localhost:8000`, and **Hold a new moot** appears only once a worker is
+  set. In the app, the forest uses the app's worker address, and **Reset all
+  settings** clears it.
+- **On-device answers use the window the device has.** Devices that report an
+  8,192-token window (newer chips under iOS 27 and macOS 27) get passages twice
+  as long. The model is also kept warm between questions.
+- **Settings:** Worker sits under Answers, beside the engine that uses it, and
+  Delete all conversations is last.
+
+### Fixed
+
+- **Pepys opens from the forest.** The reader built a diary entry by entry,
+  three queries for each of Pepys's 3,358 days, and never finished. A diary now
+  loads in one query: about 3 seconds for Pepys on a Mac.
+- **A follow-up question stays in the conversation's scope**, after a suggested
+  question, Ask about this book, or reopening the conversation. A new
+  conversation returns to the scope chosen in the picker.
+- **Share as PDF opens on a finished file.** On iPhone and iPad the share sheet
+  half-drew while the PDF rendered; now a "Preparing PDF..." indicator shows,
+  then the sheet opens.
+- **The context window shows its real size.** The Answers section always said
+  4,096 tokens; it now shows what the model reports.
+- **In the forest on touch screens,** the drive stick and buttons no longer
+  cover the reader or a plaque.
+- **In the app's forest,** the user guide links open in the browser, and About
+  no longer offers `?meteors=` links, since the app has no address bar.
 
 ## [1.34.1] - 2026-11-05
 

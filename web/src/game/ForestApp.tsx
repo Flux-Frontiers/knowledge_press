@@ -16,11 +16,15 @@ import { requestPlace } from "./location";
 import { nextCamera, LEAF_SCALE } from "./preferences";
 import { resetSim } from "./sim";
 import { unlockSpeechOnGesture } from "./speech";
-import { useGame } from "./store";
+import { readerTarget, useGame } from "./store";
 
 export function ForestApp() {
   const [mounted, setMounted] = useState(false);
   const [forest, setForest] = useState<Forest | null>(null);
+  // The start buttons wait for the forest's first frame, not just its data: the first
+  // frame uploads the geometry and compiles the shaders, and that is the stall.
+  const [drawn, setDrawn] = useState(false);
+  useEffect(() => setDrawn(false), [forest]);
   const playing = useGame((s) => s.playing);
   const play = useGame((s) => s.play);
   const setToast = useGame((s) => s.setToast);
@@ -212,6 +216,11 @@ export function ForestApp() {
       if (e.code === "KeyB") st.toggleCatalog();
       if (e.code === "KeyQ") st.toggleCircuit();
       if (e.code === "KeyC") st.setPreferences({ camera: nextCamera(st.preferences.camera) });
+      // Not with a modifier: Cmd+R and Ctrl+R reload the page.
+      if (e.code === "KeyR" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const slug = readerTarget(st);
+        if (slug) st.openReader(slug);
+      }
       if (e.code === "KeyH" && forest) {
         st.selectGrove(null);
         st.requestJump(forest.home, "Home · the corpus redwood");
@@ -240,7 +249,7 @@ export function ForestApp() {
       {shot ? null : <img src={nightStill ? "start/night.webp" : "start/day.webp"} alt="" className="absolute inset-0 size-full object-cover" />}
       {mounted && forest ? (
         <div className="forest-fade-in absolute inset-0">
-          <ForestCanvas forest={forest} />
+          <ForestCanvas forest={forest} onDrawn={() => setDrawn(true)} />
         </div>
       ) : null}
       {playing && forest && !shot ? (
@@ -251,8 +260,8 @@ export function ForestApp() {
         </>
       ) : shot ? null : (
         <StartScreen
-          ready={Boolean(forest)}
-          growing={!forest}
+          ready={Boolean(forest) && drawn}
+          growing={!forest || !drawn}
           opensAt={linked?.book.title}
           onEnter={(tour) => {
             if (forest) {

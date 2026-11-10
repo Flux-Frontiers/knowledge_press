@@ -5,7 +5,7 @@ ways to reach one.
 
 ## Light the groves with a query
 
-Type a word in the **lantern query** field at the top left: `stoic`,
+Type a word in the **lantern query** field at the bottom of the screen: `stoic`,
 `freedom`, `fire`, `sea`. Every tree whose title, tags or excerpt matches
 lights up, and a **lantern trail** on the ground leads from the cart to the
 nearest one. Press ++enter++ to jump straight to the first match.

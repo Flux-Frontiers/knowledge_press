@@ -18,29 +18,23 @@ Great books, searched offline
 
 ## Promotional text (170, changeable without a new version)
 
-Live on iOS since 2026-11-06, with 1.34.1:
+Live on iOS since 2026-11-06, with 1.34.1, and on the Mac 1.40.0 version,
+submitted 2026-11-08:
 
 ```text
 Walk a 3-D forest where every tree is a book, then ask it a question. 261 classics and four diaries on your device, and every answer shows its sources.
 ```
 
-Promotional text goes live on the current build the moment it is saved.
-
-### Mac: apply once a build with the Forest is live
-
-The Mac page keeps this until then, since the Forest text would describe a
-feature its store build lacks (Guideline 2.3):
-
-261 classic books and four diaries on your Mac. Ask a question, get an
-answer written from the passages it found, with every source shown.
-
-Then use the iOS text above, with "on your Mac" for "on your device".
+Mac: "on your Mac" for "on your device". Promotional text goes live on the
+current build the moment it is saved, so it is set on a version before that
+version ships, never on the live one.
 
 ## Description (4000)
 
 Per version. This text is for 1.34.1 and later: Ask about this book's
-book-only scope and the working Siri shortcut both need 1.34.1. Paragraphs
-are on one line each, so it pastes cleanly. The same text serves the Mac.
+book-only scope and the working Siri shortcut both need 1.34.1. It went in for
+iOS 1.34.1 and, unchanged, for iOS and Mac 1.40.0. Paragraphs are on one line
+each, so it pastes cleanly. The same text serves the Mac.
 
 ```text
 The Knowledge Press is a library of 261 public-domain books and four diaries that you can search and question, entirely on your device.
@@ -89,6 +83,40 @@ The Knowledge Press is not affiliated with Project Gutenberg. The texts are publ
 classics,books,library,philosophy,literature,offline,reader,search,shakespeare,plato,diaries,homer
 
 ## What's New (per version)
+
+### 1.40.0
+
+Submitted 2026-11-08 for iOS and Mac, build 907 on both.
+
+iOS:
+
+```text
+A smoother forest and a new icon.
+
+- A new app icon, in light, dark, clear and tinted styles.
+- The forest draws faster, with a shorter top bar and a camera button. Shadows have their own setting.
+- On iPad, switch between Chat, Browse and the Forest from a bar at the bottom.
+- Pepys's diary opens from its tree in the forest.
+- A follow-up question stays in the part of the library you first asked about.
+- On newer iPhones and iPads, on-device answers read longer passages.
+- Share as PDF opens faster.
+- Moots held with your own GutenbergKG worker are now kept on the device.
+```
+
+Mac (the first Mac version with the Forest; the Mac last shipped 1.32.0, so
+its notes lead with it):
+
+```text
+The Forest is here. Walk a 3-D forest where every tree is a book, right inside the app and with no network needed. Open a tree and click Ask about this book to ask that book a question.
+
+Also new:
+- A new app icon, in light, dark, clear and tinted styles.
+- Tree buttons in Browse and on answer citations take you to that book's tree.
+- Browse search finds titles as well as authors.
+- A follow-up question stays in the part of the library you first asked about.
+- On newer Macs, on-device answers read longer passages.
+- Moots held with your own GutenbergKG worker are now kept on the device.
+```
 
 ### 1.34.1
 
@@ -152,7 +180,10 @@ URLs, award claims, Project Gutenberg logo, or other platforms' logos.
 
 The set below is for versions after 1.33.0: slot 06 shows title search in
 Browse, and slot 03's card shows Ask about this book with the book-only
-scope, both of which came after 1.33.0. All shots use dark mode, the
+scope, both of which came after 1.33.0. The iOS set was captured for 1.34.1
+and reused for 1.40.0; it still shows the forest's pre-1.40.0 top bar, so the
+forest slots (02, 03) are due a retake. The Mac set was captured for 1.40.0;
+see "Mac screenshots" below. All shots use dark mode, the
 Simulator default (`SIM_APPEARANCE=dark`); do not mix modes in a set. iPad
 shots are landscape (rotate the Simulator with Cmd-Left before capturing);
 iPhone shots are portrait. Captions are in `scripts/store_captions.tsv`, one
@@ -185,10 +216,10 @@ exchange does not read well as a still.
 3. `ios-sim-launch` sets the 9:41 status bar. Take each shot with
    `make ios-sim-screenshot SIM=...`, which writes
    `screenshots/<SIM>-<time>.png`, and move it to
-   `screenshots/raw/iphone/<slot>-<name>.png` (or `ipad/`). For the Mac,
-   crop as under "Mac screenshots" below, but end the ffmpeg output name in
-   `.png` (the script reads PNG only) and save it in `screenshots/raw/mac/`.
-4. `make store-shots` writes `screenshots/store/<version>/<device>-<slot>.png`
+   `screenshots/raw/iphone/<slot>-<name>.png` (or `ipad/`). The Mac is
+   captured from its window instead; see "Mac screenshots" below.
+4. `make store-shots STORE_VERSION=<version>` writes
+   `screenshots/store/<version>/<device>-<slot>.png`
    at 1320x2868, 2752x2064 (iPad, landscape) and 2880x1800, opaque, and a
    `contact-<device>.png` per device. It fails if a size is wrong, a file has
    alpha, a slot has no caption, or a device has more than 10.
@@ -233,22 +264,40 @@ The blocks above count the 1.32.0 corpus: 261 books plus four diaries, 265
 works in all. The description is per version, so the count changes only when
 a new version's text is edited.
 
+Mac 1.40.0, submitted 2026-11-08, is the first Mac version with the Forest:
+it took the description above (with THE FOREST), the Forest promotional text,
+the 1.40.0 Mac What's New and the seven Mac screenshots. Its review notes are
+a short paragraph, not the iOS answers: two Mac versions had passed with the
+field blank, and the note only says that no setup is needed, that written
+answers need Apple Intelligence, and that the forest's "Hold a new moot"
+appears only with the user's own server. No recording is attached for the
+Mac; App Review asked for the recording on iOS.
+
 ### Mac screenshots
 
-Apple takes 1280x800, 1440x900, 2560x1600 or 2880x1800. On a 14-inch
-MacBook Pro (3024x1964), zoom the window (double-click its title bar), take
-a full-screen capture with Cmd-Shift-3, and crop off the 74 px menu bar;
-what is left is exactly 16:10:
+Apple takes 1280x800, 1440x900, 2560x1600 or 2880x1800. The 1.40.0 set is
+captured from the app's window, not the screen: size the window to exactly
+1440x900 points, which on a Retina display is 2880x1800 pixels, and capture
+just that window with no shadow:
 
 ```sh
-ffmpeg -i in.png -vf "crop=3024:1890:0:74,scale=2880:1800:flags=lanczos" -q:v 2 out.jpg
+osascript -e 'tell application "System Events" to tell process "KnowledgePress" to set size of window 1 to {1440, 900}'
+screencapture -x -o -l<window-id> out.png   # window id from CGWindowListCopyWindowInfo
 ```
 
-Clear the Worker field in Settings first, or every answer shows "Cannot
-reach the worker" and a Render button. The 1.30.0 set, in order: the start
-screen with sample questions; "what did marcus aurelius say about anger?"
-with Source passages open; Pepys on 1 January 1660 in the reader; *Macbeth*
-I.ii in the reader.
+Resizing needs Accessibility permission for the app that runs the script. Save
+each capture opaque at 2880x1800 as `screenshots/raw/mac/<slot>-<name>.png`;
+`make store-shots` captions it. The forest pauses and opens its settings when
+its window loses focus, so capture a forest scene after a short delay, with the
+window in front and the panel closed.
+
+Clear the Worker field in Settings first, or every answer shows "Cannot reach
+the worker" and a Render button. Set Scope to **all** and turn off the forest's
+**Show geometry & frame rate**. The 1.40.0 set uses slots 01-07 of the table
+above; slot 08 is skipped on the Mac. Slot 01 asks "marcus aurelius on death",
+slot 03 is *Moby Dick*'s card at dawn, slot 04 asks "In Moby Dick, why does Ahab
+hunt the whale?", slot 05 is *Pride and Prejudice* chapter II, slot 06 searches
+"dickens", and slot 07 is Pepys on 2 September 1666.
 
 ## Category
 

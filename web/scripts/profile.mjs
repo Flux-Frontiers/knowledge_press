@@ -8,7 +8,7 @@
 //   node scripts/profile.mjs [label]
 //
 // Env: FOREST_URL (default http://127.0.0.1:5173); CASES, a JSON list of
-// { camera, leaves, shadows, nolod?, day? }; BREAKDOWN=1 to list triangles by
+// { camera, leaves, shadows, nolod?, day?, zoomIn? }; BREAKDOWN=1 to list triangles by
 // kind of mesh; OUT for results-<label>.jsonl and a screenshot per case
 // (default ../screenshots/profile, which git ignores).
 import { appendFileSync, mkdirSync } from "node:fs";
@@ -48,6 +48,9 @@ for (const c of cases) {
     if (c.day) await page.evaluate(() => { const g = window.__forestProfile.game.getState(); g.setSeason("summer"); g.setTimeMode("day"); });
     // Let the camera settle (the god's-eye flight, the forest fading in).
     await page.waitForTimeout(6000);
+    // { zoomIn: n }: n wheel notches in at the middle of the view, in god's eye.
+    for (let k = 0; k < (c.zoomIn ?? 0); k++) await page.mouse.wheel(0, -400);
+    if (c.zoomIn) await page.waitForTimeout(4000);
     const r = await page.evaluate(async () => {
       const { gl, scene, camera, game } = window.__forestProfile;
       const ctx = gl.getContext();
@@ -126,8 +129,9 @@ for (const c of cases) {
         leafMeshes: leafMeshes.length, leafInstances, leafTrisVisible: Math.round(leafTris), all, noLeaves, breakdown, shadow, shadowRedrawShare: rafFrames ? +(shadowRendersInRaf / rafFrames).toFixed(2) : null, casting: (() => { let on = false; scene.traverse((o) => { if (o.isDirectionalLight && o.castShadow) on = true; }); return on; })() };
     });
     r.nolod = !!c.nolod;
+    r.zoomIn = c.zoomIn ?? 0;
     try {
-      await page.screenshot({ path: join(out, `shot-${label}-${c.camera}-${c.leaves}${c.shadows ? "-shadows" : ""}${c.nolod ? "-nolod" : ""}.png`), timeout: 240000 });
+      await page.screenshot({ path: join(out, `shot-${label}-${c.camera}-${c.leaves}${c.zoomIn ? `-zoom${c.zoomIn}` : ""}${c.shadows ? "-shadows" : ""}${c.nolod ? "-nolod" : ""}.png`), timeout: 240000 });
     } catch (e) { console.error(`no screenshot: ${e.message.split("\n")[0]}`); }
     results.push(r);
     appendFileSync(join(out, `results-${label}.jsonl`), JSON.stringify(r) + "\n");
@@ -139,5 +143,5 @@ for (const c of cases) {
 console.log("SUMMARY " + label);
 for (const r of results) {
   if (process.env.BREAKDOWN) console.log(r.breakdown.join("\n"));
-  console.log(`${r.nolod ? "nolod" : "lod  "} ${r.camera.padEnd(6)} leaves=${r.leaves.padEnd(5)} shadows=${String(r.shadows).padEnd(5)} | ${(r.all.tris / 1e6).toFixed(2)}M tris ${String(r.all.calls).padStart(4)} calls ${r.all.ms.toFixed(1).padStart(6)} ms/render | no leaves: ${(r.noLeaves.tris / 1e6).toFixed(2)}M ${r.noLeaves.ms.toFixed(1).padStart(6)} ms | leaf inst ${r.leafInstances} | raf ${r.rafFps} fps${r.shadow ? ` | shadow pass ${(r.shadow.withMs - r.shadow.withoutMs).toFixed(0)} ms, redrawn on ${Math.round(100 * r.shadowRedrawShare)}% of frames` : ""}`);
+  console.log(`${r.nolod ? "nolod" : "lod  "} ${r.camera.padEnd(6)}${r.zoomIn ? ` zoom${r.zoomIn} y=${r.camPos[1]}` : ""} leaves=${r.leaves.padEnd(5)} shadows=${String(r.shadows).padEnd(5)} | ${(r.all.tris / 1e6).toFixed(2)}M tris ${String(r.all.calls).padStart(4)} calls ${r.all.ms.toFixed(1).padStart(6)} ms/render | no leaves: ${(r.noLeaves.tris / 1e6).toFixed(2)}M ${r.noLeaves.ms.toFixed(1).padStart(6)} ms | leaf inst ${r.leafInstances} | raf ${r.rafFps} fps${r.shadow ? ` | shadow pass ${(r.shadow.withMs - r.shadow.withoutMs).toFixed(0)} ms, redrawn on ${Math.round(100 * r.shadowRedrawShare)}% of frames` : ""}`);
 }

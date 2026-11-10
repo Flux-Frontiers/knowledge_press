@@ -1,65 +1,8 @@
 /**
- * Two savings borrowed from Solstice (github.com/SamG-Coder/solstice, MIT):
- * foliage that thins with distance, as Nanite's foliage does, and a shadow
- * map redrawn only when what it shows has changed.
+ * The sun's shadow map, redrawn only when it is stale and centred on whole
+ * texels. Solstice (github.com/SamG-Coder/solstice, MIT) redraws a shadow
+ * cascade only when its view changes, its largest single saving on small GPUs.
  */
-
-/** Within this many metres of the camera a grove draws every leaf. */
-export const LEAF_FULL_DISTANCE = 45;
-/** The most a far leaf is enlarged; so a grove never drops below 1 / LEAF_MAX_SCALE² of its leaves. */
-export const LEAF_MAX_SCALE = 3;
-
-/**
- * The share of a grove's leaves to draw at this distance, and how much to
- * enlarge each so the crown covers as much of the screen. A leaf's area on
- * screen falls as 1 / distance², so drawing that share of them, each scaled
- * by 1 / sqrt(share), keeps the leaf area the eye sees constant.
- *
- * :param distance: Metres from the camera to the nearest point of the grove.
- * :returns: `fraction` in (0, 1] and `scale` >= 1, with fraction * scale² = 1.
- */
-export function leafLod(distance: number): { fraction: number; scale: number } {
-  if (!(distance > LEAF_FULL_DISTANCE)) return { fraction: 1, scale: 1 };
-  const fraction = Math.max((LEAF_FULL_DISTANCE / distance) ** 2, 1 / LEAF_MAX_SCALE ** 2);
-  return { fraction, scale: 1 / Math.sqrt(fraction) };
-}
-
-/**
- * An instance order for one grove: its shown leaves first, shuffled, then the
- * hidden ones. Any prefix of the shown part is then a fair sample of the
- * whole crown, so drawing the first `fraction` of them thins every tree
- * evenly instead of dropping whole trees.
- *
- * :param shown: For each leaf of the grove, whether it is drawn at all.
- * :param seed: Fixes the shuffle, so the same grove thins the same way each time.
- * :returns: `order[slot]` is the leaf (0-based in the grove) for that instance slot; `shown` is how many lead.
- */
-export function leafOrder(shown: ArrayLike<boolean>, seed: number): { order: Int32Array; shown: number } {
-  const n = shown.length;
-  const order = new Int32Array(n);
-  let front = 0;
-  let back = n - 1;
-  for (let i = 0; i < n; i++) {
-    if (shown[i]) order[front++] = i;
-    else order[back--] = i;
-  }
-  // Fisher-Yates over the shown leaves, from a small seeded generator (mulberry32).
-  let s = seed >>> 0;
-  const random = () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-  for (let i = front - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    const t = order[i]!;
-    order[i] = order[j]!;
-    order[j] = t;
-  }
-  return { order, shown: front };
-}
 
 /** Moving this far, metres, or turning the light this much (1 - cos), makes the shadow map stale. */
 const SHADOW_MOVED = 0.01;

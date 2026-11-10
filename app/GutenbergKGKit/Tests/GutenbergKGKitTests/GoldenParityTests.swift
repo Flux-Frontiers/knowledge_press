@@ -279,6 +279,34 @@ struct GoldenParityTests {
         }
     }
 
+    @Test func aPhraseQueryNarrowsSynthesisToItsLiteralMatches() async throws {
+        // The on-device model narrates every passage it is handed, so the
+        // verse arrived with Kings and the Quran and the answer said those
+        // "do not mention a pillar of salt". Synthesis now reads only the
+        // literal matches; the cards keep every hit.
+        let (packs, _) = try load()
+        let retrieval = LocalRetrieval(packs: packs)
+
+        for query in ["pillar of salt", "pillars of salt"] {
+            let result = try await retrieval.retrieve(
+                RetrievalRequest(query: query, corpus: "all", k: 25, minScore: 0.5))
+            #expect(result.hits.count > 1)
+            #expect(result.synthesisHits.count == 1, "[\(query)]")
+            #expect(result.synthesisHits.first?.nodeId.contains("the_bible.md:0102") == true)
+        }
+
+        // One word is not a phrase, a question with no literal match narrows
+        // nothing, and neither does a phrase cosine found by itself: the one
+        // literal "circles of Hell" is an aside in Les Miserables, and the
+        // passages that answer it are Dante's.
+        for query in ["Moses", "a monster assembled from dead body parts", "circles of Hell"] {
+            let result = try await retrieval.retrieve(
+                RetrievalRequest(query: query, corpus: "all", k: 25, minScore: 0.5))
+            #expect(result.phraseMatched == nil, "[\(query)]")
+            #expect(result.synthesisHits.count == result.hits.count)
+        }
+    }
+
     @Test func aScopedQueryStaysInsideItsGenre() async throws {
         let (packs, _) = try load()
         let retrieval = LocalRetrieval(packs: packs)

@@ -1,12 +1,12 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, RepeatWrapping, RGBADepthPacking, Shape, ShapeGeometry, SRGBColorSpace, TextureLoader, Vector2 } from "three";
-import { textureAnisotropy } from "./Environment";
+import { COARSE_POINTER, textureAnisotropy } from "./Environment";
 import { useGame } from "./store";
 import type { Forest } from "./forest";
 import { bookMatchesQuery } from "./forest";
+import { godLeafBlend, leafFraction, leafHash, leafOrder } from "./leafLod";
 import { SEASONS, type SeasonName } from "./seasons";
-import { leafLod, leafOrder } from "./foliageLod";
 import { leafOutline, SPECIES, type LeafShape, type Species } from "./species";
 
 const dummy = new Object3D();
@@ -38,61 +38,19 @@ function leafGeometry(leaf: LeafShape) {
   return g;
 }
 
-/** `?nolod` turns off distance thinning (foliageLod.ts), to compare. */
-const LEAF_LOD = typeof window === "undefined" || !new URLSearchParams(window.location.search).has("nolod");
-
-/**
- * A grove's leaf and shadow-depth materials. Each grove has its own pair, all
- * on one shader program, so that each can carry its own `leafScale`: three
- * uploads a material's uniforms only when the material changes between draws.
- */
-function leafMaterials(wind: { value: number }, windStrength: { value: number }) {
-  const leafScale = { value: 1 };
-  const leaf = new MeshStandardMaterial({ roughness: 0.8, side: DoubleSide });
-  const depth = new MeshDepthMaterial({ depthPacking: RGBADepthPacking, side: DoubleSide });
-  for (const material of [leaf, depth]) {
-    material.onBeforeCompile = (shader) => {
-      shader.uniforms.windTime = wind;
-      shader.uniforms.windStrength = windStrength;
-      shader.uniforms.leafScale = leafScale;
-      shader.vertexShader = "uniform float windTime; uniform float windStrength; uniform float leafScale;\n" + shader.vertexShader;
-      // A far grove draws fewer leaves, each enlarged about its stalk (foliageLod.ts).
-      shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n          transformed *= leafScale;");
-      // Three's project_vertex, with the wind added in world space after the
-      // instance matrix: in leaf space a flap along the face normal would be
-      // scaled down by the blade's thin z.
-      shader.vertexShader = shader.vertexShader.replace("#include <project_vertex>", `
-        vec4 mvPosition = instanceMatrix * vec4(transformed, 1.0);
-        vec3 base = instanceMatrix[3].xyz;
-        float phase = base.x * .31 + base.z * .27;
-        // Slow gusts roll across the forest (windRotors.ts gust(), which turns the sculptures).
-        float gust = 0.65 + 0.35 * sin(windTime * 0.35 + base.x * .02);
-        float w = gust * windStrength;
-        // The crown sways together, more the higher the leaf, in waves across the grove.
-        vec2 windDir = vec2(0.93, 0.37);
-        float sway = sin(windTime * 1.1 + base.x * .05 + base.z * .04) + 0.4 * sin(windTime * 2.3 + base.z * .07);
-        mvPosition.xz += windDir * sway * w * .009 * base.y;
-        // Each leaf flaps about its stalk (the shape's y = -1 end), along its face normal.
-        float tip = (position.y + 1.0) * 0.5;
-        float flap = sin(windTime * 4.0 + phase * 3.0) + 0.5 * sin(windTime * 6.4 + phase * 1.7);
-        // Divided, not normalize(): a hidden leaf is scaled to zero, and normalize(0) is NaN.
-        vec3 leafNormal = instanceMatrix[2].xyz / max(length(instanceMatrix[2].xyz), 1e-6);
-        mvPosition.xyz += leafNormal * flap * tip * w * .35 * leafScale * length(instanceMatrix[1].xyz);
-        mvPosition = modelViewMatrix * mvPosition;
-        gl_Position = projectionMatrix * mvPosition;
-      `);
-    };
-    material.customProgramCacheKey = () => "forest-leaf-wind-v4";
-  }
-  return { leaf, depth, leafScale };
-}
-
 function keepLeaf(i: number, density: number): boolean {
   if (density >= 0.999) return true;
-  // Mix adjacent indices; the old sequence kept almost every early winter leaf.
-  const h = ((Math.imul(i + 1, 1664525) ^ Math.imul(i + 7, 1013904223)) >>> 0) / 4294967296;
-  return h < density;
+  return leafHash(i) < density;
 }
+
+/** Groves nearer than this, metres from the camera to the grove's edge, draw every leaf. */
+const LEAF_FULL = COARSE_POINTER ? 60 : 110;
+/** The fewest leaves a far grove keeps, as a fraction of its own. */
+const LEAF_FLOOR = 0.15;
+/** About where the crowns are, metres: god's-eye thinning reads the camera's height above them. */
+const CROWN_HEIGHT = 12;
+/** `?nolod` draws god's eye with every leaf, as before godLeafBlend, to compare. */
+const GOD_LOD = typeof window === "undefined" || !new URLSearchParams(window.location.search).has("nolod");
 
 export function Trees({
   forest,
@@ -108,10 +66,49 @@ export function Trees({
   const q = query.trim();
   const wind = useMemo(() => ({ value: 0 }), []);
   const windStrength = useMemo(() => ({ value: 0 }), []);
-  const materials = useMemo(() => forest.chunks.map(() => leafMaterials(wind, windStrength)), [forest, wind, windStrength]);
+  // One leaf and depth material per grove, all on one shader program, so each can carry its own
+  // `leafScale`: three uploads a material's uniforms only when the material changes between draws.
+  const materials = useMemo(() => forest.chunks.map(() => {
+    const leafScale = { value: 1 };
+    const leaf = new MeshStandardMaterial({ roughness: 0.8, side: DoubleSide });
+    const depth = new MeshDepthMaterial({ depthPacking: RGBADepthPacking, side: DoubleSide });
+    for (const material of [leaf, depth]) {
+      material.onBeforeCompile = (shader) => {
+        shader.uniforms.windTime = wind;
+        shader.uniforms.windStrength = windStrength;
+        shader.uniforms.leafScale = leafScale;
+        shader.vertexShader = "uniform float windTime; uniform float windStrength; uniform float leafScale;\n" + shader.vertexShader;
+        // God's eye draws fewer leaves, each enlarged about its stalk (leafLod.ts godLeafBlend).
+        shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n          transformed *= leafScale;");
+        // Three's project_vertex, with the wind added in world space after the
+        // instance matrix: in leaf space a flap along the face normal would be
+        // scaled down by the blade's thin z.
+        shader.vertexShader = shader.vertexShader.replace("#include <project_vertex>", `
+          vec4 mvPosition = instanceMatrix * vec4(transformed, 1.0);
+          vec3 base = instanceMatrix[3].xyz;
+          float phase = base.x * .31 + base.z * .27;
+          // Slow gusts roll across the forest (windRotors.ts gust(), which turns the sculptures).
+          float gust = 0.65 + 0.35 * sin(windTime * 0.35 + base.x * .02);
+          float w = gust * windStrength;
+          // The crown sways together, more the higher the leaf, in waves across the grove.
+          vec2 windDir = vec2(0.93, 0.37);
+          float sway = sin(windTime * 1.1 + base.x * .05 + base.z * .04) + 0.4 * sin(windTime * 2.3 + base.z * .07);
+          mvPosition.xz += windDir * sway * w * .009 * base.y;
+          // Each leaf flaps about its stalk (the shape's y = -1 end), along its face normal.
+          float tip = (position.y + 1.0) * 0.5;
+          float flap = sin(windTime * 4.0 + phase * 3.0) + 0.5 * sin(windTime * 6.4 + phase * 1.7);
+          // Divided, not normalize(): a hidden leaf is scaled to zero, and normalize(0) is NaN.
+          vec3 leafNormal = instanceMatrix[2].xyz / max(length(instanceMatrix[2].xyz), 1e-6);
+          mvPosition.xyz += leafNormal * flap * tip * w * .35 * leafScale * length(instanceMatrix[1].xyz);
+          mvPosition = modelViewMatrix * mvPosition;
+          gl_Position = projectionMatrix * mvPosition;
+        `);
+      };
+      material.customProgramCacheKey = () => "forest-leaf-wind-v4";
+    }
+    return { leaf, depth, leafScale };
+  }), [forest, wind, windStrength]);
   useEffect(() => () => materials.forEach((m) => { m.leaf.dispose(); m.depth.dispose(); }), [materials]);
-  // Per grove, how many instances lead its leaf order shown (foliageLod.ts leafOrder).
-  const leafShown = useRef<number[]>([]);
 
   // A tree portrait (portrait.ts) shows one tree and nothing else of the forest.
   const only = useGame((s) => s.portrait?.tree ?? null);
@@ -151,6 +148,9 @@ export function Trees({
   const leafGeoms = useMemo(() => SPECIES.map((s) => leafGeometry(s.leaf)), []);
   const leafRefs = useRef<(InstancedMesh | null)[]>([]);
   const chunkRefs = useRef<(Group | null)[]>([]);
+  const orders = useMemo(() => forest.chunks.map((c) => leafOrder(c.leafStart, c.leafCount)), [forest]);
+  // Per grove, the slots up to the last leaf with any size; the frame loop cuts the count below it by distance.
+  const kept = useRef<number[]>([]);
   useEffect(() => () => bark.forEach((g) => g.dispose()), [bark]);
   useEffect(() => () => leafGeoms.forEach((g) => g.dispose()), [leafGeoms]);
   useEffect(() => () => {
@@ -168,20 +168,26 @@ export function Trees({
     // hidden chunks also drop out of the shadow pass.
     const density = scene.fog && "density" in scene.fog ? (scene.fog.density as number) : 0;
     const cutoff = density > 0 ? 2.6 / density : Infinity;
+    // God's eye sees every grove from far above: thinning by count alone would bare the
+    // whole forest, so there it draws fewer, larger leaves instead, eased in from the
+    // ground's thinning by height so a dive to the cart lands without a change (godLeafBlend).
+    // The camera mode stays "god" through a dive until it lands.
+    const god = s.preferences.camera === "god" && s.portrait === null;
+    const thin = !god && s.portrait === null;
     forest.chunks.forEach((c, i) => {
       const g = chunkRefs.current[i];
       if (!g) return;
       const subject = s.portrait ? forest.trees[s.portrait.tree]!.chunk : null;
-      const ground = Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius;
-      g.visible = subject !== null ? i === subject : ground < cutoff;
-      // Far groves draw a share of their leaves, enlarged; a portrait draws every leaf.
+      const dist = Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius;
+      g.visible = subject !== null ? i === subject : dist < cutoff;
       const mesh = leafRefs.current[i];
-      const shown = leafShown.current[i] ?? 0;
-      if (!mesh || !g.visible) return;
-      // From the camera to the nearest point of the grove, up to the height of the crowns.
-      const lod = LEAF_LOD && subject === null ? leafLod(Math.hypot(Math.max(0, ground), Math.max(0, camera.position.y - 12))) : { fraction: 1, scale: 1 };
-      mesh.count = Math.min(shown, Math.ceil(shown * lod.fraction));
-      materials[i]!.leafScale.value = lod.scale;
+      const full = kept.current[i] ?? c.leafCount;
+      const above = camera.position.y - CROWN_HEIGHT;
+      const lod = god && GOD_LOD
+        ? godLeafBlend(Math.hypot(Math.max(0, dist), Math.max(0, above)), above, leafFraction(dist, LEAF_FULL, LEAF_FLOOR))
+        : null;
+      if (mesh) mesh.count = lod ? Math.max(1, Math.ceil(full * lod.fraction)) : thin ? Math.max(1, Math.ceil(full * leafFraction(dist, LEAF_FULL, LEAF_FLOOR))) : full;
+      materials[i]!.leafScale.value = lod ? lod.scale : 1;
     });
   });
 
@@ -216,38 +222,32 @@ export function Trees({
       if (!mesh) return;
       const [dh, ds, dl] = SPECIES[chunk.species]!.foliageShift;
       const foliage = palette.foliage.map((hex) => new Color(hex).offsetHSL(dh, ds, dl));
-      // Size of each leaf: 1, small for a grove the search passed over, 0 for one the season dropped.
-      const sizes = new Float32Array(chunk.leafCount);
+      const order = orders[ci]!;
+      let last = -1;
       for (let n = 0; n < chunk.leafCount; n++) {
-        const i = chunk.leafStart + n;
-        const dim = match && !match.has(treeIndex[i]!);
-        sizes[n] = keepLeaf(i, palette.density) && !dim ? 1 : match && dim && only === null ? 0.15 : 0;
-      }
-      // Shown leaves first, shuffled, so the first share of them thins every crown evenly.
-      const { order, shown } = leafOrder(Array.from(sizes, (v) => v > 0), ci + 1);
-      leafShown.current[ci] = shown;
-      for (let slot = 0; slot < chunk.leafCount; slot++) {
-        const n = order[slot]!;
-        const i = chunk.leafStart + n;
+        const i = chunk.leafStart + order[n]!;
         const treeI = treeIndex[i]!;
+        const dim = match && !match.has(treeI);
+        const visible = keepLeaf(i, palette.density) && !dim;
         dummy.position.set(pos[i * 3]!, pos[i * 3 + 1]!, pos[i * 3 + 2]!);
-        const s = sizes[n]!;
+        const s = visible ? 1 : match && dim && only === null ? 0.15 : 0;
+        if (s > 0) last = n;
         dummy.scale.set(scale[i * 3]! * s, scale[i * 3 + 1]! * s, scale[i * 3 + 2]! * s);
         dummy.quaternion.set(quat[i * 4]!, quat[i * 4 + 1]!, quat[i * 4 + 2]!, quat[i * 4 + 3]!);
         dummy.updateMatrix();
-        mesh.setMatrixAt(slot, dummy.matrix);
+        mesh.setMatrixAt(n, dummy.matrix);
         color.copy(foliage[tint[i]! % foliage.length]!);
         if (match && match.has(treeI)) color.offsetHSL(0, 0.05, 0.08);
-        mesh.setColorAt(slot, color);
+        mesh.setColorAt(n, color);
       }
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-      // Leaves the season dropped are not drawn at all; useFrame thins the rest with distance.
-      mesh.count = shown;
+      kept.current[ci] = last + 1;
+      mesh.count = chunk.leafCount;
       // Bounds from the real instances, so frustum culling can skip this grove.
       mesh.computeBoundingSphere();
     });
-  }, [forest, palette, match, only]);
+  }, [forest, palette, match, only, orders]);
 
   useLayoutEffect(() => {
     const mesh = ringRef.current;

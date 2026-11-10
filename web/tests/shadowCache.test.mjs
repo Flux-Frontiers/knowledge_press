@@ -3,49 +3,8 @@ import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
-const { leafLod, leafOrder, shadowStale, snapToTexels, LEAF_FULL_DISTANCE, LEAF_MAX_SCALE, SHADOW_MOVING_FRAMES, SHADOW_IDLE_FRAMES, SHADOW_MAX_FRAMES } =
-  require(`${process.env.FOREST_TEST_BUILD}/foliageLod.js`);
-
-test("near groves draw every leaf at full size", () => {
-  for (const d of [-5, 0, 10, LEAF_FULL_DISTANCE]) assert.deepEqual(leafLod(d), { fraction: 1, scale: 1 });
-});
-
-test("far groves draw fewer, larger leaves and keep their leaf area", () => {
-  let last = 1;
-  for (const d of [60, 90, 120]) {
-    const { fraction } = leafLod(d);
-    assert.ok(fraction < last, `fewer leaves at ${d} m`);
-    last = fraction;
-  }
-  for (const d of [60, 90, 120, 200, 600]) {
-    const { fraction, scale } = leafLod(d);
-    assert.ok(Math.abs(fraction * scale * scale - 1) < 1e-9, "fraction x scale^2 = 1");
-  }
-  // Past three times the full distance it stops at the floor, as in the god's-eye view hundreds of metres up.
-  assert.deepEqual(leafLod(3 * LEAF_FULL_DISTANCE + 1), leafLod(600));
-  assert.equal(leafLod(600).scale, LEAF_MAX_SCALE);
-  assert.ok(Math.abs(leafLod(600).fraction - 1 / LEAF_MAX_SCALE ** 2) < 1e-12);
-});
-
-test("the leaf order leads with the shown leaves, each once", () => {
-  const shown = Array.from({ length: 1000 }, (_, i) => i % 7 !== 0);
-  const { order, shown: n } = leafOrder(shown, 11);
-  assert.equal(n, shown.filter(Boolean).length);
-  assert.equal(new Set(order).size, shown.length);
-  for (let s = 0; s < order.length; s++) assert.equal(shown[order[s]], s < n);
-  assert.deepEqual(leafOrder(shown, 11).order, order, "the same seed, the same order");
-});
-
-test("a prefix of the order thins every tree evenly", () => {
-  // Ten trees of 500 leaves each, in tree order as the forest stores them.
-  const shown = new Array(5000).fill(true);
-  const { order } = leafOrder(shown, 3);
-  const prefix = order.slice(0, 500);
-  for (let tree = 0; tree < 10; tree++) {
-    const kept = prefix.filter((i) => Math.floor(i / 500) === tree).length;
-    assert.ok(kept > 20 && kept < 80, `tree ${tree} keeps ${kept} of 50 expected`);
-  }
-});
+const { shadowStale, snapToTexels, SHADOW_MOVING_FRAMES, SHADOW_IDLE_FRAMES, SHADOW_MAX_FRAMES } =
+  require(`${process.env.FOREST_TEST_BUILD}/shadowCache.js`);
 
 const SUN = [0.3, 0.8, 0.52].map((v, _, a) => v / Math.hypot(...a));
 

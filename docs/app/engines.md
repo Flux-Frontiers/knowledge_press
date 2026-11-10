@@ -50,6 +50,33 @@ Ollama, OpenAI or Anthropic) and a model. The app has no default worker and
 contacts none until you enter one. It is also the only engine that can draw
 illustrations.
 
+### Install a worker
+
+The worker is [GutenbergKG](https://github.com/Flux-Frontiers/gutenberg_kg),
+the project that builds this corpus. It runs in Docker on a Mac, Linux or
+Windows machine.
+
+1. Install [Docker](https://docs.docker.com/get-docker/).
+2. Clone the project and fetch the published image:
+
+    ```sh
+    git clone https://github.com/Flux-Frontiers/gutenberg_kg
+    cd gutenberg_kg
+    make pull-worker-image
+    ```
+
+3. Start the worker on port 8000 with `make run`. To get the chat page and an
+   image server as well, which illustrations need, use `make up`.
+4. Give the worker a model to call: oMLX, Ollama, OpenAI or Anthropic. See
+   [Connecting a local LLM](https://flux-frontiers.github.io/gutenberg_kg/INSTALLATION/#connecting-a-local-llm-optional).
+5. To reach it from an iPhone or iPad, set `WORKER_BIND=0.0.0.0` in
+   `docker/.env`, restart the worker, and enter
+   `http://<your-mac>.local:8000` under **Worker** in Settings. See
+   [Serving phones and other devices on your LAN](https://flux-frontiers.github.io/gutenberg_kg/INSTALLATION/#serving-phones-and-other-devices-on-your-lan).
+
+The [GutenbergKG installation guide](https://flux-frontiers.github.io/gutenberg_kg/INSTALLATION/)
+has the full steps, including building the image yourself.
+
 ## Passages only
 
 No answer is written. You get the search results to read yourself, which is
@@ -60,5 +87,5 @@ want the text, not a summary of it.
 
 **Settings**, then **Help**, explains these engines and every setting in the
 app, in the app. On a Mac, the Help menu has **The Knowledge Press Help**.
-The question-mark button beside the Search, Answers and Synthesis headings in
-Settings opens the matching page.
+The question-mark button beside the Search, Answers, Worker, Synthesis and
+Illustrations headings in Settings opens the matching page.
