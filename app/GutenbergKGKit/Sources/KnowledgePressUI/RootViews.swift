@@ -281,6 +281,12 @@ public struct PadRootView: View {
                             }
                         #endif
                     }
+                    #if os(iOS)
+                        // The forest has its own controls; New chat, Delete and
+                        // the sidebar toggle over it are noise. The bottom bar
+                        // stays, so Chat and Browse are one tap away.
+                        .toolbar(selection == .forest ? .hidden : .automatic, for: .navigationBar)
+                    #endif
                     .deleteConversationConfirmation($confirmingDelete)
             }
         }
