@@ -5,7 +5,7 @@ import { COARSE_POINTER, textureAnisotropy } from "./Environment";
 import { useGame } from "./store";
 import type { Forest } from "./forest";
 import { bookMatchesQuery } from "./forest";
-import { leafFraction, leafHash, leafOrder } from "./leafLod";
+import { godLeafBlend, leafFraction, leafHash, leafOrder } from "./leafLod";
 import { SEASONS, type SeasonName } from "./seasons";
 import { leafOutline, SPECIES, type LeafShape, type Species } from "./species";
 
@@ -47,6 +47,10 @@ function keepLeaf(i: number, density: number): boolean {
 const LEAF_FULL = COARSE_POINTER ? 60 : 110;
 /** The fewest leaves a far grove keeps, as a fraction of its own. */
 const LEAF_FLOOR = 0.15;
+/** About where the crowns are, metres: god's-eye thinning reads the camera's height above them. */
+const CROWN_HEIGHT = 12;
+/** `?nolod` draws god's eye with every leaf, as before godLeafBlend, to compare. */
+const GOD_LOD = typeof window === "undefined" || !new URLSearchParams(window.location.search).has("nolod");
 
 export function Trees({
   forest,
@@ -62,14 +66,20 @@ export function Trees({
   const q = query.trim();
   const wind = useMemo(() => ({ value: 0 }), []);
   const windStrength = useMemo(() => ({ value: 0 }), []);
-  const materials = useMemo(() => {
+  // One leaf and depth material per grove, all on one shader program, so each can carry its own
+  // `leafScale`: three uploads a material's uniforms only when the material changes between draws.
+  const materials = useMemo(() => forest.chunks.map(() => {
+    const leafScale = { value: 1 };
     const leaf = new MeshStandardMaterial({ roughness: 0.8, side: DoubleSide });
     const depth = new MeshDepthMaterial({ depthPacking: RGBADepthPacking, side: DoubleSide });
     for (const material of [leaf, depth]) {
       material.onBeforeCompile = (shader) => {
         shader.uniforms.windTime = wind;
         shader.uniforms.windStrength = windStrength;
-        shader.vertexShader = "uniform float windTime; uniform float windStrength;\n" + shader.vertexShader;
+        shader.uniforms.leafScale = leafScale;
+        shader.vertexShader = "uniform float windTime; uniform float windStrength; uniform float leafScale;\n" + shader.vertexShader;
+        // God's eye draws fewer leaves, each enlarged about its stalk (leafLod.ts godLeafBlend).
+        shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n          transformed *= leafScale;");
         // Three's project_vertex, with the wind added in world space after the
         // instance matrix: in leaf space a flap along the face normal would be
         // scaled down by the blade's thin z.
@@ -89,16 +99,16 @@ export function Trees({
           float flap = sin(windTime * 4.0 + phase * 3.0) + 0.5 * sin(windTime * 6.4 + phase * 1.7);
           // Divided, not normalize(): a hidden leaf is scaled to zero, and normalize(0) is NaN.
           vec3 leafNormal = instanceMatrix[2].xyz / max(length(instanceMatrix[2].xyz), 1e-6);
-          mvPosition.xyz += leafNormal * flap * tip * w * .35 * length(instanceMatrix[1].xyz);
+          mvPosition.xyz += leafNormal * flap * tip * w * .35 * leafScale * length(instanceMatrix[1].xyz);
           mvPosition = modelViewMatrix * mvPosition;
           gl_Position = projectionMatrix * mvPosition;
         `);
       };
-      material.customProgramCacheKey = () => "forest-leaf-wind-v3";
+      material.customProgramCacheKey = () => "forest-leaf-wind-v4";
     }
-    return { leaf, depth };
-  }, [wind, windStrength]);
-  useEffect(() => () => { materials.leaf.dispose(); materials.depth.dispose(); }, [materials]);
+    return { leaf, depth, leafScale };
+  }), [forest, wind, windStrength]);
+  useEffect(() => () => materials.forEach((m) => { m.leaf.dispose(); m.depth.dispose(); }), [materials]);
 
   // A tree portrait (portrait.ts) shows one tree and nothing else of the forest.
   const only = useGame((s) => s.portrait?.tree ?? null);
@@ -158,8 +168,12 @@ export function Trees({
     // hidden chunks also drop out of the shadow pass.
     const density = scene.fog && "density" in scene.fog ? (scene.fog.density as number) : 0;
     const cutoff = density > 0 ? 2.6 / density : Infinity;
-    // God's eye sees every grove from far above; thinning there would bare the whole forest.
-    const thin = s.preferences.camera !== "god" && s.portrait === null;
+    // God's eye sees every grove from far above: thinning by count alone would bare the
+    // whole forest, so there it draws fewer, larger leaves instead, eased in from the
+    // ground's thinning by height so a dive to the cart lands without a change (godLeafBlend).
+    // The camera mode stays "god" through a dive until it lands.
+    const god = s.preferences.camera === "god" && s.portrait === null;
+    const thin = !god && s.portrait === null;
     forest.chunks.forEach((c, i) => {
       const g = chunkRefs.current[i];
       if (!g) return;
@@ -168,7 +182,12 @@ export function Trees({
       g.visible = subject !== null ? i === subject : dist < cutoff;
       const mesh = leafRefs.current[i];
       const full = kept.current[i] ?? c.leafCount;
-      if (mesh) mesh.count = thin ? Math.max(1, Math.ceil(full * leafFraction(dist, LEAF_FULL, LEAF_FLOOR))) : full;
+      const above = camera.position.y - CROWN_HEIGHT;
+      const lod = god && GOD_LOD
+        ? godLeafBlend(Math.hypot(Math.max(0, dist), Math.max(0, above)), above, leafFraction(dist, LEAF_FULL, LEAF_FLOOR))
+        : null;
+      if (mesh) mesh.count = lod ? Math.max(1, Math.ceil(full * lod.fraction)) : thin ? Math.max(1, Math.ceil(full * leafFraction(dist, LEAF_FULL, LEAF_FLOOR))) : full;
+      materials[i]!.leafScale.value = lod ? lod.scale : 1;
     });
   });
 
@@ -256,7 +275,7 @@ export function Trees({
           visible={only === null || ci === forest.trees[only]!.chunk}>
           <mesh geometry={subjectBark && ci === forest.trees[only!]!.chunk ? subjectBark : bark[ci]} material={barkMats[chunk.species]} castShadow receiveShadow />
           <instancedMesh ref={(m) => { leafRefs.current[ci] = m; }}
-            args={[leafGeoms[chunk.species], materials.leaf, Math.max(1, chunk.leafCount)]} customDepthMaterial={materials.depth}
+            args={[leafGeoms[chunk.species], materials[ci]!.leaf, Math.max(1, chunk.leafCount)]} customDepthMaterial={materials[ci]!.depth}
             castShadow receiveShadow />
         </group>
       ))}

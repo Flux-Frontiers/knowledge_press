@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **`web/scripts/profile.mjs`** measures where the forest's frame goes:
+  triangles, draw calls and render time per camera view and leaf level, with
+  and without the leaves, and the shadow pass on its own. It runs in headless
+  Chromium with software WebGL, so its times compare cases rather than predict
+  a device; its counts are exact. `?profile` hands it the renderer.
 - **R opens the book** in the reader: the tree whose card is showing, or
   else the nearest tree within reach. The card's button reads **Open the book
   · R**, and the key lists in About, the start screen and the guide include it.
@@ -26,6 +31,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **God's eye draws fewer, larger leaves.** Far groves there now thin too, but
+  each leaf kept is enlarged so the crown covers as much, which the ground's
+  thinning by count alone cannot do from above: past 45 m a grove draws a share
+  falling as 1 / distance², each leaf scaled by 1 / sqrt(share), down to a ninth
+  of them at three times their size. It eases in from the ground's thinning
+  between 25 and 90 m above the crowns, so a dive to the cart and the climb
+  back land without a change. At Ultra god's eye drew 13.0M triangles, 11.3M
+  of them leaves; it now draws about 3M. The technique is Solstice's, after
+  Unreal's Nanite foliage
+  ([SamG-Coder/solstice](https://github.com/SamG-Coder/solstice), MIT).
+- **The shadow map is redrawn only when it is stale.** It was drawn every
+  frame; now every other frame while the cart moves, every fourth at rest in
+  the wind, at once when the sun moves, and otherwise about twice a second. Its
+  camera sits on whole shadow texels, so shadow edges keep still as the cart
+  drives. Also after Solstice, which redraws a shadow cascade only when its
+  view changes.
+- **`?nolod`** turns both off, to compare.
 - **No minimap in god's eye**, which is already the map. It comes back once
   a dive from god's eye has landed.
 - **Fly there no longer flashes the book's title** as the dive starts. The
@@ -67,6 +89,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   flame colour instead of clipping to white, and its light is a spot hung
   below the glass and aimed down the road, so the lamp's own cap and hook,
   which fill the view from the cart, stay dark.
+- **`make ios-build` and `make ios-sim-build` stage the forest first**, so
+  `ios-deploy-all`, `ios-push-all` and Simulator runs no longer bundle
+  whatever web build was staged last.
 
 ## [1.40.0] - 2026-11-08
 
