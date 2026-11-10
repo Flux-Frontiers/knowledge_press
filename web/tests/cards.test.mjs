@@ -133,7 +133,7 @@ test("god's eye opens with the book card closed, and a later tap still opens one
   st().setPreferences({ camera: "follow" });
 });
 
-test("fly there closes the card for the flight and opens it on landing", () => {
+test("fly there closes the card for the flight and keeps it down on landing", () => {
   globalThis.window ??= { localStorage: { getItem: () => null, setItem: () => {} } };
   const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
   const st = () => useGame.getState();
@@ -141,10 +141,19 @@ test("fly there closes the card for the flight and opens it on landing", () => {
   st().pinTree("lear");
   st().flyTo({ x: 10, z: 10, yaw: 0 }, "King Lear", "lear");
   assert.equal(st().pinnedSlug, null);
-  assert.equal(st().flight?.reopen, "lear");
   st().endFlight();
   assert.equal(st().flight, null);
-  assert.equal(st().pinnedSlug, "lear");
+  assert.equal(st().pinnedSlug, null);
   assert.notEqual(st().preferences.camera, "god");
-  st().pinTree(null);
+  // Parked beside the tree, its card does not pop up.
+  st().setNearby("lear", 2, 0);
+  assert.equal(st().nearbyDismissed, "lear");
+  // Pulling up at another tree ends the hush, and coming back pops the card as usual.
+  st().setNearby("hamlet", 2, 0);
+  assert.equal(st().hushedSlug, null);
+  assert.equal(st().nearbyDismissed, null);
+  st().setNearby("lear", 2, 0);
+  assert.equal(st().nearbyDismissed, null);
+  assert.equal(st().cardSlug, "lear");
+  st().setNearby(null, Infinity, 0);
 });

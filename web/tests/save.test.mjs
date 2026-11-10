@@ -117,7 +117,7 @@ test("the tour started from god's eye dives to the cart first", () => {
   st().toggleCircuit();
   assert.equal(st().travelMode, "circuit");
   assert.deepEqual(st().jump, { x: 12, z: -7, yaw: 0.5 });
-  assert.deepEqual(st().flight, { to: "high", reopen: null });
+  assert.deepEqual(st().flight, { to: "high" });
   st().endFlight();
   assert.equal(st().preferences.camera, "high");
   assert.equal(st().travelMode, "circuit");

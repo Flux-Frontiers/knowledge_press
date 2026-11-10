@@ -25,6 +25,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **No minimap in god's eye**, which is already the map. It comes back with
   the ground cameras.
+- **Fly there lands quietly.** The book's card no longer pops up when the
+  cart sets down beside the tree; tap the tree to open it.
 - **Settings sections fold.** Search, Worker, Synthesis, Illustrations and
   Corpus information open and close from their headings. Search starts open,
   the others closed, and the app remembers which you left open.

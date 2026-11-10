@@ -466,7 +466,7 @@ function jumpToTree(t: TreeSite) {
   (document.activeElement as HTMLElement | null)?.blur();
 }
 
-/** From god's eye: put the cart at the tree and dive the camera down to it, its card shut until landing. */
+/** From god's eye: put the cart at the tree and dive the camera down to it, its card kept down on landing. */
 function flyToTree(t: TreeSite) {
   const s = useGame.getState();
   s.selectGrove(null);
