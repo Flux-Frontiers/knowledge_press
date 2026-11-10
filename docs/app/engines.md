@@ -60,5 +60,5 @@ want the text, not a summary of it.
 
 **Settings**, then **Help**, explains these engines and every setting in the
 app, in the app. On a Mac, the Help menu has **The Knowledge Press Help**.
-The question-mark button beside the Search, Answers and Synthesis headings in
-Settings opens the matching page.
+The question-mark button beside the Search, Answers, Worker, Synthesis and
+Illustrations headings in Settings opens the matching page.

@@ -4,8 +4,8 @@ Open **Settings** from the toolbar on iPhone (the sliders button), from the
 bottom of the sidebar on iPad, or with ++cmd+comma++ on a Mac. Changes apply to
 your next question. The app remembers them.
 
-Beside the Search, Answers and Synthesis headings is a question-mark button
-that opens the matching page of the in-app Help.
+Beside the Search, Answers, Worker, Synthesis and Illustrations headings is a
+question-mark button that opens the matching page of the in-app Help.
 
 Search, Worker, Synthesis, Illustrations and Corpus information fold: tap a
 heading to open or close its section. Search starts open and the others start

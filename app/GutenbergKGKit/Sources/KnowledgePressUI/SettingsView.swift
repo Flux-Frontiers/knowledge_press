@@ -203,7 +203,10 @@ public struct SettingsView: View {
     @ViewBuilder
     private var workerSection: some View {
         @Bindable var model = model
-        CollapsibleSection("Worker", key: "worker") {
+        CollapsibleSection(
+            "Worker", key: "worker", topicID: HelpContent.workerTopicID,
+            presentedTopicID: $helpTopicID
+        ) {
             TextField(AppModel.workerURLPlaceholder, text: $model.workerURLString)
                 .textFieldStyle(.roundedBorder)
                 .font(.caption)
@@ -259,7 +262,10 @@ public struct SettingsView: View {
     @ViewBuilder
     private var illustrationSection: some View {
         @Bindable var model = model
-        CollapsibleSection("🎨 Illustrations", key: "illustrations") {
+        CollapsibleSection(
+            "🎨 Illustrations", key: "illustrations", topicID: HelpContent.illustrationsTopicID,
+            presentedTopicID: $helpTopicID
+        ) {
             Picker("Resolution", selection: $model.imageResolution) {
                 ForEach(ImageResolution.allCases, id: \.self) { resolution in
                     Text(resolution.label).tag(resolution)
