@@ -89,6 +89,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   flame colour instead of clipping to white, and its light is a spot hung
   below the glass and aimed down the road, so the lamp's own cap and hook,
   which fill the view from the cart, stay dark.
+- **`make ios-build` and `make ios-sim-build` stage the forest first**, so
+  `ios-deploy-all`, `ios-push-all` and Simulator runs no longer bundle
+  whatever web build was staged last.
 
 ## [1.40.0] - 2026-11-08
 
