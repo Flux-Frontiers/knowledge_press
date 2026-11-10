@@ -46,7 +46,7 @@ public struct AboutView: View {
             Divider()
 
             VStack(spacing: 6) {
-                Text(model.statsCaption)
+                Text(model.aboutCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)

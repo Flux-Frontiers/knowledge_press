@@ -895,16 +895,19 @@ public final class AppModel {
 
     /// Sidebar header line, built from live stats (no hardcoded counts).
     var statsCaption: String {
+        guard let model = stats?.embedModel else { return aboutCaption }
+        return aboutCaption + " · " + (model.components(separatedBy: "/").last ?? model)
+    }
+
+    /// The same line without the embedder, for About: the embedding model is
+    /// a detail for Settings, not for a credits screen.
+    var aboutCaption: String {
         guard let stats else { return "\(AppVersion.display) · connecting…" }
-        var parts = [
+        return [
             AppVersion.display,
             "\(stats.books) books", "\(stats.genres) genres", "\(stats.diaries) diaries",
             "\(stats.nodes.formatted()) nodes",
-        ]
-        if let model = stats.embedModel {
-            parts.append(model.components(separatedBy: "/").last ?? model)
-        }
-        return parts.joined(separator: " · ")
+        ].joined(separator: " · ")
     }
 
     private var client: WorkerClient {
