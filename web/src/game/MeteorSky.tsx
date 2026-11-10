@@ -1,12 +1,13 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { AdditiveBlending, type BufferAttribute, type Group, type ShaderMaterial } from "three";
-import { meteorAt, meteorGlow, meteorOverride, meteorSources, spawnMeteor, TRAIL, type Meteor } from "./meteors";
+import { stage } from "./events";
+import { meteorAt, meteorGlow, meteorOverride, meteorSources, spawnMeteor, swarmSources, TRAIL, type Meteor } from "./meteors";
 import type { SkyState } from "./sky";
 import { overcast, weather } from "./weather";
 
-/** At most this many meteors in the sky at once. */
-const MAX_METEORS = 16;
+/** At most this many meteors in the sky at once: room for an event's swarm. */
+const MAX_METEORS = 64;
 /** Points drawn along each trail, tail to head. */
 const TRAIL_POINTS = 64;
 const N = MAX_METEORS * TRAIL_POINTS;
@@ -17,7 +18,8 @@ const N = MAX_METEORS * TRAIL_POINTS;
  * They show as the stars do, through darkness and clear air, so a meteor at
  * dusk is lost in the twilight as a real one is. `?meteors=perseids` pins a
  * shower to its peak, `?meteors=perseids:20` shows twenty times its rate, and
- * `?meteors=10` ten times tonight's whole sky.
+ * `?meteors=10` ten times tonight's whole sky. An event's swarm (events.ts
+ * `stage`) adds radiants of its own at storm rates, and shows even at dusk.
  */
 export function MeteorSky({ sky }: { sky: SkyState }) {
   const group = useRef<Group>(null);
@@ -35,7 +37,7 @@ export function MeteorSky({ sky }: { sky: SkyState }) {
   useFrame(({ camera }, delta) => {
     group.current?.position.copy(camera.position);
     const dt = Math.min(delta, 0.1);
-    const opacity = (1 - sky.daylight) ** 2 * (1 - overcast(weather)) ** 2;
+    const opacity = Math.max((1 - sky.daylight) ** 2, 0.8 * stage.swarm) * (1 - overcast(weather)) ** 2;
     const u = (material.current?.uniforms ?? uniforms) as typeof uniforms;
     u.opacity.value = opacity;
     u.pixelRatio.value = gl.getPixelRatio();
@@ -46,7 +48,7 @@ export function MeteorSky({ sky }: { sky: SkyState }) {
     // Nothing to see in daylight: spend nothing on it.
     if (opacity > 0.01) {
       const boost = pin?.boost ?? 1;
-      for (const src of sources) {
+      for (const src of stage.swarm > 0.01 ? [...sources, ...swarmSources(stage.swarm)] : sources) {
         if (live.current.length >= MAX_METEORS) break;
         if (Math.random() < (src.perHour * boost * dt) / 3600) {
           const m = spawnMeteor(src, Math.random);
