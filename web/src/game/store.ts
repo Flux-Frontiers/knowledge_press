@@ -449,9 +449,10 @@ export const useGame = create<GameStore>((set, get) => ({
   flight: null,
   flyTo: (pose, toast, reopen) => {
     // The cards close so the flight can be watched; `reopen`'s card comes back on landing.
+    // It lands behind the cart, where the pressed books show over the tailboard.
     get().clearCards();
     get().requestJump(pose, toast);
-    set({ flight: { to: get().groundCamera, reopen: reopen ?? null } });
+    set({ flight: { to: "follow", reopen: reopen ?? null } });
   },
   endFlight: () => {
     const flight = get().flight;
@@ -461,6 +462,17 @@ export const useGame = create<GameStore>((set, get) => ({
     if (flight.reopen) get().pinTree(flight.reopen);
   },
 }));
+
+/**
+ * The book R opens in the reader: the tree whose card is showing, else the
+ * nearest tree within reading range; none during a dive from god's eye.
+ */
+export function readerTarget(s: Pick<GameStore, "flight" | "pinnedSlug" | "cardSlug" | "nearbyDismissed" | "nearbySlug" | "nearbyDist" | "preferences">): string | null {
+  if (s.flight) return null;
+  if (s.pinnedSlug) return s.pinnedSlug;
+  if (!s.preferences.silent && s.cardSlug && s.cardSlug !== s.nearbyDismissed) return s.cardSlug;
+  return s.nearbySlug && s.nearbyDist < READ_RANGE ? s.nearbySlug : null;
+}
 
 /** The tree whose card is up, as HUD.tsx decides it: a pinned tree, or the one the cart slowed beside. */
 function shownCard(s: GameStore): string | null {

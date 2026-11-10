@@ -15,7 +15,7 @@
 #   make ios-verify-corpus  -- list what is actually in that container
 #   make ios-launch         -- relaunch the app so it re-reads the corpus
 #   make ios-deploy         -- install-corpus + verify + launch, in order
-#   make ios-build          -- signed device build (needs a Team ID on this Mac)
+#   make ios-build          -- signed device build, forest staged (needs a Team ID on this Mac)
 #   make ios-deploy-all     -- install + relaunch the app on every reachable device
 #   make ios-push-all       -- build, then install app + corpus + relaunch on every reachable device
 #
@@ -300,7 +300,7 @@ ios-deploy: ios-install-corpus ios-verify-corpus ios-launch
 SIM ?= iPhone 17 Pro Max
 IOS_SIM_APP = app/ios/build/sim/Build/Products/Debug-iphonesimulator/KnowledgePress.app
 
-ios-sim-build: ios-generate
+ios-sim-build: ios-stage-forest ios-generate
 	cd app/ios && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj -scheme KnowledgePress \
 	  -destination "platform=iOS Simulator,name=$(SIM)" -derivedDataPath build/sim \
 	  CODE_SIGNING_ALLOWED=NO build
@@ -405,7 +405,9 @@ endef
 # this only works once each target device has been Run from Xcode at least
 # once (RUNBOOK.md section 6: automatic signing has to see and trust a device
 # before a CLI build can install to it).
-ios-build: ios-generate
+# The forest is only ever read from the bundle, so it is staged first; a
+# stale app/ios/Forest would otherwise ship whatever was staged last.
+ios-build: ios-stage-forest ios-generate
 	@$(ios_resolve_team); \
 	cd app/ios && xcodebuild CURRENT_PROJECT_VERSION=$(APP_BUILD) -project KnowledgePress.xcodeproj -scheme KnowledgePress \
 	  -destination 'generic/platform=iOS' -derivedDataPath build \

@@ -13,12 +13,58 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **`web/scripts/profile.mjs`** measures where the forest's frame goes:
+  triangles, draw calls and render time per camera view and leaf level, with
+  and without the leaves, and the shadow pass on its own. It runs in headless
+  Chromium with software WebGL, so its times compare cases rather than predict
+  a device; its counts are exact. `?profile` hands it the renderer.
+- **R opens the book** in the reader: the tree whose card is showing, or
+  else the nearest tree within reach. The card's button reads **Open the book
+  · R**, and the key lists in About, the start screen and the guide include it.
+- **Pan in god's eye.** Drag with the mouse or one finger to move the map,
+  the ground following the pointer; two fingers pan as they pinch. How far
+  the view can pan grows as it zooms in, so all the way out it stays over the
+  hub. A drag that ends over a tree does not open its card.
 - **Reset all settings**, at the bottom of Settings, puts search, synthesis
   and illustrations back to their defaults and clears the worker address. The
   corpus scope, the answer engine and your conversations are kept.
 
 ### Changed
 
+- **The iPad's forest fills the screen.** The bar of sidebar, Delete and New
+  chat buttons along the top is hidden while the Forest is showing; the
+  Chat, Browse and Forest bar at the bottom stays.
+- **Fly there lands behind the cart**, where the pressed books show over the
+  tailboard, rather than in whichever ground view was used last. Riding the
+  ring from god's eye still lands in that view.
+- **God's eye draws fewer, larger leaves.** Far groves there now thin too, but
+  each leaf kept is enlarged so the crown covers as much, which the ground's
+  thinning by count alone cannot do from above: past 45 m a grove draws a share
+  falling as 1 / distance², each leaf scaled by 1 / sqrt(share), down to a ninth
+  of them at three times their size. It eases in from the ground's thinning
+  between 25 and 90 m above the crowns, so a dive to the cart and the climb
+  back land without a change. At Ultra god's eye drew 13.0M triangles, 11.3M
+  of them leaves; it now draws about 3M. The technique is Solstice's, after
+  Unreal's Nanite foliage
+  ([SamG-Coder/solstice](https://github.com/SamG-Coder/solstice), MIT).
+- **The shadow map is redrawn only when it is stale.** It was drawn every
+  frame; now every other frame while the cart moves, every fourth at rest in
+  the wind, at once when the sun moves, and otherwise about twice a second. Its
+  camera sits on whole shadow texels, so shadow edges keep still as the cart
+  drives. Also after Solstice, which redraws a shadow cascade only when its
+  view changes.
+- **`?nolod`** turns both off, to compare.
+- **No minimap in god's eye**, which is already the map. It comes back once
+  a dive from god's eye has landed.
+- **Fly there no longer flashes the book's title** as the dive starts. The
+  book's card still opens on landing.
+- **The card's Read into the press button is called Press the book.**
+- **The touch Read button is called Press**, after what it does: it reads the
+  nearest tree into the press. Beside a tree already in the press it says
+  **Read** and opens the book in the reader.
+- **On an upright phone the search bar sits right of the stick**, just above
+  the Guided tour button, instead of across the middle of the view. The book
+  card drops to just above the stick.
 - **Settings sections fold.** Search, Worker, Synthesis, Illustrations and
   Corpus information open and close from their headings. Search starts open,
   the others closed, and the app remembers which you left open.
@@ -49,6 +95,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   flame colour instead of clipping to white, and its light is a spot hung
   below the glass and aimed down the road, so the lamp's own cap and hook,
   which fill the view from the cart, stay dark.
+- **The iPad's Chat, Browse and Forest bar is one capsule.** iPadOS 26 drew
+  its own glass behind the segmented control, a little larger, so a second
+  rounded edge showed around it.
+- **`make ios-build` and `make ios-sim-build` stage the forest first**, so
+  `ios-deploy-all`, `ios-push-all` and Simulator runs no longer bundle
+  whatever web build was staged last.
 
 ## [1.40.0] - 2026-11-08
 

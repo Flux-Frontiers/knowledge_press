@@ -69,6 +69,8 @@ export function HUD({ forest }: { forest: Forest }) {
   const camera = useGame((s) => s.preferences.camera);
   const stepCamera = () => setPreferences({ camera: nextCamera(camera) });
   const godEye = useGame((s) => s.preferences.camera === "god" && !s.flight);
+  /** In god's eye or diving out of it: the minimap waits for the landing. */
+  const overhead = useGame((s) => s.preferences.camera === "god" || Boolean(s.flight));
   // No cards during a flight, so the dive can be watched; the tree's card opens on landing.
   const flying = useGame((s) => s.flight !== null);
   const tourStop = useGame((s) => s.tourStop);
@@ -219,8 +221,9 @@ export function HUD({ forest }: { forest: Forest }) {
             </>)}
           </div>
 
-          {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it. */}
-          {clean ? null : <div className="pointer-events-auto w-28 sm:w-40">
+          {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it.
+              Not in god's eye, which is already the map, nor during the dive out of it. */}
+          {clean || overhead ? null : <div className="pointer-events-auto w-28 sm:w-40">
             <Minimap forest={forest} x={x} z={z} yaw={yaw} pins={query.trim() ? results : []} picked={searchPick} />
             {selected ? (
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
@@ -358,12 +361,12 @@ export function HUD({ forest }: { forest: Forest }) {
                   <button type="button" disabled={bookDist >= READ_RANGE}
                     onClick={() => collect(nearby.book.slug, nearby.book.title)}
                     className="min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
-                    {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
+                    {bookDist < READ_RANGE ? "Press the book · E" : `Move closer · ${Math.ceil(bookDist)} m`}
                   </button>
                 )}
                 <button type="button" onClick={() => openReader(nearby.book.slug)}
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-4 text-sm text-fg">
-                  <BookOpen className="size-4" strokeWidth={1.75} /> Open the book
+                  <BookOpen className="size-4" strokeWidth={1.75} /> Open the book · R
                 </button>
                 {host.available ? (
                   // Only inside the app (host.ts): its chat answers from the book's passages.
@@ -411,7 +414,7 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
 
         <p className="key-hints absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
-          WASD drive · Drag or arrows look · Space brake · E read · B books · C camera · Esc settings · ? about
+          WASD drive · Drag or arrows look · Space brake · E press · R read · B books · C camera · Esc settings · ? about
         </p>
       </>)}
 
@@ -469,7 +472,8 @@ function jumpToTree(t: TreeSite) {
 function flyToTree(t: TreeSite) {
   const s = useGame.getState();
   s.selectGrove(null);
-  s.flyTo(treeApproach(t, s.x, s.z), t.book.title, t.book.slug);
+  // No toast: the card that opens on landing names the book.
+  s.flyTo(treeApproach(t, s.x, s.z), undefined, t.book.slug);
 }
 
 function jumpHome(forest: Forest) {

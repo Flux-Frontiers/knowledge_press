@@ -18,7 +18,7 @@ driving.
 
 - Drag the forest with the mouse or a finger to look around: no button to
   hold. The sideways look eases back to straight ahead when you let go, and
-  the tilt stays. Not in god's eye, where a drag does nothing and the wheel
+  the tilt stays. Not in god's eye, where a drag pans the map and the wheel
   or a pinch zooms.
 - ++left++ and ++right++, or a gamepad's right stick, turn the view. It eases
   back to straight ahead when you release, so a glance to the side does not
@@ -39,15 +39,20 @@ driving.
 | In the cart | From the seat. The lantern is beside you. |
 | God's eye | The whole forest from above the hub, with each grove's name over it. |
 
-### Zoom and fly from god's eye
+### Zoom, pan and fly from god's eye
 
 In god's eye, scroll the mouse wheel or pinch with two fingers to zoom. The
 view zooms toward the point under the cursor, or between your fingers, from
 the whole forest down to about one grove.
 
+Once zoomed in, drag with the mouse or one finger to pan: the ground moves
+with the pointer, like a map. Two fingers pan as they pinch. The farther in
+you are, the farther you can pan; all the way out the view stays over the
+hub.
+
 Click or tap a tree to show its card, then select **Fly there**. The cart is
-set down beside the tree and the camera dives to it, ending on the camera you
-used before god's eye.
+set down beside the tree and the camera dives to it, ending behind the cart,
+where the books you have pressed show over the tailboard.
 
 ## Take the guided tour
 

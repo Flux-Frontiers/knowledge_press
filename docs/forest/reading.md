@@ -18,20 +18,27 @@ Drive up to a tree. Within about 7 m of the trunk, and with the cart slowed,
 the book's **card** appears: its title, author, genre, an excerpt, and how
 many leaves it has. The card has two buttons.
 
-- **Read** (or ++e++, or A on a gamepad) puts the book in your press. Each
-  pressed book rides in the cart's bed, in its grove's color.
-- **Open the book** opens the book's text.
+- **Press the book** (or ++e++, or A on a gamepad) puts the book in your
+  press. Each pressed book rides in the cart's bed, in its grove's color.
+- **Open the book** (or ++r++) opens the book's text.
+
+On a phone or tablet the **Press** button beside the stick reads the nearest
+tree into the press. Next to a tree already in your press it says **Read**
+and opens the book.
 
 Clicking a tree pins its card, so you can read the card of a tree you are not
 next to. Clicking open ground clears it.
 
 **Silent mode** stops cards from appearing on their own. ++e++ still reads
-the nearest tree, and clicking a tree still shows its card. Turn it on from
+the nearest tree, ++r++ still opens it, and clicking a tree still shows its
+card. Turn it on from
 settings.
 
 ## Open the book
 
-**Open the book** shows the book's text in the reader, a chapter at a time.
+**Open the book**, or ++r++, shows the book's text in the reader, a chapter
+at a time. ++r++ opens the tree whose card is showing, or else the nearest
+tree within reach.
 
 - Pick a chapter from the menu at the top, or use **Previous** and **Next**
   at the bottom.
