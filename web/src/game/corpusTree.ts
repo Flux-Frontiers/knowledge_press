@@ -27,7 +27,7 @@ const TRUNK_STEP = 0.75;
 const REACH_MAX = 13;
 const REACH_MIN = 1.8;
 /** Book trees are capped at this height (growTree.placeCrown). */
-const BOOK_TREE_CAP = 22;
+const BOOK_TREE_CAP = 30;
 
 export type LimbSource = {
   book: { slug: string; chunks: number };

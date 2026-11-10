@@ -31,6 +31,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Book trees differ more in height.** A power law, `6 * (chunks / 52) **
+  0.274` capped at 30 m, replaces `1.7 * log2(1 + chunks)` capped at 22 m:
+  the smallest book stands 6 m, the median 13.6 m, the largest 30 m, and
+  the middle half of the books now spans 4.8 m instead of 3.2 m.
+- **Macs and desktops draw every leaf near the ground.** Distance thinning
+  now applies only to touch screens; god's eye still thins on every screen.
 - **The iPad's forest fills the screen.** The bar of sidebar, Delete and New
   chat buttons along the top is hidden while the Forest is showing; the
   Chat, Browse and Forest bar at the bottom stays.
