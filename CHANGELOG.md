@@ -25,8 +25,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **No minimap in god's eye**, which is already the map. It comes back with
   the ground cameras.
-- **Fly there lands quietly.** The book's card no longer pops up when the
-  cart sets down beside the tree; tap the tree to open it.
+- **Fly there no longer flashes the book's title** as the dive starts. The
+  book's card still opens on landing.
 - **On an upright phone the search bar sits right of the stick**, just above
   the Guided tour button, instead of across the middle of the view. The book
   card drops to just above the stick.

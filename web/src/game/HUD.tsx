@@ -466,11 +466,12 @@ function jumpToTree(t: TreeSite) {
   (document.activeElement as HTMLElement | null)?.blur();
 }
 
-/** From god's eye: put the cart at the tree and dive the camera down to it, its card kept down on landing. */
+/** From god's eye: put the cart at the tree and dive the camera down to it, its card shut until landing. */
 function flyToTree(t: TreeSite) {
   const s = useGame.getState();
   s.selectGrove(null);
-  s.flyTo(treeApproach(t, s.x, s.z), t.book.title, t.book.slug);
+  // No toast: the card that opens on landing names the book.
+  s.flyTo(treeApproach(t, s.x, s.z), undefined, t.book.slug);
 }
 
 function jumpHome(forest: Forest) {

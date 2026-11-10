@@ -109,8 +109,6 @@ export type GameStore = {
   nearbySlug: string | null;
   nearbyDist: number;
   nearbyDismissed: string | null;
-  /** A tree Fly there landed beside: its card stays down until the cart pulls up at another tree. */
-  hushedSlug: string | null;
   /** The tree whose card popped up on its own: the cart slowed within reading range of it. */
   cardSlug: string | null;
   /** A tree the player picked (clicked, searched, catalog): its card shows even in silent mode. */
@@ -215,10 +213,10 @@ export type GameStore = {
   /** The ground camera last in use: where a dive from god's eye lands. */
   groundCamera: GroundCamera;
   /** A dive from god's eye down to the cart, under way (Player.tsx animates it). */
-  flight: { to: GroundCamera } | null;
+  flight: { to: GroundCamera; reopen: string | null } | null;
   /** Jump the cart to a pose and dive the god's-eye camera down to it. */
-  /** :param hush: The tree the flight lands beside, whose card stays down on landing. */
-  flyTo: (pose: JumpPose, toast?: string, hush?: string) => void;
+  /** :param reopen: The tree whose card closes for the flight and opens again on landing. */
+  flyTo: (pose: JumpPose, toast?: string, reopen?: string) => void;
   endFlight: () => void;
 };
 
@@ -282,7 +280,6 @@ export const useGame = create<GameStore>((set, get) => ({
   nearbySlug: null,
   nearbyDist: 99,
   nearbyDismissed: null,
-  hushedSlug: null,
   cardSlug: null,
   pinnedSlug: null,
   questHintHidden: null,
@@ -387,12 +384,7 @@ export const useGame = create<GameStore>((set, get) => ({
     const unpin = s.pinnedSlug !== null && cardSlug !== null && cardSlug !== s.cardSlug
       && cardSlug !== s.pinnedSlug && pinnedDist >= READ_RANGE;
     const pin = unpin ? { pinnedSlug: null } : {};
-    if (changed) {
-      // Pulling up at the tree Fly there landed beside keeps its card down; any other tree ends the hush.
-      const hushed = nearbySlug !== null && nearbySlug === s.hushedSlug;
-      const hush = hushed || nearbySlug === null ? {} : { hushedSlug: null };
-      set({ nearbySlug, nearbyDist, nearbyDismissed: hushed ? nearbySlug : null, cardSlug, ...pin, ...hush });
-    }
+    if (changed) set({ nearbySlug, nearbyDist, nearbyDismissed: null, cardSlug, ...pin });
     else set(cardSlug === s.cardSlug ? { nearbyDist } : { nearbyDist, cardSlug, ...pin });
   },
   pinTree: (pinnedSlug) => set({ pinnedSlug }),
@@ -432,7 +424,7 @@ export const useGame = create<GameStore>((set, get) => ({
       // Setting off from god's eye: dive to the cart where it stands, then ride.
       get().clearCards();
       get().requestJump({ x: sim.x, z: sim.z, yaw: sim.yaw }, toast);
-      set({ travelMode: "circuit", flight: { to: get().groundCamera } });
+      set({ travelMode: "circuit", flight: { to: get().groundCamera, reopen: null } });
       return;
     }
     set({
@@ -455,17 +447,18 @@ export const useGame = create<GameStore>((set, get) => ({
   clearJump: () => set({ jump: null }),
   groundCamera: initial.preferences.camera === "god" ? "follow" : initial.preferences.camera,
   flight: null,
-  flyTo: (pose, toast, hush) => {
-    // The cards close so the flight can be watched, and `hush`'s stays down on landing.
+  flyTo: (pose, toast, reopen) => {
+    // The cards close so the flight can be watched; `reopen`'s card comes back on landing.
     get().clearCards();
     get().requestJump(pose, toast);
-    set({ flight: { to: get().groundCamera }, hushedSlug: hush ?? null });
+    set({ flight: { to: get().groundCamera, reopen: reopen ?? null } });
   },
   endFlight: () => {
     const flight = get().flight;
     if (!flight) return;
     set({ flight: null });
     get().setPreferences({ camera: flight.to });
+    if (flight.reopen) get().pinTree(flight.reopen);
   },
 }));
 
