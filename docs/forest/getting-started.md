@@ -63,7 +63,8 @@ On a phone or tablet the controls are on screen:
   left or right to look to the side. Tilt holds; the sideways look eases
   back when you let go.
 - **Press:** reads the nearest tree into the press. It lights up when a tree
-  is close enough.
+  is close enough. Once the tree is in your press the button says **Read**
+  and opens the book.
 - **Guided tour:** starts the tour; the same button ends it.
 - **Pinch:** in god's eye, zooms toward the point between your fingers and
   pans as they move. One finger pans.

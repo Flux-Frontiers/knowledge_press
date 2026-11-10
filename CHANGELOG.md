@@ -28,7 +28,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Fly there no longer flashes the book's title** as the dive starts. The
   book's card still opens on landing.
 - **The touch Read button is called Press**, after what it does: it reads the
-  nearest tree into the press.
+  nearest tree into the press. Beside a tree already in the press it says
+  **Read** and opens the book in the reader.
 - **On an upright phone the search bar sits right of the stick**, just above
   the Guided tour button, instead of across the middle of the view. The book
   card drops to just above the stick.

@@ -5,6 +5,7 @@ import { useGame } from "./store";
 
 export function TouchControls() {
   const collect = useGame((s) => s.collect);
+  const openReader = useGame((s) => s.openReader);
   const clean = useGame((s) => s.cleanView);
   const nearbySlug = useGame((s) => s.nearbySlug);
   const pressed = useGame((s) => (s.nearbySlug ? s.library.includes(s.nearbySlug) : false));
@@ -31,8 +32,13 @@ export function TouchControls() {
         </button>
         <button type="button" disabled={!nearbySlug || nearbyDist >= 6.8}
           className="min-h-14 min-w-14 rounded-full border border-border bg-primary px-4 text-sm font-medium text-primary-fg disabled:opacity-40"
-          onClick={() => { if (nearbySlug && nearbyDist < 6.8) collect(nearbySlug, bookBySlug(nearbySlug)?.title ?? "Book"); }}>
-          {pressed ? "In press" : "Press"}
+          onClick={() => {
+            if (!nearbySlug || nearbyDist >= 6.8) return;
+            // Pressed already: the same button opens the book in the reader.
+            if (pressed) openReader(nearbySlug);
+            else collect(nearbySlug, bookBySlug(nearbySlug)?.title ?? "Book");
+          }}>
+          {pressed ? "Read" : "Press"}
         </button>
       </div>}
     </div>
