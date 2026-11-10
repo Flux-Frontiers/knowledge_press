@@ -13,12 +13,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **R opens the book** in the reader: the tree whose card is showing, or
+  else the nearest tree within reach. The card's button reads **Open the book
+  · R**, and the key lists in About, the start screen and the guide include it.
+- **Pan in god's eye.** Drag with the mouse or one finger to move the map,
+  the ground following the pointer; two fingers pan as they pinch. How far
+  the view can pan grows as it zooms in, so all the way out it stays over the
+  hub. A drag that ends over a tree does not open its card.
 - **Reset all settings**, at the bottom of Settings, puts search, synthesis
   and illustrations back to their defaults and clears the worker address. The
   corpus scope, the answer engine and your conversations are kept.
 
 ### Changed
 
+- **No minimap in god's eye**, which is already the map. It comes back once
+  a dive from god's eye has landed.
+- **Fly there no longer flashes the book's title** as the dive starts. The
+  book's card still opens on landing.
+- **The card's Read into the press button is called Press the book.**
+- **The touch Read button is called Press**, after what it does: it reads the
+  nearest tree into the press. Beside a tree already in the press it says
+  **Read** and opens the book in the reader.
+- **On an upright phone the search bar sits right of the stick**, just above
+  the Guided tour button, instead of across the middle of the view. The book
+  card drops to just above the stick.
 - **Settings sections fold.** Search, Worker, Synthesis, Illustrations and
   Corpus information open and close from their headings. Search starts open,
   the others closed, and the app remembers which you left open.

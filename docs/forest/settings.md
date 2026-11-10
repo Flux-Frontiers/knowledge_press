@@ -27,7 +27,7 @@ opens the settings. The cart is parked while they are open. Every setting is sav
 | Read each grove aloud on the ring | On the guided tour, the captions are read in the system voice. Off by default. |
 | Read moots aloud | A playing [moot](moots.md) is read aloud, each book in a voice matching its author. On by default; the speaker button in the moot player flips it too. |
 | First tree's voice, second tree's voice | Shown while **Read moots aloud** is on. **Automatic** picks a voice for each author; or pick one of this browser's English voices. A choice this browser lacks is marked *(not here)*. |
-| Silent mode | No cards, hints or captions appear on their own. ++e++ and clicking a tree still work. |
+| Silent mode | No cards, hints or captions appear on their own. ++e++, ++r++ and clicking a tree still work. |
 
 ## Live moots
 

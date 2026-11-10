@@ -462,6 +462,17 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 }));
 
+/**
+ * The book R opens in the reader: the tree whose card is showing, else the
+ * nearest tree within reading range; none during a dive from god's eye.
+ */
+export function readerTarget(s: Pick<GameStore, "flight" | "pinnedSlug" | "cardSlug" | "nearbyDismissed" | "nearbySlug" | "nearbyDist" | "preferences">): string | null {
+  if (s.flight) return null;
+  if (s.pinnedSlug) return s.pinnedSlug;
+  if (!s.preferences.silent && s.cardSlug && s.cardSlug !== s.nearbyDismissed) return s.cardSlug;
+  return s.nearbySlug && s.nearbyDist < READ_RANGE ? s.nearbySlug : null;
+}
+
 /** The tree whose card is up, as HUD.tsx decides it: a pinned tree, or the one the cart slowed beside. */
 function shownCard(s: GameStore): string | null {
   return s.pinnedSlug ?? (s.preferences.silent ? null : s.cardSlug);
