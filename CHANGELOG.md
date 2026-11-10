@@ -11,8 +11,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Reset all settings**, at the bottom of Settings, puts search, synthesis
+  and illustrations back to their defaults and clears the worker address. The
+  corpus scope, the answer engine and your conversations are kept.
+
 ### Changed
 
+- **Settings sections fold.** Search, Worker, Synthesis, Illustrations and
+  Corpus information open and close from their headings. Search starts open,
+  the others closed, and the app remembers which you left open.
+- **The list of chats is called Conversations**, and **Delete all
+  conversations** moved from Settings to the bottom of that list.
 - **Far groves draw fewer leaves.** Past 60 m from a grove's edge on a touch
   screen (110 m with a pointer) its leaves thin as 1 / distance, down to 15
   percent, and the shadow pass thins with them; god's eye still draws every

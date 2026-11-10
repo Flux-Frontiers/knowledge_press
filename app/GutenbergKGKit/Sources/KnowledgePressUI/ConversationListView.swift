@@ -1,7 +1,7 @@
 // © 2026 Eric G. Suchanek, PhD — Flux-Frontiers · SPDX-License-Identifier: LicenseRef-Flux-Frontiers-Proprietary
 // The Knowledge Press. Not redistributable; see app/LICENSE.
 //
-// The list of saved chats, grouped by day and searchable. One component,
+// The list of saved conversations, grouped by day and searchable. One component,
 // used by the iPad/Mac sidebar now and the iPhone sheet in phase 3 -- the
 // rows behave the same in both, which is the point of extracting it.
 
@@ -37,6 +37,7 @@ struct ConversationListView: View {
 
     @State private var renaming: ConversationSummary?
     @State private var newTitle = ""
+    @State private var confirmingDeleteAll = false
 
     private var sections: [RecentsGrouping.Section] {
         RecentsGrouping.group(filtered)
@@ -66,13 +67,34 @@ struct ConversationListView: View {
         }
 
         if model.conversations.isEmpty {
-            Text("Chats you have will be listed here.")
+            Text("Conversations you have will be listed here.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         } else if sections.isEmpty {
-            Text("No chat matches \"\(search)\".")
+            Text("No conversation matches \"\(search)\".")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+
+        // At the foot of the list it empties, not in Settings: it deletes
+        // data, and nothing else in Settings does.
+        if !model.conversations.isEmpty {
+            Section {
+                Button("Delete all conversations", systemImage: "trash", role: .destructive) {
+                    confirmingDeleteAll = true
+                }
+                .confirmationDialog(
+                    "Delete all conversations?", isPresented: $confirmingDeleteAll,
+                    titleVisibility: .visible
+                ) {
+                    Button("Delete All", role: .destructive) { model.deleteAllConversations() }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text(
+                        "This removes every saved conversation -- the questions, answers, and any illustrations -- and the chat on screen. It cannot be undone."
+                    )
+                }
+            }
         }
     }
 

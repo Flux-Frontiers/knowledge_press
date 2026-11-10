@@ -33,7 +33,7 @@ public struct MacRootView: View {
     public var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             ConversationSidebar(selection: $selection, search: $search)
-                .searchable(text: $search, placement: .sidebar, prompt: "Search chats")
+                .searchable(text: $search, placement: .sidebar, prompt: "Search conversations")
                 .navigationSplitViewColumnWidth(min: 260, ideal: 300)
         } detail: {
             detail
@@ -102,7 +102,7 @@ public struct PhoneRootView: View {
                     .toolbarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigation) {
-                            Button("Chats", systemImage: "sidebar.left") {
+                            Button("Conversations", systemImage: "sidebar.left") {
                                 showingHistory = true
                             }
                         }
@@ -188,8 +188,8 @@ private struct ConversationHistorySheet: View {
                     search: $search, presentation: .sheet,
                     onSelect: { isPresented = false })
             }
-            .searchable(text: $search, prompt: "Search chats")
-            .navigationTitle("Chats")
+            .searchable(text: $search, prompt: "Search conversations")
+            .navigationTitle("Conversations")
             .toolbarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -226,7 +226,7 @@ public struct PadRootView: View {
                 selection: $selection, search: $search,
                 onOpenSettings: { showingSettings = true }
             )
-            .searchable(text: $search, placement: .sidebar, prompt: "Search chats")
+            .searchable(text: $search, placement: .sidebar, prompt: "Search conversations")
             .navigationSplitViewColumnWidth(min: 260, ideal: 300)
             .popover(isPresented: $showingSettings) {
                 NavigationStack {

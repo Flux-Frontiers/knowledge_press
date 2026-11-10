@@ -2,7 +2,7 @@
 // The Knowledge Press. Not redistributable; see app/LICENSE.
 //
 // Settings — a translation of chat.py's `_render_sidebar`: corpus scope,
-// search sliders, answer engine, delete all conversations. Renders as the persistent
+// search sliders, answer engine, reset all settings. Renders as the persistent
 // sidebar on macOS and as a sheet on iPhone; same controls either way.
 
 import Foundation
@@ -11,7 +11,7 @@ import SwiftUI
 
 public struct SettingsView: View {
     @Environment(AppModel.self) private var model
-    @State private var confirmingDelete = false
+    @State private var confirmingReset = false
     /// Which help topic is open, or nil. Drives one sheet for both the Help
     /// row and every section's info button, so there is a single presentation
     /// path rather than one per entry point.
@@ -64,7 +64,10 @@ public struct SettingsView: View {
                 }
             }
 
-            Section {
+            CollapsibleSection(
+                "⚙️ Search", key: "search", expandedByDefault: true, topicID: "search",
+                presentedTopicID: $helpTopicID
+            ) {
                 LabeledSlider(
                     label: "Results", value: $model.resultCount, range: 1...50, format: "%.0f")
                 LabeledSlider(
@@ -74,9 +77,6 @@ public struct SettingsView: View {
                     format: "%.2f")
                 Button("↩️ Reset search to defaults") { model.resetSearchSettings() }
                     .disabled(model.searchSettingsAreDefault)
-            } header: {
-                HelpSectionHeader(
-                    title: "⚙️ Search", topicID: "search", presentedTopicID: $helpTopicID)
             }
 
             if showsEngineAndScope {
@@ -109,20 +109,18 @@ public struct SettingsView: View {
             }
 
             Section {
-                Button("🗑️ Delete all conversations", role: .destructive) {
-                    confirmingDelete = true
-                }
-                .disabled(model.conversations.isEmpty && model.turns.isEmpty)
+                Button("↩️ Reset all settings") { confirmingReset = true }
+                    .disabled(model.settingsAreDefault)
             }
         }
         .confirmationDialog(
-            "Delete all conversations?", isPresented: $confirmingDelete, titleVisibility: .visible
+            "Reset all settings?", isPresented: $confirmingReset, titleVisibility: .visible
         ) {
-            Button("Delete All", role: .destructive) { model.deleteAllConversations() }
+            Button("Reset", role: .destructive) { model.resetAllSettings() }
             Button("Cancel", role: .cancel) {}
         } message: {
             Text(
-                "This removes every saved conversation -- the questions, answers, and any illustrations -- and the chat on screen. It cannot be undone."
+                "This puts search, synthesis and illustrations back to their defaults and clears the worker address. Your conversations, the corpus scope and the answer engine are kept."
             )
         }
         // One sheet for the section info buttons, one for the Help row. Both
@@ -164,7 +162,10 @@ public struct SettingsView: View {
         let perSource = Binding<Int>(
             get: { model.synthesisTuning.maxPassagesPerSource ?? 0 },
             set: { model.synthesisTuning.maxPassagesPerSource = $0 == 0 ? nil : $0 })
-        Section {
+        CollapsibleSection(
+            "🧪 Synthesis", key: "synthesis", topicID: HelpContent.synthesisTopicID,
+            presentedTopicID: $helpTopicID
+        ) {
             LabeledSlider(
                 label: "Temperature", value: $model.synthesisTuning.temperature, range: 0...1,
                 format: "%.2f"
@@ -190,10 +191,6 @@ public struct SettingsView: View {
                 .foregroundStyle(.secondary)
             Button("↩️ Reset synthesis to defaults") { model.resetSynthesisTuning() }
                 .disabled(model.synthesisTuning == .default)
-        } header: {
-            HelpSectionHeader(
-                title: "🧪 Synthesis", topicID: HelpContent.synthesisTopicID,
-                presentedTopicID: $helpTopicID)
         }
     }
 
@@ -206,7 +203,7 @@ public struct SettingsView: View {
     @ViewBuilder
     private var workerSection: some View {
         @Bindable var model = model
-        Section("Worker") {
+        CollapsibleSection("Worker", key: "worker") {
             TextField(AppModel.workerURLPlaceholder, text: $model.workerURLString)
                 .textFieldStyle(.roundedBorder)
                 .font(.caption)
@@ -262,7 +259,7 @@ public struct SettingsView: View {
     @ViewBuilder
     private var illustrationSection: some View {
         @Bindable var model = model
-        Section("🎨 Illustrations") {
+        CollapsibleSection("🎨 Illustrations", key: "illustrations") {
             Picker("Resolution", selection: $model.imageResolution) {
                 ForEach(ImageResolution.allCases, id: \.self) { resolution in
                     Text(resolution.label).tag(resolution)
@@ -292,7 +289,7 @@ extension SettingsView {
     /// Where the passages come from, and whether the answer needs the network.
     @ViewBuilder
     fileprivate var corpusSection: some View {
-        Section("📦 Corpus") {
+        CollapsibleSection("📦 Corpus", key: "corpus") {
             if model.isLoadingPacks {
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
@@ -328,6 +325,76 @@ extension SettingsView {
                 .foregroundStyle(model.packsError == nil ? Color.secondary : Color.orange)
             }
         }
+    }
+}
+
+/// A settings section that folds down to its header.
+///
+/// Settings carries five sections most readers set once, and open they push
+/// the rest off the screen. Whether each is open is remembered per device.
+/// The header keeps its help button, so a folded section still explains
+/// itself.
+struct CollapsibleSection<Content: View>: View {
+    let title: String
+    let topicID: String?
+    @Binding var presentedTopicID: String?
+    @AppStorage private var expanded: Bool
+    @ViewBuilder let content: () -> Content
+
+    /// :param title: The header text.
+    /// :param key: Names this section's stored open or closed state.
+    /// :param expandedByDefault: Whether it starts open.
+    /// :param topicID: The help page its info button opens, or nil for none.
+    /// :param presentedTopicID: The host's help sheet binding.
+    init(
+        _ title: String, key: String, expandedByDefault: Bool = false, topicID: String? = nil,
+        presentedTopicID: Binding<String?> = .constant(nil),
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.title = title
+        self.topicID = topicID
+        _presentedTopicID = presentedTopicID
+        _expanded = AppStorage(wrappedValue: expandedByDefault, "settingsSectionExpanded.\(key)")
+        self.content = content
+    }
+
+    var body: some View {
+        Section {
+            if expanded { content() }
+        } header: {
+            HStack {
+                Button {
+                    withAnimation { expanded.toggle() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "chevron.right")
+                            .font(.caption2.weight(.semibold))
+                            .rotationEffect(.degrees(expanded ? 90 : 0))
+                        Text(title)
+                        Spacer()
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(title)
+                .accessibilityValue(expanded ? "expanded" : "collapsed")
+                if let topicID {
+                    Button {
+                        presentedTopicID = topicID
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.tint)
+                    .accessibilityLabel("About \(title)")
+                }
+            }
+        }
+        #if os(macOS)
+            // The sidebar list style folds sections from a hover control of
+            // its own; one way to fold a section is enough.
+            .collapsible(false)
+        #endif
     }
 }
 

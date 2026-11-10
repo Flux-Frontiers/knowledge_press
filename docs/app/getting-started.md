@@ -46,7 +46,7 @@ where you read the books. Where they sit depends on the device.
 
     Two tabs at the bottom: **Chat** and **Browse**.
 
-    In Chat, the toolbar has buttons for **Chats** (your past conversations),
+    In Chat, the toolbar has buttons for **Conversations** (your past conversations),
     **Settings**, **Delete**, and **Export as Markdown**.
 
 === "iPad"

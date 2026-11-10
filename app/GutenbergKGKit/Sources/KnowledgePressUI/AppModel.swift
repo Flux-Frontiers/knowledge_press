@@ -438,6 +438,29 @@ public final class AppModel {
 
     func resetSynthesisTuning() { synthesisTuning = .default }
 
+    /// Whether everything ``resetAllSettings()`` touches is already where it
+    /// shipped, so its button can disable itself.
+    var settingsAreDefault: Bool {
+        searchSettingsAreDefault && synthesisTuning == .default
+            && imageResolution == .preview && imageBackendChoice == AppModel.imageAuto
+            && workerURLString.isEmpty
+    }
+
+    /// Put every setting back to its shipped value and clear the worker
+    /// address.
+    ///
+    /// The corpus scope and the answer engine are left alone: both sit in the
+    /// sidebar as choices about a chat, not preferences, and the engine's
+    /// default depends on what this device can run. Conversations are data,
+    /// not settings. The forest keeps its own reset, in its own panel.
+    func resetAllSettings() {
+        resetSearchSettings()
+        resetSynthesisTuning()
+        imageResolution = .preview
+        imageBackendChoice = AppModel.imageAuto
+        workerURLString = ""
+    }
+
     /// Which engine writes the answer. Defaults to on-device when the
     /// hardware allows, which is the point of the app.
     var engine: AnswerEngine = .off
