@@ -22,7 +22,7 @@ export type Vec3 = { x: number; y: number; z: number };
 /**
  * Where the god's-eye camera hangs: over (cx, cz) at this height, looking at
  * that point from `GOD_TILT` of the height to the south. Module state, like
- * `sim`: the camera reads it every frame and the wheel and pinch write it.
+ * `sim`: the camera reads it every frame and the wheel, pinch and drag write it.
  */
 export const godView = { height: 0, cx: 0, cz: 0 };
 
@@ -74,18 +74,32 @@ export function resetGodView(max: number): void {
 export function zoomGodView(ax: number, az: number, factor: number, limits: { min: number; max: number }, worldRadius: number): void {
   const height = clamp(godView.height * factor, limits.min, limits.max);
   const s = height / (godView.height || height);
-  let cx = ax + (godView.cx - ax) * s;
-  let cz = az + (godView.cz - az) * s;
-  const span = limits.max - limits.min;
-  const reach = span > 0 ? worldRadius * (1 - (height - limits.min) / span) : 0;
-  const d = Math.hypot(cx, cz);
-  if (d > reach) {
-    cx *= reach / d;
-    cz *= reach / d;
-  }
   godView.height = height;
-  godView.cx = cx;
-  godView.cz = cz;
+  setCentre(ax + (godView.cx - ax) * s, az + (godView.cz - az) * s, limits, worldRadius);
+}
+
+/**
+ * Pan the god's-eye view by (dx, dz) metres on the ground, as dragging a map
+ * does. The centre is kept to the part of the world the current height can
+ * show, so all the way out the view stays over the hub.
+ *
+ * :param dx: Metres to move the centre along x.
+ * :param dz: Metres to move the centre along z.
+ * :param limits: From `godLimits`.
+ * :param worldRadius: The forest's radius, m.
+ */
+export function panGodView(dx: number, dz: number, limits: { min: number; max: number }, worldRadius: number): void {
+  setCentre(godView.cx + dx, godView.cz + dz, limits, worldRadius);
+}
+
+/** Put the view's centre at (cx, cz), pulled in to the reach of the current height: none at the top, the world's edge at the bottom. */
+function setCentre(cx: number, cz: number, limits: { min: number; max: number }, worldRadius: number): void {
+  const span = limits.max - limits.min;
+  const reach = span > 0 ? worldRadius * (1 - (godView.height - limits.min) / span) : 0;
+  const d = Math.hypot(cx, cz);
+  const k = d > reach ? reach / d : 1;
+  godView.cx = cx * k;
+  godView.cz = cz * k;
 }
 
 /** The god's-eye camera position and look point for the current view. */

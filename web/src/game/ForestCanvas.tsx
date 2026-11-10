@@ -3,7 +3,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import { ACESFilmicToneMapping, PerspectiveCamera, Raycaster, Vector2 } from "three";
 import { COARSE_POINTER, EXPOSURE, PHONE } from "./Environment";
 import { pickTree, type Forest, type TreeSite } from "./forest";
-import { forestGodLimits, godPose, zoomGodView } from "./godEye";
+import { forestGodLimits, godPose, panGodView, zoomGodView } from "./godEye";
 import { GroveLabels } from "./GroveLabels";
 import { Player } from "./Player";
 import { setScreenshotCapture } from "./screenshot";
@@ -54,7 +54,7 @@ export function ForestCanvas({ forest, onDrawn }: {
       {onDrawn ? <FirstFrame forest={forest} onDrawn={onDrawn} /> : null}
       <ScreenshotCapture />
       <TreePicker forest={forest} picker={picker} />
-      <GodEyeZoom forest={forest} />
+      <GodEyeControls forest={forest} />
       <GroveLabels forest={forest} />
       <Player forest={forest} playing={playing} />
     </Canvas>
@@ -117,22 +117,28 @@ function TreePicker({ forest, picker }: { forest: Forest; picker: RefObject<((e:
 
 const godCam = new PerspectiveCamera();
 const zoomRay = new Raycaster();
+/** Pixels a press may wander and still be a click on a tree, not a pan. */
+const PAN_CLICK = 6;
 
 /**
- * In god's eye, the wheel and a two-finger pinch zoom toward the ground point
- * under the cursor or between the fingers (godEye.ts). The point is found
- * from the pose the camera is easing to, not the one it shows, so a quick run
- * of wheel clicks stays anchored.
+ * In god's eye, the view handles like a map. The wheel and a two-finger pinch
+ * zoom toward the ground point under the cursor or between the fingers; a
+ * drag with the mouse or one finger grabs the ground and pans; two fingers
+ * pan as they pinch (godEye.ts). Ground points are found from the pose the
+ * camera is easing to, not the one it shows, so a quick run of wheel clicks
+ * or a fast drag stays anchored. A click that ends a pan is not a click on a
+ * tree.
  */
-function GodEyeZoom({ forest }: { forest: Forest }) {
+function GodEyeControls({ forest }: { forest: Forest }) {
   const { camera, gl } = useThree();
   useEffect(() => {
     const el = gl.domElement;
     const godEye = () => {
       const s = useGame.getState();
-      return s.preferences.camera === "god" && !s.flight && s.playing;
+      return s.preferences.camera === "god" && !s.flight && s.playing && !s.paused;
     };
-    const zoomAt = (clientX: number, clientY: number, factor: number) => {
+    /** The ground point under a screen point, or the view's centre above the horizon. */
+    const groundAt = (clientX: number, clientY: number): [number, number] => {
       const rect = el.getBoundingClientRect();
       const pose = godPose();
       godCam.copy(camera as PerspectiveCamera);
@@ -142,11 +148,18 @@ function GodEyeZoom({ forest }: { forest: Forest }) {
       ndc.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
       zoomRay.setFromCamera(ndc, godCam);
       const { origin, direction } = zoomRay.ray;
-      // Above the horizon there is no ground under the cursor: zoom about the view's centre.
       const t = direction.y < -1e-3 ? -origin.y / direction.y : 0;
-      const ax = t > 0 ? origin.x + direction.x * t : pose.look.x;
-      const az = t > 0 ? origin.z + direction.z * t : pose.look.z;
+      return t > 0 ? [origin.x + direction.x * t, origin.z + direction.z * t] : [pose.look.x, pose.look.z];
+    };
+    const zoomAt = (clientX: number, clientY: number, factor: number) => {
+      const [ax, az] = groundAt(clientX, clientY);
       zoomGodView(ax, az, factor, forestGodLimits(forest), forest.worldRadius);
+    };
+    /** Pan so the ground under (fromX, fromY) moves to (toX, toY). */
+    const panBetween = (fromX: number, fromY: number, toX: number, toY: number) => {
+      const [ax, az] = groundAt(fromX, fromY);
+      const [bx, bz] = groundAt(toX, toY);
+      panGodView(ax - bx, az - bz, forestGodLimits(forest), forest.worldRadius);
     };
     const onWheel = (e: WheelEvent) => {
       if (!godEye()) return;
@@ -155,37 +168,70 @@ function GodEyeZoom({ forest }: { forest: Forest }) {
       const px = e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 600 : 1);
       zoomAt(e.clientX, e.clientY, Math.exp(px * 0.0015));
     };
-    const touches = new Map<number, { x: number; y: number }>();
+    const pointers = new Map<number, { x: number; y: number }>();
     let spread = 0;
+    let moved = 0;
+    /** When the last pan ended, ms; the click that follows it is not a click. */
+    let pannedAt = -Infinity;
     const onDown = (e: PointerEvent) => {
-      if (e.pointerType !== "touch") return;
-      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (!godEye() || (e.pointerType === "mouse" && e.button !== 0)) return;
+      if (pointers.size === 0) moved = 0;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       spread = 0;
+      try { el.setPointerCapture(e.pointerId); } catch { /* pointer already gone */ }
     };
     const onMove = (e: PointerEvent) => {
-      if (!touches.has(e.pointerId)) return;
-      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (touches.size !== 2 || !godEye()) return;
-      const [a, b] = [...touches.values()];
+      const prev = pointers.get(e.pointerId);
+      if (!prev) return;
+      if (!godEye()) {
+        pointers.clear();
+        return;
+      }
+      if (pointers.size === 1) {
+        // Held at the press point until the pointer has wandered past a click, then the whole way is panned at once.
+        moved = Math.max(moved, Math.hypot(e.clientX - prev.x, e.clientY - prev.y));
+        if (moved <= PAN_CLICK) return;
+        panBetween(prev.x, prev.y, e.clientX, e.clientY);
+        pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        return;
+      }
+      if (pointers.size !== 2) return;
+      const [a0, b0] = [...pointers.values()];
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      const [a, b] = [...pointers.values()];
+      moved = Infinity;
+      // The midpoint drags the ground with it, then the spread zooms about where it now is.
+      panBetween((a0.x + b0.x) / 2, (a0.y + b0.y) / 2, (a.x + b.x) / 2, (a.y + b.y) / 2);
       const d = Math.hypot(a.x - b.x, a.y - b.y);
       if (spread > 0 && d > 0) zoomAt((a.x + b.x) / 2, (a.y + b.y) / 2, spread / d);
       spread = d;
     };
     const onUp = (e: PointerEvent) => {
-      touches.delete(e.pointerId);
+      if (!pointers.delete(e.pointerId)) return;
       spread = 0;
+      if (pointers.size === 0 && moved > PAN_CLICK) pannedAt = performance.now();
+    };
+    // A pan that ends over a tree or a signpost is not a click on it.
+    const onClick = (e: MouseEvent) => {
+      if (performance.now() - pannedAt > 300 || !(e.target instanceof Node) || !el.contains(e.target)) return;
+      pannedAt = -Infinity;
+      e.stopPropagation();
     };
     el.addEventListener("wheel", onWheel, { passive: false });
     el.addEventListener("pointerdown", onDown);
     el.addEventListener("pointermove", onMove);
     el.addEventListener("pointerup", onUp);
     el.addEventListener("pointercancel", onUp);
+    el.addEventListener("lostpointercapture", onUp);
+    window.addEventListener("click", onClick, true);
     return () => {
       el.removeEventListener("wheel", onWheel);
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);
       el.removeEventListener("pointercancel", onUp);
+      el.removeEventListener("lostpointercapture", onUp);
+      window.removeEventListener("click", onClick, true);
     };
   }, [forest, camera, gl]);
   return null;

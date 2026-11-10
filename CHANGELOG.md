@@ -13,6 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Pan in god's eye.** Drag with the mouse or one finger to move the map,
+  the ground following the pointer; two fingers pan as they pinch. How far
+  the view can pan grows as it zooms in, so all the way out it stays over the
+  hub. A drag that ends over a tree does not open its card.
 - **Reset all settings**, at the bottom of Settings, puts search, synthesis
   and illustrations back to their defaults and clears the worker address. The
   corpus scope, the answer engine and your conversations are kept.
