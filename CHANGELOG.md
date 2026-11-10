@@ -23,8 +23,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- **No minimap in god's eye**, which is already the map. It comes back with
-  the ground cameras.
+- **No minimap in god's eye**, which is already the map. It comes back once
+  a dive from god's eye has landed.
 - **Fly there no longer flashes the book's title** as the dive starts. The
   book's card still opens on landing.
 - **On an upright phone the search bar sits right of the stick**, just above
