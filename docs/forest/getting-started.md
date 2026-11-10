@@ -62,7 +62,7 @@ On a phone or tablet the controls are on screen:
 - **Drag anywhere else:** look around. Drag up or down to tilt the view,
   left or right to look to the side. Tilt holds; the sideways look eases
   back when you let go.
-- **Read:** reads the nearest tree into the press. It lights up when a tree
+- **Press:** reads the nearest tree into the press. It lights up when a tree
   is close enough.
 - **Guided tour:** starts the tour; the same button ends it.
 - **Pinch:** in god's eye, zooms toward the point between your fingers and

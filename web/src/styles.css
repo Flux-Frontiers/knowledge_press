@@ -166,7 +166,7 @@ button:focus-visible, select:focus-visible, input:focus-visible {
 }
 
 /* A phone upright: the search goes right of the stick (~7.75rem), just above
-   the Guided tour and Read buttons (~4.25rem tall), instead of across the
+   the Guided tour and Press buttons (~4.25rem tall), instead of across the
    middle above them; the card drops to sit just above the stick. */
 @media (pointer: coarse) and (max-width: 699px) and (min-height: 501px) {
   .search-dock {

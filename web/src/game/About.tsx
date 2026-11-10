@@ -23,7 +23,7 @@ const KEYS: [string, string][] = [
 const TOUCH: [string, string][] = [
   ["Stick, bottom left", "drive: up forward, down reverse, sideways to steer"],
   ["Drag anywhere else", "look around; the view eases back to ahead when you let go"],
-  ["Read", "the nearest tree, once you are close"],
+  ["Press", "read the nearest tree into the press, once you are close"],
   ["Guided tour", "the cart drives the ring and stops at each grove"],
   ["Three-dot menu", "time of day, silent mode, screenshot, moots, settings, this page"],
 ];
