@@ -13,6 +13,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **R opens the book** in the reader: the tree whose card is showing, or
+  else the nearest tree within reach. The card's button reads **Open the book
+  · R**, and the key lists in About, the start screen and the guide include it.
 - **Pan in god's eye.** Drag with the mouse or one finger to move the map,
   the ground following the pointer; two fingers pan as they pinch. How far
   the view can pan grows as it zooms in, so all the way out it stays over the

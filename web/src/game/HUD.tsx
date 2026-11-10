@@ -366,7 +366,7 @@ export function HUD({ forest }: { forest: Forest }) {
                 )}
                 <button type="button" onClick={() => openReader(nearby.book.slug)}
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-4 text-sm text-fg">
-                  <BookOpen className="size-4" strokeWidth={1.75} /> Open the book
+                  <BookOpen className="size-4" strokeWidth={1.75} /> Open the book · R
                 </button>
                 {host.available ? (
                   // Only inside the app (host.ts): its chat answers from the book's passages.
@@ -414,7 +414,7 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
 
         <p className="key-hints absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
-          WASD drive · Drag or arrows look · Space brake · E read · B books · C camera · Esc settings · ? about
+          WASD drive · Drag or arrows look · Space brake · E press · R read · B books · C camera · Esc settings · ? about
         </p>
       </>)}
 

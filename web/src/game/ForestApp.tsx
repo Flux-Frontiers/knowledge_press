@@ -16,7 +16,7 @@ import { requestPlace } from "./location";
 import { nextCamera, LEAF_SCALE } from "./preferences";
 import { resetSim } from "./sim";
 import { unlockSpeechOnGesture } from "./speech";
-import { useGame } from "./store";
+import { readerTarget, useGame } from "./store";
 
 export function ForestApp() {
   const [mounted, setMounted] = useState(false);
@@ -216,6 +216,11 @@ export function ForestApp() {
       if (e.code === "KeyB") st.toggleCatalog();
       if (e.code === "KeyQ") st.toggleCircuit();
       if (e.code === "KeyC") st.setPreferences({ camera: nextCamera(st.preferences.camera) });
+      // Not with a modifier: Cmd+R and Ctrl+R reload the page.
+      if (e.code === "KeyR" && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const slug = readerTarget(st);
+        if (slug) st.openReader(slug);
+      }
       if (e.code === "KeyH" && forest) {
         st.selectGrove(null);
         st.requestJump(forest.home, "Home · the corpus redwood");

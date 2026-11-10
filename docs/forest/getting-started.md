@@ -41,6 +41,7 @@ plaque. The groves are out along the roads.
 | ++shift++ | Hurry. |
 | ++space++ | Brake. |
 | ++e++ | Read the nearest tree into the press. |
+| ++r++ | Open the book in the reader: the tree whose card is showing, or else the nearest tree. |
 | ++c++ | Next camera: behind the cart, high view, in the cart, god's eye. |
 | Mouse wheel | In god's eye, zoom toward the cursor. Drag to pan. |
 | ++q++ | Start or end the guided tour. |
@@ -88,15 +89,19 @@ silent mode, Moots, settings, About and Exit.
 
 ## The screen
 
-- **Top left:** the lantern query. Type a word to light the groves that
-  match it. See [Finding books](finding.md#light-the-groves-with-a-query).
-- **Top right:** home, **Browse** (groves, every book and the press), the
-  screenshot button, the clock and settings. On a phone the bar keeps home
-  and Browse, and the rest move to the three-dot menu.
-- **The clock:** the sky's time. Tap it to step through live, dawn, day,
-  dusk and night. See [Sky, seasons and weather](sky.md).
-- **The minimap:** the roads, the groves as colored dots, the exhibits as
-  gold diamonds, and you. Tap a grove to list its books.
+- **Top left:** the forest's name, the season and the sky's time.
+- **Top right:** clean view, the screenshot button, the camera, home,
+  **Browse** (groves, every book and the press) and the three-dot menu. On a
+  phone the bar keeps home and Browse, and the rest move to the menu.
+- **Time of day:** in the three-dot menu. Each tap steps through live, dawn,
+  day, dusk and night. See [Sky, seasons and weather](sky.md).
+- **The minimap:** under the buttons, the roads, the groves as colored dots,
+  the exhibits as gold diamonds, and you. Tap a grove to list its books. It
+  is hidden in god's eye, which is already the map.
+- **The lantern query:** at the bottom. Type a word to light the groves that
+  match it. On an upright phone it sits right of the stick, above the
+  **Guided tour** button. See
+  [Finding books](finding.md#light-the-groves-with-a-query).
 - **Cards:** when you drive up to a tree, its card appears with the book's
   title, author and an excerpt. See [Reading and the press](reading.md).
 

@@ -148,3 +148,19 @@ test("fly there closes the card for the flight and opens it on landing", () => {
   assert.notEqual(st().preferences.camera, "god");
   st().pinTree(null);
 });
+
+test("R opens the card's tree, else the nearest in reach, never mid-dive", () => {
+  globalThis.window ??= { localStorage: { getItem: () => null, setItem: () => {} } };
+  const { readerTarget } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const base = { flight: null, pinnedSlug: null, cardSlug: null, nearbyDismissed: null, nearbySlug: null, nearbyDist: Infinity, preferences: { silent: false } };
+  assert.equal(readerTarget(base), null);
+  assert.equal(readerTarget({ ...base, nearbySlug: "lear", nearbyDist: 3 }), "lear");
+  assert.equal(readerTarget({ ...base, nearbySlug: "lear", nearbyDist: 20 }), null);
+  assert.equal(readerTarget({ ...base, cardSlug: "hamlet", nearbySlug: "lear", nearbyDist: 3 }), "hamlet");
+  // A pinned card wins, silent mode or not.
+  assert.equal(readerTarget({ ...base, pinnedSlug: "moby_dick", cardSlug: "hamlet", preferences: { silent: true } }), "moby_dick");
+  // A dismissed or silenced card falls back to the nearest tree.
+  assert.equal(readerTarget({ ...base, cardSlug: "hamlet", nearbyDismissed: "hamlet", nearbySlug: "lear", nearbyDist: 3 }), "lear");
+  assert.equal(readerTarget({ ...base, cardSlug: "hamlet", preferences: { silent: true } }), null);
+  assert.equal(readerTarget({ ...base, flight: { to: "follow", reopen: null }, pinnedSlug: "moby_dick" }), null);
+});
