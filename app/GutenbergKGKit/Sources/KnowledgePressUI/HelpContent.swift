@@ -218,6 +218,13 @@ public enum HelpContent {
                     "With the corpus installed, search runs on this device and the worker plays no part in it. The worker is used for two things only: the **Worker** answer engine, and illustrations.",
                 ]),
             HelpSection(
+                heading: "Installing one",
+                paragraphs: [
+                    "The worker is GutenbergKG, the project that builds this corpus. It runs in Docker on a Mac, Linux or Windows machine.",
+                    "Clone `https://github.com/Flux-Frontiers/gutenberg_kg`, then in that folder run `make pull-worker-image` to fetch the published image and `make run` to start the worker on port 8000. `make up` starts the chat page and an image server as well, which illustrations need.",
+                    "Answers also need a model for the worker to call: oMLX, Ollama, OpenAI or Anthropic. The [GutenbergKG installation guide](https://flux-frontiers.github.io/gutenberg_kg/INSTALLATION/) covers that, building the image yourself, and what to check when a phone cannot reach the worker.",
+                ]),
+            HelpSection(
                 heading: "Setting the address",
                 paragraphs: [
                     "Type the address and tap **Test**. The app reports the number of books and genres it found, or why it could not reach the server.",
