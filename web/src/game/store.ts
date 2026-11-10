@@ -449,9 +449,10 @@ export const useGame = create<GameStore>((set, get) => ({
   flight: null,
   flyTo: (pose, toast, reopen) => {
     // The cards close so the flight can be watched; `reopen`'s card comes back on landing.
+    // It lands behind the cart, where the pressed books show over the tailboard.
     get().clearCards();
     get().requestJump(pose, toast);
-    set({ flight: { to: get().groundCamera, reopen: reopen ?? null } });
+    set({ flight: { to: "follow", reopen: reopen ?? null } });
   },
   endFlight: () => {
     const flight = get().flight;

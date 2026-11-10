@@ -31,6 +31,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Fly there lands behind the cart**, where the pressed books show over the
+  tailboard, rather than in whichever ground view was used last. Riding the
+  ring from god's eye still lands in that view.
 - **God's eye draws fewer, larger leaves.** Far groves there now thin too, but
   each leaf kept is enlarged so the crown covers as much, which the ground's
   thinning by count alone cannot do from above: past 45 m a grove draws a share

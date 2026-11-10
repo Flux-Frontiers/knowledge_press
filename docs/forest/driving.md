@@ -51,8 +51,8 @@ you are, the farther you can pan; all the way out the view stays over the
 hub.
 
 Click or tap a tree to show its card, then select **Fly there**. The cart is
-set down beside the tree and the camera dives to it, ending on the camera you
-used before god's eye.
+set down beside the tree and the camera dives to it, ending behind the cart,
+where the books you have pressed show over the tailboard.
 
 ## Take the guided tour
 

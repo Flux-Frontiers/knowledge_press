@@ -149,6 +149,19 @@ test("fly there closes the card for the flight and opens it on landing", () => {
   st().pinTree(null);
 });
 
+test("fly there lands behind the cart, whatever ground view was last used", () => {
+  globalThis.window ??= { localStorage: { getItem: () => null, setItem: () => {} } };
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().setPreferences({ camera: "cart" });
+  st().setPreferences({ camera: "god" });
+  st().flyTo({ x: 10, z: 10, yaw: 0 }, "King Lear", "lear");
+  assert.equal(st().flight?.to, "follow");
+  st().endFlight();
+  assert.equal(st().preferences.camera, "follow");
+  st().pinTree(null);
+});
+
 test("R opens the card's tree, else the nearest in reach, never mid-dive", () => {
   globalThis.window ??= { localStorage: { getItem: () => null, setItem: () => {} } };
   const { readerTarget } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
