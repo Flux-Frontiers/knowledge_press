@@ -361,7 +361,7 @@ export function HUD({ forest }: { forest: Forest }) {
                   <button type="button" disabled={bookDist >= READ_RANGE}
                     onClick={() => collect(nearby.book.slug, nearby.book.title)}
                     className="min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
-                    {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
+                    {bookDist < READ_RANGE ? "Press the book · E" : `Move closer · ${Math.ceil(bookDist)} m`}
                   </button>
                 )}
                 <button type="button" onClick={() => openReader(nearby.book.slug)}

@@ -30,6 +30,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   a dive from god's eye has landed.
 - **Fly there no longer flashes the book's title** as the dive starts. The
   book's card still opens on landing.
+- **The card's Read into the press button is called Press the book.**
 - **The touch Read button is called Press**, after what it does: it reads the
   nearest tree into the press. Beside a tree already in the press it says
   **Read** and opens the book in the reader.
