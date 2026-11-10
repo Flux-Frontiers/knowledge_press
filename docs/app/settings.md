@@ -72,7 +72,8 @@ appears when you are on the on-device engine.
 ## Help and About
 
 **Help** opens the in-app Help. **About** (on iPhone and iPad; on a Mac it is
-in the app menu) shows the version and the corpus counts.
+in the app menu) shows the version and the corpus counts. It links to this guide and
+to GutenbergKG, the project that builds the corpus.
 
 ## Reset all settings
 

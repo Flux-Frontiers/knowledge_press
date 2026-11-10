@@ -50,11 +50,19 @@ public struct AboutView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                // The app's own guide first: it is what a reader wants. The
+                // engine's docs are a developer manual, so they are the
+                // credit, not the destination.
                 Link(
-                    "github.com/Flux-Frontiers/gutenberg_kg",
-                    destination: URL(string: "https://github.com/Flux-Frontiers/gutenberg_kg")!
+                    "The Knowledge Press guide",
+                    destination: URL(string: "https://flux-frontiers.github.io/knowledge_press/docs/")!
                 )
                 .font(.caption)
+                Link(
+                    "Corpus built with GutenbergKG",
+                    destination: URL(string: "https://flux-frontiers.github.io/gutenberg_kg/")!
+                )
+                .font(.caption2)
             }
 
             Spacer(minLength: 0)

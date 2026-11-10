@@ -22,6 +22,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Settings sections fold.** Search, Worker, Synthesis, Illustrations and
   Corpus information open and close from their headings. Search starts open,
   the others closed, and the app remembers which you left open.
+- **About links to the Knowledge Press guide**, with a credit line to
+  GutenbergKG's docs, in place of the GutenbergKG repository.
 - **The list of chats is called Conversations**, and **Delete all
   conversations** moved from Settings to the bottom of that list.
 - **Far groves draw fewer leaves.** Past 60 m from a grove's edge on a touch
