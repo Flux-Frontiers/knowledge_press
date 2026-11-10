@@ -7,7 +7,7 @@ it. Nothing is sent to us.
 
 === "iPhone"
 
-    Tap **Chats**, the sidebar button at the top left of the Chat screen. The
+    Tap **Conversations**, the sidebar button at the top left of the Chat screen. The
     list opens as a sheet. Tap a chat to open it. **New chat** is at the top.
 
 === "iPad and Mac"
@@ -16,7 +16,7 @@ it. Nothing is sent to us.
     **New chat** at the top of the sidebar to start another.
 
 Chats are grouped by when you last used them: Today, Yesterday, Previous 7
-days, and Older. Type in **Search chats** to filter by title.
+days, and Older. Type in **Search conversations** to filter by title.
 
 ## Name, rename and delete
 
@@ -28,7 +28,8 @@ To delete a chat, swipe it to the left, or touch and hold and choose
 first. Deleting removes its questions, answers and illustrations, and it
 cannot be undone.
 
-**Settings**, then **Delete all conversations**, removes every chat.
+**Delete all conversations**, at the bottom of the list of conversations,
+removes every chat. It asks first.
 
 ## Export a chat
 

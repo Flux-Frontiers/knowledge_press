@@ -4,8 +4,12 @@ Open **Settings** from the toolbar on iPhone (the sliders button), from the
 bottom of the sidebar on iPad, or with ++cmd+comma++ on a Mac. Changes apply to
 your next question. The app remembers them.
 
-Beside the Search, Answers and Synthesis headings is a question-mark button
-that opens the matching page of the in-app Help.
+Beside the Search, Answers, Worker, Synthesis and Illustrations headings is a
+question-mark button that opens the matching page of the in-app Help.
+
+Search, Worker, Synthesis, Illustrations and Corpus information fold: tap a
+heading to open or close its section. Search starts open and the others start
+closed. The app remembers which you left open.
 
 ## Corpus
 
@@ -68,9 +72,15 @@ appears when you are on the on-device engine.
 ## Help and About
 
 **Help** opens the in-app Help. **About** (on iPhone and iPad; on a Mac it is
-in the app menu) shows the version and the corpus counts.
+in the app menu) shows the version and the corpus counts. It links to this guide and
+to GutenbergKG, the project that builds the corpus.
 
-## Delete all conversations
+## Reset all settings
 
-Removes every saved chat, including their answers and illustrations. It asks
-first and cannot be undone.
+Puts search, synthesis and illustrations back to their defaults and clears the
+worker address. It asks first. Your conversations, the corpus scope and the
+answer engine are kept. The forest has its own reset, in its **Controls and
+settings** panel.
+
+To remove every saved conversation, see
+[Name, rename and delete](chats.md#name-rename-and-delete).

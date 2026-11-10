@@ -45,7 +45,10 @@ import Testing
     /// The info buttons pass literal ids. A renamed topic must not leave one
     /// opening an empty page.
     @Test func idsReferencedByTheUIResolve() {
-        for id in [HelpContent.synthesisTopicID, "engines", "search"] {
+        for id in [
+            HelpContent.synthesisTopicID, HelpContent.workerTopicID,
+            HelpContent.illustrationsTopicID, "engines", "search",
+        ] {
             #expect(HelpContent.topic(id: id) != nil, "Settings references missing topic '\(id)'")
         }
     }

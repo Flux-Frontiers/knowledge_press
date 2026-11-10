@@ -11,7 +11,10 @@ import Testing
 @testable import KnowledgePressUI
 
 @MainActor
-@Suite("Conversation lifecycle")
+// Serialized: each test points the static `AppModel.defaults` at its own
+// suite and then awaits, so two of them running at once read each other's
+// stored scope.
+@Suite("Conversation lifecycle", .serialized)
 struct ConversationLifecycleTests {
 
     /// A model wired to a scratch directory and a scratch defaults domain, so

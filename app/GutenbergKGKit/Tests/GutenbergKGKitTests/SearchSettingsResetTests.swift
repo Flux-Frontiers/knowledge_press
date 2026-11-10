@@ -10,7 +10,9 @@
 
 import Testing
 
+import GutenbergKGKit
 @testable import KnowledgePressUI
+import Foundation
 
 @MainActor
 @Suite("Search settings reset")
@@ -56,5 +58,34 @@ struct SearchSettingsResetTests {
         // preference; a button about sliders must not undo the reader's
         // narrowing.
         #expect(model.corpus == "world-literature")
+    }
+
+    @Test("reset all restores every setting and clears the worker address")
+    func resetAllRestoresEverything() {
+        let suite = "ResetAllSettingsTests.\(UUID().uuidString)"
+        let previous = AppModel.defaults
+        AppModel.defaults = UserDefaults(suiteName: suite)!
+        defer {
+            AppModel.defaults = previous
+            UserDefaults.standard.removePersistentDomain(forName: suite)
+        }
+
+        let model = AppModel()
+        model.workerURLString = ""
+        #expect(model.settingsAreDefault)
+
+        model.resultCount = 3
+        model.synthesisTuning.greedy = true
+        model.imageResolution = ImageResolution.allCases.first { $0 != .preview } ?? .preview
+        model.imageBackendChoice = "openai"
+        model.workerURLString = "http://example.local:8000"
+        model.corpus = "philosophy"
+        #expect(model.settingsAreDefault == false)
+
+        model.resetAllSettings()
+
+        #expect(model.settingsAreDefault)
+        #expect(model.workerURLString.isEmpty)
+        #expect(model.corpus == "philosophy")
     }
 }
