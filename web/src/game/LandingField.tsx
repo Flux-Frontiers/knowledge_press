@@ -2,6 +2,7 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type Ref } from "react";
 import {
   AdditiveBlending,
+  BoxGeometry,
   Color,
   DoubleSide,
   Group,
@@ -46,21 +47,24 @@ const FIELD_BODY =
   "Most days nobody comes. Now and then someone does.";
 
 const HEAD_URL = "models/visitor_head.glb";
-/** The rider is this close when the craft starts its approach. */
-const TRIGGER_DIST = 90;
+/** The rider is this close, on the spur or the plaza, when the craft starts its approach (home is about 40 m off). */
+const TRIGGER_DIST = 30;
 const MARKERS = 16;
 const RIM_LIGHTS = 48;
 const TRACES = 16;
 /** Legs at these bearings, clear of the way out toward the road at 0. */
 const LEG_BEARINGS = [Math.PI / 3, Math.PI, (5 * Math.PI) / 3];
-const LEG_TOP_R = 4.0;
-const LEG_FOOT_R = 4.6;
+/** Legs from under the hull out to feet near the pad's edge. */
+const LEG_TOP_R = 6.0;
+const LEG_FOOT_R = 6.9;
+/** Where the legs meet the hull's underside, over the belly. */
+const LEG_TOP_Y = 0.6;
 /** The craft is modeled 4.6 m in radius and drawn at SAUCER_R. */
 const BASE_R = 4.6;
 const K = SAUCER_R / BASE_R;
 /** The shaft in model units. */
 const WELL_R = SHAFT_R / K;
-const WELL_H = 2.0;
+const WELL_H = 1.6;
 
 /** Seconds into the landing: null until it starts. Kept for the session, so it plays once. */
 let landingT: number | null = null;
@@ -76,7 +80,7 @@ const PALETTE = {
 
 /** The craft's hull, belly center at the origin, open round the shaft: faceted, 16 planes round. */
 function hullGeometry() {
-  const pts = [[WELL_R, 0], [1.6, 0.06], [3.6, 0.4], [BASE_R, 0.74], [BASE_R, 1.0], [4.0, 1.34], [2.8, 1.9], [2.4, 2.1], [0, 2.1]];
+  const pts = [[WELL_R, 0], [1.6, 0.06], [3.6, 0.4], [BASE_R, 0.74], [BASE_R, 1.0], [4.0, 1.25], [2.8, 1.55], [2.4, 1.65], [0, 1.65]];
   return new LatheGeometry(pts.map(([r, y]) => new Vector2(r, y)), 16);
 }
 
@@ -280,7 +284,7 @@ function Guest({ m, groupRef, limbs }: { m: Materials; groupRef: Ref<Group>; lim
   );
 }
 
-/** The craft: hull, gold rim, server lights, copper traces, stepped crown, belly lights and iris. */
+/** The craft: hull, gold rim, server lights, copper traces, a low stepped crown, glowing traces underneath, belly lights and iris. */
 function Craft({ m, rimLights, iris }: { m: Materials; rimLights: Ref<InstancedMesh>; iris: Ref<Group> }) {
   const hull = useMemo(hullGeometry, []);
   useEffect(() => () => hull.dispose(), [hull]);
@@ -288,12 +292,12 @@ function Craft({ m, rimLights, iris }: { m: Materials; rimLights: Ref<InstancedM
     light: () => new LatheGeometry([new Vector2(0, -0.04), new Vector2(0.09, -0.04), new Vector2(0.09, 0.04), new Vector2(0, 0.04)], 4),
   }), []);
   // Copper traces up the upper hull, each from a gold pad at the rim to one at the crown.
-  const slope = Math.atan2(1.9 - 1.34, 4.0 - 2.8);
-  const traceGeo = useMemo(() => new LatheGeometry([new Vector2(0, 0), new Vector2(0.02, 0), new Vector2(0.02, 1.25), new Vector2(0, 1.25)], 4), []);
+  const slope = Math.atan2(1.55 - 1.25, 4.0 - 2.8);
+  const traceGeo = useMemo(() => new LatheGeometry([new Vector2(0, 0), new Vector2(0.02, 0), new Vector2(0.02, 1.22), new Vector2(0, 1.22)], 4), []);
   const placeTrace = useMemo(() => (i: number, o: Object3D) => {
     const a = (2 * Math.PI * (i + 0.5)) / TRACES;
     o.rotation.set(0, -a, 0);
-    o.position.set(Math.cos(a) * 3.98, 1.36, Math.sin(a) * 3.98);
+    o.position.set(Math.cos(a) * 3.98, 1.27, Math.sin(a) * 3.98);
     // Lie the trace along the hull, rising inward.
     o.rotateZ(Math.PI / 2 - slope);
   }, [slope]);
@@ -301,7 +305,7 @@ function Craft({ m, rimLights, iris }: { m: Materials; rimLights: Ref<InstancedM
   const placePad = useMemo(() => (i: number, o: Object3D) => {
     const a = (2 * Math.PI * ((i >> 1) + 0.5)) / TRACES;
     const r = i & 1 ? 2.85 : 3.95;
-    o.position.set(Math.cos(a) * r, i & 1 ? 1.88 : 1.36, Math.sin(a) * r);
+    o.position.set(Math.cos(a) * r, i & 1 ? 1.54 : 1.27, Math.sin(a) * r);
     o.rotation.set(0, -a, -slope);
   }, [slope]);
   const placeRim = useMemo(() => (i: number, o: Object3D) => {
@@ -328,14 +332,15 @@ function Craft({ m, rimLights, iris }: { m: Materials; rimLights: Ref<InstancedM
       <Instances geometry={traceGeo} material={m.copper} count={TRACES} place={placeTrace} />
       <Instances geometry={padGeo} material={m.gold} count={TRACES * 2} place={placePad} />
       <Instances geometry={bellyGeo} material={m.marker} count={12} place={placeBelly} />
+      <UnderTraces m={m} />
       {/* The stepped crown, Deco's setback tower, with the green die at its peak. */}
-      <mesh position={[0, 2.25, 0]} material={m.panel}><cylinderGeometry args={[2.25, 2.4, 0.3, 16]} /></mesh>
-      <mesh position={[0, 2.43, 0]} material={m.gold}><cylinderGeometry args={[1.82, 1.82, 0.06, 16]} /></mesh>
-      <mesh position={[0, 2.62, 0]} material={m.obsidian}><cylinderGeometry args={[1.65, 1.8, 0.35, 16]} /></mesh>
-      <mesh position={[0, 2.84, 0]} material={m.gold}><cylinderGeometry args={[1.16, 1.16, 0.06, 16]} /></mesh>
-      <mesh position={[0, 3.02, 0]} material={m.obsidian}><cylinderGeometry args={[1.0, 1.12, 0.32, 16]} /></mesh>
-      <mesh position={[0, 3.22, 0]} material={m.gold}><boxGeometry args={[0.78, 0.08, 0.78]} /></mesh>
-      <mesh position={[0, 3.34, 0]} material={m.die}><boxGeometry args={[0.56, 0.16, 0.56]} /></mesh>
+      <mesh position={[0, 1.75, 0]} material={m.panel}><cylinderGeometry args={[2.25, 2.4, 0.2, 16]} /></mesh>
+      <mesh position={[0, 1.875, 0]} material={m.gold}><cylinderGeometry args={[1.82, 1.82, 0.05, 16]} /></mesh>
+      <mesh position={[0, 2.0, 0]} material={m.obsidian}><cylinderGeometry args={[1.65, 1.8, 0.2, 16]} /></mesh>
+      <mesh position={[0, 2.125, 0]} material={m.gold}><cylinderGeometry args={[1.16, 1.16, 0.05, 16]} /></mesh>
+      <mesh position={[0, 2.24, 0]} material={m.obsidian}><cylinderGeometry args={[1.0, 1.12, 0.18, 16]} /></mesh>
+      <mesh position={[0, 2.36, 0]} material={m.gold}><boxGeometry args={[0.78, 0.06, 0.78]} /></mesh>
+      <mesh position={[0, 2.44, 0]} material={m.die}><boxGeometry args={[0.56, 0.1, 0.56]} /></mesh>
       {/* The shaft up the axis, dark inside, lit at its head. */}
       <mesh position={[0, WELL_H / 2, 0]} material={m.panel}><cylinderGeometry args={[WELL_R, WELL_R, WELL_H, 16, 1, true]} /></mesh>
       <mesh position={[0, WELL_H, 0]} rotation={[Math.PI / 2, 0, 0]} material={m.marker}><circleGeometry args={[WELL_R, 16]} /></mesh>
@@ -350,6 +355,59 @@ function Craft({ m, rimLights, iris }: { m: Materials; rimLights: Ref<InstancedM
           </group>
         ))}
       </group>
+    </>
+  );
+}
+
+/** The underside's segments, each from (r, y) to (r, y) just under the hull: shaft lip to rim. */
+const UNDER_SEGS: [[number, number], [number, number]][] = [[[WELL_R + 0.15, 0.02], [1.6, 0.06]], [[1.6, 0.06], [3.6, 0.4]], [[3.6, 0.4], [4.5, 0.71]]];
+const SPOKES = 16;
+
+/**
+ * Glowing traces under the belly: sixteen radial runs from the shaft to the
+ * rim, crossed by two ring buses, the light pulsing outward from the shaft
+ * while the craft is busy and breathing slowly once it rests.
+ */
+function UnderTraces({ m }: { m: Materials }) {
+  const ref = useRef<InstancedMesh>(null);
+  const geometry = useMemo(() => new BoxGeometry(1, 0.025, 0.07), []);
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  const tint = useMemo(() => ({ c: new Color(), mint: new Color(PALETTE.mint) }), []);
+  useLayoutEffect(() => {
+    const im = ref.current;
+    if (!im) return;
+    const o = new Object3D();
+    for (let sp = 0; sp < SPOKES; sp++) {
+      const a = (2 * Math.PI * sp) / SPOKES;
+      UNDER_SEGS.forEach(([[r0, y0], [r1, y1]], k) => {
+        o.position.set(Math.cos(a) * (r0 + r1) / 2, (y0 + y1) / 2 - 0.018, Math.sin(a) * (r0 + r1) / 2);
+        o.rotation.set(0, -a, Math.atan2(y1 - y0, r1 - r0));
+        o.scale.set(Math.hypot(r1 - r0, y1 - y0), 1, 1);
+        o.updateMatrix();
+        im.setMatrixAt(sp * UNDER_SEGS.length + k, o.matrix);
+        im.setColorAt(sp * UNDER_SEGS.length + k, tint.mint);
+      });
+    }
+    im.instanceMatrix.needsUpdate = true;
+  }, [tint]);
+  useFrame(() => {
+    const im = ref.current;
+    if (!im || landingT === null) return;
+    const busy = landingT < VISITOR_END;
+    for (let k = 0; k < UNDER_SEGS.length; k++) {
+      // A wave running outward from the shaft, or a slow breath at rest.
+      const level = busy ? 0.35 + 0.65 * Math.max(0, Math.cos(landingT * 3 - k * 1.1)) : 0.6 + 0.2 * Math.sin(landingT * 0.8);
+      tint.c.copy(tint.mint).multiplyScalar(level);
+      for (let sp = 0; sp < SPOKES; sp++) im.setColorAt(sp * UNDER_SEGS.length + k, tint.c);
+    }
+    if (im.instanceColor) im.instanceColor.needsUpdate = true;
+  });
+  return (
+    <>
+      <instancedMesh ref={ref} args={[geometry, m.lights, SPOKES * UNDER_SEGS.length]} />
+      {[[1.6, 0.04], [3.6, 0.38]].map(([r, y]) => (
+        <mesh key={r} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]} material={m.marker}><torusGeometry args={[r, 0.03, 4, 48]} /></mesh>
+      ))}
     </>
   );
 }
@@ -389,8 +447,8 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
   const robotLimbs = useMemo(newLimbs, []);
   const guestLimbs = useMemo(newLimbs, []);
   const tint = useMemo(() => ({ c: new Color(), mint: new Color(PALETTE.mint), green: new Color(PALETTE.green), white: new Color("#ffffff") }), []);
-  const legLen = Math.hypot(LEG_FOOT_R - LEG_TOP_R, LEG_H + 0.3);
-  const legTilt = Math.atan2(LEG_FOOT_R - LEG_TOP_R, LEG_H + 0.3);
+  const legLen = Math.hypot(LEG_FOOT_R - LEG_TOP_R, LEG_H + LEG_TOP_Y);
+  const legTilt = Math.atan2(LEG_FOOT_R - LEG_TOP_R, LEG_H + LEG_TOP_Y);
   const cos = Math.cos(face), sin = Math.sin(face);
   const toWorld = (p: [number, number, number], out: [number, number, number]) => {
     out[0] = exhibit.x + p[0] * cos + p[2] * sin;
@@ -506,7 +564,7 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
           <Craft m={m} rimLights={rimLights} iris={iris} />
         </group>
         {LEG_BEARINGS.map((a, i) => (
-          <group key={a} position={[Math.cos(a) * LEG_TOP_R, 0.3, Math.sin(a) * LEG_TOP_R]} rotation={[0, -a, 0]}>
+          <group key={a} position={[Math.cos(a) * LEG_TOP_R, LEG_TOP_Y, Math.sin(a) * LEG_TOP_R]} rotation={[0, -a, 0]}>
             <group rotation={[0, 0, legTilt]} ref={(g) => { legs.current[i] = g; }}>
               <mesh position={[0, -legLen / 2, 0]} material={m.copper}><boxGeometry args={[0.24, legLen, 0.24]} /></mesh>
               <mesh position={[0, -legLen, 0]} rotation={[0, 0, -legTilt]} material={m.gold}><cylinderGeometry args={[0.5, 0.6, 0.08, 8]} /></mesh>
@@ -528,8 +586,8 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
       <mesh ref={shaft} position={[0, PAD_TOP + LEG_H / 2, 0]} material={m.shaft} visible={false}>
         <cylinderGeometry args={[SHAFT_R * 0.97, SHAFT_R * 0.97, LEG_H, 16, 1, true]} />
       </mesh>
-      {/* One real light, only while the event is on: under the rim on the road side, over where the two stand. */}
-      <pointLight ref={lamp} position={[8.0, 3.4, 1.2]} color="#e4fbf1" intensity={0} distance={20} decay={2} />
+      {/* One real light, only while the event is on: at the rim on the road side, over where the two stand. */}
+      <pointLight ref={lamp} position={[9.6, 3.6, 1.5]} color="#e4fbf1" intensity={0} distance={20} decay={2} />
       <Sentinel m={m} groupRef={robot} limbs={robotLimbs} sweepRef={sweep} />
       <Guest m={m} groupRef={guest} limbs={guestLimbs} />
     </>

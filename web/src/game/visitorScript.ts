@@ -9,7 +9,8 @@
 
 /** Height of the pad the craft rests on. */
 export const PAD_TOP = 0.35;
-export const PAD_R = 5;
+/** The pad's radius: the landing field's obstacle (exhibits.ts). */
+export const PAD_R = 7.5;
 /** 17 m across: it overhangs the pad and roofs most of the paved plaza. */
 export const SAUCER_R = 8.5;
 /** The craft's belly stands this high over the pad on its legs: room for the sentinel under it. */
@@ -43,11 +44,11 @@ type P = [number, number, number];
 type Leg = { to: P; ride?: boolean };
 const ROBOT_PATH: { from: P; legs: Leg[] } = {
   from: [0, REST_Y, 0],
-  legs: [{ to: [0, PAD_TOP, 0], ride: true }, { to: [4.8, PAD_TOP, 1.2] }, { to: [5.4, 0, 1.5] }, { to: [7.0, 0, 2.6] }],
+  legs: [{ to: [0, PAD_TOP, 0], ride: true }, { to: [7.2, PAD_TOP, 1.8] }, { to: [7.9, 0, 2.1] }, { to: [9.6, 0, 3.0] }],
 };
 const GUEST_PATH: { from: P; legs: Leg[] } = {
   from: [0, REST_Y, 0],
-  legs: [{ to: [0, PAD_TOP, 0], ride: true }, { to: [4.8, PAD_TOP, 0.4] }, { to: [5.4, 0, 0.6] }, { to: [7.4, 0, 0.8] }],
+  legs: [{ to: [0, PAD_TOP, 0], ride: true }, { to: [7.2, PAD_TOP, 0.5] }, { to: [7.9, 0, 0.6] }, { to: [10.0, 0, 0.9] }],
 };
 
 const dist = (a: P, b: P) => Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
@@ -193,12 +194,12 @@ export function visitorShot(t: number): { cam: P; look: P } {
   const p = visitorPose(t);
   const craft: P = [p.saucer[0], p.saucer[1] + 1.2, p.saucer[2]];
   const keys: { t: number; cam: P; look: P }[] = [
-    { t: 0, cam: [14, 1.7, -1.5], look: craft },
-    { t: T_LANDED - 1, cam: [15, 1.9, -1.5], look: craft },
-    { t: T_IRIS + 1, cam: [10.8, 1.2, -1.4], look: [0, 2.6, 0] },
-    { t: T_GUEST, cam: [10.8, 1.3, -1.2], look: [2, 2.2, 0.6] },
+    { t: 0, cam: [16.5, 1.7, -1.5], look: craft },
+    { t: T_LANDED - 1, cam: [17.5, 1.9, -1.5], look: craft },
+    { t: T_IRIS + 1, cam: [13.3, 1.2, -1.4], look: [0, 2.6, 0] },
+    { t: T_GUEST, cam: [13.3, 1.3, -1.2], look: [2, 2.2, 0.6] },
     // Square on to the two of them, the visitor holding out the slate.
-    { t: T_OFFER, cam: [10.8, 1.5, 0.3], look: [6.5, 1.6, 1.5] },
+    { t: T_OFFER, cam: [13.3, 1.5, 0.3], look: [9.0, 1.6, 1.9] },
   ];
   let i = 0;
   while (i < keys.length - 1 && t >= keys[i + 1]!.t) i++;

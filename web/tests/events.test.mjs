@@ -25,6 +25,8 @@ test("the landing field keeps its own glade and leaves the other exhibits where 
   const f = getForest();
   const e = f.exhibits.find((x) => x.id === "landing");
   assert.ok(e, "landing field placed");
+  const { PAD_R } = require(`${build}/visitorScript.js`);
+  assert.equal(e.obstacle, PAD_R, "the pad drawn is the pad the cart stops at");
   // Positions with the field left out (develop at #140); placement is greedy, and the field is last.
   const before = {
     mysterium: [24.889, 36.257], flame: [-73.581, -107.828], helix: [-77.038, 64.138], darrieus: [74.616, -66.639],
