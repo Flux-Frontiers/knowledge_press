@@ -29,7 +29,7 @@ export type GrownTree = {
 };
 
 /** Bump when caps change so the forest cache rebuilds. */
-export const GROW_VERSION = 16;
+export const GROW_VERSION = 17;
 
 // This file mirrors the Python viz3d (kg_utils.viz3d.organic.colonize and
 // gutenberg_kg.treegeom.grow_tree_geometry) so both front ends grow the same
@@ -37,7 +37,7 @@ export const GROW_VERSION = 16;
 // to MAX_ATTRACTORS of them with no node cap, and distances come from the
 // crown's own scale.
 //
-// The web world is smaller: trunks are 1.7 * log2(1 + chunks) here against
+// The web world is smaller: trunks were 1.7 * log2(1 + chunks) here against
 // ForestLayout's 4 * log2(1 + chunks), so lengths carrying absolute units
 // (the tip radius) are scaled by WORLD_SCALE to keep Python's proportions.
 const WORLD_SCALE = 1.7 / 4;
@@ -62,8 +62,12 @@ const TWIG_MIN_R = 0.035;
 
 const GOLDEN = Math.PI * (3 - Math.sqrt(5));
 
-/** Book trees are this tall at most (and diaries too). */
-const trunkHeightFor = (nChunks: number) => Math.min(1.7 * Math.max(1, Math.log2(1 + nChunks)), 22);
+/**
+ * Trunk height, metres: a power law, 6 m at 52 chunks (the smallest book) and
+ * 30 m at 18,517 (the largest), so heights spread wider than a log would.
+ * Capped at 30 m (diaries too).
+ */
+const trunkHeightFor = (nChunks: number) => Math.min(6 * (Math.max(1, nChunks) / 52) ** 0.274, 30);
 
 /**
  * treegeom.crown_sections: tips climb from the clear bole to the top at

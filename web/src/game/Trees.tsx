@@ -43,8 +43,8 @@ function keepLeaf(i: number, density: number): boolean {
   return leafHash(i) < density;
 }
 
-/** Groves nearer than this, metres from the camera to the grove's edge, draw every leaf. */
-const LEAF_FULL = COARSE_POINTER ? 60 : 110;
+/** Groves nearer than this, metres from the camera to the grove's edge, draw every leaf; pointer screens (Macs, desktops) never thin. */
+const LEAF_FULL = COARSE_POINTER ? 60 : Infinity;
 /** The fewest leaves a far grove keeps, as a fraction of its own. */
 const LEAF_FLOOR = 0.15;
 /** About where the crowns are, metres: god's-eye thinning reads the camera's height above them. */
