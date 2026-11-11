@@ -20,7 +20,7 @@ let master = [
     "app/icon/AppIcon-1024.png",
     "app/GutenbergKGKit/Sources/KnowledgePressUI/Resources/AppIcon-1024.png",
 ]
-let navy = NSColor(srgbRed: 0x15 / 255.0, green: 0x1b / 255.0, blue: 0x29 / 255.0, alpha: 1)
+let paper = NSColor(srgbRed: 0xf4 / 255.0, green: 0xf0 / 255.0, blue: 0xdc / 255.0, alpha: 1)
 
 func load(_ path: String) -> NSImage {
     guard let img = NSImage(contentsOfFile: path) else { fatalError("cannot load \(path)") }
@@ -58,13 +58,18 @@ let seal = load("app/icon/press-seal.svg")
 let full = png(1024, 1024, alpha: false) { seal.draw(in: NSRect(x: 0, y: 0, width: 1024, height: 1024)) }
 master.forEach { write(full, $0) }
 
-// The master at 96, 48, 32 and 16 px on the icon's navy, left to right.
+// The master at 96, 48, 32 and 16 px on the brand's paper, left to right, each
+// clipped to an app icon's rounded square so its edge shows against the light.
 write(png(284, 128, alpha: false) {
-    navy.setFill()
+    paper.setFill()
     NSRect(x: 0, y: 0, width: 284, height: 128).fill()
     var x: CGFloat = 16
     for s: CGFloat in [96, 48, 32, 16] {
-        seal.draw(in: NSRect(x: x, y: (128 - s) / 2, width: s, height: s))
+        let r = NSRect(x: x, y: (128 - s) / 2, width: s, height: s)
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(roundedRect: r, xRadius: s * 0.2237, yRadius: s * 0.2237).addClip()
+        seal.draw(in: r)
+        NSGraphicsContext.restoreGraphicsState()
         x += s + 24
     }
 }, "app/icon/AppIcon-proof.png")
