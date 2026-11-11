@@ -21,25 +21,37 @@ import Synchronization
         public let label = "On-device"
         /// Names the window too, so a turn's provenance shows which budget
         /// the device was given.
-        public var modelDescription: String {
+        public var modelDescription: String { Self.windowCaption(budgeter) }
+
+        private static func windowCaption(_ budgeter: ContextBudgeter) -> String {
             "Apple Foundation Models (on-device, \(budgeter.budget.contextWindow)-token window)"
         }
 
-        private let budgeter: ContextBudgeter
+        /// The caller's budget, or nil to size one to the reported window.
+        private let fixedBudget: ContextBudgeter.Budget?
         private let tuning: SynthesisTuning
         /// The session warmed for the next question, if one is ready.
         private let standby = Standby()
 
+        /// The budget for the next question. Built per call, not once at
+        /// init: before the model has loaded the OS can report 4,096 on a
+        /// device whose window is 8,192, and a budget fixed then kept the
+        /// smaller window for the life of the backend.
+        private var budgeter: ContextBudgeter {
+            let budget = fixedBudget ?? .onDevice(contextWindow: Self.reportedContextWindow)
+            return ContextBudgeter(budget: tuning.apply(to: budget))
+        }
+
         /// :param budget: Context limits; nil sizes the on-device default to
-        ///     the window the OS reports (see `reportedContextWindow`).
+        ///     the window the OS reports at each question (see
+        ///     `reportedContextWindow`).
         /// :param tuning: Decoding, packing and prompt settings. The
         ///     temperature default lives there: it was 0 for determinism,
         ///     but greedy decoding degenerates into repeated text when
         ///     several passages share a source (e.g. "circles of Hell"
         ///     pulling three Divine Comedy chunks).
         public init(budget: ContextBudgeter.Budget? = nil, tuning: SynthesisTuning = .default) {
-            let budget = budget ?? .onDevice(contextWindow: Self.reportedContextWindow)
-            self.budgeter = ContextBudgeter(budget: tuning.apply(to: budget))
+            self.fixedBudget = budget
             self.tuning = tuning
         }
 
@@ -145,6 +157,7 @@ import Synchronization
                     availability.reason ?? "the built-in model is not available")
             }
 
+            let budgeter = self.budgeter
             let packed = budgeter.pack(passages, question: question)
             guard !packed.isEmpty else { throw SynthesisFailure.noPassages }
 
@@ -158,7 +171,7 @@ import Synchronization
                 ?? LanguageModelSession(model: model, instructions: tuning.instructionText)
             try await streamFoundationModelsAnswer(
                 session: session, question: question, packed: packed, tuning: tuning,
-                modelDescription: modelDescription, into: continuation)
+                modelDescription: Self.windowCaption(budgeter), into: continuation)
             prewarm()
         }
 
