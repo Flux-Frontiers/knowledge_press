@@ -40,9 +40,11 @@ export const EXHIBITS: ExhibitSpec[] = [
   { id: "darrieus", label: "Darrieus Rotor", obstacle: 2.0, treeClearance: 8, year: 1931 },
   { id: "savonius", label: "Savonius Tower", obstacle: 1.8, treeClearance: 8, year: 1922 },
   { id: "dna", label: "Double Helix", obstacle: 1.8, treeClearance: 8, year: 1953 },
-  { id: "mast", label: "Weather Mast", obstacle: 1.4, treeClearance: 8 },
+  // Robinson's cup anemometer, 1846.
+  { id: "mast", label: "Weather Mast", obstacle: 1.4, treeClearance: 8, year: 1846 },
   // The armillary sundial (Sundial.tsx): rings up to 4 m across, over a plinth.
-  { id: "sundial", label: "Armillary Sundial", obstacle: 2.4, treeClearance: 8 },
+  // Eratosthenes' armillary sphere, about 255 BC.
+  { id: "sundial", label: "Armillary Sundial", obstacle: 2.4, treeClearance: 8, year: -255 },
   // The landing field (LandingField.tsx): a raised pad 15 m across that a 17 m craft
   // stands on, open sky above it for the descent. Permanent; in-app events stage on it (events.ts). Keep it
   // last: placement is greedy in this order, so the pieces above keep their glades.
