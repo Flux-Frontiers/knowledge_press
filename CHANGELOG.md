@@ -13,6 +13,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **The Landing Field**, a new exhibit: a raised pad in an open glade, kept
+  for in-app events. It is placed after the other exhibits, so they keep
+  their glades.
+- **The visitor event** (`web/src/game/events.ts`), staged on the landing
+  field during a booked window, or now with `?event=visitor`. An Art Techno
+  craft, 17 m across, flies in above the redwood and comes down over the pad
+  on three legs. It opens an iris and lowers a lift. A faceless sentinel
+  steps off, then a cart rolls out and plants a seed, and an Art Techno tree
+  grows, routed like a circuit board at 0 and 45 degrees, while the cart
+  comes round to stand beside the sentinel. While the rider sits still, the
+  camera follows the landing in clean view. The craft hums (WebAudio, no
+  files), glowing traces light its underside, one light under it shows the
+  pad, and a meteor swarm falls from five radiants. Everything is built in
+  code, with no models or textures, and it adds about 19 KB to the forest's
+  script. No dates are booked yet.
 - **Timeline: grow the forest by date.** "Timeline" in the HUD menu opens a
   bar in the search's place with a slider over every year a work appeared
   (1000 BC to 1931), play and pause, and running totals of works,

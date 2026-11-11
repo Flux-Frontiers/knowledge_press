@@ -41,6 +41,10 @@ export const EXHIBITS: ExhibitSpec[] = [
   { id: "mast", label: "Weather Mast", obstacle: 1.4, treeClearance: 8 },
   // The armillary sundial (Sundial.tsx): rings up to 4 m across, over a plinth.
   { id: "sundial", label: "Armillary Sundial", obstacle: 2.4, treeClearance: 8 },
+  // The landing field (LandingField.tsx): a raised pad 15 m across that a 17 m craft
+  // stands on, open sky above it for the descent. Permanent; in-app events stage on it (events.ts). Keep it
+  // last: placement is greedy in this order, so the pieces above keep their glades.
+  { id: "landing", label: "The Landing Field", obstacle: 7.5, treeClearance: 16 },
 ];
 
 /** Keep exhibits out from under the redwood's crown and apart from one another. */

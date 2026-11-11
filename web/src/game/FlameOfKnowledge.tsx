@@ -65,9 +65,9 @@ function useFlameModel(silver: MeshStandardMaterial): Object3D | null {
 /**
  * What the silver reflects: a painted sky over a bright horizon over grass.
  * The scene has no environment map, and polished metal with nothing to
- * reflect renders dark; this one is for the flame alone.
+ * reflect renders dark; this one is for the flame and the landing field's craft.
  */
-function reflectionMap(): CanvasTexture {
+export function reflectionMap(): CanvasTexture {
   const c = document.createElement("canvas");
   c.width = 256;
   c.height = 128;

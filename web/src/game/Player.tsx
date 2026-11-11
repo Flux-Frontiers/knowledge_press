@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
 import { cartLoad, NEUTRAL_SPINE } from "./cartLoad";
+import { cinema } from "./cinema";
 import { EXPOSURE } from "./Environment";
 import { atGroveStop, treesNear, type Forest } from "./forest";
 import { addDragLook, resetInput, sampleActions, setDragging } from "./input";
@@ -258,6 +259,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         }
       }
       stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake || tourBrake, year: useGame.getState().timelineYear });
+      // A set piece's shot (cinema.ts) waits for the rider to sit still.
+      cinema.idle = throttle || steer || a.brake || a.look || a.pitch || a.dragging ? 0 : cinema.idle + dt;
       // A drag turns the view with the hand, as a mouse look does: right looks right, down looks down.
       pitch.current = clamp(pitch.current + a.pitch * 1.1 * dt - a.dragY * DRAG_LOOK, -0.45, 0.75);
       // Held arrows or a drag pan up to ~110° either way; let go, the view eases back ahead.
@@ -372,6 +375,11 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current + rest);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;
+      // A set piece's shot, blended over the rider's view (cinema.ts).
+      if (cinema.weight > 0.001) {
+        state.camera.position.lerp(camPos.set(...cinema.cam), cinema.weight);
+        lookAt.lerp(camPos.set(...cinema.look), cinema.weight);
+      }
     }
     state.camera.lookAt(lookAt);
     const fovTarget = inCart ? 60 : 58;
