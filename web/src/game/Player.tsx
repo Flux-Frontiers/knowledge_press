@@ -13,6 +13,7 @@ import { hush, speak, speaking } from "./speech";
 import { markTourHeard, TOUR_FAREWELL, TOUR_LAP_DONE, tourHeard, tourIntro } from "./tourScript";
 import { planTour, steerTour, tourState, tourStop } from "./tour";
 import { useGame } from "./store";
+import { bookShown } from "./timeline";
 
 const camPos = new Vector3();
 /** Within this of a picked tree, the cart has arrived (reading range plus a margin). */
@@ -256,7 +257,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           }
         }
       }
-      stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake || tourBrake });
+      stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake || tourBrake, year: useGame.getState().timelineYear });
       // A drag turns the view with the hand, as a mouse look does: right looks right, down looks down.
       pitch.current = clamp(pitch.current + a.pitch * 1.1 * dt - a.dragY * DRAG_LOOK, -0.45, 0.75);
       // Held arrows or a drag pan up to ~110° either way; let go, the view eases back ahead.
@@ -264,7 +265,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       if (!a.look && !a.dragging) look.current *= Math.exp(-3 * dt);
 
       if (a.interact) {
-        const near = treesNear(forest, sim.x, sim.z, 6.8);
+        const near = treesNear(forest, sim.x, sim.z, 6.8).filter((t) => bookShown(t.book, useGame.getState().timelineYear));
         let best = near[0];
         let bestD = Infinity;
         for (const t of near) {
@@ -387,7 +388,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     if (wheelL.current) wheelL.current.rotation.x += spin;
     if (wheelR.current) wheelR.current.rotation.x += spin;
 
-    const near = treesNear(forest, sim.x, sim.z, 16);
+    const near = treesNear(forest, sim.x, sim.z, 16).filter((t) => bookShown(t.book, useGame.getState().timelineYear));
     let bestSlug: string | null = null;
     let bestD = 16;
     for (const t of near) {

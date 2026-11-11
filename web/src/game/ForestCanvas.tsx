@@ -10,6 +10,7 @@ import { setScreenshotCapture } from "./screenshot";
 import { Trees } from "./Trees";
 import { World } from "./World";
 import { useGame } from "./store";
+import { bookShown } from "./timeline";
 
 export function ForestCanvas({ forest, onDrawn }: {
   forest: Forest;
@@ -120,7 +121,9 @@ function TreePicker({ forest, picker }: { forest: Forest; picker: RefObject<((e:
       // No farther than the fog lets you see (Trees.tsx hides groves past the same cutoff).
       const density = scene.fog && "density" in scene.fog ? (scene.fog.density as number) : 0;
       const maxDist = density > 0 ? 2.6 / density : 200;
-      return pickTree(forest, raycaster.ray.origin, raycaster.ray.direction, maxDist);
+      const tree = pickTree(forest, raycaster.ray.origin, raycaster.ray.direction, maxDist);
+      // A tree the timeline has hidden cannot be tapped.
+      return tree && bookShown(tree.book, useGame.getState().timelineYear) ? tree : null;
     };
     return () => { picker.current = null; };
   }, [forest, picker, camera, gl, scene]);

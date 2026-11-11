@@ -10,6 +10,8 @@ import { clearTourHeard } from "./tourScript";
 import type { Portrait } from "./portrait";
 import type { GroundCamera } from "./godEye";
 import { host } from "./host";
+import { bookBySlug } from "./catalog";
+import { bookShown } from "./timeline";
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -104,6 +106,14 @@ export type GameStore = {
   moonName: string;
   query: string;
   searchPick: string | null;
+  /**
+   * The literary timeline (timeline.ts): the year the forest is shown at, or null when
+   * it is off and every tree stands. Separate from the sky's clock (timeMode).
+   */
+  timelineYear: number | null;
+  /** The timeline is stepping forward through its years on its own. */
+  timelinePlaying: boolean;
+  setTimeline: (year: number | null, playing?: boolean) => void;
   library: string[];
   grovesVisited: string[];
   nearbySlug: string | null;
@@ -305,6 +315,9 @@ export const useGame = create<GameStore>((set, get) => ({
   liveMoot: null,
   mootSpeaker: null,
   cleanView: false,
+  timelineYear: null,
+  timelinePlaying: false,
+  setTimeline: (timelineYear, timelinePlaying = false) => set({ timelineYear, timelinePlaying }),
   hostWorker: "",
   setHostWorker: (url) => set({ hostWorker: url }),
   portrait: null,
@@ -323,7 +336,7 @@ export const useGame = create<GameStore>((set, get) => ({
       libraryOpen: false, atlasOpen: false, catalogOpen: false, helpOpen: false, plaque: null, readingSlug: null,
       mootsOpen: false, mootId: null, liveMoot: null, mootSpeaker: null,
       jump: null, flight: null, query: "", searchPick: null, pinnedSlug: null, cardSlug: null, nearbySlug: null,
-      selectedGrove: null, toast: null, cleanView: false,
+      selectedGrove: null, toast: null, cleanView: false, timelineYear: null, timelinePlaying: false,
     });
   },
   pause: (v) => {
@@ -387,7 +400,11 @@ export const useGame = create<GameStore>((set, get) => ({
     if (changed) set({ nearbySlug, nearbyDist, nearbyDismissed: null, cardSlug, ...pin });
     else set(cardSlug === s.cardSlug ? { nearbyDist } : { nearbyDist, cardSlug, ...pin });
   },
-  pinTree: (pinnedSlug) => set({ pinnedSlug }),
+  pinTree: (pinnedSlug) => {
+    // Going to a tree the timeline has not reached yet ends the timeline, so the tree is there.
+    const book = pinnedSlug ? bookBySlug(pinnedSlug) : undefined;
+    set({ pinnedSlug, ...(book && !bookShown(book, get().timelineYear) ? { timelineYear: null, timelinePlaying: false } : {}) });
+  },
   clearCards: () => set({ pinnedSlug: null, cardSlug: null, nearbyDismissed: get().nearbySlug }),
   dismissNearby: () => {
     const { nearbySlug, pinnedSlug } = get();

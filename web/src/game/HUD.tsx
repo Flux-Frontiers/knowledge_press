@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -15,6 +15,8 @@ import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
+import { TimelineBar, useTimelinePlayback } from "./TimelineBar";
+import { bookShown, timelineStops } from "./timeline";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
 
@@ -77,11 +79,14 @@ export function HUD({ forest }: { forest: Forest }) {
   const touring = tourStop ? forest.groves.find((g) => g.genre === tourStop) : undefined;
   const tourNote = useGame((s) => s.tourNote);
   const setPreferences = useGame((s) => s.setPreferences);
+  const timelineYear = useGame((s) => s.timelineYear);
+  useTimelinePlayback(forest);
+  const standing = timelineYear === null ? forest.trees.length : forest.trees.filter((t) => bookShown(t.book, timelineYear)).length;
 
   // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
   const shownSlug = pinnedSlug ?? (silent ? null : cardSlug);
   const nearby = shownSlug ? forest.trees.find((t) => t.book.slug === shownSlug) : undefined;
-  const showBook = !flying && Boolean(nearby && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
+  const showBook = !flying && Boolean(nearby && bookShown(nearby.book, timelineYear) && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
   const bookDist = nearby ? Math.hypot(nearby.x - x, nearby.z - z) : Infinity;
   const pressed = nearby ? library.includes(nearby.book.slug) : false;
   // The redwood's card shows on the hub plaza; once closed it stays closed until the cart leaves.
@@ -99,8 +104,9 @@ export function HUD({ forest }: { forest: Forest }) {
   // Sorted from where the cart was when the query changed; re-sorting every pose tick would reshuffle the list under the pointer.
   const results = useMemo(() => {
     const { x, z } = useGame.getState();
-    return searchTrees(forest, query, x, z);
-  }, [forest, query]);
+    // Only trees the timeline has reached answer.
+    return searchTrees(forest, query, x, z).filter((t) => bookShown(t.book, timelineYear));
+  }, [forest, query, timelineYear]);
   const matches = results.length;
   const picked = searchPick ? results.find((t) => t.book.slug === searchPick) : undefined;
 
@@ -119,7 +125,7 @@ export function HUD({ forest }: { forest: Forest }) {
               <em className="mt-0.5 block whitespace-nowrap sm:mt-0 sm:inline">The Forest</em>
             </p>
             <p className="mt-1 text-xs text-muted">
-              {forest.trees.length} trees · {SEASONS[season].label}
+              {standing === forest.trees.length ? forest.trees.length : `${standing} of ${forest.trees.length}`} trees · {SEASONS[season].label}
               {" · "}
               {timeLabel}
               {travelMode === "circuit" ? " · ring" : ""}
@@ -200,6 +206,11 @@ export function HUD({ forest }: { forest: Forest }) {
               {menuOpen ? (<>
                 <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} aria-hidden />
                 <ul className="absolute top-full right-0 z-40 mt-2 w-60 rounded-lg border border-border bg-surface py-1">
+                  <MenuItem icon={<History className="size-4" strokeWidth={1.75} />} label={timelineYear === null ? "Timeline · grow the forest by date" : "Timeline · off"}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      useGame.getState().setTimeline(timelineYear === null ? timelineStops(forest.trees.map((t) => t.book))[0]?.year ?? null : null, timelineYear === null);
+                    }} />
                   <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
                   <MenuItem phoneOnly icon={<Video className="size-4" strokeWidth={1.75} />} label={`Camera · ${CAMERA_NAME[camera]}`} onClick={stepCamera} />
                   <MenuItem icon={silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
@@ -245,9 +256,12 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
       </header>
 
-      {clean ? null : (<>
+      {/* Clean view keeps the timeline's bar: it is for watching the forest grow. */}
+      {clean && timelineYear === null ? null : (<>
         {/* Bottom-centre above the key hints, results opening upward; touch layouts move it (styles.css). */}
         <div className="search-dock pointer-events-auto z-20 mx-auto flex w-[min(100%-1.5rem,28rem)] flex-col gap-1 sm:absolute sm:bottom-9 sm:left-1/2 sm:mx-0 sm:w-[22rem] sm:-translate-x-1/2 sm:flex-col-reverse">
+          {/* The timeline takes the search's place while it is open. */}
+          {timelineYear !== null ? <TimelineBar forest={forest} /> : (<>
           <label className="flex items-center gap-2 rounded-md border border-border bg-surface/90 px-3 py-2">
             <Search className="size-4 shrink-0 text-muted" strokeWidth={1.75} />
             <input
@@ -292,6 +306,7 @@ export function HUD({ forest }: { forest: Forest }) {
               {matches > 30 ? <li className="px-3 py-2 text-xs text-faint">{matches - 30} more; narrow the query</li> : null}
             </ul>
           ) : null}
+          </>)}
         </div>
       </>)}
 

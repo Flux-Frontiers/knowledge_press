@@ -13,11 +13,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Timeline: grow the forest by date.** "Timeline" in the HUD menu opens a
+  bar in the search's place with a slider over every year a work appeared
+  (1000 BC to 1931), play and pause, and running totals of works,
+  groves and chunks. Trees whose year has not come are hidden on the GPU
+  (a per-vertex year and one uniform), with their shadows; the layout never
+  moves. Hidden trees do not block the cart, pop up cards, answer taps or
+  searches. The slider steps by year, not by time, so the empty centuries
+  before 1500 take little of its travel.
 - **Every book in the forest catalog has a literary year.** `Book.year` is
   the year the work was first published, performed or, for ancient and sacred
   texts, composed; negative years are BC. It comes from gutenberg_kg's
   `corpus/pub_dates.tsv` through `gutenkg export-web-catalog`, and is the data
-  for the planned timeline slider. Nothing reads it yet.
+  for the timeline.
 - **`web/scripts/profile.mjs`** measures where the forest's frame goes:
   triangles, draw calls and render time per camera view and leaf level, with
   and without the leaves, and the shadow pass on its own. It runs in headless
