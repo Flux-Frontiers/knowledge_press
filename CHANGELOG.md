@@ -106,12 +106,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   of them leaves; it now draws about 3M. The technique is Solstice's, after
   Unreal's Nanite foliage
   ([SamG-Coder/solstice](https://github.com/SamG-Coder/solstice), MIT).
-- **The shadow map is redrawn only when it is stale.** It was drawn every
-  frame; now every other frame while the cart moves, every fourth at rest in
-  the wind, at once when the sun moves, and otherwise about twice a second. Its
-  camera sits on whole shadow texels, so shadow edges keep still as the cart
-  drives. Also after Solstice, which redraws a shadow cascade only when its
-  view changes.
+- **On touch screens the shadow map is redrawn only when it is stale.** It was
+  drawn every frame; now every other frame while the cart moves, every fourth
+  at rest in the wind, at once when the sun moves, and otherwise about twice a
+  second. Macs and desktops still draw it every frame, so there shadows are
+  simply on or off, and they reach 120 m from the cart on a 4096 map instead
+  of 40 m on 2048, so a grove's shadows no longer appear as the cart nears it.
+  On every screen its camera sits on whole shadow texels, so
+  shadow edges keep still as the cart drives. Also after Solstice, which
+  redraws a shadow cascade only when its view changes.
 - **`?nolod`** turns both off, to compare.
 - **No minimap in god's eye**, which is already the map. It comes back once
   a dive from god's eye has landed.
