@@ -297,8 +297,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const cam = state.camera as PerspectiveCamera;
     const flight = game.flight;
     const flying = Boolean(flight && flightFrom.current);
-    // The timeline watches the forest grow from the start screen's vantage.
-    const timeline = playing && !flying && game.timelineYear !== null;
+    // The timeline watches the forest grow from the start screen's vantage; god's eye keeps its own view of it.
+    const timeline = playing && !flying && !godEye && game.timelineYear !== null;
     if (playing && wasStart.current) {
       // Leaving the start screen: land behind the cart rather than glide in from the circle.
       wasStart.current = false;
