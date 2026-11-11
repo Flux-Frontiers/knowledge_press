@@ -10,6 +10,11 @@ export type Book = {
   excerpt: string;
   tags: string[];
   /**
+   * Literary year: first published, performed, or (ancient and sacred texts)
+   * composed. Negative is BC. Absent when the corpus has no date for the work.
+   */
+  year?: number;
+  /**
    * Diaries only: one limb per period (a calendar year when dated), earliest
    * first. `bins` counts the period's chunks in equal slices along its limb,
    * by each entry's fraction of the year; trailing empty slices are dropped.

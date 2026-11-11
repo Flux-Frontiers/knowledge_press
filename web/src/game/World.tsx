@@ -23,6 +23,7 @@ import { Sundial } from "./Sundial";
 import { SEASONS, type SeasonName } from "./seasons";
 import { sim } from "./sim";
 import { useGame } from "./store";
+import { bookShown } from "./timeline";
 import { tourAhead, tourState } from "./tour";
 import { fogMix, stepWeather, weather, weatherAt, weatherOverride } from "./weather";
 import { DarrieusSculpture, DnaSculpture, HelixSculpture, SavoniusSculpture, WeatherMast } from "./WindSculptures";
@@ -302,7 +303,7 @@ function LanternTrail({
       let bestD = Infinity;
       let found = false;
       for (const t of forest.trees) {
-        if (!bookMatchesQuery(t.book, target.q)) continue;
+        if (!bookMatchesQuery(t.book, target.q) || !bookShown(t.book, useGame.getState().timelineYear)) continue;
         const d = Math.hypot(t.x - sim.x, t.z - sim.z);
         if (d < bestD) {
           bestD = d;
