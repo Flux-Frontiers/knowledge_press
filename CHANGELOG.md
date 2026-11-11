@@ -30,6 +30,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   camera round the redwood and tilt it, and it stays where you leave it. On
   touch the bar sits level with the stick, beside it.
 - **No drive stick in god's eye** on touch: the cart is not driven from there.
+- **God's-eye grove names are tidier**: "Literature" is shortened to "Lit.",
+  and American Lit., Russian Lit. and Ancient & Classical sit just past
+  their groves' north edge instead of over the middle.
 - **Dawn and dusk cast clear shadows**: low-sun shadows fade between 5 and 2
   degrees instead of 8 and 3, about three quarters strength at dawn.
 - **Exhibits arrive on the timeline in their own year**: the armillary
