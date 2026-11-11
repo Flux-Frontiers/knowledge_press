@@ -151,6 +151,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **On-device answers use the window the model reports when you ask.** The
+  budget was sized once, when the engine was created; before the model had
+  loaded the OS could report 4,096 tokens on a device whose window is 8,192,
+  and the smaller budget then held for the whole session, with shorter
+  passages and a 4096 caption. It is now read at each question.
 - **The start screen shows the redwood's whole crown.** Its circle now uses
   the timeline's 62 m radius and aim instead of 46 m, which cut off the top,
   and the day and night stills shown while the forest loads are re-captured
