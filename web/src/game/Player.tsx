@@ -32,16 +32,16 @@ const GOD_NEAR = 2;
 const DRAG_LOOK = 0.0042;
 /** A press that moves farther than this, in pixels, is a drag, not a click. */
 const DRAG_CLICK = 6;
-/** The start screen's slow circle round the redwood: radius and eye height, m, and radians a second. */
-const ORBIT_R = 46;
+/**
+ * The start screen's and the timeline's slow circle round the redwood: radius and
+ * eye height, m, radians a second, and the aim as a fraction of the redwood's height.
+ * Far enough out and aimed high enough that the full-grown crown stays in frame
+ * (its top about 3° inside the edge at a 58° fov).
+ */
+const ORBIT_R = 62;
 const ORBIT_UP = 8;
 const ORBIT_RATE = 0.03;
-/**
- * The timeline's circle: farther out than the start screen's and aimed higher,
- * so the full-grown crown stays in frame (its top about 3° inside the edge at a 58° fov).
- */
-const TIMELINE_ORBIT_R = 62;
-const TIMELINE_LOOK = 0.4;
+const ORBIT_LOOK = 0.4;
 /** The start screen's circle is this much brighter by day, and by START_NIGHT_LIFT more in full dark: behind the title, night reads as black otherwise. */
 const START_DAY_LIFT = 1.25;
 const START_NIGHT_LIFT = 1.0;
@@ -322,7 +322,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       state.gl.toneMappingExposure = EXPOSURE * (START_DAY_LIFT + START_NIGHT_LIFT * (1 - game.sky.daylight));
       const a = state.clock.elapsedTime * ORBIT_RATE;
       state.camera.position.set(Math.sin(a) * ORBIT_R, ORBIT_UP, Math.cos(a) * ORBIT_R);
-      lookAt.set(0, forest.corpusTree.height * 0.3, 0);
+      lookAt.set(0, forest.corpusTree.height * ORBIT_LOOK, 0);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;
     } else if (flight && flightFrom.current) {
@@ -338,12 +338,12 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         game.endFlight();
       }
     } else if (timeline) {
-      // The start screen's slow circle round the redwood, pulled back to hold the whole crown.
+      // The start screen's slow circle round the redwood.
       // Cut to it rather than glide: the straight line from the cart can pass through the trunk.
       // Drag or arrows swing it round and tilt it up or down (pitch), as they look about on the road.
       const a = state.clock.elapsedTime * ORBIT_RATE + orbitTurn.current;
-      state.camera.position.set(Math.sin(a) * TIMELINE_ORBIT_R, ORBIT_UP, Math.cos(a) * TIMELINE_ORBIT_R);
-      lookAt.set(0, forest.corpusTree.height * TIMELINE_LOOK + TIMELINE_ORBIT_R * Math.tan(pitch.current), 0);
+      state.camera.position.set(Math.sin(a) * ORBIT_R, ORBIT_UP, Math.cos(a) * ORBIT_R);
+      lookAt.set(0, forest.corpusTree.height * ORBIT_LOOK + ORBIT_R * Math.tan(pitch.current), 0);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;
     } else if (godEye) {
