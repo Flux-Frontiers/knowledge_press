@@ -1,0 +1,107 @@
+{
+  "key": "1.41.0",
+  "branch": "release/v1.41.0",
+  "timestamp": "2026-11-11T22:21:28.021513+00:00",
+  "version": "1.41.0",
+  "subject": "repo:knowledge_press",
+  "tool": "tscode-kg",
+  "tool_version": "0.8.1",
+  "tree_hash": "f4def29d29c91c03e4575461e9c71d9e2b6cd95a",
+  "metrics": {
+    "db_path": ".tscodekg/graph.sqlite",
+    "meaningful_nodes": 3624,
+    "module_count": 134,
+    "class_count": 6,
+    "function_count": 2940,
+    "method_count": 436,
+    "docstring_coverage": 0.09,
+    "snapshot_count": 16,
+    "vector_backend": "sqlite-vec",
+    "total_nodes": 3624,
+    "node_counts": {
+      "class": 6,
+      "function": 2940,
+      "interface": 1,
+      "method": 436,
+      "module": 134,
+      "type_alias": 107
+    },
+    "total_edges": 9471,
+    "edge_counts": {
+      "CALLS": 5504,
+      "CONTAINS": 3490,
+      "IMPORTS": 463,
+      "INHERITS": 14
+    },
+    "critical_issues": 6,
+    "complexity_median": 26.0
+  },
+  "hotspots": [
+    {
+      "name": "fn:app/ios/Forest/assets/index-CciLv1ac.js:i",
+      "callers": 63,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-C2hjXiSx.js:i",
+      "callers": 63,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/ios/Forest/assets/index-CciLv1ac.js:n",
+      "callers": 45,
+      "callees": 3
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-C2hjXiSx.js:n",
+      "callers": 45,
+      "callees": 3
+    },
+    {
+      "name": "fn:app/ios/Forest/assets/index-CciLv1ac.js:t",
+      "callers": 40,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-C2hjXiSx.js:t",
+      "callers": 40,
+      "callees": 1
+    },
+    {
+      "name": "fn:app/ios/Forest/assets/index-CciLv1ac.js:r",
+      "callers": 26,
+      "callees": 3
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-C2hjXiSx.js:r",
+      "callers": 26,
+      "callees": 3
+    },
+    {
+      "name": "fn:app/ios/Forest/assets/index-CciLv1ac.js:a",
+      "callers": 23,
+      "callees": 0
+    },
+    {
+      "name": "fn:app/macos/Forest/assets/index-C2hjXiSx.js:a",
+      "callers": 23,
+      "callees": 0
+    }
+  ],
+  "issues": [
+    "[WARN] 1637 orphaned declarations: `K`, `fe`, `ge`, `q`, `te` (and 1632 more) \u2014 zero callers detected; verify these aren't dead code",
+    "[LOW] Low JSDoc coverage (9.3%) \u2014 semantic query quality will be poor; undocumented nodes embed only identifiers, not natural language",
+    "[WARN] `index-C2hjXiSx.js` has 1377 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `index-CciLv1ac.js` has 1377 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `forestWorker-A9AOtTa1.js` has 42 declarations \u2014 consider splitting into focused modules",
+    "[WARN] `forestWorker-A9AOtTa1.js` has 42 declarations \u2014 consider splitting into focused modules"
+  ],
+  "vs_previous": {
+    "nodes": -2111,
+    "edges": -5399
+  },
+  "vs_baseline": {
+    "nodes": 3309,
+    "edges": 8660
+  }
+}

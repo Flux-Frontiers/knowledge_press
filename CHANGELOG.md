@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.41.0] - 2026-11-11
+
 ### Added
 
 - **The timeline grows the corpus redwood.** At each year the redwood
