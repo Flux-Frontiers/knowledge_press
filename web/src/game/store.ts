@@ -10,6 +10,8 @@ import { clearTourHeard } from "./tourScript";
 import type { Portrait } from "./portrait";
 import type { GroundCamera } from "./godEye";
 import { host } from "./host";
+import { bookBySlug } from "./catalog";
+import { bookShown } from "./timeline";
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -398,7 +400,11 @@ export const useGame = create<GameStore>((set, get) => ({
     if (changed) set({ nearbySlug, nearbyDist, nearbyDismissed: null, cardSlug, ...pin });
     else set(cardSlug === s.cardSlug ? { nearbyDist } : { nearbyDist, cardSlug, ...pin });
   },
-  pinTree: (pinnedSlug) => set({ pinnedSlug }),
+  pinTree: (pinnedSlug) => {
+    // Going to a tree the timeline has not reached yet ends the timeline, so the tree is there.
+    const book = pinnedSlug ? bookBySlug(pinnedSlug) : undefined;
+    set({ pinnedSlug, ...(book && !bookShown(book, get().timelineYear) ? { timelineYear: null, timelinePlaying: false } : {}) });
+  },
   clearCards: () => set({ pinnedSlug: null, cardSlug: null, nearbyDismissed: get().nearbySlug }),
   dismissNearby: () => {
     const { nearbySlug, pinnedSlug } = get();

@@ -15,7 +15,7 @@ import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
-import { TimelineBar } from "./TimelineBar";
+import { TimelineBar, useTimelinePlayback } from "./TimelineBar";
 import { bookShown, timelineStops } from "./timeline";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
@@ -80,11 +80,13 @@ export function HUD({ forest }: { forest: Forest }) {
   const tourNote = useGame((s) => s.tourNote);
   const setPreferences = useGame((s) => s.setPreferences);
   const timelineYear = useGame((s) => s.timelineYear);
+  useTimelinePlayback(forest);
+  const standing = timelineYear === null ? forest.trees.length : forest.trees.filter((t) => bookShown(t.book, timelineYear)).length;
 
   // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
   const shownSlug = pinnedSlug ?? (silent ? null : cardSlug);
   const nearby = shownSlug ? forest.trees.find((t) => t.book.slug === shownSlug) : undefined;
-  const showBook = !flying && Boolean(nearby && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
+  const showBook = !flying && Boolean(nearby && bookShown(nearby.book, timelineYear) && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
   const bookDist = nearby ? Math.hypot(nearby.x - x, nearby.z - z) : Infinity;
   const pressed = nearby ? library.includes(nearby.book.slug) : false;
   // The redwood's card shows on the hub plaza; once closed it stays closed until the cart leaves.
@@ -123,7 +125,7 @@ export function HUD({ forest }: { forest: Forest }) {
               <em className="mt-0.5 block whitespace-nowrap sm:mt-0 sm:inline">The Forest</em>
             </p>
             <p className="mt-1 text-xs text-muted">
-              {forest.trees.length} trees · {SEASONS[season].label}
+              {standing === forest.trees.length ? forest.trees.length : `${standing} of ${forest.trees.length}`} trees · {SEASONS[season].label}
               {" · "}
               {timeLabel}
               {travelMode === "circuit" ? " · ring" : ""}
@@ -254,7 +256,8 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
       </header>
 
-      {clean ? null : (<>
+      {/* Clean view keeps the timeline's bar: it is for watching the forest grow. */}
+      {clean && timelineYear === null ? null : (<>
         {/* Bottom-centre above the key hints, results opening upward; touch layouts move it (styles.css). */}
         <div className="search-dock pointer-events-auto z-20 mx-auto flex w-[min(100%-1.5rem,28rem)] flex-col gap-1 sm:absolute sm:bottom-9 sm:left-1/2 sm:mx-0 sm:w-[22rem] sm:-translate-x-1/2 sm:flex-col-reverse">
           {/* The timeline takes the search's place while it is open. */}

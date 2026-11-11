@@ -296,7 +296,7 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
     target.updateMatrixWorld();
     if (SHADOW_CACHE && casting) {
       const g = useGame.getState();
-      if (shadowStale(last.current, sim.x, sim.z, d, g.preferences.motion && !g.paused)) {
+      if (shadowStale(last.current, sim.x, sim.z, d, (g.preferences.motion && !g.paused) || g.timelinePlaying)) {
         gl.shadowMap.needsUpdate = true;
         last.current = { x: sim.x, z: sim.z, dir: d, frames: 0 };
       } else if (last.current) {

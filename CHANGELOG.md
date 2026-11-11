@@ -15,7 +15,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Timeline: grow the forest by date.** "Timeline" in the HUD menu opens a
   bar in the search's place with a slider over every year a work appeared
-  (1000 BC to the present), play and pause, and running totals of works,
+  (1000 BC to 1931), play and pause, and running totals of works,
   groves and chunks. Trees whose year has not come are hidden on the GPU
   (a per-vertex year and one uniform), with their shadows; the layout never
   moves. Hidden trees do not block the cart, pop up cards, answer taps or
