@@ -22,7 +22,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   camera circles the redwood as the start screen does, pulled back so the
   full-grown crown stays in frame. It cuts to the circle and back to the
   cart rather than gliding, which could pass through the trunk. In god's
-  eye the timeline keeps the overhead view, slider and all.
+  eye the timeline keeps the overhead view, with its bar moved to the
+  bottom-right corner so the whole ring shows.
 - **Exhibits arrive on the timeline in their own year**: the armillary
   sundial about 255 BC, Kepler 1596, the weather mast 1846, Savonius 1922,
   Darrieus 1931, Double Helix 1953, the Flame of Knowledge 1964, the helical

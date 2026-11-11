@@ -176,3 +176,17 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   }
   .book-dock { bottom: calc(8.5rem + env(safe-area-inset-bottom)); }
 }
+
+/* God's eye with the timeline open: the bar goes to the bottom-right corner so
+   the whole ring shows (HUD.tsx). Last in the file, so it beats the touch
+   placements above; on touch it sits above the row of buttons. */
+@media (min-width: 640px) {
+  .search-dock.timeline-aside { left: auto; right: 0.75rem; bottom: 0.75rem; translate: none; }
+}
+@media (pointer: coarse) {
+  .search-dock.timeline-aside {
+    left: auto; right: 0.75rem; translate: none;
+    width: min(100% - 1.5rem, 22rem);
+    bottom: calc(8.75rem + env(safe-area-inset-bottom));
+  }
+}

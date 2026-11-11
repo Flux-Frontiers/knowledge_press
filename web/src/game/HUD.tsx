@@ -261,7 +261,8 @@ export function HUD({ forest }: { forest: Forest }) {
       {/* Clean view keeps the timeline's bar: it is for watching the forest grow. */}
       {clean && timelineYear === null ? null : (<>
         {/* Bottom-centre above the key hints, results opening upward; touch layouts move it (styles.css). */}
-        <div className="search-dock pointer-events-auto z-20 mx-auto flex w-[min(100%-1.5rem,28rem)] flex-col gap-1 sm:absolute sm:bottom-9 sm:left-1/2 sm:mx-0 sm:w-[22rem] sm:-translate-x-1/2 sm:flex-col-reverse">
+        {/* In god's eye the timeline's bar moves to the corner, off the ring (styles.css .timeline-aside). */}
+        <div className={(godEye && timelineYear !== null ? "timeline-aside " : "") + "search-dock pointer-events-auto z-20 mx-auto flex w-[min(100%-1.5rem,28rem)] flex-col gap-1 sm:absolute sm:bottom-9 sm:left-1/2 sm:mx-0 sm:w-[22rem] sm:-translate-x-1/2 sm:flex-col-reverse"}>
           {/* The timeline takes the search's place while it is open. */}
           {timelineYear !== null ? <TimelineBar forest={forest} /> : (<>
           <label className="flex items-center gap-2 rounded-md border border-border bg-surface/90 px-3 py-2">
@@ -417,7 +418,7 @@ export function HUD({ forest }: { forest: Forest }) {
           ) : null}
         </div>
 
-        <div className="season-dock pointer-events-auto absolute right-3 bottom-24 hidden flex-col gap-1 sm:flex">
+        <div className={"season-dock pointer-events-auto absolute right-3 hidden flex-col gap-1 sm:flex " + (godEye && timelineYear !== null ? "bottom-[7.5rem]" : "bottom-24")}>
           <button
             type="button"
             onClick={() => { toggleCircuit(); (document.activeElement as HTMLElement | null)?.blur(); }}
