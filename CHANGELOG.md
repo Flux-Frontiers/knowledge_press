@@ -90,8 +90,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   0.274` capped at 30 m, replaces `1.7 * log2(1 + chunks)` capped at 22 m:
   the smallest book stands 6 m, the median 13.6 m, the largest 30 m, and
   the middle half of the books now spans 4.8 m instead of 3.2 m.
-- **Macs and desktops draw every leaf near the ground.** Distance thinning
-  now applies only to touch screens; god's eye still thins on every screen.
 - **The iPad's forest fills the screen.** The bar of sidebar, Delete and New
   chat buttons along the top is hidden while the Forest is showing; the
   Chat, Browse and Forest bar at the bottom stays.
@@ -133,18 +131,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   GutenbergKG's docs, in place of the GutenbergKG repository.
 - **The list of chats is called Conversations**, and **Delete all
   conversations** moved from Settings to the bottom of that list.
-- **Far groves draw fewer leaves.** Past 60 m from a grove's edge on a touch
-  screen (110 m with a pointer) its leaves thin as 1 / distance, down to 15
-  percent, and the shadow pass thins with them; god's eye still draws every
-  leaf. An iPad mini (A20 Pro) at Clear fog, Ultra and shadows on goes from
-  23 to 60 fps.
+- **Far groves draw fewer leaves on touch screens.** Past 60 m from a grove's
+  edge its leaves thin as 1 / distance, down to 15 percent, and the shadow
+  pass thins with them. An iPad mini (A20 Pro) at Clear fog, Ultra and
+  shadows on goes from 23 to 60 fps. Macs and desktops draw every leaf near
+  the ground; god's eye thins on every screen, as above.
 - **Touch screens start at High leaf complexity**, not Low.
+- **The start screen draws at 30 fps.** Its slow circle round the redwood
+  drew every display frame; it now draws on demand at 30 fps, which halves
+  the GPU's load there on an iPad mini (52 to 26 percent). Play, the
+  timeline and god's eye still draw every frame.
+- **The app icon's press seal is larger**: scaled 1.25 times about the
+  center, its rim's radius goes from 347 to 434 px on the 1024 grid. The
+  1024 master, the splash copy and the apple-touch-icon match, and so do the
+  sibling `KP-*.icon` files.
 - **Start driving and Guided tour wait for the forest's first frame**, which
   uploads the geometry and compiles the shaders, instead of enabling on the
   forest's data and stalling on the press.
 
 ### Fixed
 
+- **The start screen shows the redwood's whole crown.** Its circle now uses
+  the timeline's 62 m radius and aim instead of 46 m, which cut off the top,
+  and the day and night stills shown while the forest loads are re-captured
+  at the new framing.
 - **An exact phrase answers from the passage that holds it.** When a question
   is a phrase the corpus contains and the search by meaning missed it, the
   answer is written from the matching passages alone; the hit cards still

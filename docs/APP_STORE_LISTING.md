@@ -84,6 +84,46 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 ## What's New (per version)
 
+### 1.41.0
+
+iOS:
+
+```text
+Watch the library grow. The new Timeline, in the Forest's menu, grows the forest by date from 1000 BC to 1931: each tree appears in the year its book was written, the great redwood grows from a sapling, and the forest's exhibits arrive in their own year.
+
+Also new:
+- The forest runs much faster on iPhone and iPad, and starts at High leaf detail.
+- Trees vary more in height, from 6 to 30 meters.
+- In god's-eye view, drag to pan the map.
+- Fly there lands behind the cart, with the pressed books in view.
+- Press reads the nearest tree into the press; beside a tree already pressed, Read opens its book.
+- On iPhone, the search bar sits beside the stick, out of the middle of the view.
+- On iPad, the Forest fills the screen.
+- Clearer shadows at dawn and dusk, and the cart's lantern no longer dazzles at night.
+- Settings sections fold, and Reset all settings restores the defaults.
+- Delete all conversations is now at the bottom of the Conversations list.
+- An exact phrase, such as "pillar of salt", is answered from the passage that holds it.
+- A bolder app icon, with the press seal filling more of it.
+```
+
+Mac (no stick, no iPad bar; the R key and every leaf near the ground are
+the Mac's own):
+
+```text
+Watch the library grow. The new Timeline, in the Forest's menu, grows the forest by date from 1000 BC to 1931: each tree appears in the year its book was written, the great redwood grows from a sapling, and the forest's exhibits arrive in their own year. Drag or use the arrow keys to look around.
+
+Also new:
+- A bolder app icon, with the press seal filling more of it.
+- Trees vary more in height, from 6 to 30 meters, and every leaf near the cart is drawn.
+- God's-eye view draws faster, and you can drag to pan the map.
+- Press R to open the book of the tree in front of you.
+- Fly there lands behind the cart, with the pressed books in view.
+- Clearer shadows at dawn and dusk, and the cart's lantern no longer dazzles at night.
+- Settings sections fold, and Reset all settings restores the defaults.
+- Delete all conversations is now at the bottom of the Conversations list.
+- An exact phrase, such as "pillar of salt", is answered from the passage that holds it.
+```
+
 ### 1.40.0
 
 Submitted 2026-11-08 for iOS and Mac, build 907 on both.
