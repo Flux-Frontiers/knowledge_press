@@ -15,6 +15,8 @@ export type ExhibitSpec = {
   obstacle: number;
   /** Clear ground needed from any trunk, crowns included. */
   treeClearance: number;
+  /** The year the piece comes into the timeline (timeline.ts); undated stands throughout. */
+  year?: number;
 };
 
 export type Exhibit = ExhibitSpec & {
@@ -30,14 +32,14 @@ export type Exhibit = ExhibitSpec & {
 };
 
 export const EXHIBITS: ExhibitSpec[] = [
-  { id: "mysterium", label: "Mysterium Cosmographicum", obstacle: 2.6, treeClearance: 10 },
+  { id: "mysterium", label: "Mysterium Cosmographicum", obstacle: 2.6, treeClearance: 10, year: 1596 },
   // George B. Suchanek's sculpture (FlameOfKnowledge.tsx): 4.6 m across, 8.5 m tall.
-  { id: "flame", label: "The Flame of Knowledge", obstacle: 2.6, treeClearance: 10 },
+  { id: "flame", label: "The Flame of Knowledge", obstacle: 2.6, treeClearance: 10, year: 1964 },
   // The wind sculptures (WindSculptures.tsx): narrow plinths, but rotors that need open air.
-  { id: "helix", label: "Helical Rotor", obstacle: 1.8, treeClearance: 8 },
-  { id: "darrieus", label: "Darrieus Rotor", obstacle: 2.0, treeClearance: 8 },
-  { id: "savonius", label: "Savonius Tower", obstacle: 1.8, treeClearance: 8 },
-  { id: "dna", label: "Double Helix", obstacle: 1.8, treeClearance: 8 },
+  { id: "helix", label: "Helical Rotor", obstacle: 1.8, treeClearance: 8, year: 1995 },
+  { id: "darrieus", label: "Darrieus Rotor", obstacle: 2.0, treeClearance: 8, year: 1931 },
+  { id: "savonius", label: "Savonius Tower", obstacle: 1.8, treeClearance: 8, year: 1922 },
+  { id: "dna", label: "Double Helix", obstacle: 1.8, treeClearance: 8, year: 1953 },
   { id: "mast", label: "Weather Mast", obstacle: 1.4, treeClearance: 8 },
   // The armillary sundial (Sundial.tsx): rings up to 4 m across, over a plinth.
   { id: "sundial", label: "Armillary Sundial", obstacle: 2.4, treeClearance: 8 },

@@ -6,6 +6,7 @@ import { sunflower, wheelLayout } from "./math";
 import type { Junction } from "./roads";
 import { groveNarration } from "./narration";
 import { SPECIES, speciesFor } from "./species";
+import { bookShown } from "./timeline";
 
 export const GENRE_PALETTE = [
   "#c45c4a",
@@ -164,8 +165,8 @@ export type Forest = {
   corpusTree: CorpusTree;
   /** Set pieces in roadside glades. */
   exhibits: Exhibit[];
-  /** Discs the cart cannot drive into besides trunks: the redwood and each exhibit's plinth. */
-  obstacles: { x: number; z: number; r: number }[];
+  /** Discs the cart cannot drive into besides trunks: the redwood and each exhibit's plinth (with its timeline year). */
+  obstacles: { x: number; z: number; r: number; year?: number }[];
   grid: Map<string, number[]>;
   cell: number;
 };
@@ -175,6 +176,19 @@ let cachedVersion = "";
 
 function cellKey(cx: number, cz: number): string {
   return cx + ":" + cz;
+}
+
+/**
+ * The corpus redwood at the timeline's year: grown from the books standing then,
+ * so it is as tall and has as many limbs as the forest shown. Not cached; the
+ * caller memoizes per year.
+ *
+ * :param forest: The forest.
+ * :param year: The timeline's year, or null when it is off (the full redwood).
+ */
+export function corpusTreeAt(forest: Forest, year: number | null): CorpusTree {
+  if (year === null) return forest.corpusTree;
+  return growCorpusTree(forest.trees.filter((t) => bookShown(t.book, year)));
 }
 
 export function getForest(leafMultiplier = 1): Forest {
@@ -605,7 +619,7 @@ function buildForest(leafMultiplier: number): Forest {
     worldRadius: worldRadius + 18,
     corpusTree,
     exhibits,
-    obstacles: [{ x: 0, z: 0, r: corpusTree.baseRadius }, ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.obstacle }))],
+    obstacles: [{ x: 0, z: 0, r: corpusTree.baseRadius }, ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.obstacle, year: e.year }))],
     grid,
     cell,
   };
