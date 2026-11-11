@@ -11,6 +11,7 @@ export const BOOKS_PART7: Book[] = [
     chunks: 1995,
     excerpt: "In this pursuit I had wandered a little from my people, and being uncertain whether they were before or behind me, I hastened to a rising ground to look about me. As I was proceeding towards this eminence, two Negro horsemen, armed with muskets, came galloping from among the…",
     tags: ["travel"],
+    year: 1799,
   },
   {
     slug: "two_years_before_the_mast",
@@ -22,6 +23,7 @@ export const BOOKS_PART7: Book[] = [
     chunks: 2251,
     excerpt: "No Protestant has any civil rights, nor can he hold any property, or, indeed, remain more than a few weeks on shore, unless he belong to some vessel. Consequently, the Americans and English who intend to remain here become Catholics, to a man; the current phrase among them…",
     tags: ["travel"],
+    year: 1840,
   },
   {
     slug: "typee_a_peep_at_polynesian_life_herman_melville",
@@ -33,6 +35,7 @@ export const BOOKS_PART7: Book[] = [
     chunks: 1609,
     excerpt: "My curiosity had been not a little raised with regard to the description of country we should meet on the other side of the mountains; and I had supposed, with Toby, that immediately on gaining the heights we should be enabled to view the large bays of Happar and Typee…",
     tags: ["travel"],
+    year: 1846,
   },
   {
     slug: "gitanjali_tagore",
@@ -44,6 +47,7 @@ export const BOOKS_PART7: Book[] = [
     chunks: 179,
     excerpt: "My heart longs to join in thy song, but vainly struggles for a voice. I would speak, but speech breaks not into song, and I cry out baffled. Ah, thou hast made my heart captive in the endless meshes of thy music, my master! 4. Life of my life, I shall ever try to keep my body…",
     tags: ["world-literature"],
+    year: 1910,
   },
   {
     slug: "one_thousand_and_one_nights_lane_translation",
@@ -55,6 +59,7 @@ export const BOOKS_PART7: Book[] = [
     chunks: 1457,
     excerpt: "Now when I had ended my story, I proceeded to show the genius how to apply it to himself. \"O genius,\" I said, \"you see that this Sultan was not content with merely forgiving the envious man for the attempt on his life; he heaped rewards and riches upon him.\" But the genius…",
     tags: ["world-literature"],
+    year: 850,
   },
   {
     slug: "the_divine_comedy_carys_translation",
@@ -66,6 +71,7 @@ export const BOOKS_PART7: Book[] = [
     chunks: 1476,
     excerpt: "But onward now: For now doth Cain with fork of thorns confine On either hemisphere, touching the wave Beneath the towers of Seville. Yesternight The moon was round. Thou mayst remember well: For she good service did thee in the gloom Of the deep wood.” This said, both onward…",
     tags: ["world-literature"],
+    year: 1308,
   },
   {
     slug: "the_divine_comedy_longfellows_translation",
@@ -77,5 +83,6 @@ export const BOOKS_PART7: Book[] = [
     chunks: 1440,
     excerpt: "Passing that way the virgin pitiless Land in the middle of the fen descried, Untilled and naked of inhabitants; There to escape all human intercourse, She with her servants stayed, her arts to practise And lived, and left her empty body there. The men, thereafter, who were…",
     tags: ["world-literature"],
+    year: 1308,
   },
 ];

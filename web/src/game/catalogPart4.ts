@@ -11,6 +11,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 998,
     excerpt: "\"I shall be dizzy,\" I said. \"The more reason why we should go up; we must get used to it.\" \"But--\" \"Come, I tell you; don't waste our time.\" I had to obey. A keeper who lived at the other end of the street handed us the key, and the ascent began. My uncle went ahead with a…",
     tags: ["french-literature"],
+    year: 1864,
   },
   {
     slug: "les_miserables",
@@ -22,6 +23,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 7636,
     excerpt: "When you are reasonable, I will bring her to you myself.” The poor mother bowed her head. “I beg your pardon, doctor, I really beg your pardon. Formerly I should never have spoken as I have just done; so many misfortunes have happened to me, that I sometimes do not know what…",
     tags: ["french-literature"],
+    year: 1862,
   },
   {
     slug: "madame_bovary",
@@ -33,6 +35,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1583,
     excerpt: "Then he wrote to the chemist of the place to ask the number of the population, the distance from the nearest doctor, what his predecessor had made a year, and so forth; and the answer being satisfactory, he made up his mind to move towards the spring, if Emma’s health did not…",
     tags: ["french-literature"],
+    year: 1857,
   },
   {
     slug: "nana_zola",
@@ -44,6 +47,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 2062,
     excerpt: "Dans ces cas-là, par exemple, il se mettait en travers. Et, les mains belles, un diamant au petit doigt, il achevait un filet de chevreuil. D'ailleurs, la conversation sur les enfants continuait. La Faloise, empli de trouble par le voisinage de Gaga, lui demandait des…",
     tags: ["french-literature"],
+    year: 1880,
   },
   {
     slug: "the_count_of_monte_cristo",
@@ -55,6 +59,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 5744,
     excerpt: "But you tell me he is no more, and therefore can have nothing to do with hatred or revenge, so let all such feeling be buried with him.” “You prefer, then,” said the abbé, “that I should bestow on men you say are false and treacherous, the reward intended for faithful…",
     tags: ["french-literature"],
+    year: 1844,
   },
   {
     slug: "the_hunchback_of_notre_dame_hugo",
@@ -66,6 +71,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 2517,
     excerpt: "Was it not Louis XIV., fulfilling the request of Louis XIII.? And who put the cold, white panes in the place of those windows, “high in color,” which caused the astonished eyes of our fathers to hesitate between the rose of the grand portal and the arches of the apse? And…",
     tags: ["french-literature"],
+    year: 1831,
   },
   {
     slug: "the_three_musketeers",
@@ -77,6 +83,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 2988,
     excerpt: "D’Artagnan resolved to try and enter the Louvre. His costume of Guardsman in the company of M. Dessessart ought to be his passport. He therefore went down the Rue des Petits Augustins, and came up to the quay, in order to take the New Bridge. He had at first an idea of…",
     tags: ["french-literature"],
+    year: 1844,
   },
   {
     slug: "twenty_thousand_leagues_under_the_sea",
@@ -88,6 +95,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1405,
     excerpt: "Of the echinodermes, remarkable for their coating of spines, asteri, sea-stars, pantacrinæ, comatules, astérophons, echini, holothuri, etc., represented individually a complete collection of this group. A somewhat nervous conchyliologist would certainly have fainted before…",
     tags: ["french-literature"],
+    year: 1869,
   },
   {
     slug: "faust_part_i_goethe",
@@ -99,6 +107,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 434,
     excerpt: "Sieh nur, sieh! wie behend sich die Menge Durch die Gärten und Felder zerschlägt, Wie der Fluß, in Breit und Länge So manchen lustigen Nachen bewegt, Und bis zum Sinken überladen Entfernt sich dieser letzte Kahn. Selbst von des Berges fernen Pfaden Blinken uns farbige Kleider…",
     tags: ["german-literature"],
+    year: 1808,
   },
   {
     slug: "faust_der_tragödie_zweiter_teil",
@@ -110,6 +119,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1106,
     excerpt: "Weh! Weh! das brennt! das war ein harter Tritt, + Wie Pferdehuf.",
     tags: ["german-literature"],
+    year: 1832,
   },
   {
     slug: "siddhartha_hesse",
@@ -121,6 +131,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 535,
     excerpt: "I wish that you would go it up to its end, oh my friend, that you shall find salvation!” Govinda, not completely understanding it yet, repeated his question in an impatient tone: “Speak up, I beg you, my dear! Tell me, since it could not be any other way, that you also, my…",
     tags: ["german-literature"],
+    year: 1922,
   },
   {
     slug: "the_metamorphosis_kafka",
@@ -132,6 +143,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 289,
     excerpt: "The first few times he tried to climb up on the smooth chest of drawers he just slid down again, but he finally gave himself one last swing and stood there upright; the lower part of his body was in serious pain but he no longer gave any attention to it. Now he let himself…",
     tags: ["german-literature"],
+    year: 1915,
   },
   {
     slug: "the_trial_kafka",
@@ -143,6 +155,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1106,
     excerpt: "\"I have nearly finished what I have to say,\" said K., and as there was no bell available he struck the desk with his fist in a way that startled the judge and his advisor and made them look up from each other. \"None of this concerns me, and I am therefore able to make a calm…",
     tags: ["german-literature"],
+    year: 1914,
   },
   {
     slug: "at_the_mountains_of_madness",
@@ -154,6 +167,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 616,
     excerpt: "Wish I had a real laboratory here. Dyer better kick himself for having tried to stop my westward trip. First the world's greatest mountains, and then this. If this last isn't the high spot of the expedition, I don't know what is. We're made scientifically. Congrats, Pabodie,…",
     tags: ["horror"],
+    year: 1931,
   },
   {
     slug: "carmilla",
@@ -165,6 +179,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 372,
     excerpt: "You saw how quickly she was gone. I hope I have not done a very foolish thing, in taking charge of the young lady.” For my part, I was delighted. I was longing to see and talk to her; and only waiting till the doctor should give me leave. You, who live in towns, can have no…",
     tags: ["horror"],
+    year: 1872,
   },
   {
     slug: "ghost_stories_of_an_antiquary",
@@ -176,6 +191,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 606,
     excerpt: "Those who have taken even the most limited interest in the acquisition of topographical pictures are aware that there is one London dealer whose aid is indispensable to their researches. Mr J. W. Britnell publishes at short intervals very admirable catalogues of a large and…",
     tags: ["horror"],
+    year: 1904,
   },
   {
     slug: "tales_of_terror_and_mystery",
@@ -187,6 +203,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 962,
     excerpt: "By Jove, I am chilled to the bone! Come on, Burger, let us warm ourselves by a spurt of hard walking.\" Their footsteps sounded loud and crisp upon the rough stone paving of the disappointing road which is all that is left of the most famous highway of the world. A peasant or…",
     tags: ["horror"],
+    year: 1922,
   },
   {
     slug: "the_call_of_cthulhu",
@@ -198,6 +215,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 182,
     excerpt: "On April 2nd at about 3 p. m. every trace of Wilcox's malady suddenly ceased. He sat upright in bed, astonished to find himself at home and completely ignorant of what had happened in dream or reality since the night of March 22nd. Pronounced well by his physician, he…",
     tags: ["horror"],
+    year: 1928,
   },
   {
     slug: "the_case_of_charles_dexter_ward",
@@ -209,6 +227,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 645,
     excerpt: "According to the Smith diary a company of about one hundred men met at ten P.M. on Friday, April twelfth, 1771, in the great room of Thurston's Tavern at the Sign of the Golden Lion on Weybosset Point across the Bridge. Of the guiding group of prominent men in addition to the…",
     tags: ["horror"],
+    year: 1927,
   },
   {
     slug: "the_colour_out_of_space",
@@ -220,6 +239,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 169,
     excerpt: "The beaker had gone, too, and the wise men talked of the strange stone's affinity for silicon. It had acted quite unbelievably in that well-ordered laboratory; doing nothing at all and showing no occluded gases when heated on charcoal, being wholly negative in the borax bead,…",
     tags: ["horror"],
+    year: 1927,
   },
   {
     slug: "the_dunwich_horror",
@@ -231,6 +251,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 246,
     excerpt: "This chamber he lined with tall, firm shelving; along which he began gradually to arrange, in apparently careful order, all the rotting ancient books and parts of books which during his own day had been heaped promiscuously in odd corners of the various rooms. \"I made some…",
     tags: ["horror"],
+    year: 1929,
   },
   {
     slug: "the_great_god_pan",
@@ -242,6 +263,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 289,
     excerpt: "Thinking, however, that it would be better for the child to have playmates of her own age, he advertised in several local papers for a good home in a comfortable farmhouse for a girl of twelve, and this advertisement was answered by Mr. R., a well-to-do farmer in the…",
     tags: ["horror"],
+    year: 1894,
   },
   {
     slug: "the_house_on_the_borderland",
@@ -253,6 +275,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 659,
     excerpt: "We had accomplished perhaps half the distance, when I heard again the sound of falling stones on the other side--the side from which we had just come. One large rock came thundering down through the treetops, struck the opposite bank, and bounded into the river, driving a…",
     tags: ["horror"],
+    year: 1908,
   },
   {
     slug: "the_king_in_yellow",
@@ -264,6 +287,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 974,
     excerpt: "Boris, all over clay, stood there washing his hands. The room was built of rose-coloured marble excepting the floor, which was tessellated in rose and grey. In the centre was a square pool sunken below the surface of the floor; steps led down into it, sculptured pillars…",
     tags: ["horror"],
+    year: 1895,
   },
   {
     slug: "the_monk_a_romance",
@@ -275,6 +299,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1882,
     excerpt: "This command was issued by the counsels of his Friend, the Duke of Villa Hermosa, a Nobleman for whose abilities and knowledge of the world I have ever entertained the most profound veneration. “Believe me,” said He, “my dear Raymond, you will hereafter feel the benefits of…",
     tags: ["horror"],
+    year: 1796,
   },
   {
     slug: "the_mysteries_of_udolpho",
@@ -286,6 +311,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 4052,
     excerpt: "Had he the presumption to suppose I would marry my niece to a person such as he describes himself!” Emily dried her tears when she heard of the candid confession of Valancourt; and, though the circumstances it discovered were afflicting to her hopes, his artless conduct gave…",
     tags: ["horror"],
+    year: 1794,
   },
   {
     slug: "the_shadow_over_innsmouth",
@@ -297,6 +323,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 231,
     excerpt: "But as the leaving time obviously approached I conquered my qualms and followed the man aboard, extending him a dollar bill and murmuring the single word \"Innsmouth.\" At length the decrepit vehicle started with a jerk, and rattled noisily past the old brick buildings of State…",
     tags: ["horror"],
+    year: 1931,
   },
   {
     slug: "the_shunned_house",
@@ -308,6 +335,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 161,
     excerpt: "Rider and Thomas W. Bicknell. He lived with one man-servant in a Georgian homestead with knocker and iron-railed steps, balanced eerily on the steep ascent of North Court Street beside the ancient brick court and colony house where his grandfather--a cousin of that celebrated…",
     tags: ["horror"],
+    year: 1924,
   },
   {
     slug: "the_willows",
@@ -319,6 +347,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 269,
     excerpt: "We saw its eyes reflecting the sunset, and gleaming an odd yellow as the body turned over. Then it gave a swift, gulping plunge, and dived out of sight in a flash. “An otter, by gad!” we exclaimed in the same breath, laughing. It was an otter, alive, and out on the hunt; yet…",
     tags: ["horror"],
+    year: 1907,
   },
   {
     slug: "letters_of_john_keats_to_his_family_and_friends",
@@ -330,6 +359,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1802,
     excerpt: "Dote upon me, I am a primrose!\" Modern poets differ from the Elizabethans in this: each of the moderns like an Elector of Hanover governs his petty state and knows how many straws are swept daily from the Causeways in all his dominions, and has a continual itching that all…",
     tags: ["letters"],
+    year: 1816,
   },
   {
     slug: "letters_of_pliny_the_younger",
@@ -341,6 +371,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1316,
     excerpt: "He has completed the history which Aufidius Bassus[48] left unfinished, and has added to it thirty books. And lastly he has left thirty-seven books on Natural History, a work of great compass and learning, and as full of variety as nature herself. You will wonder how a man as…",
     tags: ["letters"],
+    year: 100,
   },
   {
     slug: "letters_of_the_right_honourable_lady_mary_wortley_montagu",
@@ -352,6 +383,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1062,
     excerpt: "I am persuaded there cannot be a purer air, nor more wholesome, than that of Vienna. The plenty and excellence of all sorts of provisions are greater here than in any place I ever was before, and 'tis not very expensive to keep a splendid table. 'Tis really a pleasure to pass…",
     tags: ["letters"],
+    year: 1716,
   },
   {
     slug: "letters_on_england",
@@ -363,6 +395,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 537,
     excerpt: "But these are shameless heretics, who deserve to be blown hence through the flames to old Nick, as Rabelais says, and for this reason I do not trouble myself about them.",
     tags: ["letters"],
+    year: 1733,
   },
   {
     slug: "letters_to_his_son_lord_chesterfield",
@@ -374,6 +407,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 612,
     excerpt: "LONDON, April 1, O. S. 1748. DEAR BOY: I have not received any letter, either from you or from Mr. Harte, these three posts, which I impute wholly to accidents between this place and Leipsig; and they are distant enough to admit of many.",
     tags: ["letters"],
+    year: 1748,
   },
   {
     slug: "the_best_letters_of_charles_lamb_lamb",
@@ -385,6 +419,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1177,
     excerpt: "This is the pomp and paraphernalia of parting, with which I take my leave of a passion which has reigned so royally (so long) within me; thus, with its trappings of laureateship, I fling it off, pleased and satisfied with myself that the weakness troubles me no longer. I am…",
     tags: ["letters"],
+    year: 1796,
   },
   {
     slug: "the_works_of_lord_byron_letters_and_journals_vol_1",
@@ -396,6 +431,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1787,
     excerpt: "I saw them walk to St. George's Chapel, which was the best part, as it did not last long ... Their dresses were very magnificent. The Knights, before they were installed, were in white and silver, like the old pictures of Henry VIII., and afterwards they had a purple mantle…",
     tags: ["letters"],
+    year: 1808,
   },
   {
     slug: "the_works_of_lord_byron_letters_and_journals_vol_2",
@@ -407,6 +443,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 2397,
     excerpt: "You censure _my_ life, Harness,--when I compare myself with these men, my elders and my betters, I really begin to conceive myself a monument of prudence--a walking statue--without feeling or failing; and yet the world in general hath given me a proud pre-eminence over them…",
     tags: ["letters"],
+    year: 1808,
   },
   {
     slug: "autobiography_of_charles_darwin",
@@ -418,6 +455,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 320,
     excerpt: "So that I felt the keenest delight when I first read of the action of icebergs in transporting boulders, and I gloried in the progress of Geology.",
     tags: ["natural-history"],
+    year: 1876,
   },
   {
     slug: "mans_place_in_nature_thomas_h_huxley",
@@ -429,6 +467,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 247,
     excerpt: "The Abbe Prevost and Buffon between them, however, did a good deal more disfigurement to Battell's sober account than 'cutting off an article.' Thus Battell's statement that the Pongos \"cannot speake, and have no understanding more than a beast,\" is rendered by Buffon \"qu'il…",
     tags: ["natural-history"],
+    year: 1863,
   },
   {
     slug: "on_the_origin_of_species_charles_darwin",
@@ -440,6 +479,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 2329,
     excerpt: "In many other cases, far from there being any aids for self-fertilisation, there are special contrivances, as I could show from the writings of C. C.",
     tags: ["natural-history"],
+    year: 1859,
   },
   {
     slug: "the_chemical_history_of_a_candle_michael_faraday",
@@ -451,6 +491,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 547,
     excerpt: "These things may all be very properly used if you take care; but without that, much mischief will be done.) Well, then, here is a little gunpowder, which I put at the bottom of that little wooden vessel, and mix the iron filings up with it, my object being to make the…",
     tags: ["natural-history"],
+    year: 1861,
   },
   {
     slug: "the_descent_of_man_charles_darwin",
@@ -462,6 +503,7 @@ export const BOOKS_PART4: Book[] = [
     chunks: 4564,
     excerpt: "Mr. Wallace gives cases in his ‘Contributions to the Theory of Natural Selection,’ 1870, p. 354.), would not feel remorse in his inmost soul, if he had failed in a duty, which he held sacred. We may therefore conclude that primeval man, at a very remote period, was influenced…",
     tags: ["natural-history"],
+    year: 1871,
   },
   {
     slug: "the_malay_archipelago_alfred_russel_wallace",
@@ -473,5 +515,6 @@ export const BOOKS_PART4: Book[] = [
     chunks: 1593,
     excerpt: "In preparing the skins and skeletons of these animals, I was much troubled by the Dyak dogs, which, being always kept in a state of semi-starvation, are ravenous for animal food. I had a great iron pan, in which I boiled the bones to make skeletons, and at night I covered…",
     tags: ["natural-history"],
+    year: 1869,
   },
 ];

@@ -13,6 +13,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Every book in the forest catalog has a literary year.** `Book.year` is
+  the year the work was first published, performed or, for ancient and sacred
+  texts, composed; negative years are BC. It comes from gutenberg_kg's
+  `corpus/pub_dates.tsv` through `gutenkg export-web-catalog`, and is the data
+  for the planned timeline slider. Nothing reads it yet.
 - **`web/scripts/profile.mjs`** measures where the forest's frame goes:
   triangles, draw calls and render time per camera view and leaf level, with
   and without the leaves, and the shadow pass on its own. It runs in headless
