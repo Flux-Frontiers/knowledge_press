@@ -84,6 +84,15 @@ test("trunk collision resolves even at its exact centre; world edge contains the
   assert.ok(Math.hypot(sim.x, sim.z) <= 1000);
 });
 
+test("a trunk the timeline has not reached yet does not stop the cart", () => {
+  const forest = { ...empty, trees: [{ x: 0, z: 0, trunkRadius: 1, book: { year: 1900 } }], grid: new Map([["0:0", [0]]]) };
+  resetSim(empty);
+  stepVehicle(forest, 0, 0, false, 1 / 60, { year: 1800 });
+  assert.ok(Math.hypot(sim.x, sim.z) < 0.01);
+  stepVehicle(forest, 0, 0, false, 1 / 60, { year: 1900 });
+  assert.ok(Math.hypot(sim.x, sim.z) >= 2.049);
+});
+
 test("input reset clears held keyboard, touch axes, look and interaction edges", () => {
   input.setInjectedKeys(["KeyW", "Space", "KeyE"]);
   let actions = input.sampleActions();

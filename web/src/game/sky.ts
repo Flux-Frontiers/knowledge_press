@@ -284,10 +284,11 @@ export function skyState(at: Date, place: Place): SkyState {
   const starI = 0.16 * (1 - daylight);
   let light: SkyState["light"];
   if (sunI >= moonI && sunI >= starI) {
-    // Only the sun casts shadows, fading out over its last few degrees. A low light
-    // drives the shadow camera's slanted box through far more forest, which
-    // halved the frame rate at sunset, and shadows that long are lost in the haze.
-    light = { dir: sunDir, color: mixHex("#ff9a52", "#fff0d2", smoothstep(0, 25 * RAD, alt)), intensity: sunI, shadow: smoothstep(3 * RAD, 8 * RAD, alt) };
+    // Only the sun casts shadows, fading out between 5 and 2 degrees. A low light
+    // drives the shadow camera's slanted box through far more forest; that once
+    // halved the frame rate at sunset, but the leaf decimation since leaves room,
+    // so dawn and dusk (LOW_SUN, 4 degrees) keep about three quarters strength.
+    light = { dir: sunDir, color: mixHex("#ff9a52", "#fff0d2", smoothstep(0, 25 * RAD, alt)), intensity: sunI, shadow: smoothstep(2 * RAD, 5 * RAD, alt) };
   } else if (moonI >= starI) {
     // Moonlight is too faint for its shadows to earn a shadow pass.
     light = { dir: moonDir, color: "#94b7e5", intensity: moonI, shadow: 0 };

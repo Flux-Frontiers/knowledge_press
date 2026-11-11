@@ -1,5 +1,6 @@
 import { getForest, treesNear, type Forest } from "./forest";
 import { clamp } from "./math";
+import { bookShown } from "./timeline";
 import type { Preferences } from "./preferences";
 
 export type SimState = {
@@ -64,7 +65,7 @@ export function stepVehicle(
   steer: number,
   boost: boolean,
   dt: number,
-  options: { brake?: boolean; pace?: Preferences["pace"]; sensitivity?: number } = {},
+  options: { brake?: boolean; pace?: Preferences["pace"]; sensitivity?: number; year?: number | null } = {},
 ) {
   // Small steps keep collisions and handling stable across frame rates.
   const steps = Math.ceil(Math.min(Math.max(dt, 0), 0.1) / (1 / 120));
@@ -73,7 +74,7 @@ export function stepVehicle(
 }
 
 function step(forest: Forest, throttle: number, steer: number, boost: boolean, dt: number,
-  options: { brake?: boolean; pace?: Preferences["pace"]; sensitivity?: number }) {
+  options: { brake?: boolean; pace?: Preferences["pace"]; sensitivity?: number; year?: number | null }) {
   const gentle = options.pace !== "brisk";
   // Halved for the compact layout (trees ~9 m apart): gentle is ~16 km/h.
   const maxSpeed = (gentle ? 4.5 : 9) * (boost ? 1.45 : 1);
@@ -109,6 +110,8 @@ function step(forest: Forest, throttle: number, steer: number, boost: boolean, d
   const cartR = 1.05;
   const near = treesNear(forest, sim.x, sim.z, 8);
   for (const t of near) {
+    // A tree the timeline has not reached yet is not there to hit.
+    if (!bookShown(t.book, options.year ?? null)) continue;
     const dx = sim.x - t.x;
     const dz = sim.z - t.z;
     const min = t.trunkRadius + cartR;
@@ -124,6 +127,7 @@ function step(forest: Forest, throttle: number, steer: number, boost: boolean, d
 
   // The redwood's root flare and the exhibits' plinths.
   for (const o of forest.obstacles) {
+    if (!bookShown(o, options.year ?? null)) continue;
     const dx = sim.x - o.x, dz = sim.z - o.z;
     const d = Math.hypot(dx, dz);
     const min = o.r + cartR;

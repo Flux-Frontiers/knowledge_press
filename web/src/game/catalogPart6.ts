@@ -11,6 +11,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 2728,
     excerpt: "But a year ago, the girl died of typhus. I remained lodging there as before, and when my landlady moved into her present quarters, she said to me... and in a friendly way... that she had complete trust in me, but still, would I not give her an I O U for one hundred and…",
     tags: ["russian-literature"],
+    year: 1866,
   },
   {
     slug: "dead_souls",
@@ -22,6 +23,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1946,
     excerpt: "Indeed, the pair would have entered into conversation, and have made one another’s acquaintance (since a beginning was made with their simultaneously expressing satisfaction at the circumstance that the previous night’s rain had laid the dust on the roads, and thereby made…",
     tags: ["russian-literature"],
+    year: 1842,
   },
   {
     slug: "fathers_and_sons_turgenev",
@@ -33,6 +35,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1040,
     excerpt: "'Oh, yes, the curtains; Nikolai Petrovitch was so good as to make me a present of them; but they have been put up a long while now.' 'Yes, and it's a long while since I have been to see you. Now it is very nice here.' 'Thanks to Nikolai Petrovitch's kindness,' murmured…",
     tags: ["russian-literature"],
+    year: 1862,
   },
   {
     slug: "notes_from_underground_dostoevsky",
@@ -44,6 +47,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 581,
     excerpt: "And as all choice and reasoning can be really calculated—because there will some day be discovered the laws of our so-called free will—so, joking apart, there may one day be something like a table constructed of them, so that we really shall choose in accordance with it.",
     tags: ["russian-literature"],
+    year: 1864,
   },
   {
     slug: "oblomov",
@@ -55,6 +59,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 821,
     excerpt: "The doctor having departed, Oblomov threw himself back into an arm-chair, clasped his hands behind his head, and remained sitting in an almost unthinking heap. Roused by Zakhar to consider once more the question of changing his quarters, he engaged in a long and heated…",
     tags: ["russian-literature"],
+    year: 1859,
   },
   {
     slug: "on_the_eve_a_novel",
@@ -66,6 +71,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 806,
     excerpt: "Of late years she had behaved to her mother as to a sick grandmother; while her father, who had been proud of her while she had been regarded as an exceptional child, had come to be afraid of her when she was grown up, and said of her that she was a sort of enthusiastic…",
     tags: ["russian-literature"],
+    year: 1860,
   },
   {
     slug: "the_brothers_karamazov",
@@ -77,6 +83,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 4690,
     excerpt: "But a minute later he laughed again just as softly and happily. He slowly replaced the note in the envelope, crossed himself and lay down. The agitation in his heart passed at once. “God, have mercy upon all of them, have all these unhappy and turbulent souls in Thy keeping,…",
     tags: ["russian-literature"],
+    year: 1880,
   },
   {
     slug: "the_idiot",
@@ -88,6 +95,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 3255,
     excerpt: "The prince was in despair. He felt that though he had but applied to this miserable old drunkard because he saw no other way of getting to Nastasia Philipovna’s, yet he had been very wrong to put the slightest confidence in such a man. At last he rose and declared that he…",
     tags: ["russian-literature"],
+    year: 1869,
   },
   {
     slug: "the_mantle_and_other_stories_gogol",
@@ -99,6 +107,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 745,
     excerpt: "If anyone called with a request to see him, the secretary of the board informed the Government secretary, who in his turn passed it on to a higher official, and the latter informed the important personage himself. That is the way business is carried on in our Holy Russia. In…",
     tags: ["russian-literature"],
+    year: 1842,
   },
   {
     slug: "the_possessed_or_the_devils",
@@ -110,6 +119,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 3441,
     excerpt: "I rest all my hopes on you and I've no one else; I spoke stupidly to Shatov.... I'm sure that you are perfectly honest and perhaps ready to do anything for me, only arrange it.\" I felt a passionate desire to help her in every way. \"This is what I'll do,\" I said, after a…",
     tags: ["russian-literature"],
+    year: 1871,
   },
   {
     slug: "war_and_peace",
@@ -121,6 +131,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 7846,
     excerpt: "He said he would not have been taken, it was not his fault but the corporal’s who had sent him to seize some horsecloths, though he had told him the Russians were there. And at every word he added: “But don’t hurt my little horse!” and stroked the animal. It was plain that he…",
     tags: ["russian-literature"],
+    year: 1869,
   },
   {
     slug: "youth_tolstoy",
@@ -132,6 +143,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 899,
     excerpt: "However, St. Jerome, who had coached me in Latin, spoke encouragingly, and I myself thought that, since I could translate Cicero and certain parts of Horace without the aid of a lexicon, I should do no worse than the rest. Yet things proved otherwise.",
     tags: ["russian-literature"],
+    year: 1857,
   },
   {
     slug: "dhammapada_f_max_müller_translation",
@@ -143,6 +155,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 167,
     excerpt: "Few are there among men who arrive at the other shore (become Arhats); the other people here run up and down the shore. 86. But those who, when the law has been well preached to them, follow the law, will pass across the dominion of death, however difficult to overcome. 87,…",
     tags: ["sacred-texts"],
+    year: -250,
   },
   {
     slug: "tao_te_ching_james_legge_translation",
@@ -154,6 +167,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 142,
     excerpt: "The skilful masters (of the Tao) in old times, with a subtle and exquisite penetration, comprehended its mysteries, and were deep (also) so as to elude men's knowledge. As they were thus beyond men's knowledge, I will make an effort to describe of what sort they appeared to…",
     tags: ["sacred-texts"],
+    year: -400,
   },
   {
     slug: "the_analects_of_confucius_james_legge_translation",
@@ -165,6 +179,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 452,
     excerpt: "The acquaintance might be long, but he showed the same respect as at first.' CHAP. XVII. The Master said, 'Tsang Wan kept a large tortoise in a house, on the capitals of the pillars of which he had hills made, and with representations of duckweed on the small pillars above…",
     tags: ["sacred-texts"],
+    year: -475,
   },
   {
     slug: "the_bhagavad_gita_edwin_arnold_verse_translation",
@@ -176,6 +191,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 288,
     excerpt: "Yea! whoso, shaking off the yoke of flesh Lives lord, not servant, of his lusts; set free From pride, from passion, from the sin of \"Self,\" Toucheth tranquillity! O Pritha's Son! That is the state of Brahm! There rests no dread When that last step is reached! Live where he…",
     tags: ["sacred-texts"],
+    year: -200,
   },
   {
     slug: "the_bible",
@@ -187,6 +203,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 6696,
     excerpt: "And an angel of the LORD came up from Gilgal to Bochim, and said, I made you to go up out of Egypt, and have brought you unto the land which I sware unto your fathers; and I said, I will never break my covenant with you. And ye shall make no league with the inhabitants of…",
     tags: ["sacred-texts"],
+    year: -1000,
   },
   {
     slug: "the_quran_rodwell_translation",
@@ -198,6 +215,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 2649,
     excerpt: "And is this the favour thou hast conferred on me, that thou hast enslaved the children of Israel?\" Said Pharaoh, \"Who then is the Lord of the Worlds?\" He said, \"The Lord of the Heavens and of the Earth and of all that is between them, if only ye believe it.\" Said Pharaoh to…",
     tags: ["sacred-texts"],
+    year: 632,
   },
   {
     slug: "the_upanishads_max_müller_translation",
@@ -209,6 +227,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 321,
     excerpt: "Therefore the wise man sees Him in every manifested form. They who have a true conception of God are never separated from Him. They exist in Him and He in them.",
     tags: ["sacred-texts"],
+    year: -800,
   },
   {
     slug: "a_journey_in_other_worlds_a_romance_of_the_future",
@@ -220,6 +239,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1280,
     excerpt: "I expect to find it in its Palaeozoic or Mesozoic period, while over a hundred years ago the English astronomer, Chambers, thought that on Saturn there was good reason for suspecting the presence of snow.\" \"What sort of spaceship do you propose to have?\" asked the vice-president.",
     tags: ["science-fiction"],
+    year: 1894,
   },
   {
     slug: "a_princess_of_mars",
@@ -231,6 +251,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 901,
     excerpt: "She, on the contrary, was sober with apparent solicitude and, as soon as I had finished the monster, rushed to me and carefully examined my body for possible wounds or injuries. Satisfying herself that I had come off unscathed she smiled quietly, and, taking my hand, started…",
     tags: ["science-fiction"],
+    year: 1912,
   },
   {
     slug: "at_the_earths_core",
@@ -242,6 +263,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 646,
     excerpt: "Their arms and necks were encircled by many ornaments of metal—silver predominating—and on their tunics were sewn the heads of tiny reptiles in odd and rather artistic designs. They talked among themselves as they marched along on either side of us, but in a language which I…",
     tags: ["science-fiction"],
+    year: 1914,
   },
   {
     slug: "etidorhpa_or_the_end_of_earth",
@@ -253,6 +275,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1703,
     excerpt: "To the people of this State, and to your home, and kindred, you must become a stranger for all time. Do you consent?\" \"Yes,\" I answered, for I knew that I must acquiesce. \"In the next place, you must help us to remove all traces of your identity. You must, so far as the world…",
     tags: ["science-fiction"],
+    year: 1895,
   },
   {
     slug: "flatland_a_romance_of_many_dimensions",
@@ -264,6 +287,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 488,
     excerpt: "The answer is threefold. The first means of recognition is the sense of hearing; which with us is far more highly developed than with you, and which enables us not only to distinguish by the voice our personal friends, but even to discriminate between different classes, at…",
     tags: ["science-fiction"],
+    year: 1884,
   },
   {
     slug: "frankenstein",
@@ -275,6 +299,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1022,
     excerpt: "If this rule were always observed; if no man allowed any pursuit whatsoever to interfere with the tranquillity of his domestic affections, Greece had not been enslaved, Cæsar would have spared his country, America would have been discovered more gradually, and the empires of…",
     tags: ["science-fiction"],
+    year: 1818,
   },
   {
     slug: "pellucidar_burroughs",
@@ -286,6 +311,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 745,
     excerpt: "Below the water-line she was practically non-existent. She should have had considerable draft; but, as the enemy couldn’t have seen it, Perry decided to do away with it, and so made her flat-bottomed. It was this that caused my doubts about her. There was another little…",
     tags: ["science-fiction"],
+    year: 1915,
   },
   {
     slug: "symzonia_voyage_of_discovery",
@@ -297,6 +323,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 627,
     excerpt: "I would not put up with it; there is but one Slim in the ship, and we'll heave him overboard, if you say the word; at least, I'd clap the ruffles [1] on him, and keep him out of harm's way the rest of the voyage.\" Whether it was honest indignation that prompted Will's advice,…",
     tags: ["science-fiction"],
+    year: 1820,
   },
   {
     slug: "the_coming_race",
@@ -308,6 +335,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 721,
     excerpt: "As these effects became familiarly known and skillfully administered, war between the vril-discoverers ceased, for they brought the art of destruction to such perfection as to annul all superiority in numbers, discipline, or military skill. The fire lodged in the hollow of a…",
     tags: ["science-fiction"],
+    year: 1871,
   },
   {
     slug: "the_first_men_in_the_moon",
@@ -319,6 +347,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 919,
     excerpt: "So slight were the exertions required of us, so easy did the practical annihilation of our weight make all we had to do, that the necessity for taking refreshment did not occur to us for nearly six hours (by Cavor’s chronometer) after our start. I was amazed at that lapse of…",
     tags: ["science-fiction"],
+    year: 1901,
   },
   {
     slug: "the_food_of_the_gods_and_how_it_came_to_earth",
@@ -330,6 +359,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1028,
     excerpt: "\"It's too much to hope,\" said Bensington, \"that one of the wasps--\" \"The wasp has no more idea of public utility than a--than a House Agent,\" said Redwood.",
     tags: ["science-fiction"],
+    year: 1904,
   },
   {
     slug: "the_gods_of_mars",
@@ -341,6 +371,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1065,
     excerpt: "I have spoken.” “Come, then,” I cried, “we must make the start, for we could not be further from escape than we now are in the heart of this mountain and within the four walls of this chamber of death.” “Come, then,” said the girl, “but do not flatter yourself that you can…",
     tags: ["science-fiction"],
+    year: 1913,
   },
   {
     slug: "the_invisible_man",
@@ -352,6 +383,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 661,
     excerpt: "The bed-clothes gathered themselves together, leapt up suddenly into a sort of peak, and then jumped headlong over the bottom rail. It was exactly as if a hand had clutched them in the centre and flung them aside. Immediately after, the stranger’s hat hopped off the bed-post,…",
     tags: ["science-fiction"],
+    year: 1897,
   },
   {
     slug: "the_island_of_doctor_moreau",
@@ -363,6 +395,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 582,
     excerpt: "The reader will perhaps understand that at first everything was so strange about me, and my position was the outcome of such unexpected adventures, that I had no discernment of the relative strangeness of this or that thing. I followed the llama up the beach, and was…",
     tags: ["science-fiction"],
+    year: 1895,
   },
   {
     slug: "the_lost_world",
@@ -374,6 +407,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1002,
     excerpt: "But the incident was far from being closed. Whatever path the lecturer took amid the wilds of the past seemed invariably to lead him to some assertion as to extinct or prehistoric life which instantly brought the same bulls' bellow from the Professor. The audience began to…",
     tags: ["science-fiction"],
+    year: 1912,
   },
   {
     slug: "the_warlord_of_mars",
@@ -385,6 +419,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 768,
     excerpt: "And well it was that I had been forced to follow him. But a short distance from the circular chamber we came suddenly into a brilliantly lighted labyrinth of crystal glass partitioned passages. At first I thought it was one vast, unbroken chamber, so clear and transparent…",
     tags: ["science-fiction"],
+    year: 1913,
   },
   {
     slug: "a_midsummer_nights_dream",
@@ -396,6 +431,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 233,
     excerpt: "Are not you he? PUCK. Thou speak’st aright; I am that merry wanderer of the night. I jest to Oberon, and make him smile, When I a fat and bean-fed horse beguile, Neighing in likeness of a filly foal; And sometime lurk I in a gossip’s bowl In very likeness of a roasted crab,…",
     tags: ["shakespeare"],
+    year: 1595,
   },
   {
     slug: "hamlet",
@@ -407,6 +443,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 420,
     excerpt: "Remember thee? Yea, from the table of my memory I’ll wipe away all trivial fond records, All saws of books, all forms, all pressures past, That youth and observation copied there; And thy commandment all alone shall live Within the book and volume of my brain, Unmix’d with…",
     tags: ["shakespeare"],
+    year: 1599,
   },
   {
     slug: "macbeth",
@@ -418,6 +455,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 249,
     excerpt: "But in these cases We still have judgement here; that we but teach Bloody instructions, which being taught, return To plague th’ inventor. This even-handed justice Commends th’ ingredience of our poison’d chalice To our own lips. He’s here in double trust: First, as I am his…",
     tags: ["shakespeare"],
+    year: 1606,
   },
   {
     slug: "romeo_and_juliet",
@@ -429,6 +467,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 340,
     excerpt: "MERCUTIO. O, then, I see Queen Mab hath been with you. She is the fairies’ midwife, and she comes In shape no bigger than an agate-stone On the fore-finger of an alderman, Drawn with a team of little atomies Over men’s noses as they lie asleep: Her waggon-spokes made of long…",
     tags: ["shakespeare"],
+    year: 1591,
   },
   {
     slug: "don_quixote",
@@ -440,6 +479,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 4032,
     excerpt: "Meanwhile the knight has taken his departure; he fights in the war, conquers the king’s enemy, wins many cities, triumphs in many battles, returns to the court, sees his lady where he was wont to see her, and it is agreed that he shall demand her in marriage of her parents as…",
     tags: ["spanish"],
+    year: 1605,
   },
   {
     slug: "a_ladys_life_in_the_rocky_mountains",
@@ -451,6 +491,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 1007,
     excerpt: "Holland says of another:-- If ever I shall reach the home in heaven, For whose dear rest I humbly hope and pray, In the great company of the forgiven I shall be sure to meet old Daniel Gray. The night came without coolness, but at daylight on Monday morning a fire was…",
     tags: ["travel"],
+    year: 1879,
   },
   {
     slug: "the_innocents_abroad_mark_twain",
@@ -462,6 +503,7 @@ export const BOOKS_PART6: Book[] = [
     chunks: 2582,
     excerpt: "I have not a word to say against the misused, faithful girl, and would not withhold from her grave a single one of those simple tributes which blighted youths and maidens offer to her memory, but I am sorry enough that I have not time and opportunity to write four or five…",
     tags: ["travel"],
+    year: 1869,
   },
   {
     slug: "the_travels_of_marco_polo",
@@ -473,5 +515,6 @@ export const BOOKS_PART6: Book[] = [
     chunks: 4983,
     excerpt: "But there is nothing particular to mention on the way till you come, at the end of those five days, to TADINFU.{1} This, you must know, is a very great city, and in old times was the seat of a great kingdom; but the Great Kaan conquered it by force of arms. Nevertheless it is…",
     tags: ["travel"],
+    year: 1298,
   },
 ];

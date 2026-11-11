@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DoubleSide, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, RepeatWrapping, RGBADepthPacking, SRGBColorSpace } from "three";
 import { textureAnisotropy } from "./Environment";
-import { HUB_PLAQUE_DIR, HUB_PLAQUE_DIST, type Forest } from "./forest";
+import { corpusTreeAt, HUB_PLAQUE_DIR, HUB_PLAQUE_DIST, type Forest } from "./forest";
 import type { SeasonName } from "./seasons";
 import { Lectern } from "./Signposts";
 import { useGame } from "./store";
@@ -136,12 +136,17 @@ const REDWOOD_BODY =
   "The trunk is as thick as its limbs together: at any height its cross-section is the sum of " +
   "theirs above it. Click the tree or press B to browse every book and jump to its tree.";
 
+/** The redwood as the timeline shows it: grown from the books standing at its year, or whole in a portrait. */
+export function useCorpusTree(forest: Forest) {
+  const year = useGame((s) => (s.portrait === null ? s.timelineYear : null));
+  return useMemo(() => corpusTreeAt(forest, year), [forest, year]);
+}
+
 function pointer(on: boolean) {
   document.body.style.cursor = on ? "pointer" : "";
 }
 
-function RedwoodPlaque({ forest }: { forest: Forest }) {
-  const c = forest.corpusTree;
+function RedwoodPlaque({ c }: { c: Forest["corpusTree"] }) {
   const byline = `${c.limbs} books · ${c.totalChunks.toLocaleString("en-US")} chunks · ${Math.round(c.height)} m`;
   const x = Math.cos(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
   const z = Math.sin(HUB_PLAQUE_DIR) * HUB_PLAQUE_DIST;
@@ -157,7 +162,7 @@ function RedwoodPlaque({ forest }: { forest: Forest }) {
 
 /** The hub's redwood: one bark mesh and one instanced draw of foliage sprays. */
 export function CorpusRedwood({ forest, season }: { forest: Forest; season: SeasonName }) {
-  const c = forest.corpusTree;
+  const c = useCorpusTree(forest);
   const bark = useMemo(() => {
     const g = new BufferGeometry();
     g.setAttribute("position", new BufferAttribute(c.bark.pos, 3));
@@ -219,9 +224,10 @@ export function CorpusRedwood({ forest, season }: { forest: Forest; season: Seas
         <cylinderGeometry args={[c.baseRadius * 0.35, c.baseRadius, c.height * 0.6, 12]} />
         <meshBasicMaterial visible={false} />
       </mesh>
-      <instancedMesh ref={ref} args={[spray, sprayMat, Math.max(1, c.foliage.count)]} customDepthMaterial={sprayDepth}
+      {/* Sized for the whole redwood, so the timeline's smaller ones reuse it (mesh.count). */}
+      <instancedMesh ref={ref} args={[spray, sprayMat, Math.max(1, forest.corpusTree.foliage.count)]} customDepthMaterial={sprayDepth}
         castShadow receiveShadow />
-      <RedwoodPlaque forest={forest} />
+      <RedwoodPlaque c={c} />
       <UplightFixtures radius={c.baseRadius + 0.5} count={6} pool={3.5} />
     </group>
   );

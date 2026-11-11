@@ -13,6 +13,61 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **The timeline grows the corpus redwood.** At each year the redwood
+  regrows from the books standing then, so its limbs and plaque match the
+  forest shown. Its height is the full redwood's times the square root of
+  the shown share of the corpus, so it starts as a sapling (about 8 m with
+  the Bible alone) and ends at full size.
+- **The timeline watches from the opening shot.** While it is open, the
+  camera circles the redwood as the start screen does, pulled back so the
+  full-grown crown stays in frame. It cuts to the circle and back to the
+  cart rather than gliding, which could pass through the trunk. In god's
+  eye the timeline keeps the overhead view, with its bar moved to the
+  bottom-right corner so the whole ring shows.
+- **The timeline opens in clean view**: no minimap or buttons, only its bar.
+  Closing it puts the view back as it was.
+- **Look around in the timeline's circle**: drag or the arrow keys swing the
+  camera round the redwood and tilt it, and it stays where you leave it. On
+  touch the bar sits level with the stick, beside it.
+- **No drive stick in god's eye** on touch: the cart is not driven from there.
+- **God's-eye grove names are tidier**: "Literature" is shortened to "Lit.",
+  and American Lit., Russian Lit. and Ancient & Classical sit just past
+  their groves' north edge instead of over the middle.
+- **Dawn and dusk cast clear shadows**: low-sun shadows fade between 5 and 2
+  degrees instead of 8 and 3, about three quarters strength at dawn.
+- **Exhibits arrive on the timeline in their own year**: the armillary
+  sundial about 255 BC, Kepler 1596, the weather mast 1846, Savonius 1922,
+  Darrieus 1931, Double Helix 1953, the Flame of Knowledge 1964, the helical
+  rotor 1995. Each year is a slider stop of its own. The landing field
+  stands throughout.
+- **The Landing Field**, a new exhibit: a raised pad in an open glade, kept
+  for in-app events. It is placed after the other exhibits, so they keep
+  their glades.
+- **The visitor event** (`web/src/game/events.ts`), staged on the landing
+  field during a booked window, or now with `?event=visitor`. An Art Techno
+  craft, 17 m across, flies in above the redwood and comes down over the pad
+  on three legs. It opens an iris and lowers a lift. A faceless sentinel
+  steps off, then a cart rolls out and plants a seed, and an Art Techno tree
+  grows, routed like a circuit board at 0 and 45 degrees, while the cart
+  comes round to stand beside the sentinel. While the rider sits still, the
+  camera follows the landing in clean view. The craft hums (WebAudio, no
+  files), glowing traces light its underside, one light under it shows the
+  pad, and a meteor swarm falls from five radiants. Everything is built in
+  code, with no models or textures, and it adds about 19 KB to the forest's
+  script. No dates are booked yet.
+- **Timeline: grow the forest by date.** "Timeline" in the HUD menu opens a
+  bar in the search's place with a slider over every year a work appeared
+  (1000 BC to 1931), play and pause, and running totals of works,
+  groves and chunks. Trees whose year has not come are hidden on the GPU
+  (a per-vertex year and one uniform), with their shadows; the layout never
+  moves. Hidden trees do not block the cart, pop up cards, answer taps or
+  searches. The slider steps by year, not by time, so the empty centuries
+  before 1500 take little of its travel.
+- **Every book in the forest catalog has a literary year.** `Book.year` is
+  the year the work was first published, performed or, for ancient and sacred
+  texts, composed; negative years are BC. It comes from gutenberg_kg's
+  `corpus/pub_dates.tsv` through `gutenkg export-web-catalog`, and is the data
+  for the timeline.
 - **`web/scripts/profile.mjs`** measures where the forest's frame goes:
   triangles, draw calls and render time per camera view and leaf level, with
   and without the leaves, and the shadow pass on its own. It runs in headless

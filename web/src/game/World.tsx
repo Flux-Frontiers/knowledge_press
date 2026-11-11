@@ -18,10 +18,12 @@ import { FlameOfKnowledge } from "./FlameOfKnowledge";
 import { GroveMarks } from "./GroveMarks";
 import { Mysterium } from "./Mysterium";
 import { Signposts } from "./Signposts";
+import { LandingField } from "./LandingField";
 import { Sundial } from "./Sundial";
 import { SEASONS, type SeasonName } from "./seasons";
 import { sim } from "./sim";
 import { useGame } from "./store";
+import { bookShown } from "./timeline";
 import { tourAhead, tourState } from "./tour";
 import { fogMix, stepWeather, weather, weatherAt, weatherOverride } from "./weather";
 import { DarrieusSculpture, DnaSculpture, HelixSculpture, SavoniusSculpture, WeatherMast } from "./WindSculptures";
@@ -30,7 +32,7 @@ const dummy = new Object3D();
 const gray = new Color();
 const CLEAR = { fogDensity: 0, cloud: 0, kind: "clear" as const };
 
-const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit }>> = {
+const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit; forest: Forest }>> = {
   mysterium: Mysterium,
   flame: FlameOfKnowledge,
   helix: HelixSculpture,
@@ -39,6 +41,7 @@ const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit }>> = {
   dna: DnaSculpture,
   mast: WeatherMast,
   sundial: Sundial,
+  landing: LandingField,
 };
 const TRAIL_N = 20;
 
@@ -46,6 +49,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
   const pal = SEASONS[season];
   // Every colour eases from the season's night palette to the day look as the sun rises (sky.ts).
   const sky = useGame((s) => s.sky);
+  const timelineYear = useGame((s) => s.timelineYear);
   const t = sky.daylight;
   const skyColor = useMemo(() => new Color(pal.sky).lerp(new Color(DAY_OVERRIDE.sky), t), [t, pal.sky]);
   // Sunrise and sunset warm the haze a little.
@@ -137,7 +141,9 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
         <CorpusRedwood forest={forest} season={season} />
         {forest.exhibits.map((e) => {
           const View = EXHIBIT_VIEWS[e.id];
-          return View ? <View key={e.id} exhibit={e} /> : null;
+          // An exhibit the timeline has not reached yet is not built; its plaza stays paved.
+          if (!bookShown(e, timelineYear)) return null;
+          return View ? <View key={e.id} exhibit={e} forest={forest} /> : null;
         })}
       </>)}
 
@@ -300,7 +306,7 @@ function LanternTrail({
       let bestD = Infinity;
       let found = false;
       for (const t of forest.trees) {
-        if (!bookMatchesQuery(t.book, target.q)) continue;
+        if (!bookMatchesQuery(t.book, target.q) || !bookShown(t.book, useGame.getState().timelineYear)) continue;
         const d = Math.hypot(t.x - sim.x, t.z - sim.z);
         if (d < bestD) {
           bestD = d;
