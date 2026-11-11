@@ -50,7 +50,7 @@ const HEAD_URL = "models/visitor_head.glb";
 /** The rider is this close, on the spur or the plaza, when the craft starts its approach (home is about 40 m off). */
 const TRIGGER_DIST = 30;
 const MARKERS = 16;
-const RIM_LIGHTS = 48;
+const RIM_LIGHTS = 24;
 const TRACES = 16;
 /** Legs at these bearings, clear of the way out toward the road at 0. */
 const LEG_BEARINGS = [Math.PI / 3, Math.PI, (5 * Math.PI) / 3];
