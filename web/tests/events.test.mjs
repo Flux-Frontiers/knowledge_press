@@ -64,10 +64,10 @@ test("visitor: the craft comes in above every crown and the redwood, and drops o
   const end = visitorPose(VISITOR_END + 100);
   assert.ok(Math.abs(end.saucer[1] - REST_Y) < 1e-9 && end.saucer[0] === 0 && end.saucer[2] === 0, "the craft stands on the pad");
   assert.equal(end.legs, 1);
-  assert.equal(end.iris, 0, "the iris shuts once the cart is back aboard");
+  assert.equal(end.iris, 1);
 });
 
-test("visitor: the sentinel comes down first, then the cart, which plants the seed facing the tree and goes back aboard", () => {
+test("visitor: the sentinel comes down first, then the cart, which plants the seed facing the tree and comes round to stand beside the sentinel", () => {
   const { getForest } = require(`${build}/forest.js`);
   const { visitorPose, VISITOR_END, PAD_R, REST_Y, TREE_AT, CART_STOP_DIST } = require(`${build}/visitorScript.js`);
   const e = getForest().exhibits.find((x) => x.id === "landing");
@@ -83,6 +83,10 @@ test("visitor: the sentinel comes down first, then the cart, which plants the se
     if (p.grow > 0) assert.equal(p.plant, 1, "the tree grows before the seed is down");
     const r = Math.hypot(p.cart.x, p.cart.z);
     if (!far || r > far.r + 1e-9) far = { r, p };
+    // Off the lift and the wedge, the cart keeps off the pad: its half length clear of the edge.
+    const { PAD_TOP, PAVE_Y } = require(`${build}/visitorScript.js`);
+    if (p.cart.shown && p.cart.y <= PAVE_Y + 1e-9) assert.ok(r > PAD_R + 0.75, `the cart runs over the pad's edge at ${t.toFixed(2)} s`);
+    void PAD_TOP;
   }
   assert.ok(robotOut !== null && cartOut !== null && robotOut < cartOut);
   // Out at the tree's spot, facing it (yaw: 0 faces +x, positive turns toward -z).
@@ -97,10 +101,13 @@ test("visitor: the sentinel comes down first, then the cart, which plants the se
   // On the paving, not sunk into it.
   const { PAVE_Y } = require(`${build}/visitorScript.js`);
   assert.equal(end.robot.y, PAVE_Y);
-  assert.ok(Math.hypot(end.cart.x, end.cart.z) < 1e-9 && Math.abs(end.cart.y - REST_Y) < 1e-9, "the cart is back aboard");
-  assert.equal(end.iris, 0);
+  // Beside the sentinel, on the paving, facing the road with it.
+  const apart = Math.hypot(end.cart.x - end.robot.x, end.cart.z - end.robot.z);
+  assert.ok(apart > 1.2 && apart < 2.5, `the cart stops ${apart.toFixed(2)} m from the sentinel`);
+  assert.equal(end.cart.y, PAVE_Y);
+  assert.ok(Math.abs(end.cart.yaw) < 1e-9, "the cart faces the road");
+  assert.equal(end.cart.stride, null);
   assert.equal(end.grow, 1);
-  assert.equal(end.caption, 1);
 });
 
 test("visitor: nobody passes through the hull; above the belly they ride the lift inside the shaft", () => {

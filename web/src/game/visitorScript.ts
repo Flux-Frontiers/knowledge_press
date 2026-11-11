@@ -3,8 +3,8 @@
  * straight down over the landing field's pad, puts down its legs, opens an
  * iris in its belly and lowers a lift, which brings down its sentinel and
  * then a cart. The cart rolls off the pad, plants a seed, and an Art Techno
- * tree grows (artTree.ts) for the library while the cart goes back aboard and
- * the iris shuts behind it. Pure math: the pose of everything
+ * tree grows (artTree.ts) for the library while the cart comes round the
+ * plaza to stand beside the sentinel. Pure math: the pose of everything
  * at `t` seconds after the start, in the plaza's frame, +x toward the road
  * (where the rider watches from), y up. LandingField.tsx draws it.
  */
@@ -65,10 +65,15 @@ const ROBOT_PATH: { from: P; legs: Leg[] } = {
 const toward = (r: number, y: number): P => [Math.cos(TREE_BEARING) * r, y, Math.sin(TREE_BEARING) * r];
 /** Out: down the lift, across the pad, down the wedge and over to the tree's spot. */
 const CART_OUT: Leg[] = [{ to: [0, PAD_TOP, 0], ride: true }, { to: toward(WEDGE.from - 0.05, PAD_TOP) }, { to: toward(WEDGE.to, PAVE_Y) }, { to: toward(TREE_DIST - 2.4, 0) }];
-/** Back: a pause to plant the seed, then the same way home and up the lift into the craft. */
+/** On the paving round the pad, at this radius: clear of the pad's edge by more than the cart's half length. */
+const ROUND_R = 10;
+const round = (deg: number): P => [Math.cos((deg * Math.PI) / 180) * ROUND_R, PAVE_Y, Math.sin((deg * Math.PI) / 180) * ROUND_R];
+/** Where the cart ends, beside the sentinel, facing the road with it. */
+export const CART_REST: P = [9.3, PAVE_Y, 0.9];
+/** Back: a pause to plant the seed, then round the plaza to the front, and a last few metres straight toward the road. */
 const CART_BACK: Leg[] = [
-  { to: toward(TREE_DIST - 2.4, 0), hold: 1.8 }, { to: toward(WEDGE.to, PAVE_Y) }, { to: toward(WEDGE.from - 0.05, PAD_TOP) },
-  { to: [0, PAD_TOP, 0] }, { to: [0, REST_Y, 0], ride: true },
+  { to: toward(TREE_DIST - 2.4, 0), hold: 1.8 }, { to: round(-75) }, { to: round(-45) }, { to: round(-20) },
+  { to: [8.4, PAVE_Y, CART_REST[2]] }, { to: CART_REST },
 ];
 const CART_PATH: { from: P; legs: Leg[] } = { from: [0, REST_Y, 0], legs: [...CART_OUT, ...CART_BACK] };
 
@@ -87,14 +92,13 @@ const T_LIFT_BACK = T_ROBOT_DOWN + 2;
 const T_VISOR = T_ROBOT_STOP + 0.5;
 const T_CART = Math.max(T_VISOR + 4, T_LIFT_BACK + RIDE + 0.5);
 const T_CART_STOP = T_CART + pathTime({ from: CART_PATH.from, legs: CART_OUT }, CART_SPEED);
-/** The cart back aboard, and the iris shut behind it. */
+/** The cart at rest beside the sentinel. */
 const T_CART_HOME = T_CART + pathTime(CART_PATH, CART_SPEED);
-const T_SHUT = T_CART_HOME + 0.3;
 /** The seed's hop from the cart to the ground, then the tree's growth. */
 const T_PLANT = T_CART_STOP + 0.8;
 const T_GROW = T_PLANT + 1.0;
 /** Seconds from the start until everything rests in its final pose. */
-export const VISITOR_END = Math.max(T_GROW + GROW_TIME + 3, T_SHUT + 2);
+export const VISITOR_END = Math.max(T_GROW + GROW_TIME + 3, T_CART_HOME + 2);
 
 export type Walker = {
   x: number; y: number; z: number;
@@ -131,8 +135,6 @@ export type VisitorPose = {
   plant: number;
   /** The tree's growth, 0 to 1 (artTree.grownFraction). */
   grow: number;
-  /** The words under the tree, faded in as it finishes, 0 to 1. */
-  caption: number;
 };
 
 const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
@@ -170,7 +172,7 @@ function walk(path: { from: P; legs: Leg[] }, t: number, start: number, speed: n
   throw new Error("unreachable: a path has at least one leg");
 }
 
-/** The platform: down with the sentinel, back up empty, then under the cart: down with it, waiting, and up with it. */
+/** The platform: down with the sentinel, back up empty, down with the cart, and left down. */
 function liftY(t: number, cart: Walker): number {
   const ride = (a: number) => REST_Y + (PAD_TOP - REST_Y) * span(t, a, a + RIDE);
   if (t < T_LIFT_BACK) return ride(T_LIFT);
@@ -211,16 +213,15 @@ export function visitorPose(t: number): VisitorPose {
     legs: smooth(span(t, T_HOVER, T_SETTLE)),
     beam: smooth(span(t, T_APPROACH - 1, T_APPROACH + 1)) * (1 - smooth(span(t, T_SETTLE + 0.5, T_LANDED + 0.5))),
     dust: t < touch ? 0 : span(t, touch, touch + 2.8),
-    iris: smooth(span(t, T_IRIS, T_IRIS + 1.5)) * (1 - smooth(span(t, T_SHUT, T_SHUT + 1.5))),
+    iris: smooth(span(t, T_IRIS, T_IRIS + 1.5)),
     lift: liftY(t, cart),
-    shaft: smooth(span(t, T_IRIS + 0.5, T_LIFT)) * (1 - smooth(span(t, T_SHUT - 0.5, T_SHUT + 1))),
+    shaft: smooth(span(t, T_IRIS + 0.5, T_LIFT)) * (1 - 0.6 * smooth(span(t, T_CART + RIDE, T_CART + RIDE + 2))),
     robot: walk(ROBOT_PATH, t, T_LIFT, ROBOT_SPEED, 0.95),
     cart,
     visor: smooth(span(t, T_VISOR, T_VISOR + 0.8)),
     sweep: t < T_VISOR ? 0 : Math.sin((t - T_VISOR) * 1.6) * (1 - span(t, T_CART, T_CART + 3)),
     plant: span(t, T_PLANT, T_GROW),
     grow: smooth(span(t, T_GROW, T_GROW + GROW_TIME)),
-    caption: smooth(span(t, T_GROW + GROW_TIME * 0.85, T_GROW + GROW_TIME * 0.85 + 2)),
   };
 }
 

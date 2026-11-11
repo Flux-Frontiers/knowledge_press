@@ -3,7 +3,6 @@ import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode, type Ref }
 import {
   AdditiveBlending,
   BoxGeometry,
-  CanvasTexture,
   Color,
   CylinderGeometry,
   DoubleSide,
@@ -16,9 +15,6 @@ import {
   Object3D,
   OctahedronGeometry,
   PointLight,
-  type Sprite,
-  SpriteMaterial,
-  SRGBColorSpace,
   Vector2,
   Vector3,
   type BufferGeometry,
@@ -260,30 +256,6 @@ function Rover({ m, groupRef, wheels, seedRef }: { m: Materials; groupRef: Ref<G
   );
 }
 
-const CAPTION = "A Gift for the Library";
-
-/** The words under the tree, gold on nothing, drawn once to a canvas. */
-function useCaption() {
-  const tex = useMemo(() => {
-    const c = document.createElement("canvas");
-    c.width = 1536;
-    c.height = 192;
-    const ctx = c.getContext("2d")!;
-    ctx.fillStyle = PALETTE.gold;
-    ctx.fillRect(268, 22, 1000, 3);
-    ctx.fillRect(268, 167, 1000, 3);
-    ctx.font = "italic 600 92px Georgia, 'Times New Roman', serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(CAPTION, 768, 98);
-    const t = new CanvasTexture(c);
-    t.colorSpace = SRGBColorSpace;
-    return t;
-  }, []);
-  useEffect(() => () => tex.dispose(), [tex]);
-  return tex;
-}
-
 /**
  * The tree the cart plants (artTree.ts): copper branches routed at 0 and 45
  * degrees, gold vias at the junctions, green dies for leaves. Grown once and
@@ -513,10 +485,6 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
   const wheels = useMemo<(Group | null)[]>(() => [], []);
   const seedOnCart = useRef<Mesh>(null);
   const seed = useRef<Mesh>(null);
-  const caption = useRef<Sprite>(null);
-  const captionTex = useCaption();
-  const captionMat = useMemo(() => new SpriteMaterial({ map: captionTex, transparent: true, opacity: 0, depthWrite: false }), [captionTex]);
-  useEffect(() => () => captionMat.dispose(), [captionMat]);
   const sweep = useRef<Mesh>(null);
   const lamp = useRef<PointLight>(null);
   const robotLimbs = useMemo(newLimbs, []);
@@ -618,8 +586,7 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
         p.cart.z + (TREE_AT[2] - p.cart.z) * k,
       );
     }
-    captionMat.opacity = p.caption;
-    if (caption.current) caption.current.visible = p.caption > 0.01;
+
     m.visor.opacity = 0.15 + 0.85 * p.visor;
     if (sweep.current) {
       sweep.current.visible = p.visor > 0.05;
@@ -686,9 +653,7 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
       <Rover m={m} groupRef={cart} wheels={wheels} seedRef={seedOnCart} />
       <mesh ref={seed} rotation={[Math.PI / 4, 0, Math.PI / 4]} material={m.die} visible={false}><boxGeometry args={[0.24, 0.24, 0.24]} /></mesh>
       <ArtTreeView m={m} />
-      {/* Toward the spur from the tree's foot, so it reads in front of the trunk. */}
-      <sprite ref={caption} material={captionMat} visible={false} scale={[10, 1.25, 1]}
-        position={[TREE_AT[0] + 2.4, 2.4, TREE_AT[2] + 2.2]} />
+
     </>
   );
 }

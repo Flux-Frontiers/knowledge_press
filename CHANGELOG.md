@@ -20,9 +20,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   field during a booked window, or now with `?event=visitor`. An Art Techno
   craft, 17 m across, flies in above the redwood and comes down over the pad
   on three legs. It opens an iris and lowers a lift. A faceless sentinel
-  steps off, then a cart rolls out, plants a seed and goes back aboard while
-  an Art Techno tree grows, routed like a circuit board at 0 and 45 degrees.
-  "A Gift for the Library" appears under it. While the rider sits still, the
+  steps off, then a cart rolls out and plants a seed, and an Art Techno tree
+  grows, routed like a circuit board at 0 and 45 degrees, while the cart
+  comes round to stand beside the sentinel. While the rider sits still, the
   camera follows the landing in clean view. The craft hums (WebAudio, no
   files), glowing traces light its underside, one light under it shows the
   pad, and a meteor swarm falls from five radiants. Everything is built in
