@@ -68,6 +68,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   /** Last frame was the start screen's circle, so the first played frame puts the camera behind the cart. */
   const wasStart = useRef(true);
   const wasTimeline = useRef(false);
+  /** How far the rider has swung the timeline's circle round the redwood; it stays where it is left. */
+  const orbitTurn = useRef(0);
 
   const paused = useGame((s) => s.paused);
   const collect = useGame((s) => s.collect);
@@ -273,6 +275,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       // Held arrows or a drag pan up to ~110° either way; let go, the view eases back ahead.
       look.current = clamp(look.current + a.look * 1.6 * dt - a.dragX * DRAG_LOOK, -1.9, 1.9);
       if (!a.look && !a.dragging) look.current *= Math.exp(-3 * dt);
+      // In the timeline's circle the same drag or arrows swing the camera round the redwood.
+      if (game.timelineYear !== null && preferences.camera !== "god") orbitTurn.current += a.look * 0.8 * dt - a.dragX * DRAG_LOOK;
 
       if (a.interact) {
         const near = treesNear(forest, sim.x, sim.z, 6.8).filter((t) => bookShown(t.book, useGame.getState().timelineYear));
@@ -336,9 +340,10 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     } else if (timeline) {
       // The start screen's slow circle round the redwood, pulled back to hold the whole crown.
       // Cut to it rather than glide: the straight line from the cart can pass through the trunk.
-      const a = state.clock.elapsedTime * ORBIT_RATE;
+      // Drag or arrows swing it round and tilt it up or down (pitch), as they look about on the road.
+      const a = state.clock.elapsedTime * ORBIT_RATE + orbitTurn.current;
       state.camera.position.set(Math.sin(a) * TIMELINE_ORBIT_R, ORBIT_UP, Math.cos(a) * TIMELINE_ORBIT_R);
-      lookAt.set(0, forest.corpusTree.height * TIMELINE_LOOK, 0);
+      lookAt.set(0, forest.corpusTree.height * TIMELINE_LOOK + TIMELINE_ORBIT_R * Math.tan(pitch.current), 0);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;
     } else if (godEye) {

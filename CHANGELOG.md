@@ -26,6 +26,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   bottom-right corner so the whole ring shows.
 - **The timeline opens in clean view**: no minimap or buttons, only its bar.
   Closing it puts the view back as it was.
+- **Look around in the timeline's circle**: drag or the arrow keys swing the
+  camera round the redwood and tilt it, and it stays where you leave it. On
+  touch the bar sits level with the stick, beside it.
+- **Dawn and dusk cast clear shadows**: low-sun shadows fade between 5 and 2
+  degrees instead of 8 and 3, about three quarters strength at dawn.
 - **Exhibits arrive on the timeline in their own year**: the armillary
   sundial about 255 BC, Kepler 1596, the weather mast 1846, Savonius 1922,
   Darrieus 1931, Double Helix 1953, the Flame of Knowledge 1964, the helical
