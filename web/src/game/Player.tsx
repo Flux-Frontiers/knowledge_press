@@ -290,6 +290,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const cam = state.camera as PerspectiveCamera;
     const flight = game.flight;
     const flying = Boolean(flight && flightFrom.current);
+    // The timeline watches the forest grow from the start screen's vantage.
+    const timeline = playing && !flying && game.timelineYear !== null;
     if (playing && wasStart.current) {
       // Leaving the start screen: land behind the cart rather than glide in from the circle.
       wasStart.current = false;
@@ -319,6 +321,13 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         flightFrom.current = null;
         game.endFlight();
       }
+    } else if (timeline) {
+      // The start screen's slow circle round the redwood, eased into from wherever the camera was.
+      const a = state.clock.elapsedTime * ORBIT_RATE;
+      state.camera.position.lerp(camPos.set(Math.sin(a) * ORBIT_R, ORBIT_UP, Math.cos(a) * ORBIT_R), 1 - Math.exp(-2.2 * dt));
+      lookAt.lerp(camPos.set(0, forest.corpusTree.height * 0.3, 0), 1 - Math.exp(-2.2 * dt));
+      cam.far = GROUND_FAR;
+      cam.near = GROUND_NEAR;
     } else if (godEye) {
       // Over the zoomed point (godEye.ts), the whole world in view until the wheel or a pinch says otherwise.
       if (!wasGod.current) {
@@ -368,8 +377,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     }
     // Tilt by raising or lowering the look point over its horizontal distance.
     // Not on the start screen: god's eye set up there would skip its reset on entering.
-    wasGod.current = playing && godEye && !flying;
-    if (playing && !godEye && !flying) {
+    wasGod.current = playing && godEye && !flying && !timeline;
+    if (playing && !godEye && !flying && !timeline) {
       // On a portrait screen the level chase view is half road and cart; rest it tilted up a little.
       const rest = preferences.camera === "follow" && cam.aspect < 1 ? PORTRAIT_TILT : 0;
       lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current + rest);
