@@ -260,17 +260,33 @@ export function textureAnisotropy(n: number): number {
   return WEBKIT ? 1 : n;
 }
 
-/** The shadow camera's half-width, metres, and the shadow map's size; one texel is 2 * SHADOW_HALF / SHADOW_MAP. */
-const SHADOW_HALF = 40;
-const SHADOW_MAP = 2048;
-/** `?nolod` also redraws the shadow map every frame, to compare (shadowCache.ts). */
-const SHADOW_CACHE = typeof window === "undefined" || !new URLSearchParams(window.location.search).has("nolod");
+/**
+ * The shadow camera's half-width, metres, and the shadow map's size; one texel
+ * is 2 * SHADOW_HALF / SHADOW_MAP. Nothing past SHADOW_HALF from the cart casts
+ * a shadow, so at 40 m a grove's shadows appeared as the cart neared it. A Mac
+ * or desktop covers 120 m on a 4096 map (texels 5.9 cm, against 3.9 cm);
+ * touch screens keep 40 m on 2048.
+ */
+const SHADOW_HALF = COARSE_POINTER ? 40 : 120;
+const SHADOW_MAP = COARSE_POINTER ? 2048 : 4096;
+/** How far the light sits back from the cart along its direction; the shadow camera reaches twice this. */
+const SHADOW_BACK = 2 * SHADOW_HALF;
+/** `?nolod` turns off texel snapping and the shadow cache, to compare (shadowCache.ts). */
+const NOLOD = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("nolod");
+/** Shadow map texels snapped, so shadow edges keep still as the cart drives. */
+const SHADOW_SNAP = !NOLOD;
+/**
+ * Redraw the shadow map only when stale on touch screens alone. A Mac or
+ * desktop GPU affords it every frame, so there shadows are simply on or off.
+ */
+const SHADOW_CACHE = COARSE_POINTER && !NOLOD;
 
 /**
  * The one shadow-casting light, from the sun, the moon or the stars (sky.ts),
  * kept on a modest shadow map around the cart instead of covering the forest.
- * The map is redrawn only when it is stale (shadowCache.ts shadowStale), and
- * centred on whole texels so its edges keep still as the cart drives.
+ * On touch screens the map is redrawn only when stale (shadowCache.ts
+ * shadowStale); elsewhere every frame. It is centred on whole texels so its
+ * edges keep still as the cart drives.
  */
 export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shadows: boolean }) {
   const light = useRef<DirectionalLight>(null);
@@ -290,9 +306,9 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
   useFrame(() => {
     if (!light.current) return;
     const d: [number, number, number] = [dir.x, dir.y, dir.z];
-    const [tx, ty, tz] = SHADOW_CACHE ? snapToTexels(sim.x, sim.z, d, (2 * SHADOW_HALF) / SHADOW_MAP) : [sim.x, 0, sim.z];
+    const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(sim.x, sim.z, d, (2 * SHADOW_HALF) / SHADOW_MAP) : [sim.x, 0, sim.z];
     target.position.set(tx, ty, tz);
-    light.current.position.set(tx + dir.x * 80, ty + dir.y * 80, tz + dir.z * 80);
+    light.current.position.set(tx + dir.x * SHADOW_BACK, ty + dir.y * SHADOW_BACK, tz + dir.z * SHADOW_BACK);
     target.updateMatrixWorld();
     if (SHADOW_CACHE && casting) {
       const g = useGame.getState();
@@ -314,7 +330,7 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
     <directionalLight ref={light} target={target} color={l.color}
       intensity={l.intensity} castShadow={casting} shadow-intensity={l.shadow}
       shadow-mapSize={[SHADOW_MAP, SHADOW_MAP]} shadow-camera-left={-SHADOW_HALF} shadow-camera-right={SHADOW_HALF}
-      shadow-camera-top={SHADOW_HALF} shadow-camera-bottom={-SHADOW_HALF} shadow-camera-near={1} shadow-camera-far={160}
+      shadow-camera-top={SHADOW_HALF} shadow-camera-bottom={-SHADOW_HALF} shadow-camera-near={1} shadow-camera-far={2 * SHADOW_BACK}
       shadow-bias={-0.0002} shadow-normalBias={0.08} />
   </>;
 }
