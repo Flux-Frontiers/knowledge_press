@@ -64,36 +64,49 @@ test("visitor: the craft comes in above every crown and the redwood, and drops o
   const end = visitorPose(VISITOR_END + 100);
   assert.ok(Math.abs(end.saucer[1] - REST_Y) < 1e-9 && end.saucer[0] === 0 && end.saucer[2] === 0, "the craft stands on the pad");
   assert.equal(end.legs, 1);
-  assert.equal(end.iris, 1);
-  assert.equal(end.offer, 1);
+  assert.equal(end.iris, 0, "the iris shuts once the cart is back aboard");
 });
 
-test("visitor: the sentinel comes down first, both stop on the plaza facing the road", () => {
+test("visitor: the sentinel comes down first, then the cart, which plants the seed facing the tree and goes back aboard", () => {
   const { getForest } = require(`${build}/forest.js`);
-  const { visitorPose, VISITOR_END, PAD_R } = require(`${build}/visitorScript.js`);
+  const { visitorPose, VISITOR_END, PAD_R, REST_Y, TREE_AT, CART_STOP_DIST } = require(`${build}/visitorScript.js`);
   const e = getForest().exhibits.find((x) => x.id === "landing");
-  let robotOut = null, guestOut = null;
+  let robotOut = null, cartOut = null, far = null;
   for (let t = 0; t <= VISITOR_END; t += 0.05) {
     const p = visitorPose(t);
     if (robotOut === null && p.robot.shown) robotOut = t;
-    if (guestOut === null && p.guest.shown) guestOut = t;
-    if (p.robot.shown || p.guest.shown) assert.ok(p.iris > 0.99, `someone is out at ${t.toFixed(2)} s through a shut iris`);
+    if (cartOut === null && p.cart.shown) cartOut = t;
+    for (const w of [p.robot, p.cart]) {
+      // On the lift below the belly means through the iris, which must be open.
+      if (w.shown && w.y < REST_Y - 1e-3 && Math.hypot(w.x, w.z) < 1) assert.ok(p.iris > 0.99, `through a shut iris at ${t.toFixed(2)} s`);
+    }
+    if (p.grow > 0) assert.equal(p.plant, 1, "the tree grows before the seed is down");
+    const r = Math.hypot(p.cart.x, p.cart.z);
+    if (!far || r > far.r + 1e-9) far = { r, p };
   }
-  assert.ok(robotOut !== null && guestOut !== null && robotOut < guestOut);
+  assert.ok(robotOut !== null && cartOut !== null && robotOut < cartOut);
+  // Out at the tree's spot, facing it (yaw: 0 faces +x, positive turns toward -z).
+  assert.ok(Math.abs(far.r - CART_STOP_DIST) < 1e-9);
+  const want = Math.atan2(-(TREE_AT[2] - far.p.cart.z), TREE_AT[0] - far.p.cart.x);
+  assert.ok(Math.abs(far.p.cart.yaw - want) < 1e-6, "the cart faces the tree");
   const end = visitorPose(VISITOR_END);
-  for (const w of [end.robot, end.guest]) {
-    const r = Math.hypot(w.x, w.z);
-    assert.ok(r > PAD_R && r < e.plazaR - 0.5, `stops at ${r.toFixed(2)} m, pad ${PAD_R}, plaza ${e.plazaR.toFixed(2)}`);
-    assert.equal(w.y, 0);
-    assert.equal(w.stride, null);
-    assert.equal(w.yaw, 0);
-  }
+  const r = Math.hypot(end.robot.x, end.robot.z);
+  assert.ok(r > PAD_R && r < e.plazaR - 0.5, `sentinel stops at ${r.toFixed(2)} m, pad ${PAD_R}, plaza ${e.plazaR.toFixed(2)}`);
+  assert.equal(end.robot.yaw, 0);
+  assert.equal(end.robot.stride, null);
+  // On the paving, not sunk into it.
+  const { PAVE_Y } = require(`${build}/visitorScript.js`);
+  assert.equal(end.robot.y, PAVE_Y);
+  assert.ok(Math.hypot(end.cart.x, end.cart.z) < 1e-9 && Math.abs(end.cart.y - REST_Y) < 1e-9, "the cart is back aboard");
+  assert.equal(end.iris, 0);
+  assert.equal(end.grow, 1);
+  assert.equal(end.caption, 1);
 });
 
 test("visitor: nobody passes through the hull; above the belly they ride the lift inside the shaft", () => {
   const { visitorPose, VISITOR_END, REST_Y, PAD_TOP, SHAFT_R, LIFT_R } = require(`${build}/visitorScript.js`);
-  // Half widths: the sentinel's fins and arms, the visitor's shoulders.
-  const figures = [["robot", 2.75, 0.7], ["guest", 1.85, 0.35]];
+  // Heights and half widths: the sentinel's fins and arms, the cart's corners.
+  const figures = [["robot", 2.75, 0.7], ["cart", 1.15, 0.86]];
   for (let t = 0; t <= VISITOR_END; t += 0.02) {
     const p = visitorPose(t);
     for (const [who, height, half] of figures) {
@@ -116,21 +129,30 @@ test("visitor: the legs are down before the craft touches, and the beam is out b
   }
 });
 
-test("visitor: the camera watches from the spur or the plaza, never among the trees", () => {
+test("visitor: the camera keeps clear of trunks, leaves and the craft, and sees the grown tree past the rim", () => {
   const { getForest } = require(`${build}/forest.js`);
-  const { visitorShot, VISITOR_END } = require(`${build}/visitorScript.js`);
+  const { visitorShot, VISITOR_END, SAUCER_R, TREE_AT } = require(`${build}/visitorScript.js`);
   const f = getForest();
   const e = f.exhibits.find((x) => x.id === "landing");
   const face = Math.atan2(-(e.roadZ - e.z), e.roadX - e.x);
-  const toRoad = Math.hypot(e.roadX - e.x, e.roadZ - e.z);
+  const L = f.leaves;
   for (let t = 0; t <= VISITOR_END; t += 0.1) {
     const { cam } = visitorShot(t);
-    assert.ok(Math.abs(cam[2]) <= 1.5 + 1e-9 && cam[0] > 0 && cam[0] <= toRoad + 6, `camera off the spur at ${t.toFixed(1)} s: ${cam.map((v) => v.toFixed(1))}`);
     assert.ok(cam[1] > 0.5 && cam[1] < 3, `camera at ${cam[1].toFixed(2)} m`);
+    assert.ok(Math.hypot(cam[0], cam[2]) > SAUCER_R + 1, `camera under the rim at ${t.toFixed(1)} s`);
     const x = e.x + cam[0] * Math.cos(face) + cam[2] * Math.sin(face);
     const z = e.z - cam[0] * Math.sin(face) + cam[2] * Math.cos(face);
     for (const t2 of f.trees) assert.ok(Math.hypot(t2.x - x, t2.z - z) - t2.trunkRadius > 2, `camera beside ${t2.book.slug}`);
+    for (let i = 0; i < L.count; i++) {
+      if (L.pos[i * 3 + 1] > cam[1] + 2) continue;
+      assert.ok(Math.hypot(L.pos[i * 3] - x, L.pos[i * 3 + 2] - z) > 1.5, `camera in the leaves at ${t.toFixed(1)} s`);
+    }
   }
+  // At the end, the line from the camera to the tree's trunk passes outside the craft's rim.
+  const { cam } = visitorShot(VISITOR_END);
+  const dx = TREE_AT[0] - cam[0], dz = TREE_AT[2] - cam[2];
+  const miss = Math.abs(cam[0] * dz - cam[2] * dx) / Math.hypot(dx, dz);
+  assert.ok(miss > SAUCER_R + 1, `the craft hides the tree: the sightline passes ${miss.toFixed(1)} m from its axis`);
 });
 
 test("the event swarm: several radiants above the horizon, at storm rates, and nothing at level 0", () => {
@@ -142,4 +164,55 @@ test("the event swarm: several radiants above the horizon, at storm rates, and n
   assert.deepEqual(swarmSources(0), []);
   const full = swarmSources(1).reduce((s, src) => s + src.perHour, 0);
   assert.ok(full / 3600 > 2, `${(full / 3600).toFixed(1)} a second`);
+});
+
+test("the cart's tree: routed at 0 and 45 degrees only, and the same every time", () => {
+  const { artTree } = require(`${build}/artTree.js`);
+  const a = artTree(), b = artTree();
+  assert.deepEqual(a, b);
+  assert.ok(a.segs.length > 100 && a.leaves.length > 100, `${a.segs.length} segments, ${a.leaves.length} leaves`);
+  for (const s of a.segs) {
+    const up = (s.to[1] - s.from[1]) / s.length;
+    const tilt = (Math.acos(Math.min(1, up)) * 180) / Math.PI;
+    assert.ok(Math.abs(tilt) < 1e-6 || Math.abs(tilt - 45) < 1e-6, `a branch at ${tilt.toFixed(2)} degrees`);
+  }
+  assert.ok(a.height > 12 && a.reach > 5, `height ${a.height.toFixed(1)}, reach ${a.reach.toFixed(1)}`);
+});
+
+test("the cart's tree stands off the paving, clear of roads, trees, the redwood and the craft", () => {
+  const { getForest } = require(`${build}/forest.js`);
+  const { artTree } = require(`${build}/artTree.js`);
+  const { TREE_AT, SAUCER_R, visitorShot, VISITOR_END } = require(`${build}/visitorScript.js`);
+  const f = getForest();
+  const e = f.exhibits.find((x) => x.id === "landing");
+  const tree = artTree();
+  const face = Math.atan2(-(e.roadZ - e.z), e.roadX - e.x);
+  const world = (lx, lz) => [e.x + lx * Math.cos(face) + lz * Math.sin(face), e.z - lx * Math.sin(face) + lz * Math.cos(face)];
+  const [x, z] = world(TREE_AT[0], TREE_AT[2]);
+  const dist = Math.hypot(TREE_AT[0], TREE_AT[2]);
+  assert.ok(dist - 0.4 > e.plazaR, "the trunk stands on the paving");
+  assert.ok(dist - tree.reach > SAUCER_R + 0.5, "the crown reaches under the craft's rim");
+  const segDist = (px, pz, ax, az, bx, bz) => {
+    const dx = bx - ax, dz = bz - az;
+    const t = Math.max(0, Math.min(1, ((px - ax) * dx + (pz - az) * dz) / (dx * dx + dz * dz || 1)));
+    return Math.hypot(px - ax - dx * t, pz - az - dz * t);
+  };
+  for (const line of f.roadLines) {
+    const n = line.pts.length;
+    for (let i = 0; i < (line.closed ? n : n - 1); i++) {
+      const [ax, az] = line.pts[i], [bx, bz] = line.pts[(i + 1) % n];
+      assert.ok(segDist(x, z, ax, az, bx, bz) > 3, "the trunk stands on a road");
+    }
+  }
+  for (const t of f.trees) assert.ok(Math.hypot(t.x - x, t.z - z) - t.trunkRadius > tree.reach + 1, `the crown reaches ${t.book.slug}'s trunk`);
+  const L = f.leaves;
+  for (let i = 0; i < L.count; i++) {
+    if (L.pos[i * 3 + 1] < 2) continue;
+    assert.ok(Math.hypot(L.pos[i * 3] - x, L.pos[i * 3 + 2] - z) > tree.reach + 1, "the crown tangles with another tree's leaves");
+  }
+  assert.ok(Math.hypot(x, z) > 20 + tree.reach, "the crown tangles with the redwood's");
+  for (let t = 0; t <= VISITOR_END; t += 0.5) {
+    const { cam } = visitorShot(t);
+    assert.ok(Math.hypot(cam[0] - TREE_AT[0], cam[2] - TREE_AT[2]) > tree.reach + 0.5, "the camera stands in the tree");
+  }
 });

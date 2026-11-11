@@ -1,9 +1,11 @@
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type Ref } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode, type Ref } from "react";
 import {
   AdditiveBlending,
   BoxGeometry,
+  CanvasTexture,
   Color,
+  CylinderGeometry,
   DoubleSide,
   Group,
   InstancedMesh,
@@ -12,12 +14,17 @@ import {
   MeshBasicMaterial,
   MeshStandardMaterial,
   Object3D,
+  OctahedronGeometry,
   PointLight,
+  type Sprite,
+  SpriteMaterial,
+  SRGBColorSpace,
   Vector2,
+  Vector3,
   type BufferGeometry,
 } from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { cinema } from "./cinema";
+import { artTree, grownFraction } from "./artTree";
 import { activeEvent, stage } from "./events";
 import type { Exhibit } from "./exhibits";
 import { reflectionMap } from "./FlameOfKnowledge";
@@ -26,7 +33,7 @@ import { ExhibitPlaque } from "./Signposts";
 import { sim, wrapAngle } from "./sim";
 import { useGame } from "./store";
 import {
-  LEG_H, LIFT_R, PAD_R, PAD_TOP, SAUCER_R, SHAFT_R, VISITOR_END, visitorPose, visitorShot, type Walker,
+  LEG_H, LIFT_R, PAD_R, PAD_TOP, PAVE_Y, SAUCER_R, SHAFT_R, TREE_AT, VISITOR_END, visitorPose, visitorShot, WEDGE, WHEEL_R, type Walker,
 } from "./visitorScript";
 
 /**
@@ -36,22 +43,21 @@ import {
  * a lift from a shaft up its axis, so nothing passes through the hull. Drawn to
  * the Art Techno rules (~/repos/art_techno, docs/STYLE.md): an obsidian hull
  * ruled with copper traces and gold pads, server lights for running lights,
- * an iris for a door, a stepped crown with a green die, and figures carved in
- * a few flat facets. Everything is primitives and lathes except the visitor's
- * head, cut from the Art Techno statue of Knowledge (public/models/visitor_head.glb,
- * ~2,600 triangles, no textures; the brow band is its second material).
+ * an iris for a door, a stepped crown with a green die, a sentinel carved in a
+ * few flat facets, a cart, and a tree routed like a circuit board
+ * (artTree.ts). Everything is primitives and lathes: no models or textures.
  */
 
 const FIELD_BODY =
   "A pad in an open glade with nothing above it but sky. It is kept clear for visitors. " +
   "Most days nobody comes. Now and then someone does.";
 
-const HEAD_URL = "models/visitor_head.glb";
 /** The rider is this close, on the spur or the plaza, when the craft starts its approach (home is about 40 m off). */
 const TRIGGER_DIST = 30;
 const MARKERS = 16;
 const RIM_LIGHTS = 24;
 const TRACES = 16;
+const WEDGE_TILT = Math.atan2(PAD_TOP - PAVE_Y, WEDGE.to - WEDGE.from);
 /** Legs at these bearings, clear of the way out toward the road at 0. */
 const LEG_BEARINGS = [Math.PI / 3, Math.PI, (5 * Math.PI) / 3];
 /** Legs from under the hull out to feet near the pad's edge. */
@@ -109,13 +115,15 @@ function useMaterials() {
       fgold: new MeshStandardMaterial({ color: PALETTE.gold, metalness: 0.35, roughness: 0.42, envMap: env, flatShading: true }),
       fcopper: new MeshStandardMaterial({ color: PALETTE.copper, metalness: 0.35, roughness: 0.45, envMap: env, flatShading: true }),
       fobsidian: new MeshStandardMaterial({ color: "#2a3330", metalness: 0.3, roughness: 0.5, envMap: env, flatShading: true }),
+      treeCopper: new MeshStandardMaterial({ color: PALETTE.copper, emissive: "#5a2a10", emissiveIntensity: 0.2, metalness: 0.5, roughness: 0.38, envMap: env, flatShading: true }),
+      via: new MeshBasicMaterial({ color: "#f0d690" }),
       band: new MeshStandardMaterial({ color: PALETTE.green, emissive: PALETTE.green, emissiveIntensity: 0.5, roughness: 0.35, flatShading: true }),
     };
   }, []);
   useEffect(() => () => Object.values(m).forEach((x) => x.dispose()), [m]);
   // The painted sky fades with the real one, as on the flame.
   const daylight = useGame((s) => s.sky.daylight);
-  for (const k of ["obsidian", "panel", "copper", "gold", "fgold", "fcopper", "fobsidian"] as const) m[k].envMapIntensity = 0.05 + 0.95 * daylight;
+  for (const k of ["obsidian", "panel", "copper", "gold", "fgold", "fcopper", "fobsidian", "treeCopper"] as const) m[k].envMapIntensity = 0.05 + 0.95 * daylight;
   return m;
 }
 
@@ -196,7 +204,7 @@ function Sentinel({ m, groupRef, limbs, sweepRef }: { m: Materials; groupRef: Re
       {[-0.2, 0.2].map((z, i) => (
         <Limb key={z} at={[0, 1.15, z]} len={1.15} top={0.17} bottom={0.13} sides={6} m={m} mat={m.fobsidian} via
           setRef={(g) => { if (i) limbs.legR = g; else limbs.legL = g; }}>
-          <mesh position={[0.06, -1.12, 0]} material={m.fcopper}><boxGeometry args={[0.42, 0.08, 0.24]} /></mesh>
+          <mesh position={[0.06, -1.105, 0]} material={m.fcopper}><boxGeometry args={[0.42, 0.08, 0.24]} /></mesh>
         </Limb>
       ))}
       <mesh position={[0, 1.62, 0]} material={m.fcopper}><cylinderGeometry args={[0.44, 0.33, 0.95, 8]} /></mesh>
@@ -224,62 +232,122 @@ function Sentinel({ m, groupRef, limbs, sweepRef }: { m: Materials; groupRef: Re
   );
 }
 
-/** Knowledge's head, loaded once and painted in the series' gold and green; null until it arrives. */
-function useHead(m: Materials): Object3D | null {
-  const [head, setHead] = useState<Object3D | null>(null);
-  useEffect(() => {
-    let live = true;
-    new GLTFLoader().load(HEAD_URL, (gltf) => {
-      gltf.scene.traverse((o) => {
-        if (!(o instanceof Mesh)) return;
-        // Exported without normals; the materials shade it flat, facet by facet.
-        o.geometry.computeVertexNormals();
-        const band = (o.material as { name?: string }).name === "band";
-        (o.material as MeshStandardMaterial).dispose();
-        o.material = band ? m.band : m.fgold;
-      });
-      if (live) setHead(gltf.scene);
-    }, undefined, () => { /* no head: the visitor stays headless rather than breaking the scene */ });
-    return () => { live = false; };
-  }, [m]);
-  return head;
+/**
+ * The cart: an obsidian rover on four copper-tyred wheels with gold hubs, mint
+ * headlamps, and the seed, a green die in a gold cradle, on its back. Faces +x.
+ */
+function Rover({ m, groupRef, wheels, seedRef }: { m: Materials; groupRef: Ref<Group>; wheels: (Group | null)[]; seedRef: Ref<Mesh> }) {
+  // 1.4 x 0.9 m: its corners stay inside the lift's platform.
+  return (
+    <group ref={groupRef} visible={false}>
+      <mesh position={[0, 0.5, 0]} material={m.fobsidian}><boxGeometry args={[1.4, 0.4, 0.9]} /></mesh>
+      <mesh position={[0, 0.74, 0]} material={m.fobsidian}><boxGeometry args={[1.05, 0.1, 0.68]} /></mesh>
+      <mesh position={[0, 0.705, 0]} material={m.fgold}><boxGeometry args={[1.42, 0.03, 0.92]} /></mesh>
+      {/* A glowing trim round its waist, so it reads at night away from the light. */}
+      <mesh position={[0, 0.42, 0]} material={m.marker}><boxGeometry args={[1.43, 0.04, 0.93]} /></mesh>
+      {[-1, 1].map((sx) => [-1, 1].map((sz, k) => (
+        <group key={`${sx}${sz}`} position={[sx * 0.48, WHEEL_R, sz * 0.5]} ref={(g) => { wheels[(sx > 0 ? 2 : 0) + k] = g; }}>
+          <mesh rotation={[Math.PI / 2, 0, 0]} material={m.fcopper}><cylinderGeometry args={[WHEEL_R, WHEEL_R, 0.14, 8]} /></mesh>
+          <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, sz * 0.075]} material={m.via}><cylinderGeometry args={[0.08, 0.08, 0.02, 8]} /></mesh>
+        </group>
+      )))}
+      {[-0.25, 0.25].map((z) => (
+        <mesh key={z} position={[0.71, 0.52, z]} material={m.lights}><boxGeometry args={[0.02, 0.08, 0.16]} /></mesh>
+      ))}
+      <mesh position={[0, 0.83, 0]} material={m.fgold}><cylinderGeometry args={[0.22, 0.18, 0.08, 8]} /></mesh>
+      <mesh ref={seedRef} position={[0, 1.0, 0]} rotation={[Math.PI / 4, 0, Math.PI / 4]} material={m.die}><boxGeometry args={[0.26, 0.26, 0.26]} /></mesh>
+    </group>
+  );
+}
+
+const CAPTION = "A Gift for the Library";
+
+/** The words under the tree, gold on nothing, drawn once to a canvas. */
+function useCaption() {
+  const tex = useMemo(() => {
+    const c = document.createElement("canvas");
+    c.width = 1536;
+    c.height = 192;
+    const ctx = c.getContext("2d")!;
+    ctx.fillStyle = PALETTE.gold;
+    ctx.fillRect(268, 22, 1000, 3);
+    ctx.fillRect(268, 167, 1000, 3);
+    ctx.font = "italic 600 92px Georgia, 'Times New Roman', serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(CAPTION, 768, 98);
+    const t = new CanvasTexture(c);
+    t.colorSpace = SRGBColorSpace;
+    return t;
+  }, []);
+  useEffect(() => () => tex.dispose(), [tex]);
+  return tex;
 }
 
 /**
- * The visitor: 1.85 m, carved in gold facets like the statue whose head it
- * wears, a green belt with gold studs, copper traces down the legs, and a
- * slate with a green die in the right hand. Faces +x.
+ * The tree the cart plants (artTree.ts): copper branches routed at 0 and 45
+ * degrees, gold vias at the junctions, green dies for leaves. Grown once and
+ * revealed root to tips as `grow` rises; the instances are only rewritten
+ * while it is growing.
  */
-function Guest({ m, groupRef, limbs }: { m: Materials; groupRef: Ref<Group>; limbs: Limbs }) {
-  const head = useHead(m);
+function ArtTreeView({ m }: { m: Materials }) {
+  const tree = useMemo(() => artTree(), []);
+  const segRef = useRef<InstancedMesh>(null);
+  const viaRef = useRef<InstancedMesh>(null);
+  const leafRef = useRef<InstancedMesh>(null);
+  const geo = useMemo(() => ({
+    seg: new CylinderGeometry(1, 1, 1, 6).translate(0, 0.5, 0),
+    via: new OctahedronGeometry(1, 0),
+    leaf: new BoxGeometry(1, 1, 1),
+  }), []);
+  useEffect(() => () => Object.values(geo).forEach((g) => g.dispose()), [geo]);
+  const tmp = useMemo(() => ({ o: new Object3D(), up: new Vector3(0, 1, 0), dir: new Vector3(), last: -1 }), []);
+  const daylight = useGame((s) => s.sky.daylight);
+  // A warm glow in the copper by night, as if lit from within; by day it is plain metal.
+  m.treeCopper.emissiveIntensity = 0.15 + 0.5 * (1 - daylight);
+
+  useFrame(() => {
+    if (landingT === null) return;
+    const g = visitorPose(Math.min(landingT, VISITOR_END)).grow;
+    if (g === tmp.last) return;
+    tmp.last = g;
+    const { o } = tmp;
+    const segs = segRef.current, vias = viaRef.current, leaves = leafRef.current;
+    if (!segs || !vias || !leaves) return;
+    tree.segs.forEach((s, i) => {
+      const f = grownFraction(g, s.along, s.length, tree.total);
+      tmp.dir.set(s.to[0] - s.from[0], s.to[1] - s.from[1], s.to[2] - s.from[2]).normalize();
+      o.position.set(...s.from);
+      o.quaternion.setFromUnitVectors(tmp.up, tmp.dir);
+      // Thin while young, full girth once grown past.
+      o.scale.set(s.radius * (0.4 + 0.6 * f), Math.max(1e-4, s.length * f), s.radius * (0.4 + 0.6 * f));
+      o.updateMatrix();
+      segs.setMatrixAt(i, o.matrix);
+    });
+    tree.vias.forEach((v, i) => {
+      const f = grownFraction(g, v.along, 0.4, tree.total);
+      o.position.set(...v.at);
+      o.quaternion.identity();
+      o.scale.setScalar(Math.max(1e-4, v.size * f));
+      o.updateMatrix();
+      vias.setMatrixAt(i, o.matrix);
+    });
+    tree.leaves.forEach((l, i) => {
+      const f = grownFraction(g, l.along, 0.8, tree.total);
+      o.position.set(...l.at);
+      o.rotation.set(Math.PI / 4, l.spin, Math.PI / 4);
+      o.scale.setScalar(Math.max(1e-4, l.size * f));
+      o.updateMatrix();
+      leaves.setMatrixAt(i, o.matrix);
+    });
+    segs.instanceMatrix.needsUpdate = vias.instanceMatrix.needsUpdate = leaves.instanceMatrix.needsUpdate = true;
+  });
+
   return (
-    <group ref={groupRef} visible={false}>
-      {[-0.11, 0.11].map((z, i) => (
-        <Limb key={z} at={[0, 0.9, z]} len={0.9} top={0.095} bottom={0.065} sides={6} m={m} mat={m.fgold}
-          setRef={(g) => { if (i) limbs.legR = g; else limbs.legL = g; }}>
-          <mesh position={[0, -0.45, z > 0 ? 0.075 : -0.075]} material={m.fcopper}><boxGeometry args={[0.02, 0.8, 0.012]} /></mesh>
-          <mesh position={[0.05, -0.88, 0]} material={m.fgold}><boxGeometry args={[0.22, 0.06, 0.1]} /></mesh>
-        </Limb>
-      ))}
-      <mesh position={[0, 1.2, 0]} material={m.fgold}><cylinderGeometry args={[0.2, 0.17, 0.62, 8]} /></mesh>
-      <mesh position={[0, 0.97, 0]} material={m.band}><cylinderGeometry args={[0.185, 0.185, 0.07, 8]} /></mesh>
-      {[-0.07, 0, 0.07].map((z) => (
-        <mesh key={z} position={[0.18, 0.97, z]} rotation={[0, 0, Math.PI / 2]} material={m.fgold}><cylinderGeometry args={[0.022, 0.022, 0.02, 8]} /></mesh>
-      ))}
-      <mesh position={[0, 1.5, 0]} material={m.fgold}><cylinderGeometry args={[0.12, 0.2, 0.08, 8]} /></mesh>
-      {[-0.26, 0.26].map((z, i) => (
-        <Limb key={z} at={[0, 1.46, z]} len={0.62} top={0.06} bottom={0.045} sides={6} m={m} mat={m.fgold}
-          setRef={(g) => { if (i) limbs.armR = g; else limbs.armL = g; }}>
-          {i ? (
-            <group position={[0.07, -0.66, 0]} rotation={[0, 0, 0.35]}>
-              <mesh material={m.fgold}><boxGeometry args={[0.24, 0.035, 0.31]} /></mesh>
-              <mesh position={[0, 0.02, 0]} material={m.fobsidian}><boxGeometry args={[0.21, 0.02, 0.28]} /></mesh>
-              <mesh position={[0, 0.034, 0]} material={m.die}><boxGeometry args={[0.05, 0.012, 0.05]} /></mesh>
-            </group>
-          ) : null}
-        </Limb>
-      ))}
-      {head ? <primitive object={head} position={[0, 1.47, 0]} scale={0.95} /> : null}
+    <group position={TREE_AT}>
+      <instancedMesh ref={segRef} args={[geo.seg, m.treeCopper, tree.segs.length]} frustumCulled={false} />
+      <instancedMesh ref={viaRef} args={[geo.via, m.via, tree.vias.length]} frustumCulled={false} />
+      <instancedMesh ref={leafRef} args={[geo.leaf, m.die, tree.leaves.length]} frustumCulled={false} />
     </group>
   );
 }
@@ -441,11 +509,17 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
   const beam = useRef<Mesh>(null);
   const dust = useRef<Mesh>(null);
   const robot = useRef<Group>(null);
-  const guest = useRef<Group>(null);
+  const cart = useRef<Group>(null);
+  const wheels = useMemo<(Group | null)[]>(() => [], []);
+  const seedOnCart = useRef<Mesh>(null);
+  const seed = useRef<Mesh>(null);
+  const caption = useRef<Sprite>(null);
+  const captionTex = useCaption();
+  const captionMat = useMemo(() => new SpriteMaterial({ map: captionTex, transparent: true, opacity: 0, depthWrite: false }), [captionTex]);
+  useEffect(() => () => captionMat.dispose(), [captionMat]);
   const sweep = useRef<Mesh>(null);
   const lamp = useRef<PointLight>(null);
   const robotLimbs = useMemo(newLimbs, []);
-  const guestLimbs = useMemo(newLimbs, []);
   const tint = useMemo(() => ({ c: new Color(), mint: new Color(PALETTE.mint), green: new Color(PALETTE.green), white: new Color("#ffffff") }), []);
   const legLen = Math.hypot(LEG_FOOT_R - LEG_TOP_R, LEG_H + LEG_TOP_Y);
   const legTilt = Math.atan2(LEG_FOOT_R - LEG_TOP_R, LEG_H + LEG_TOP_Y);
@@ -501,7 +575,7 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
     m.iris.opacity = 0.9 * p.iris * (1 - p.shaft * 0.7);
     if (p.iris > 0.05 && !sighed) { sighed = true; if (!s.preferences.silent) sigh(); }
     if (lift.current) {
-      lift.current.visible = p.iris > 0.5;
+      lift.current.visible = p.iris > 0.05;
       lift.current.position.y = p.lift;
     }
     if (shaft.current) {
@@ -523,14 +597,34 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
     // The light under the craft: up as the legs come down, full once the iris opens, stronger by night.
     if (lamp.current) lamp.current.intensity = 60 * Math.max(p.iris, 0.4 * p.legs) * (0.55 + 0.45 * (1 - s.sky.daylight));
     poseWalker(robot.current, robotLimbs, p.robot, 0.35, dt);
-    poseWalker(guest.current, guestLimbs, p.guest, 0.5, dt);
+    const c = cart.current;
+    if (c) {
+      c.visible = p.cart.shown;
+      c.position.set(p.cart.x, p.cart.y, p.cart.z);
+      c.rotation.y += wrapAngle(p.cart.yaw - c.rotation.y) * Math.min(1, dt * 5);
+      // On the wedge: nose down going out, nose up coming back.
+      const outward = Math.abs(wrapAngle(c.rotation.y + WEDGE.bearing)) < Math.PI / 2;
+      c.rotation.z = p.cart.y > PAVE_Y + 0.001 && p.cart.y < PAD_TOP - 0.001 ? (outward ? -WEDGE_TILT : WEDGE_TILT) : 0;
+      for (const w of wheels) if (w && p.cart.stride !== null) w.rotation.z = -p.cart.stride;
+    }
+    // The seed hops from the cart's back to the ground at the tree's foot, and sinks in.
+    if (seedOnCart.current) seedOnCart.current.visible = p.plant === 0;
+    if (seed.current) {
+      seed.current.visible = p.plant > 0 && p.grow < 0.02;
+      const k = p.plant;
+      seed.current.position.set(
+        p.cart.x + (TREE_AT[0] - p.cart.x) * k,
+        1.0 * (1 - k) + 2.2 * k * (1 - k) * 2,
+        p.cart.z + (TREE_AT[2] - p.cart.z) * k,
+      );
+    }
+    captionMat.opacity = p.caption;
+    if (caption.current) caption.current.visible = p.caption > 0.01;
     m.visor.opacity = 0.15 + 0.85 * p.visor;
     if (sweep.current) {
       sweep.current.visible = p.visor > 0.05;
       sweep.current.position.z = 0.13 * p.sweep;
     }
-    // Standing, the visitor's right arm comes up and forward, the slate held out.
-    if (guestLimbs.armR && p.guest.stride === null) guestLimbs.armR.rotation.z = 1.6 * p.offer;
 
     // The camera follows the landing while the rider sits still, and lets go a little after.
     const watching = landingT < VISITOR_END + 3 && s.preferences.motion && cinema.idle > 1.2 && Math.abs(sim.speed) < 0.3;
@@ -589,7 +683,12 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
       {/* One real light, only while the event is on: at the rim on the road side, over where the two stand. */}
       <pointLight ref={lamp} position={[9.6, 3.6, 1.5]} color="#e4fbf1" intensity={0} distance={20} decay={2} />
       <Sentinel m={m} groupRef={robot} limbs={robotLimbs} sweepRef={sweep} />
-      <Guest m={m} groupRef={guest} limbs={guestLimbs} />
+      <Rover m={m} groupRef={cart} wheels={wheels} seedRef={seedOnCart} />
+      <mesh ref={seed} rotation={[Math.PI / 4, 0, Math.PI / 4]} material={m.die} visible={false}><boxGeometry args={[0.24, 0.24, 0.24]} /></mesh>
+      <ArtTreeView m={m} />
+      {/* Toward the spur from the tree's foot, so it reads in front of the trunk. */}
+      <sprite ref={caption} material={captionMat} visible={false} scale={[10, 1.25, 1]}
+        position={[TREE_AT[0] + 2.4, 2.4, TREE_AT[2] + 2.2]} />
     </>
   );
 }
@@ -609,6 +708,12 @@ export function LandingField({ exhibit }: { exhibit: Exhibit }) {
           <cylinderGeometry args={[PAD_R, PAD_R + 0.15, PAD_TOP, 32]} />
         </mesh>
         <PadMarkers m={m} />
+        {/* The wedge the cart rolls down off the pad's edge. */}
+        <group rotation={[0, -WEDGE.bearing, 0]}>
+          <mesh position={[(WEDGE.from + WEDGE.to) / 2, (PAD_TOP + PAVE_Y) / 2 - 0.03, 0]} rotation={[0, 0, -WEDGE_TILT]} material={m.pad}>
+            <boxGeometry args={[Math.hypot(WEDGE.to - WEDGE.from, PAD_TOP - PAVE_Y) + 0.1, 0.08, 1.7]} />
+          </mesh>
+        </group>
         {event === "visitor" ? <Visitor exhibit={exhibit} face={face} m={m} /> : null}
       </group>
     </group>

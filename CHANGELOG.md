@@ -18,13 +18,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   their glades.
 - **The visitor event** (`web/src/game/events.ts`), staged on the landing
   field during a booked window, or now with `?event=visitor`. An Art Techno
-  craft flies in over the redwood, comes down over the pad on its legs and
-  lowers a lift. A faceless sentinel steps off, then a visitor wearing the
-  head of the Art Techno statue of Knowledge, who holds out a slate. While
-  the rider sits still, the camera follows the landing in clean view. The
-  craft hums (WebAudio, no files), and a meteor swarm falls from five
-  radiants. It adds about 60 KB, including a 44 KB head model. No dates are
-  booked yet.
+  craft, 17 m across, flies in above the redwood and comes down over the pad
+  on three legs. It opens an iris and lowers a lift. A faceless sentinel
+  steps off, then a cart rolls out, plants a seed and goes back aboard while
+  an Art Techno tree grows, routed like a circuit board at 0 and 45 degrees.
+  "A Gift for the Library" appears under it. While the rider sits still, the
+  camera follows the landing in clean view. The craft hums (WebAudio, no
+  files), glowing traces light its underside, one light under it shows the
+  pad, and a meteor swarm falls from five radiants. Everything is built in
+  code, with no models or textures, and it adds about 19 KB to the forest's
+  script. No dates are booked yet.
 - **`web/scripts/profile.mjs`** measures where the forest's frame goes:
   triangles, draw calls and render time per camera view and leaf level, with
   and without the leaves, and the shadow pass on its own. It runs in headless
