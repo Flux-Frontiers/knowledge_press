@@ -1,3 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+<g transform="translate(512 512) scale(1.25) translate(-512 -512)">
   <ellipse cx="350" cy="512" rx="76" ry="132" fill="#151b29"/><ellipse cx="674" cy="512" rx="76" ry="132" fill="#151b29"/><ellipse cx="512" cy="512" rx="112" ry="128" fill="#151b29"/><line x1="350" y1="512" x2="466" y2="456" stroke="#b596f5" stroke-width="15"/><line x1="466" y1="456" x2="558" y2="456" stroke="#b596f5" stroke-width="15"/><line x1="558" y1="456" x2="674" y2="512" stroke="#b596f5" stroke-width="15"/><line x1="466" y1="456" x2="512" y2="574" stroke="#b596f5" stroke-width="15"/><line x1="558" y1="456" x2="512" y2="574" stroke="#b596f5" stroke-width="15"/><circle cx="350" cy="512" r="23" fill="#b596f5"/><circle cx="466" cy="456" r="23" fill="#b596f5"/><circle cx="558" cy="456" r="23" fill="#b596f5"/><circle cx="512" cy="574" r="23" fill="#b596f5"/><circle cx="674" cy="512" r="23" fill="#b596f5"/>
+</g>
 </svg>
