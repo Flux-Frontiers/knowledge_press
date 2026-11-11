@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 globalThis.window ??= { localStorage: { getItem: () => null, setItem() {} } };
 
-const { godView, godLimits, resetGodView, zoomGodView, godPose, groundPose, flightPose, FLIGHT_S, GOD_TILT } =
+const { godView, godLimits, resetGodView, zoomGodView, panGodView, godPose, groundPose, flightPose, FLIGHT_S, GOD_TILT } =
   require(`${process.env.FOREST_TEST_BUILD}/godEye.js`);
 
 const WORLD = 300;
@@ -46,6 +46,28 @@ test("a zoomed view never leaves the world", () => {
   resetGodView(limits.max);
   for (let i = 0; i < 50; i++) zoomGodView(5000, 5000, 0.9, limits, WORLD);
   assert.ok(Math.hypot(godView.cx, godView.cz) <= WORLD + 1e-9);
+});
+
+test("a pan moves the centre by the drag, on the ground", () => {
+  resetGodView(limits.max);
+  zoomGodView(0, 0, 0.3, limits, WORLD);
+  const [x0, z0] = [godView.cx, godView.cz];
+  panGodView(12, -7, limits, WORLD);
+  assert.ok(Math.abs(godView.cx - (x0 + 12)) < 1e-9 && Math.abs(godView.cz - (z0 - 7)) < 1e-9);
+  // The height is the zoom's business, not the pan's.
+  const h = godView.height;
+  panGodView(-30, 40, limits, WORLD);
+  assert.equal(godView.height, h);
+});
+
+test("a pan never leaves the world, and all the way out it stays over the hub", () => {
+  resetGodView(limits.max);
+  panGodView(80, 80, limits, WORLD);
+  assert.equal(Math.hypot(godView.cx, godView.cz), 0);
+  for (let i = 0; i < 200; i++) zoomGodView(0, 0, 0.8, limits, WORLD);
+  for (let i = 0; i < 100; i++) panGodView(50, -50, limits, WORLD);
+  assert.ok(Math.hypot(godView.cx, godView.cz) <= WORLD + 1e-9);
+  assert.ok(Math.hypot(godView.cx, godView.cz) > WORLD * 0.99);
 });
 
 test("the god's-eye pose looks at its centre from the south", () => {

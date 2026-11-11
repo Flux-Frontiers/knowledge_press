@@ -88,6 +88,17 @@ export function meteorSources(solarLon: number, starMatrix: readonly number[]): 
   return out;
 }
 
+/** Radiants for an event's meteor swarm (events.ts), world directions spread round the sky. */
+export const SWARM_RADIANTS: Vec3[] = ([[0.5, 0.55, 0.67], [-0.6, 0.5, 0.62], [0.1, 0.8, -0.59], [-0.45, 0.35, -0.82], [0.85, 0.3, -0.2]] as Vec3[]).map(normalize);
+/** Meteors an hour from each swarm radiant at full strength: five or six a second over the whole sky. */
+export const SWARM_HR = 4000;
+
+/** The swarm's sources at `level` (0 to 1): every radiant at SWARM_HR times the level, fast and green-white. */
+export function swarmSources(level: number): MeteorSource[] {
+  if (level <= 0) return [];
+  return SWARM_RADIANTS.map((radiant, i) => ({ shower: null, radiant, perHour: SWARM_HR * level, v: 50 + 6 * i }));
+}
+
 /**
  * The `?meteors=` knob. A shower's key pins it to its peak, with an optional
  * multiple of its rate ("perseids", "perseids:20"); a bare number multiplies

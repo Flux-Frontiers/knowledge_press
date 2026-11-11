@@ -6,6 +6,7 @@ import { sunflower, wheelLayout } from "./math";
 import type { Junction } from "./roads";
 import { groveNarration } from "./narration";
 import { SPECIES, speciesFor } from "./species";
+import { bookShown } from "./timeline";
 
 export const GENRE_PALETTE = [
   "#c45c4a",
@@ -164,8 +165,8 @@ export type Forest = {
   corpusTree: CorpusTree;
   /** Set pieces in roadside glades. */
   exhibits: Exhibit[];
-  /** Discs the cart cannot drive into besides trunks: the redwood and each exhibit's plinth. */
-  obstacles: { x: number; z: number; r: number }[];
+  /** Discs the cart cannot drive into besides trunks: the redwood and each exhibit's plinth (with its timeline year). */
+  obstacles: { x: number; z: number; r: number; year?: number }[];
   grid: Map<string, number[]>;
   cell: number;
 };
@@ -175,6 +176,23 @@ let cachedVersion = "";
 
 function cellKey(cx: number, cz: number): string {
   return cx + ":" + cz;
+}
+
+/**
+ * The corpus redwood at the timeline's year: grown from the books standing then,
+ * one limb each. Its height is the full redwood's times the square root of the
+ * shown share of the corpus's chunks, so it starts as a sapling and ends at full
+ * size; the height rule's log alone would make the first book (the Bible, 6,696
+ * chunks) 43 of the full 63 m. Not cached; the caller memoizes per year.
+ *
+ * :param forest: The forest.
+ * :param year: The timeline's year, or null when it is off (the full redwood).
+ */
+export function corpusTreeAt(forest: Forest, year: number | null): CorpusTree {
+  if (year === null) return forest.corpusTree;
+  const shown = forest.trees.filter((t) => bookShown(t.book, year));
+  const share = shown.reduce((n, t) => n + t.book.chunks, 0) / forest.corpusTree.totalChunks;
+  return growCorpusTree(shown, forest.corpusTree.height * Math.sqrt(share));
 }
 
 export function getForest(leafMultiplier = 1): Forest {
@@ -605,7 +623,7 @@ function buildForest(leafMultiplier: number): Forest {
     worldRadius: worldRadius + 18,
     corpusTree,
     exhibits,
-    obstacles: [{ x: 0, z: 0, r: corpusTree.baseRadius }, ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.obstacle }))],
+    obstacles: [{ x: 0, z: 0, r: corpusTree.baseRadius }, ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.obstacle, year: e.year }))],
     grid,
     cell,
   };

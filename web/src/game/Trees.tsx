@@ -1,16 +1,33 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, RepeatWrapping, RGBADepthPacking, Shape, ShapeGeometry, SRGBColorSpace, TextureLoader, Vector2 } from "three";
-import { textureAnisotropy } from "./Environment";
+import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, InstancedBufferAttribute, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, RepeatWrapping, RGBADepthPacking, Shape, ShapeGeometry, SRGBColorSpace, TextureLoader, Vector2 } from "three";
+import { COARSE_POINTER, textureAnisotropy } from "./Environment";
 import { useGame } from "./store";
 import type { Forest } from "./forest";
 import { bookMatchesQuery } from "./forest";
+import { godLeafBlend, leafFraction, leafHash, leafOrder } from "./leafLod";
 import { SEASONS, type SeasonName } from "./seasons";
 import { leafOutline, SPECIES, type LeafShape, type Species } from "./species";
+import { bookShown, TIMELINE_OFF } from "./timeline";
 
 const dummy = new Object3D();
 const color = new Color();
 const white = new Color("#ffffff");
+
+/** The literary timeline's year (timeline.ts), shared by every tree shader; a vertex whose `bookYear` is later collapses to nothing. */
+const timelineYear = { value: TIMELINE_OFF };
+/** The year an undated book's vertices carry: before any timeline stop, so it always stands. */
+const UNDATED = -1e6;
+
+/** Collapses the vertices of trees whose year has not come (bark, and its shadow). */
+function gateByYear(material: MeshStandardMaterial | MeshDepthMaterial, key: string) {
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.timelineYear = timelineYear;
+    shader.vertexShader = "attribute float bookYear; uniform float timelineYear;\n" + shader.vertexShader.replace(
+      "#include <begin_vertex>", "#include <begin_vertex>\n          transformed *= step(bookYear, timelineYear);");
+  };
+  material.customProgramCacheKey = () => key;
+}
 
 // CC0 bark from ambientCG; see public/textures/bark/CREDITS.md.
 function barkMaterial(species: Species) {
@@ -22,13 +39,21 @@ function barkMaterial(species: Species) {
     if (srgb) tex.colorSpace = SRGBColorSpace;
     return tex;
   };
-  return new MeshStandardMaterial({
+  const material = new MeshStandardMaterial({
     map: load("color", true),
     normalMap: load("normal"),
     roughness: 0.92,
     vertexColors: true,
     metalness: 0,
   });
+  gateByYear(material, "forest-bark-year-v1");
+  return material;
+}
+
+function barkDepthMaterial() {
+  const material = new MeshDepthMaterial({ depthPacking: RGBADepthPacking });
+  gateByYear(material, "forest-bark-depth-year-v1");
+  return material;
 }
 
 function leafGeometry(leaf: LeafShape) {
@@ -39,10 +64,17 @@ function leafGeometry(leaf: LeafShape) {
 
 function keepLeaf(i: number, density: number): boolean {
   if (density >= 0.999) return true;
-  // Mix adjacent indices; the old sequence kept almost every early winter leaf.
-  const h = ((Math.imul(i + 1, 1664525) ^ Math.imul(i + 7, 1013904223)) >>> 0) / 4294967296;
-  return h < density;
+  return leafHash(i) < density;
 }
+
+/** Groves nearer than this, metres from the camera to the grove's edge, draw every leaf; pointer screens (Macs, desktops) never thin. */
+const LEAF_FULL = COARSE_POINTER ? 60 : Infinity;
+/** The fewest leaves a far grove keeps, as a fraction of its own. */
+const LEAF_FLOOR = 0.15;
+/** About where the crowns are, metres: god's-eye thinning reads the camera's height above them. */
+const CROWN_HEIGHT = 12;
+/** `?nolod` draws god's eye with every leaf, as before godLeafBlend, to compare. */
+const GOD_LOD = typeof window === "undefined" || !new URLSearchParams(window.location.search).has("nolod");
 
 export function Trees({
   forest,
@@ -58,14 +90,22 @@ export function Trees({
   const q = query.trim();
   const wind = useMemo(() => ({ value: 0 }), []);
   const windStrength = useMemo(() => ({ value: 0 }), []);
-  const materials = useMemo(() => {
+  // One leaf and depth material per grove, all on one shader program, so each can carry its own
+  // `leafScale`: three uploads a material's uniforms only when the material changes between draws.
+  const materials = useMemo(() => forest.chunks.map(() => {
+    const leafScale = { value: 1 };
     const leaf = new MeshStandardMaterial({ roughness: 0.8, side: DoubleSide });
     const depth = new MeshDepthMaterial({ depthPacking: RGBADepthPacking, side: DoubleSide });
     for (const material of [leaf, depth]) {
       material.onBeforeCompile = (shader) => {
         shader.uniforms.windTime = wind;
         shader.uniforms.windStrength = windStrength;
-        shader.vertexShader = "uniform float windTime; uniform float windStrength;\n" + shader.vertexShader;
+        shader.uniforms.leafScale = leafScale;
+        shader.uniforms.timelineYear = timelineYear;
+        shader.vertexShader = "uniform float windTime; uniform float windStrength; uniform float leafScale;\n"
+          + "attribute float bookYear; uniform float timelineYear;\n" + shader.vertexShader;
+        // God's eye draws fewer leaves, each enlarged about its stalk (leafLod.ts godLeafBlend).
+        shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n          float shown = step(bookYear, timelineYear);\n          transformed *= leafScale * shown;");
         // Three's project_vertex, with the wind added in world space after the
         // instance matrix: in leaf space a flap along the face normal would be
         // scaled down by the blade's thin z.
@@ -85,24 +125,32 @@ export function Trees({
           float flap = sin(windTime * 4.0 + phase * 3.0) + 0.5 * sin(windTime * 6.4 + phase * 1.7);
           // Divided, not normalize(): a hidden leaf is scaled to zero, and normalize(0) is NaN.
           vec3 leafNormal = instanceMatrix[2].xyz / max(length(instanceMatrix[2].xyz), 1e-6);
-          mvPosition.xyz += leafNormal * flap * tip * w * .35 * length(instanceMatrix[1].xyz);
+          mvPosition.xyz += leafNormal * flap * tip * w * .35 * leafScale * shown * length(instanceMatrix[1].xyz);
           mvPosition = modelViewMatrix * mvPosition;
           gl_Position = projectionMatrix * mvPosition;
         `);
       };
-      material.customProgramCacheKey = () => "forest-leaf-wind-v3";
+      material.customProgramCacheKey = () => "forest-leaf-wind-v5";
     }
-    return { leaf, depth };
-  }, [wind, windStrength]);
-  useEffect(() => () => { materials.leaf.dispose(); materials.depth.dispose(); }, [materials]);
+    return { leaf, depth, leafScale };
+  }), [forest, wind, windStrength]);
+  useEffect(() => () => materials.forEach((m) => { m.leaf.dispose(); m.depth.dispose(); }), [materials]);
 
   // A tree portrait (portrait.ts) shows one tree and nothing else of the forest.
   const only = useGame((s) => s.portrait?.tree ?? null);
   // The tree speaking in a moot (MootOverlay.tsx) gets a ring in its moot color.
   const mootSpeaker = useGame((s) => s.mootSpeaker);
+  const year = useGame((s) => s.timelineYear);
 
-  const bark = useMemo(() => forest.chunks.map(({ bark: b }) => {
+  // Each vertex and leaf carries its book's year, for the timeline's shader gate.
+  const treeYears = useMemo(() => forest.trees.map((t) => t.book.year ?? UNDATED), [forest]);
+  const bark = useMemo(() => forest.chunks.map(({ bark: b }, ci) => {
     const g = new BufferGeometry();
+    const years = new Float32Array(b.count);
+    forest.trees.forEach((t, ti) => {
+      if (t.chunk === ci) years.fill(treeYears[ti]!, t.woodStart, t.woodStart + t.woodCount);
+    });
+    g.setAttribute("bookYear", new BufferAttribute(years, 1));
     g.setAttribute("position", new BufferAttribute(b.pos, 3));
     g.setAttribute("normal", new BufferAttribute(b.normal, 3));
     g.setAttribute("uv", new BufferAttribute(b.uv, 2));
@@ -110,7 +158,7 @@ export function Trees({
     g.setIndex(new BufferAttribute(b.index, 1));
     g.computeBoundingSphere();
     return g;
-  }), [forest]);
+  }), [forest, treeYears]);
   // The subject's own triangles: its grove's bark with the index cut down to the tree's vertex range.
   const subjectBark = useMemo(() => {
     if (only === null) return null;
@@ -124,16 +172,34 @@ export function Trees({
       if (a >= tree.woodStart && a < end) kept.push(a, index[i + 1]!, index[i + 2]!);
     }
     const g = new BufferGeometry();
-    for (const name of ["position", "normal", "uv", "color"]) g.setAttribute(name, source.getAttribute(name));
+    for (const name of ["position", "normal", "uv", "color", "bookYear"]) g.setAttribute(name, source.getAttribute(name));
     g.setIndex(kept);
     g.computeBoundingSphere();
     return g;
   }, [forest, bark, only]);
   useEffect(() => () => subjectBark?.dispose(), [subjectBark]);
   const barkMats = useMemo(() => SPECIES.map(barkMaterial), []);
+  const barkDepth = useMemo(barkDepthMaterial, []);
   const leafGeoms = useMemo(() => SPECIES.map((s) => leafGeometry(s.leaf)), []);
   const leafRefs = useRef<(InstancedMesh | null)[]>([]);
   const chunkRefs = useRef<(Group | null)[]>([]);
+  const orders = useMemo(() => forest.chunks.map((c) => leafOrder(c.leafStart, c.leafCount)), [forest]);
+  // Per grove, its species' leaf shape plus each instance slot's year, in the slot order the layout effect writes.
+  const groveLeafGeoms = useMemo(() => forest.chunks.map((c, ci) => {
+    const base = leafGeoms[c.species]!;
+    const g = new BufferGeometry();
+    for (const name of Object.keys(base.attributes)) g.setAttribute(name, base.getAttribute(name));
+    g.setIndex(base.getIndex());
+    const years = new Float32Array(Math.max(1, c.leafCount));
+    const order = orders[ci]!;
+    for (let n = 0; n < c.leafCount; n++) years[n] = treeYears[forest.leaves.treeIndex[c.leafStart + order[n]!]!]!;
+    g.setAttribute("bookYear", new InstancedBufferAttribute(years, 1));
+    return g;
+  }), [forest, leafGeoms, orders, treeYears]);
+  useEffect(() => () => groveLeafGeoms.forEach((g) => g.dispose()), [groveLeafGeoms]);
+  useEffect(() => () => barkDepth.dispose(), [barkDepth]);
+  // Per grove, the slots up to the last leaf with any size; the frame loop cuts the count below it by distance.
+  const kept = useRef<number[]>([]);
   useEffect(() => () => bark.forEach((g) => g.dispose()), [bark]);
   useEffect(() => () => leafGeoms.forEach((g) => g.dispose()), [leafGeoms]);
   useEffect(() => () => {
@@ -146,16 +212,33 @@ export function Trees({
   useFrame(({ camera, scene }, delta) => {
     const s = useGame.getState();
     windStrength.value = s.preferences.motion ? 1 : 0;
+    // A portrait shows its tree whatever the timeline's year.
+    timelineYear.value = s.portrait === null && s.timelineYear !== null ? s.timelineYear : TIMELINE_OFF;
     if (s.preferences.motion && !s.paused) wind.value += Math.min(delta, 0.1);
     // Hide groves the fog has swallowed (exp2 fog is 99.9% opaque at 2.6 / density);
     // hidden chunks also drop out of the shadow pass.
     const density = scene.fog && "density" in scene.fog ? (scene.fog.density as number) : 0;
     const cutoff = density > 0 ? 2.6 / density : Infinity;
+    // God's eye sees every grove from far above: thinning by count alone would bare the
+    // whole forest, so there it draws fewer, larger leaves instead, eased in from the
+    // ground's thinning by height so a dive to the cart lands without a change (godLeafBlend).
+    // The camera mode stays "god" through a dive until it lands.
+    const god = s.preferences.camera === "god" && s.portrait === null;
+    const thin = !god && s.portrait === null;
     forest.chunks.forEach((c, i) => {
       const g = chunkRefs.current[i];
       if (!g) return;
       const subject = s.portrait ? forest.trees[s.portrait.tree]!.chunk : null;
-      g.visible = subject !== null ? i === subject : Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius < cutoff;
+      const dist = Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius;
+      g.visible = subject !== null ? i === subject : dist < cutoff;
+      const mesh = leafRefs.current[i];
+      const full = kept.current[i] ?? c.leafCount;
+      const above = camera.position.y - CROWN_HEIGHT;
+      const lod = god && GOD_LOD
+        ? godLeafBlend(Math.hypot(Math.max(0, dist), Math.max(0, above)), above, leafFraction(dist, LEAF_FULL, LEAF_FLOOR))
+        : null;
+      if (mesh) mesh.count = lod ? Math.max(1, Math.ceil(full * lod.fraction)) : thin ? Math.max(1, Math.ceil(full * leafFraction(dist, LEAF_FULL, LEAF_FLOOR))) : full;
+      materials[i]!.leafScale.value = lod ? lod.scale : 1;
     });
   });
 
@@ -190,13 +273,16 @@ export function Trees({
       if (!mesh) return;
       const [dh, ds, dl] = SPECIES[chunk.species]!.foliageShift;
       const foliage = palette.foliage.map((hex) => new Color(hex).offsetHSL(dh, ds, dl));
+      const order = orders[ci]!;
+      let last = -1;
       for (let n = 0; n < chunk.leafCount; n++) {
-        const i = chunk.leafStart + n;
+        const i = chunk.leafStart + order[n]!;
         const treeI = treeIndex[i]!;
         const dim = match && !match.has(treeI);
         const visible = keepLeaf(i, palette.density) && !dim;
         dummy.position.set(pos[i * 3]!, pos[i * 3 + 1]!, pos[i * 3 + 2]!);
         const s = visible ? 1 : match && dim && only === null ? 0.15 : 0;
+        if (s > 0) last = n;
         dummy.scale.set(scale[i * 3]! * s, scale[i * 3 + 1]! * s, scale[i * 3 + 2]! * s);
         dummy.quaternion.set(quat[i * 4]!, quat[i * 4 + 1]!, quat[i * 4 + 2]!, quat[i * 4 + 3]!);
         dummy.updateMatrix();
@@ -207,11 +293,12 @@ export function Trees({
       }
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      kept.current[ci] = last + 1;
       mesh.count = chunk.leafCount;
       // Bounds from the real instances, so frustum culling can skip this grove.
       mesh.computeBoundingSphere();
     });
-  }, [forest, palette, match, only]);
+  }, [forest, palette, match, only, orders]);
 
   useLayoutEffect(() => {
     const mesh = ringRef.current;
@@ -220,7 +307,7 @@ export function Trees({
       dummy.position.set(t.x, 0.05, t.z);
       dummy.rotation.set(-Math.PI / 2, 0, 0);
       const speaking = only === null && t.book.slug === mootSpeaker?.slug;
-      const on = speaking || (match && only === null ? match.has(i) : false);
+      const on = speaking || (match && only === null ? match.has(i) && bookShown(t.book, year) : false);
       const r = t.trunkRadius * (speaking ? 7 : 4.2);
       dummy.scale.set(on ? r : 0.0001, on ? r : 0.0001, 1);
       dummy.updateMatrix();
@@ -230,16 +317,16 @@ export function Trees({
     });
     mesh.instanceMatrix.needsUpdate = true;
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [forest, match, only, mootSpeaker]);
+  }, [forest, match, only, mootSpeaker, year]);
 
   return (
     <group>
       {forest.chunks.map((chunk, ci) => (
         <group key={`chunk-${ci}`} ref={(g) => { chunkRefs.current[ci] = g; }}
           visible={only === null || ci === forest.trees[only]!.chunk}>
-          <mesh geometry={subjectBark && ci === forest.trees[only!]!.chunk ? subjectBark : bark[ci]} material={barkMats[chunk.species]} castShadow receiveShadow />
+          <mesh geometry={subjectBark && ci === forest.trees[only!]!.chunk ? subjectBark : bark[ci]} material={barkMats[chunk.species]} customDepthMaterial={barkDepth} castShadow receiveShadow />
           <instancedMesh ref={(m) => { leafRefs.current[ci] = m; }}
-            args={[leafGeoms[chunk.species], materials.leaf, Math.max(1, chunk.leafCount)]} customDepthMaterial={materials.depth}
+            args={[groveLeafGeoms[ci], materials[ci]!.leaf, Math.max(1, chunk.leafCount)]} customDepthMaterial={materials[ci]!.depth}
             castShadow receiveShadow />
         </group>
       ))}

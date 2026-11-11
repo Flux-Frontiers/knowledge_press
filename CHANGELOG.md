@@ -11,6 +11,168 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **The timeline grows the corpus redwood.** At each year the redwood
+  regrows from the books standing then, so its limbs and plaque match the
+  forest shown. Its height is the full redwood's times the square root of
+  the shown share of the corpus, so it starts as a sapling (about 8 m with
+  the Bible alone) and ends at full size.
+- **The timeline watches from the opening shot.** While it is open, the
+  camera circles the redwood as the start screen does, pulled back so the
+  full-grown crown stays in frame. It cuts to the circle and back to the
+  cart rather than gliding, which could pass through the trunk. In god's
+  eye the timeline keeps the overhead view, with its bar moved to the
+  bottom-right corner so the whole ring shows.
+- **The timeline opens in clean view**: no minimap or buttons, only its bar.
+  Closing it puts the view back as it was.
+- **Look around in the timeline's circle**: drag or the arrow keys swing the
+  camera round the redwood and tilt it, and it stays where you leave it. On
+  touch the bar sits level with the stick, beside it.
+- **No drive stick in god's eye** on touch: the cart is not driven from there.
+- **God's-eye grove names are tidier**: "Literature" is shortened to "Lit.",
+  and American Lit., Russian Lit. and Ancient & Classical sit just past
+  their groves' north edge instead of over the middle.
+- **Dawn and dusk cast clear shadows**: low-sun shadows fade between 5 and 2
+  degrees instead of 8 and 3, about three quarters strength at dawn.
+- **Exhibits arrive on the timeline in their own year**: the armillary
+  sundial about 255 BC, Kepler 1596, the weather mast 1846, Savonius 1922,
+  Darrieus 1931, Double Helix 1953, the Flame of Knowledge 1964, the helical
+  rotor 1995. Each year is a slider stop of its own. The landing field
+  stands throughout.
+- **The Landing Field**, a new exhibit: a raised pad in an open glade, kept
+  for in-app events. It is placed after the other exhibits, so they keep
+  their glades.
+- **The visitor event** (`web/src/game/events.ts`), staged on the landing
+  field during a booked window, or now with `?event=visitor`. An Art Techno
+  craft, 17 m across, flies in above the redwood and comes down over the pad
+  on three legs. It opens an iris and lowers a lift. A faceless sentinel
+  steps off, then a cart rolls out and plants a seed, and an Art Techno tree
+  grows, routed like a circuit board at 0 and 45 degrees, while the cart
+  comes round to stand beside the sentinel. While the rider sits still, the
+  camera follows the landing in clean view. The craft hums (WebAudio, no
+  files), glowing traces light its underside, one light under it shows the
+  pad, and a meteor swarm falls from five radiants. Everything is built in
+  code, with no models or textures, and it adds about 19 KB to the forest's
+  script. No dates are booked yet.
+- **Timeline: grow the forest by date.** "Timeline" in the HUD menu opens a
+  bar in the search's place with a slider over every year a work appeared
+  (1000 BC to 1931), play and pause, and running totals of works,
+  groves and chunks. Trees whose year has not come are hidden on the GPU
+  (a per-vertex year and one uniform), with their shadows; the layout never
+  moves. Hidden trees do not block the cart, pop up cards, answer taps or
+  searches. The slider steps by year, not by time, so the empty centuries
+  before 1500 take little of its travel.
+- **Every book in the forest catalog has a literary year.** `Book.year` is
+  the year the work was first published, performed or, for ancient and sacred
+  texts, composed; negative years are BC. It comes from gutenberg_kg's
+  `corpus/pub_dates.tsv` through `gutenkg export-web-catalog`, and is the data
+  for the timeline.
+- **`web/scripts/profile.mjs`** measures where the forest's frame goes:
+  triangles, draw calls and render time per camera view and leaf level, with
+  and without the leaves, and the shadow pass on its own. It runs in headless
+  Chromium with software WebGL, so its times compare cases rather than predict
+  a device; its counts are exact. `?profile` hands it the renderer.
+- **R opens the book** in the reader: the tree whose card is showing, or
+  else the nearest tree within reach. The card's button reads **Open the book
+  · R**, and the key lists in About, the start screen and the guide include it.
+- **Pan in god's eye.** Drag with the mouse or one finger to move the map,
+  the ground following the pointer; two fingers pan as they pinch. How far
+  the view can pan grows as it zooms in, so all the way out it stays over the
+  hub. A drag that ends over a tree does not open its card.
+- **Reset all settings**, at the bottom of Settings, puts search, synthesis
+  and illustrations back to their defaults and clears the worker address. The
+  corpus scope, the answer engine and your conversations are kept.
+
+### Changed
+
+- **Book trees differ more in height.** A power law, `6 * (chunks / 52) **
+  0.274` capped at 30 m, replaces `1.7 * log2(1 + chunks)` capped at 22 m:
+  the smallest book stands 6 m, the median 13.6 m, the largest 30 m, and
+  the middle half of the books now spans 4.8 m instead of 3.2 m.
+- **The iPad's forest fills the screen.** The bar of sidebar, Delete and New
+  chat buttons along the top is hidden while the Forest is showing; the
+  Chat, Browse and Forest bar at the bottom stays.
+- **Fly there lands behind the cart**, where the pressed books show over the
+  tailboard, rather than in whichever ground view was used last. Riding the
+  ring from god's eye still lands in that view.
+- **God's eye draws fewer, larger leaves.** Far groves there now thin too, but
+  each leaf kept is enlarged so the crown covers as much, which the ground's
+  thinning by count alone cannot do from above: past 45 m a grove draws a share
+  falling as 1 / distance², each leaf scaled by 1 / sqrt(share), down to a ninth
+  of them at three times their size. It eases in from the ground's thinning
+  between 25 and 90 m above the crowns, so a dive to the cart and the climb
+  back land without a change. At Ultra god's eye drew 13.0M triangles, 11.3M
+  of them leaves; it now draws about 3M. The technique is Solstice's, after
+  Unreal's Nanite foliage
+  ([SamG-Coder/solstice](https://github.com/SamG-Coder/solstice), MIT).
+- **The shadow map is redrawn only when it is stale.** It was drawn every
+  frame; now every other frame while the cart moves, every fourth at rest in
+  the wind, at once when the sun moves, and otherwise about twice a second. Its
+  camera sits on whole shadow texels, so shadow edges keep still as the cart
+  drives. Also after Solstice, which redraws a shadow cascade only when its
+  view changes.
+- **`?nolod`** turns both off, to compare.
+- **No minimap in god's eye**, which is already the map. It comes back once
+  a dive from god's eye has landed.
+- **Fly there no longer flashes the book's title** as the dive starts. The
+  book's card still opens on landing.
+- **The card's Read into the press button is called Press the book.**
+- **The touch Read button is called Press**, after what it does: it reads the
+  nearest tree into the press. Beside a tree already in the press it says
+  **Read** and opens the book in the reader.
+- **On an upright phone the search bar sits right of the stick**, just above
+  the Guided tour button, instead of across the middle of the view. The book
+  card drops to just above the stick.
+- **Settings sections fold.** Search, Worker, Synthesis, Illustrations and
+  Corpus information open and close from their headings. Search starts open,
+  the others closed, and the app remembers which you left open.
+- **About links to the Knowledge Press guide**, with a credit line to
+  GutenbergKG's docs, in place of the GutenbergKG repository.
+- **The list of chats is called Conversations**, and **Delete all
+  conversations** moved from Settings to the bottom of that list.
+- **Far groves draw fewer leaves on touch screens.** Past 60 m from a grove's
+  edge its leaves thin as 1 / distance, down to 15 percent, and the shadow
+  pass thins with them. An iPad mini (A20 Pro) at Clear fog, Ultra and
+  shadows on goes from 23 to 60 fps. Macs and desktops draw every leaf near
+  the ground; god's eye thins on every screen, as above.
+- **Touch screens start at High leaf complexity**, not Low.
+- **The start screen draws at 30 fps.** Its slow circle round the redwood
+  drew every display frame; it now draws on demand at 30 fps, which halves
+  the GPU's load there on an iPad mini (52 to 26 percent). Play, the
+  timeline and god's eye still draw every frame.
+- **The app icon's press seal is larger**: scaled 1.25 times about the
+  center, its rim's radius goes from 347 to 434 px on the 1024 grid. The
+  1024 master, the splash copy and the apple-touch-icon match, and so do the
+  sibling `KP-*.icon` files.
+- **Start driving and Guided tour wait for the forest's first frame**, which
+  uploads the geometry and compiles the shaders, instead of enabling on the
+  forest's data and stalling on the press.
+
+### Fixed
+
+- **The start screen shows the redwood's whole crown.** Its circle now uses
+  the timeline's 62 m radius and aim instead of 46 m, which cut off the top,
+  and the day and night stills shown while the forest loads are re-captured
+  at the new framing.
+- **An exact phrase answers from the passage that holds it.** When a question
+  is a phrase the corpus contains and the search by meaning missed it, the
+  answer is written from the matching passages alone; the hit cards still
+  show every result. "pillar of salt" answered from Genesis and then reported
+  that passages from Kings and the Quran "do not mention a pillar of salt".
+- **Ride the ring from god's eye** dives to the cart where it stands and then
+  sets off, instead of riding the ring from above.
+- **The cart's lantern no longer blinds at night.** Its glass glows a warm
+  flame colour instead of clipping to white, and its light is a spot hung
+  below the glass and aimed down the road, so the lamp's own cap and hook,
+  which fill the view from the cart, stay dark.
+- **The iPad's Chat, Browse and Forest bar is one capsule.** iPadOS 26 drew
+  its own glass behind the segmented control, a little larger, so a second
+  rounded edge showed around it.
+- **`make ios-build` and `make ios-sim-build` stage the forest first**, so
+  `ios-deploy-all`, `ios-push-all` and Simulator runs no longer bundle
+  whatever web build was staged last.
+
 ## [1.40.0] - 2026-11-08
 
 The Forest gets faster and tidier, saves the moots you hold, and the app gains

@@ -164,3 +164,34 @@ button:focus-visible, select:focus-visible, input:focus-visible {
   .search-dock { bottom: calc(1rem + env(safe-area-inset-bottom)); }
   .book-dock { left: 8.75rem; bottom: calc(4.5rem + env(safe-area-inset-bottom)); }
 }
+
+/* A phone upright: the search goes right of the stick (~7.75rem), just above
+   the Guided tour and Press buttons (~4.25rem tall), instead of across the
+   middle above them; the card drops to sit just above the stick. */
+@media (pointer: coarse) and (max-width: 699px) and (min-height: 501px) {
+  .search-dock {
+    left: 8.5rem; right: 0.75rem; translate: none;
+    width: auto; max-width: 22rem;
+    bottom: calc(4.75rem + env(safe-area-inset-bottom));
+  }
+  .book-dock { bottom: calc(8.5rem + env(safe-area-inset-bottom)); }
+}
+
+/* The timeline's bar (HUD.tsx). On a desktop in god's eye it goes to the
+   bottom-right corner so the whole ring shows. On touch, whatever the view, it
+   is narrower and level with the stick on the right: the timeline opens in
+   clean view, so the buttons on that side are gone. Last in the file, so it
+   beats the touch placements above. */
+@media (min-width: 640px) {
+  .search-dock.timeline-aside { left: auto; right: 0.75rem; bottom: 0.75rem; translate: none; }
+}
+@media (pointer: coarse) {
+  .search-dock.timeline-open {
+    left: auto; right: 0.75rem;
+    /* Clear of the stick (0.75rem + 7rem) with a gap, so a phone upright fits it beside. */
+    width: min(100% - 9.25rem, 18rem);
+    /* Centered on the stick: its 7rem disc sits on the controls' bottom padding (TouchControls.tsx). */
+    bottom: calc(max(0.75rem, env(safe-area-inset-bottom)) + 3.5rem);
+    translate: 0 50%;
+  }
+}

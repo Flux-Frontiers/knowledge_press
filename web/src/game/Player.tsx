@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
 import { cartLoad, NEUTRAL_SPINE } from "./cartLoad";
+import { cinema } from "./cinema";
 import { EXPOSURE } from "./Environment";
 import { atGroveStop, treesNear, type Forest } from "./forest";
 import { addDragLook, resetInput, sampleActions, setDragging } from "./input";
@@ -13,6 +14,7 @@ import { hush, speak, speaking } from "./speech";
 import { markTourHeard, TOUR_FAREWELL, TOUR_LAP_DONE, tourHeard, tourIntro } from "./tourScript";
 import { planTour, steerTour, tourState, tourStop } from "./tour";
 import { useGame } from "./store";
+import { bookShown } from "./timeline";
 
 const camPos = new Vector3();
 /** Within this of a picked tree, the cart has arrived (reading range plus a margin). */
@@ -30,10 +32,16 @@ const GOD_NEAR = 2;
 const DRAG_LOOK = 0.0042;
 /** A press that moves farther than this, in pixels, is a drag, not a click. */
 const DRAG_CLICK = 6;
-/** The start screen's slow circle round the redwood: radius and eye height, m, and radians a second. */
-const ORBIT_R = 46;
+/**
+ * The start screen's and the timeline's slow circle round the redwood: radius and
+ * eye height, m, radians a second, and the aim as a fraction of the redwood's height.
+ * Far enough out and aimed high enough that the full-grown crown stays in frame
+ * (its top about 3° inside the edge at a 58° fov).
+ */
+const ORBIT_R = 62;
 const ORBIT_UP = 8;
 const ORBIT_RATE = 0.03;
+const ORBIT_LOOK = 0.4;
 /** The start screen's circle is this much brighter by day, and by START_NIGHT_LIFT more in full dark: behind the title, night reads as black otherwise. */
 const START_DAY_LIFT = 1.25;
 const START_NIGHT_LIFT = 1.0;
@@ -59,6 +67,9 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   const flightT = useRef(0);
   /** Last frame was the start screen's circle, so the first played frame puts the camera behind the cart. */
   const wasStart = useRef(true);
+  const wasTimeline = useRef(false);
+  /** How far the rider has swung the timeline's circle round the redwood; it stays where it is left. */
+  const orbitTurn = useRef(0);
 
   const paused = useGame((s) => s.paused);
   const collect = useGame((s) => s.collect);
@@ -256,15 +267,19 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           }
         }
       }
-      stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake || tourBrake });
+      stepVehicle(forest, throttle, steer, a.boost, dt, { ...preferences, brake: a.brake || tourBrake, year: useGame.getState().timelineYear });
+      // A set piece's shot (cinema.ts) waits for the rider to sit still.
+      cinema.idle = throttle || steer || a.brake || a.look || a.pitch || a.dragging ? 0 : cinema.idle + dt;
       // A drag turns the view with the hand, as a mouse look does: right looks right, down looks down.
       pitch.current = clamp(pitch.current + a.pitch * 1.1 * dt - a.dragY * DRAG_LOOK, -0.45, 0.75);
       // Held arrows or a drag pan up to ~110° either way; let go, the view eases back ahead.
       look.current = clamp(look.current + a.look * 1.6 * dt - a.dragX * DRAG_LOOK, -1.9, 1.9);
       if (!a.look && !a.dragging) look.current *= Math.exp(-3 * dt);
+      // In the timeline's circle the same drag or arrows swing the camera round the redwood.
+      if (game.timelineYear !== null && preferences.camera !== "god") orbitTurn.current += a.look * 0.8 * dt - a.dragX * DRAG_LOOK;
 
       if (a.interact) {
-        const near = treesNear(forest, sim.x, sim.z, 6.8);
+        const near = treesNear(forest, sim.x, sim.z, 6.8).filter((t) => bookShown(t.book, useGame.getState().timelineYear));
         let best = near[0];
         let bestD = Infinity;
         for (const t of near) {
@@ -286,12 +301,19 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const cam = state.camera as PerspectiveCamera;
     const flight = game.flight;
     const flying = Boolean(flight && flightFrom.current);
+    // The timeline watches the forest grow from the start screen's vantage; god's eye keeps its own view of it.
+    const timeline = playing && !flying && !godEye && game.timelineYear !== null;
     if (playing && wasStart.current) {
       // Leaving the start screen: land behind the cart rather than glide in from the circle.
       wasStart.current = false;
       state.gl.toneMappingExposure = EXPOSURE;
       state.camera.position.set(sim.x - v.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - v.z * FOLLOW_BACK);
     }
+    if (playing && wasTimeline.current && !timeline && !flying) {
+      // Leaving the timeline: cut back behind the cart, as on leaving the start screen.
+      state.camera.position.set(sim.x - v.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - v.z * FOLLOW_BACK);
+    }
+    wasTimeline.current = timeline;
     if (!playing) {
       // The start screen: the camera circles the redwood slowly behind the title,
       // in today's season and sky. A tour left by Exit is over.
@@ -300,7 +322,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       state.gl.toneMappingExposure = EXPOSURE * (START_DAY_LIFT + START_NIGHT_LIFT * (1 - game.sky.daylight));
       const a = state.clock.elapsedTime * ORBIT_RATE;
       state.camera.position.set(Math.sin(a) * ORBIT_R, ORBIT_UP, Math.cos(a) * ORBIT_R);
-      lookAt.set(0, forest.corpusTree.height * 0.3, 0);
+      lookAt.set(0, forest.corpusTree.height * ORBIT_LOOK, 0);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;
     } else if (flight && flightFrom.current) {
@@ -315,6 +337,15 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         flightFrom.current = null;
         game.endFlight();
       }
+    } else if (timeline) {
+      // The start screen's slow circle round the redwood.
+      // Cut to it rather than glide: the straight line from the cart can pass through the trunk.
+      // Drag or arrows swing it round and tilt it up or down (pitch), as they look about on the road.
+      const a = state.clock.elapsedTime * ORBIT_RATE + orbitTurn.current;
+      state.camera.position.set(Math.sin(a) * ORBIT_R, ORBIT_UP, Math.cos(a) * ORBIT_R);
+      lookAt.set(0, forest.corpusTree.height * ORBIT_LOOK + ORBIT_R * Math.tan(pitch.current), 0);
+      cam.far = GROUND_FAR;
+      cam.near = GROUND_NEAR;
     } else if (godEye) {
       // Over the zoomed point (godEye.ts), the whole world in view until the wheel or a pinch says otherwise.
       if (!wasGod.current) {
@@ -364,13 +395,18 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     }
     // Tilt by raising or lowering the look point over its horizontal distance.
     // Not on the start screen: god's eye set up there would skip its reset on entering.
-    wasGod.current = playing && godEye && !flying;
-    if (playing && !godEye && !flying) {
+    wasGod.current = playing && godEye && !flying && !timeline;
+    if (playing && !godEye && !flying && !timeline) {
       // On a portrait screen the level chase view is half road and cart; rest it tilted up a little.
       const rest = preferences.camera === "follow" && cam.aspect < 1 ? PORTRAIT_TILT : 0;
       lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current + rest);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;
+      // A set piece's shot, blended over the rider's view (cinema.ts).
+      if (cinema.weight > 0.001) {
+        state.camera.position.lerp(camPos.set(...cinema.cam), cinema.weight);
+        lookAt.lerp(camPos.set(...cinema.look), cinema.weight);
+      }
     }
     state.camera.lookAt(lookAt);
     const fovTarget = inCart ? 60 : 58;
@@ -387,7 +423,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     if (wheelL.current) wheelL.current.rotation.x += spin;
     if (wheelR.current) wheelR.current.rotation.x += spin;
 
-    const near = treesNear(forest, sim.x, sim.z, 16);
+    const near = treesNear(forest, sim.x, sim.z, 16).filter((t) => bookShown(t.book, useGame.getState().timelineYear));
     let bestSlug: string | null = null;
     let bestD = 16;
     for (const t of near) {

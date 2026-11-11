@@ -12,7 +12,8 @@ const KEYS: [string, string][] = [
   ["A / D", "steer"],
   ["Drag, or arrows", "look around; the view eases back to ahead when you let go, the tilt stays"],
   ["Shift / Space", "hurry / brake"],
-  ["E", "read the nearest tree"],
+  ["E", "read the nearest tree into the press"],
+  ["R", "open the book in the reader: the card's tree, or the nearest"],
   ["G / B / L", "the grove atlas, every book, your press"],
   ["H / Q", "home to the redwood / the guided tour"],
   ["C", "camera: behind, high, in the cart, god's eye"],
@@ -23,7 +24,7 @@ const KEYS: [string, string][] = [
 const TOUCH: [string, string][] = [
   ["Stick, bottom left", "drive: up forward, down reverse, sideways to steer"],
   ["Drag anywhere else", "look around; the view eases back to ahead when you let go"],
-  ["Read", "the nearest tree, once you are close"],
+  ["Press", "read the nearest tree into the press, once you are close; then Read opens it"],
   ["Guided tour", "the cart drives the ring and stops at each grove"],
   ["Three-dot menu", "time of day, silent mode, screenshot, moots, settings, this page"],
 ];

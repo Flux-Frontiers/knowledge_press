@@ -1,6 +1,7 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
+import { useCorpusTree } from "./CorpusRedwood";
 import { exhibitApproach, type Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest, type Grove, type TreeSite } from "./forest";
 import { GenreGlyph } from "./GenreGlyph";
@@ -15,6 +16,8 @@ import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
+import { TimelineBar, useTimelinePlayback } from "./TimelineBar";
+import { bookShown, timelineStops } from "./timeline";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
 
@@ -69,17 +72,23 @@ export function HUD({ forest }: { forest: Forest }) {
   const camera = useGame((s) => s.preferences.camera);
   const stepCamera = () => setPreferences({ camera: nextCamera(camera) });
   const godEye = useGame((s) => s.preferences.camera === "god" && !s.flight);
+  /** In god's eye or diving out of it: the minimap waits for the landing. */
+  const overhead = useGame((s) => s.preferences.camera === "god" || Boolean(s.flight));
   // No cards during a flight, so the dive can be watched; the tree's card opens on landing.
   const flying = useGame((s) => s.flight !== null);
   const tourStop = useGame((s) => s.tourStop);
   const touring = tourStop ? forest.groves.find((g) => g.genre === tourStop) : undefined;
   const tourNote = useGame((s) => s.tourNote);
   const setPreferences = useGame((s) => s.setPreferences);
+  const timelineYear = useGame((s) => s.timelineYear);
+  const redwood = useCorpusTree(forest);
+  useTimelinePlayback(forest);
+  const standing = timelineYear === null ? forest.trees.length : forest.trees.filter((t) => bookShown(t.book, timelineYear)).length;
 
   // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
   const shownSlug = pinnedSlug ?? (silent ? null : cardSlug);
   const nearby = shownSlug ? forest.trees.find((t) => t.book.slug === shownSlug) : undefined;
-  const showBook = !flying && Boolean(nearby && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
+  const showBook = !flying && Boolean(nearby && bookShown(nearby.book, timelineYear) && (pinnedSlug || nearby.book.slug !== nearbyDismissed));
   const bookDist = nearby ? Math.hypot(nearby.x - x, nearby.z - z) : Infinity;
   const pressed = nearby ? library.includes(nearby.book.slug) : false;
   // The redwood's card shows on the hub plaza; once closed it stays closed until the cart leaves.
@@ -97,8 +106,9 @@ export function HUD({ forest }: { forest: Forest }) {
   // Sorted from where the cart was when the query changed; re-sorting every pose tick would reshuffle the list under the pointer.
   const results = useMemo(() => {
     const { x, z } = useGame.getState();
-    return searchTrees(forest, query, x, z);
-  }, [forest, query]);
+    // Only trees the timeline has reached answer.
+    return searchTrees(forest, query, x, z).filter((t) => bookShown(t.book, timelineYear));
+  }, [forest, query, timelineYear]);
   const matches = results.length;
   const picked = searchPick ? results.find((t) => t.book.slug === searchPick) : undefined;
 
@@ -117,7 +127,7 @@ export function HUD({ forest }: { forest: Forest }) {
               <em className="mt-0.5 block whitespace-nowrap sm:mt-0 sm:inline">The Forest</em>
             </p>
             <p className="mt-1 text-xs text-muted">
-              {forest.trees.length} trees · {SEASONS[season].label}
+              {standing === forest.trees.length ? forest.trees.length : `${standing} of ${forest.trees.length}`} trees · {SEASONS[season].label}
               {" · "}
               {timeLabel}
               {travelMode === "circuit" ? " · ring" : ""}
@@ -198,6 +208,11 @@ export function HUD({ forest }: { forest: Forest }) {
               {menuOpen ? (<>
                 <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} aria-hidden />
                 <ul className="absolute top-full right-0 z-40 mt-2 w-60 rounded-lg border border-border bg-surface py-1">
+                  <MenuItem icon={<History className="size-4" strokeWidth={1.75} />} label={timelineYear === null ? "Timeline · grow the forest by date" : "Timeline · off"}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      useGame.getState().setTimeline(timelineYear === null ? timelineStops(forest.trees.map((t) => t.book))[0]?.year ?? null : null, timelineYear === null);
+                    }} />
                   <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
                   <MenuItem phoneOnly icon={<Video className="size-4" strokeWidth={1.75} />} label={`Camera · ${CAMERA_NAME[camera]}`} onClick={stepCamera} />
                   <MenuItem icon={silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
@@ -219,8 +234,9 @@ export function HUD({ forest }: { forest: Forest }) {
             </>)}
           </div>
 
-          {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it. */}
-          {clean ? null : <div className="pointer-events-auto w-28 sm:w-40">
+          {/* Under the buttons, not at a fixed offset, so a wrapped button row can never cover it.
+              Not in god's eye, which is already the map, nor during the dive out of it. */}
+          {clean || overhead ? null : <div className="pointer-events-auto w-28 sm:w-40">
             <Minimap forest={forest} x={x} z={z} yaw={yaw} pins={query.trim() ? results : []} picked={searchPick} />
             {selected ? (
               <p className="mt-1 flex items-center gap-1.5 text-xs text-muted">
@@ -242,9 +258,13 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
       </header>
 
-      {clean ? null : (<>
+      {/* Clean view keeps the timeline's bar: it is for watching the forest grow. */}
+      {clean && timelineYear === null ? null : (<>
         {/* Bottom-centre above the key hints, results opening upward; touch layouts move it (styles.css). */}
-        <div className="search-dock pointer-events-auto z-20 mx-auto flex w-[min(100%-1.5rem,28rem)] flex-col gap-1 sm:absolute sm:bottom-9 sm:left-1/2 sm:mx-0 sm:w-[22rem] sm:-translate-x-1/2 sm:flex-col-reverse">
+        {/* The timeline's bar: on touch, level with the stick; in god's eye on a desktop, in the corner off the ring (styles.css). */}
+        <div className={(timelineYear !== null ? "timeline-open " : "") + (godEye && timelineYear !== null ? "timeline-aside " : "") + "search-dock pointer-events-auto z-20 mx-auto flex w-[min(100%-1.5rem,28rem)] flex-col gap-1 sm:absolute sm:bottom-9 sm:left-1/2 sm:mx-0 sm:w-[22rem] sm:-translate-x-1/2 sm:flex-col-reverse"}>
+          {/* The timeline takes the search's place while it is open. */}
+          {timelineYear !== null ? <TimelineBar forest={forest} /> : (<>
           <label className="flex items-center gap-2 rounded-md border border-border bg-surface/90 px-3 py-2">
             <Search className="size-4 shrink-0 text-muted" strokeWidth={1.75} />
             <input
@@ -289,6 +309,7 @@ export function HUD({ forest }: { forest: Forest }) {
               {matches > 30 ? <li className="px-3 py-2 text-xs text-faint">{matches - 30} more; narrow the query</li> : null}
             </ul>
           ) : null}
+          </>)}
         </div>
       </>)}
 
@@ -322,7 +343,7 @@ export function HUD({ forest }: { forest: Forest }) {
               <p className="text-xs tracking-wide text-muted uppercase">The hub</p>
               <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">The Corpus Redwood</h2>
               <p className="text-sm text-muted tabular-nums">
-                {forest.corpusTree.limbs} books · {forest.corpusTree.totalChunks.toLocaleString("en-US")} chunks · {Math.round(forest.corpusTree.height)} m
+                {redwood.limbs} books · {redwood.totalChunks.toLocaleString("en-US")} chunks · {Math.round(redwood.height)} m
               </p>
               <p className="card-extra mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">
                 One limb per book, each reaching toward its own tree. Browse them all and jump to any one.
@@ -358,12 +379,12 @@ export function HUD({ forest }: { forest: Forest }) {
                   <button type="button" disabled={bookDist >= READ_RANGE}
                     onClick={() => collect(nearby.book.slug, nearby.book.title)}
                     className="min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg disabled:bg-bg disabled:text-muted">
-                    {bookDist < READ_RANGE ? "Read into the press · E" : `Move closer · ${Math.ceil(bookDist)} m`}
+                    {bookDist < READ_RANGE ? "Press the book · E" : `Move closer · ${Math.ceil(bookDist)} m`}
                   </button>
                 )}
                 <button type="button" onClick={() => openReader(nearby.book.slug)}
                   className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border px-4 text-sm text-fg">
-                  <BookOpen className="size-4" strokeWidth={1.75} /> Open the book
+                  <BookOpen className="size-4" strokeWidth={1.75} /> Open the book · R
                 </button>
                 {host.available ? (
                   // Only inside the app (host.ts): its chat answers from the book's passages.
@@ -397,7 +418,7 @@ export function HUD({ forest }: { forest: Forest }) {
           ) : null}
         </div>
 
-        <div className="season-dock pointer-events-auto absolute right-3 bottom-24 hidden flex-col gap-1 sm:flex">
+        <div className={"season-dock pointer-events-auto absolute right-3 hidden flex-col gap-1 sm:flex " + (godEye && timelineYear !== null ? "bottom-[7.5rem]" : "bottom-24")}>
           <button
             type="button"
             onClick={() => { toggleCircuit(); (document.activeElement as HTMLElement | null)?.blur(); }}
@@ -411,7 +432,7 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
 
         <p className="key-hints absolute bottom-3 left-1/2 hidden -translate-x-1/2 text-xs text-faint sm:block">
-          WASD drive · Drag or arrows look · Space brake · E read · B books · C camera · Esc settings · ? about
+          WASD drive · Drag or arrows look · Space brake · E press · R read · B books · C camera · Esc settings · ? about
         </p>
       </>)}
 
@@ -469,7 +490,8 @@ function jumpToTree(t: TreeSite) {
 function flyToTree(t: TreeSite) {
   const s = useGame.getState();
   s.selectGrove(null);
-  s.flyTo(treeApproach(t, s.x, s.z), t.book.title, t.book.slug);
+  // No toast: the card that opens on landing names the book.
+  s.flyTo(treeApproach(t, s.x, s.z), undefined, t.book.slug);
 }
 
 function jumpHome(forest: Forest) {
@@ -486,6 +508,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
   forest: Forest; x: number; z: number; yaw: number; pins: TreeSite[]; picked: string | null;
 }) {
   const selectedGrove = useGame((s) => s.selectedGrove);
+  const timelineYear = useGame((s) => s.timelineYear);
   const r = forest.worldRadius;
   const to = (wx: number, wz: number) => {
     const px = ((wx + r) / (2 * r)) * 100;
@@ -503,7 +526,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
         aria-label="Home: back to the corpus redwood"
         onClick={() => jumpHome(forest)}
       />
-      {forest.exhibits.map((e) => {
+      {forest.exhibits.filter((e) => bookShown(e, timelineYear)).map((e) => {
         const c = to(e.x, e.z);
         return (
           <button key={e.id} type="button" onClick={() => jumpToExhibit(e)}
@@ -623,11 +646,12 @@ function BrowsePanel({ forest }: { forest: Forest }) {
 function GrovesTab({ forest }: { forest: Forest }) {
   const grovesVisited = useGame((s) => s.grovesVisited);
   const selectedGrove = useGame((s) => s.selectedGrove);
+  const timelineYear = useGame((s) => s.timelineYear);
 
   return (<>
     <p className="mt-2 text-sm text-muted">Jump to an exhibit or a grove. The cart stays yours; steer to hop off.</p>
     <ul className="mt-3 min-h-0 flex-1 space-y-1 overflow-auto">
-      {forest.exhibits.map((e) => (
+      {forest.exhibits.filter((e) => bookShown(e, timelineYear)).map((e) => (
         <li key={e.id}>
           <button type="button" onClick={() => jumpToExhibit(e)}
             className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-left hover:bg-bg">

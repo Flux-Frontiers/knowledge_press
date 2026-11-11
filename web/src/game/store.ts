@@ -5,10 +5,13 @@ import { seasonFor, type SeasonName } from "./seasons";
 import type { LiveRequest } from "./liveMoots";
 import { readPreferences, type Preferences } from "./preferences";
 import { resetInput } from "./input";
+import { sim } from "./sim";
 import { clearTourHeard } from "./tourScript";
 import type { Portrait } from "./portrait";
 import type { GroundCamera } from "./godEye";
 import { host } from "./host";
+import { bookBySlug } from "./catalog";
+import { bookShown } from "./timeline";
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -103,6 +106,16 @@ export type GameStore = {
   moonName: string;
   query: string;
   searchPick: string | null;
+  /**
+   * The literary timeline (timeline.ts): the year the forest is shown at, or null when
+   * it is off and every tree stands. Separate from the sky's clock (timeMode).
+   */
+  timelineYear: number | null;
+  /** The timeline is stepping forward through its years on its own. */
+  timelinePlaying: boolean;
+  /** Opening the timeline turns on clean view; closing it puts back what was there before. */
+  cleanBeforeTimeline: boolean;
+  setTimeline: (year: number | null, playing?: boolean) => void;
   library: string[];
   grovesVisited: string[];
   nearbySlug: string | null;
@@ -304,6 +317,15 @@ export const useGame = create<GameStore>((set, get) => ({
   liveMoot: null,
   mootSpeaker: null,
   cleanView: false,
+  timelineYear: null,
+  timelinePlaying: false,
+  cleanBeforeTimeline: false,
+  setTimeline: (timelineYear, timelinePlaying = false) => set((s) => ({
+    timelineYear,
+    timelinePlaying,
+    ...(s.timelineYear === null && timelineYear !== null ? { cleanBeforeTimeline: s.cleanView, cleanView: true } : {}),
+    ...(s.timelineYear !== null && timelineYear === null ? { cleanView: s.cleanBeforeTimeline } : {}),
+  })),
   hostWorker: "",
   setHostWorker: (url) => set({ hostWorker: url }),
   portrait: null,
@@ -322,7 +344,7 @@ export const useGame = create<GameStore>((set, get) => ({
       libraryOpen: false, atlasOpen: false, catalogOpen: false, helpOpen: false, plaque: null, readingSlug: null,
       mootsOpen: false, mootId: null, liveMoot: null, mootSpeaker: null,
       jump: null, flight: null, query: "", searchPick: null, pinnedSlug: null, cardSlug: null, nearbySlug: null,
-      selectedGrove: null, toast: null, cleanView: false,
+      selectedGrove: null, toast: null, cleanView: false, timelineYear: null, timelinePlaying: false,
     });
   },
   pause: (v) => {
@@ -386,7 +408,11 @@ export const useGame = create<GameStore>((set, get) => ({
     if (changed) set({ nearbySlug, nearbyDist, nearbyDismissed: null, cardSlug, ...pin });
     else set(cardSlug === s.cardSlug ? { nearbyDist } : { nearbyDist, cardSlug, ...pin });
   },
-  pinTree: (pinnedSlug) => set({ pinnedSlug }),
+  pinTree: (pinnedSlug) => {
+    // Going to a tree the timeline has not reached yet ends the timeline, so the tree is there.
+    const book = pinnedSlug ? bookBySlug(pinnedSlug) : undefined;
+    set({ pinnedSlug, ...(book && !bookShown(book, get().timelineYear) ? { timelineYear: null, timelinePlaying: false, cleanView: get().cleanBeforeTimeline } : {}) });
+  },
   clearCards: () => set({ pinnedSlug: null, cardSlug: null, nearbyDismissed: get().nearbySlug }),
   dismissNearby: () => {
     const { nearbySlug, pinnedSlug } = get();
@@ -418,10 +444,18 @@ export const useGame = create<GameStore>((set, get) => ({
   setTourNote: (tourNote) => { if (get().tourNote !== tourNote) set({ tourNote }); },
   toggleCircuit: () => {
     const next = get().travelMode === "circuit" ? "free" : "circuit";
+    const toast = next === "circuit" ? "Riding the ring · steer to hop off" : "Free drive";
+    if (next === "circuit" && get().preferences.camera === "god") {
+      // Setting off from god's eye: dive to the cart where it stands, then ride.
+      get().clearCards();
+      get().requestJump({ x: sim.x, z: sim.z, yaw: sim.yaw }, toast);
+      set({ travelMode: "circuit", flight: { to: get().groundCamera, reopen: null } });
+      return;
+    }
     set({
       travelMode: next,
       ...(next === "free" ? { selectedGrove: null } : {}),
-      toast: next === "circuit" ? "Riding the ring · steer to hop off" : "Free drive",
+      toast,
     });
   },
   requestJump: (jump, toast) => {
@@ -440,9 +474,10 @@ export const useGame = create<GameStore>((set, get) => ({
   flight: null,
   flyTo: (pose, toast, reopen) => {
     // The cards close so the flight can be watched; `reopen`'s card comes back on landing.
+    // It lands behind the cart, where the pressed books show over the tailboard.
     get().clearCards();
     get().requestJump(pose, toast);
-    set({ flight: { to: get().groundCamera, reopen: reopen ?? null } });
+    set({ flight: { to: "follow", reopen: reopen ?? null } });
   },
   endFlight: () => {
     const flight = get().flight;
@@ -452,6 +487,17 @@ export const useGame = create<GameStore>((set, get) => ({
     if (flight.reopen) get().pinTree(flight.reopen);
   },
 }));
+
+/**
+ * The book R opens in the reader: the tree whose card is showing, else the
+ * nearest tree within reading range; none during a dive from god's eye.
+ */
+export function readerTarget(s: Pick<GameStore, "flight" | "pinnedSlug" | "cardSlug" | "nearbyDismissed" | "nearbySlug" | "nearbyDist" | "preferences">): string | null {
+  if (s.flight) return null;
+  if (s.pinnedSlug) return s.pinnedSlug;
+  if (!s.preferences.silent && s.cardSlug && s.cardSlug !== s.nearbyDismissed) return s.cardSlug;
+  return s.nearbySlug && s.nearbyDist < READ_RANGE ? s.nearbySlug : null;
+}
 
 /** The tree whose card is up, as HUD.tsx decides it: a pinned tree, or the one the cart slowed beside. */
 function shownCard(s: GameStore): string | null {

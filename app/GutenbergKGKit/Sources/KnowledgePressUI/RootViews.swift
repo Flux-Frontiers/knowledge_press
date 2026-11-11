@@ -33,7 +33,7 @@ public struct MacRootView: View {
     public var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             ConversationSidebar(selection: $selection, search: $search)
-                .searchable(text: $search, placement: .sidebar, prompt: "Search chats")
+                .searchable(text: $search, placement: .sidebar, prompt: "Search conversations")
                 .navigationSplitViewColumnWidth(min: 260, ideal: 300)
         } detail: {
             detail
@@ -102,7 +102,7 @@ public struct PhoneRootView: View {
                     .toolbarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .navigation) {
-                            Button("Chats", systemImage: "sidebar.left") {
+                            Button("Conversations", systemImage: "sidebar.left") {
                                 showingHistory = true
                             }
                         }
@@ -188,8 +188,8 @@ private struct ConversationHistorySheet: View {
                     search: $search, presentation: .sheet,
                     onSelect: { isPresented = false })
             }
-            .searchable(text: $search, prompt: "Search chats")
-            .navigationTitle("Chats")
+            .searchable(text: $search, prompt: "Search conversations")
+            .navigationTitle("Conversations")
             .toolbarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -226,7 +226,7 @@ public struct PadRootView: View {
                 selection: $selection, search: $search,
                 onOpenSettings: { showingSettings = true }
             )
-            .searchable(text: $search, placement: .sidebar, prompt: "Search chats")
+            .searchable(text: $search, placement: .sidebar, prompt: "Search conversations")
             .navigationSplitViewColumnWidth(min: 260, ideal: 300)
             .popover(isPresented: $showingSettings) {
                 NavigationStack {
@@ -270,18 +270,23 @@ public struct PadRootView: View {
                         // quick way between them, also in portrait with the
                         // sidebar hidden.
                         #if os(iOS)
-                            ToolbarItem(placement: .bottomBar) {
-                                Picker("Section", selection: section) {
-                                    Label("Chat", systemImage: "text.bubble").tag(SidebarItem.chat)
-                                    Label("Browse", systemImage: "books.vertical").tag(SidebarItem.browse)
-                                    Label("Forest", systemImage: "tree").tag(SidebarItem.forest)
-                                }
-                                .pickerStyle(.segmented)
-                                .labelStyle(.titleAndIcon)
-                                .fixedSize()
+                            // iOS 26 puts a glass capsule behind each bar item;
+                            // the segmented control draws its own, and the two
+                            // differ in size, so the toolbar's is hidden.
+                            if #available(iOS 26, *) {
+                                ToolbarItem(placement: .bottomBar) { sectionPicker }
+                                    .sharedBackgroundVisibility(.hidden)
+                            } else {
+                                ToolbarItem(placement: .bottomBar) { sectionPicker }
                             }
                         #endif
                     }
+                    #if os(iOS)
+                        // The forest has its own controls; New chat, Delete and
+                        // the sidebar toggle over it are noise. The bottom bar
+                        // stays, so Chat and Browse are one tap away.
+                        .toolbar(selection == .forest ? .hidden : .automatic, for: .navigationBar)
+                    #endif
                     .deleteConversationConfirmation($confirmingDelete)
             }
         }
@@ -324,6 +329,20 @@ public struct PadRootView: View {
                 }
             })
     }
+
+    #if os(iOS)
+        /// The phone's three tabs, as a segmented control for the bottom bar.
+        private var sectionPicker: some View {
+            Picker("Section", selection: section) {
+                Label("Chat", systemImage: "text.bubble").tag(SidebarItem.chat)
+                Label("Browse", systemImage: "books.vertical").tag(SidebarItem.browse)
+                Label("Forest", systemImage: "tree").tag(SidebarItem.forest)
+            }
+            .pickerStyle(.segmented)
+            .labelStyle(.titleAndIcon)
+            .fixedSize()
+        }
+    #endif
 
     @ViewBuilder
     private var detail: some View {
