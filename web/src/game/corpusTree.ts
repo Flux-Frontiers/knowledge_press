@@ -60,10 +60,17 @@ export type CorpusTree = {
  */
 export const REDWOOD_BARK = { aspect: 2, tile: 2.4 };
 
-export function growCorpusTree(sources: LimbSource[]): CorpusTree {
+/**
+ * :param sources: The books the redwood carries a limb for.
+ * :param height: Overrides the height rule (the timeline's young redwood, forest.corpusTreeAt);
+ *   the limbs' reach shrinks in the same proportion, so a short tree is not a wide bush.
+ */
+export function growCorpusTree(sources: LimbSource[], height?: number): CorpusTree {
   const rng = mulberry32(seedFromKey("corpus-redwood"));
   const totalChunks = sources.reduce((s, t) => s + t.book.chunks, 0);
-  const height = REDWOOD_HEIGHT_PER_LOG2 * Math.log2(1 + totalChunks);
+  const natural = REDWOOD_HEIGHT_PER_LOG2 * Math.log2(1 + totalChunks);
+  height ??= natural;
+  const reachScale = natural > 0 ? Math.min(1, height / natural) : 1;
   const limbs = [...sources].sort((a, b) => b.book.chunks - a.book.chunks || a.book.slug.localeCompare(b.book.slug));
   const n = limbs.length;
 
@@ -129,7 +136,7 @@ export function growCorpusTree(sources: LimbSource[]): CorpusTree {
     const azimuth = Math.atan2(t.z, t.x) + (rng() - 0.5) * 0.3;
     const ax = Math.cos(azimuth), az = Math.sin(azimuth);
     const book = 0.55 + 0.45 * Math.min(1, t.height / BOOK_TREE_CAP);
-    const reach = (REACH_MIN + (REACH_MAX - REACH_MIN) * (1 - u0) ** 1.1) * book;
+    const reach = (REACH_MIN + (REACH_MAX - REACH_MIN) * (1 - u0) ** 1.1) * book * reachScale;
     const surface = radii[k]!;
     const m = Math.max(3, Math.ceil(reach / 1.2));
     // Out from the trunk, sagging mid-limb and turning up at the tip.

@@ -61,6 +61,11 @@ test("the redwood grows from the books the timeline shows, and exhibits wait for
   const c = corpusTreeAt(f, year);
   assert.equal(c.limbs, shown.length);
   assert.ok(c.height < f.corpusTree.height);
+  // Height follows the shown share of the corpus, so the first book is a sapling, not most of the tree.
+  const share = shown.reduce((n, t) => n + t.book.chunks, 0) / f.corpusTree.totalChunks;
+  assert.ok(Math.abs(c.height - f.corpusTree.height * Math.sqrt(share)) < 1e-9);
+  const first = corpusTreeAt(f, timelineStops(f.trees.map((t) => t.book))[0].year);
+  assert.ok(first.height < 0.2 * f.corpusTree.height, `first stop ${first.height.toFixed(1)} m`);
   const flame = f.exhibits.find((e) => e.id === "flame");
   assert.equal(flame.year, 1964);
   // Drive at the flame's plinth: in 1963 nothing is there; in 1964 it stops the cart.
