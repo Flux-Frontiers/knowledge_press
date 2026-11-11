@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="The Knowledge Press app icon">
   <rect width="1024" height="1024" fill="#151b29"/>
-  <g transform="translate(512 512) scale(1.2) translate(-512 -512)">
+  <g transform="translate(512 512) scale(1.25) translate(-512 -512)">
   <circle cx="512" cy="512" r="347" fill="#237f59"/>
   <circle cx="512" cy="512" r="313" fill="none" stroke="#f4f0dc" stroke-width="17"/>
   <circle cx="512" cy="512" r="273" fill="#2dcc78"/>
