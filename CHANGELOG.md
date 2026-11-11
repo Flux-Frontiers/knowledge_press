@@ -19,8 +19,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the shown share of the corpus, so it starts as a sapling (about 8 m with
   the Bible alone) and ends at full size.
 - **The timeline watches from the opening shot.** While it is open, the
-  camera eases onto the start screen's slow circle round the redwood, and
-  back to the cart when it closes.
+  camera circles the redwood as the start screen does, pulled back so the
+  full-grown crown stays in frame. It cuts to the circle and back to the
+  cart rather than gliding, which could pass through the trunk.
 - **Exhibits arrive on the timeline in their own year**: the armillary
   sundial about 255 BC, Kepler 1596, the weather mast 1846, Savonius 1922,
   Darrieus 1931, Double Helix 1953, the Flame of Knowledge 1964, the helical

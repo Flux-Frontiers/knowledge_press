@@ -36,6 +36,12 @@ const DRAG_CLICK = 6;
 const ORBIT_R = 46;
 const ORBIT_UP = 8;
 const ORBIT_RATE = 0.03;
+/**
+ * The timeline's circle: farther out than the start screen's and aimed higher,
+ * so the full-grown crown stays in frame (its top about 3° inside the edge at a 58° fov).
+ */
+const TIMELINE_ORBIT_R = 62;
+const TIMELINE_LOOK = 0.4;
 /** The start screen's circle is this much brighter by day, and by START_NIGHT_LIFT more in full dark: behind the title, night reads as black otherwise. */
 const START_DAY_LIFT = 1.25;
 const START_NIGHT_LIFT = 1.0;
@@ -61,6 +67,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
   const flightT = useRef(0);
   /** Last frame was the start screen's circle, so the first played frame puts the camera behind the cart. */
   const wasStart = useRef(true);
+  const wasTimeline = useRef(false);
 
   const paused = useGame((s) => s.paused);
   const collect = useGame((s) => s.collect);
@@ -298,6 +305,11 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       state.gl.toneMappingExposure = EXPOSURE;
       state.camera.position.set(sim.x - v.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - v.z * FOLLOW_BACK);
     }
+    if (playing && wasTimeline.current && !timeline && !flying) {
+      // Leaving the timeline: cut back behind the cart, as on leaving the start screen.
+      state.camera.position.set(sim.x - v.x * FOLLOW_BACK, sim.y + FOLLOW_UP, sim.z - v.z * FOLLOW_BACK);
+    }
+    wasTimeline.current = timeline;
     if (!playing) {
       // The start screen: the camera circles the redwood slowly behind the title,
       // in today's season and sky. A tour left by Exit is over.
@@ -322,10 +334,11 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         game.endFlight();
       }
     } else if (timeline) {
-      // The start screen's slow circle round the redwood, eased into from wherever the camera was.
+      // The start screen's slow circle round the redwood, pulled back to hold the whole crown.
+      // Cut to it rather than glide: the straight line from the cart can pass through the trunk.
       const a = state.clock.elapsedTime * ORBIT_RATE;
-      state.camera.position.lerp(camPos.set(Math.sin(a) * ORBIT_R, ORBIT_UP, Math.cos(a) * ORBIT_R), 1 - Math.exp(-2.2 * dt));
-      lookAt.lerp(camPos.set(0, forest.corpusTree.height * 0.3, 0), 1 - Math.exp(-2.2 * dt));
+      state.camera.position.set(Math.sin(a) * TIMELINE_ORBIT_R, ORBIT_UP, Math.cos(a) * TIMELINE_ORBIT_R);
+      lookAt.set(0, forest.corpusTree.height * TIMELINE_LOOK, 0);
       cam.far = GROUND_FAR;
       cam.near = GROUND_NEAR;
     } else if (godEye) {
