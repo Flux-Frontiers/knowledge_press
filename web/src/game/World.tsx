@@ -49,6 +49,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
   const pal = SEASONS[season];
   // Every colour eases from the season's night palette to the day look as the sun rises (sky.ts).
   const sky = useGame((s) => s.sky);
+  const timelineYear = useGame((s) => s.timelineYear);
   const t = sky.daylight;
   const skyColor = useMemo(() => new Color(pal.sky).lerp(new Color(DAY_OVERRIDE.sky), t), [t, pal.sky]);
   // Sunrise and sunset warm the haze a little.
@@ -140,6 +141,8 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
         <CorpusRedwood forest={forest} season={season} />
         {forest.exhibits.map((e) => {
           const View = EXHIBIT_VIEWS[e.id];
+          // An exhibit the timeline has not reached yet is not built; its plaza stays paved.
+          if (!bookShown(e, timelineYear)) return null;
           return View ? <View key={e.id} exhibit={e} forest={forest} /> : null;
         })}
       </>)}

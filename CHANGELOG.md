@@ -13,6 +13,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **The timeline grows the corpus redwood.** At each year the redwood
+  regrows from the books standing then, so its height, limbs and plaque
+  match the forest shown.
+- **Exhibits arrive on the timeline in their own year**: the armillary
+  sundial about 255 BC, Kepler 1596, the weather mast 1846, Savonius 1922,
+  Darrieus 1931, Double Helix 1953, the Flame of Knowledge 1964, the helical
+  rotor 1995. Each year is a slider stop of its own. The landing field
+  stands throughout.
 - **The Landing Field**, a new exhibit: a raised pad in an open glade, kept
   for in-app events. It is placed after the other exhibits, so they keep
   their glades.

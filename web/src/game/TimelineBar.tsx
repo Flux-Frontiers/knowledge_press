@@ -10,7 +10,7 @@ const STEP_MS = 280;
 /** Steps the playing timeline forward a year at a time. In the HUD, which stays mounted when the bar is hidden. */
 export function useTimelinePlayback(forest: Forest) {
   const playing = useGame((s) => s.timelinePlaying);
-  const stops = useMemo(() => timelineStops(forest.trees.map((t) => t.book)), [forest]);
+  const stops = useMemo(() => timelineStops(forest.trees.map((t) => t.book), forest.exhibits), [forest]);
   useEffect(() => {
     if (!playing) return;
     const id = window.setInterval(() => {
@@ -35,7 +35,7 @@ export function TimelineBar({ forest }: { forest: Forest }) {
   const year = useGame((s) => s.timelineYear);
   const playing = useGame((s) => s.timelinePlaying);
   const setTimeline = useGame((s) => s.setTimeline);
-  const stops = useMemo(() => timelineStops(forest.trees.map((t) => t.book)), [forest]);
+  const stops = useMemo(() => timelineStops(forest.trees.map((t) => t.book), forest.exhibits), [forest]);
   const groveTotal = forest.groves.length;
   let at = 0;
   while (at + 1 < stops.length && stops[at + 1]!.year <= (year ?? Infinity)) at++;
@@ -52,7 +52,9 @@ export function TimelineBar({ forest }: { forest: Forest }) {
           {playing ? <Pause className="size-4" strokeWidth={1.75} /> : <Play className="size-4" strokeWidth={1.75} />}
         </button>
         <p className="font-display text-xl leading-none tabular-nums">{yearLabel(stop.year)}</p>
-        <p className="ml-auto text-xs text-muted tabular-nums">+{stop.added} {stop.added === 1 ? "work" : "works"}</p>
+        <p className="ml-auto min-w-0 truncate text-right text-xs text-muted tabular-nums">
+          {[stop.added ? `+${stop.added} ${stop.added === 1 ? "work" : "works"}` : null, ...(stop.exhibits ?? [])].filter(Boolean).join(" · ")}
+        </p>
         <button type="button" onClick={() => { release(); setTimeline(null); }}
           className="-my-1 -mr-1 grid size-9 shrink-0 place-items-center rounded-md text-muted"
           aria-label="Close the timeline: every tree stands again">

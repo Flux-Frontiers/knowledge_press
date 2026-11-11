@@ -1,6 +1,7 @@
 import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
+import { useCorpusTree } from "./CorpusRedwood";
 import { exhibitApproach, type Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest, type Grove, type TreeSite } from "./forest";
 import { GenreGlyph } from "./GenreGlyph";
@@ -80,6 +81,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const tourNote = useGame((s) => s.tourNote);
   const setPreferences = useGame((s) => s.setPreferences);
   const timelineYear = useGame((s) => s.timelineYear);
+  const redwood = useCorpusTree(forest);
   useTimelinePlayback(forest);
   const standing = timelineYear === null ? forest.trees.length : forest.trees.filter((t) => bookShown(t.book, timelineYear)).length;
 
@@ -340,7 +342,7 @@ export function HUD({ forest }: { forest: Forest }) {
               <p className="text-xs tracking-wide text-muted uppercase">The hub</p>
               <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">The Corpus Redwood</h2>
               <p className="text-sm text-muted tabular-nums">
-                {forest.corpusTree.limbs} books · {forest.corpusTree.totalChunks.toLocaleString("en-US")} chunks · {Math.round(forest.corpusTree.height)} m
+                {redwood.limbs} books · {redwood.totalChunks.toLocaleString("en-US")} chunks · {Math.round(redwood.height)} m
               </p>
               <p className="card-extra mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">
                 One limb per book, each reaching toward its own tree. Browse them all and jump to any one.
@@ -505,6 +507,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
   forest: Forest; x: number; z: number; yaw: number; pins: TreeSite[]; picked: string | null;
 }) {
   const selectedGrove = useGame((s) => s.selectedGrove);
+  const timelineYear = useGame((s) => s.timelineYear);
   const r = forest.worldRadius;
   const to = (wx: number, wz: number) => {
     const px = ((wx + r) / (2 * r)) * 100;
@@ -522,7 +525,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
         aria-label="Home: back to the corpus redwood"
         onClick={() => jumpHome(forest)}
       />
-      {forest.exhibits.map((e) => {
+      {forest.exhibits.filter((e) => bookShown(e, timelineYear)).map((e) => {
         const c = to(e.x, e.z);
         return (
           <button key={e.id} type="button" onClick={() => jumpToExhibit(e)}
@@ -642,11 +645,12 @@ function BrowsePanel({ forest }: { forest: Forest }) {
 function GrovesTab({ forest }: { forest: Forest }) {
   const grovesVisited = useGame((s) => s.grovesVisited);
   const selectedGrove = useGame((s) => s.selectedGrove);
+  const timelineYear = useGame((s) => s.timelineYear);
 
   return (<>
     <p className="mt-2 text-sm text-muted">Jump to an exhibit or a grove. The cart stays yours; steer to hop off.</p>
     <ul className="mt-3 min-h-0 flex-1 space-y-1 overflow-auto">
-      {forest.exhibits.map((e) => (
+      {forest.exhibits.filter((e) => bookShown(e, timelineYear)).map((e) => (
         <li key={e.id}>
           <button type="button" onClick={() => jumpToExhibit(e)}
             className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-left hover:bg-bg">

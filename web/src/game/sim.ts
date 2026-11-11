@@ -127,6 +127,7 @@ function step(forest: Forest, throttle: number, steer: number, boost: boolean, d
 
   // The redwood's root flare and the exhibits' plinths.
   for (const o of forest.obstacles) {
+    if (!bookShown(o, options.year ?? null)) continue;
     const dx = sim.x - o.x, dz = sim.z - o.z;
     const d = Math.hypot(dx, dz);
     const min = o.r + cartR;
