@@ -97,6 +97,8 @@ const T_CART_HOME = T_CART + pathTime(CART_PATH, CART_SPEED);
 /** The seed's hop from the cart to the ground, then the tree's growth. */
 const T_PLANT = T_CART_STOP + 0.8;
 const T_GROW = T_PLANT + 1.0;
+/** The tree is fully grown; its power-on starts here (artTree.powerLevel). */
+export const GROWN_AT = T_GROW + GROW_TIME;
 /** Seconds from the start until everything rests in its final pose. */
 export const VISITOR_END = Math.max(T_GROW + GROW_TIME + 3, T_CART_HOME + 2);
 

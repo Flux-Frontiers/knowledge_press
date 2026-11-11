@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode, type Ref } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type Ref } from "react";
 import {
   AdditiveBlending,
   BoxGeometry,
@@ -20,16 +20,17 @@ import {
   type BufferGeometry,
 } from "three";
 import { cinema } from "./cinema";
-import { artTree, grownFraction } from "./artTree";
+import { artTree, dieOrder, grownFraction, litDieCount, powerLevel } from "./artTree";
 import { activeEvent, stage } from "./events";
 import type { Exhibit } from "./exhibits";
+import { treeApproach, type Forest } from "./forest";
 import { reflectionMap } from "./FlameOfKnowledge";
 import { setHum, sigh } from "./hum";
 import { ExhibitPlaque } from "./Signposts";
 import { sim, wrapAngle } from "./sim";
 import { useGame } from "./store";
 import {
-  LEG_H, LIFT_R, PAD_R, PAD_TOP, PAVE_Y, SAUCER_R, SHAFT_R, TREE_AT, VISITOR_END, visitorPose, visitorShot, WEDGE, WHEEL_R, type Walker,
+  GROWN_AT, LEG_H, LIFT_R, PAD_R, PAD_TOP, PAVE_Y, SAUCER_R, SHAFT_R, TREE_AT, VISITOR_END, visitorPose, visitorShot, WEDGE, WHEEL_R, type Walker,
 } from "./visitorScript";
 
 /**
@@ -71,6 +72,14 @@ const WELL_H = 1.6;
 /** Seconds into the landing: null until it starts. Kept for the session, so it plays once. */
 let landingT: number | null = null;
 let sighed = false;
+/** Once the landing has been watched to the end on this device, later visits find it already down, the tree grown. */
+const SEEN_KEY = "kp.event.visitor.seen";
+function landingSeen(): boolean {
+  try { return window.localStorage.getItem(SEEN_KEY) === "1"; } catch { return false; }
+}
+function markLandingSeen() {
+  try { window.localStorage.setItem(SEEN_KEY, "1"); } catch { /* private mode: it plays again next time */ }
+}
 /** The camera is the landing's (cinema weight past half), and whether clean view was turned on for it. */
 let holding = false;
 let cleanedForShot = false;
@@ -113,6 +122,10 @@ function useMaterials() {
       fobsidian: new MeshStandardMaterial({ color: "#2a3330", metalness: 0.3, roughness: 0.5, envMap: env, flatShading: true }),
       treeCopper: new MeshStandardMaterial({ color: PALETTE.copper, emissive: "#5a2a10", emissiveIntensity: 0.2, metalness: 0.5, roughness: 0.38, envMap: env, flatShading: true }),
       via: new MeshBasicMaterial({ color: "#f0d690" }),
+      // The tree's vias and dies take their light from instance colours (the power-on, the reading).
+      treeVia: new MeshBasicMaterial({ color: "#ffffff" }),
+      treeDie: new MeshBasicMaterial({ color: "#ffffff" }),
+      hit: new MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
       band: new MeshStandardMaterial({ color: PALETTE.green, emissive: PALETTE.green, emissiveIntensity: 0.5, roughness: 0.35, flatShading: true }),
     };
   }, []);
@@ -262,8 +275,16 @@ function Rover({ m, groupRef, wheels, seedRef }: { m: Materials; groupRef: Ref<G
  * revealed root to tips as `grow` rises; the instances are only rewritten
  * while it is growing.
  */
-function ArtTreeView({ m }: { m: Materials }) {
+function ArtTreeView({ m, forest }: { m: Materials; forest: Forest }) {
   const tree = useMemo(() => artTree(), []);
+  const order = useMemo(() => dieOrder(tree), [tree]);
+  const library = useGame((s) => s.library);
+  // Which dies the rider's reading has lit, by leaf index.
+  const lit = useMemo(() => {
+    const on = new Set(order.slice(0, litDieCount(tree.leaves.length, library.length, forest?.trees.length ?? 0)));
+    return tree.leaves.map((_, i) => on.has(i));
+  }, [order, tree, library.length, forest]);
+  const colors = useMemo(() => ({ c: new Color(), via: new Color("#f6dc96"), viaOff: new Color("#5a4a26"), die: new Color("#45e0ae"), dieOff: new Color("#123a2f") }), []);
   const segRef = useRef<InstancedMesh>(null);
   const viaRef = useRef<InstancedMesh>(null);
   const leafRef = useRef<InstancedMesh>(null);
@@ -280,12 +301,27 @@ function ArtTreeView({ m }: { m: Materials }) {
 
   useFrame(() => {
     if (landingT === null) return;
+    const segs = segRef.current, vias = viaRef.current, leaves = leafRef.current;
+    if (!segs || !vias || !leaves) return;
+    // The power-on and the dies the reading has lit: every frame, as the light moves.
+    const since = landingT - GROWN_AT;
+    const breathe = useGame.getState().preferences.motion;
+    const { c } = colors;
+    tree.vias.forEach((v, i) => {
+      const k = powerLevel(since, v.along, tree.total, breathe);
+      vias.setColorAt(i, c.copy(colors.viaOff).lerp(colors.via, k));
+    });
+    tree.leaves.forEach((l, i) => {
+      const k = lit[i] ? powerLevel(since, l.along, tree.total, breathe) : 0;
+      leaves.setColorAt(i, c.copy(colors.dieOff).lerp(colors.die, k));
+    });
+    if (vias.instanceColor) vias.instanceColor.needsUpdate = true;
+    if (leaves.instanceColor) leaves.instanceColor.needsUpdate = true;
+    // The shapes only while it grows.
     const g = visitorPose(Math.min(landingT, VISITOR_END)).grow;
     if (g === tmp.last) return;
     tmp.last = g;
     const { o } = tmp;
-    const segs = segRef.current, vias = viaRef.current, leaves = leafRef.current;
-    if (!segs || !vias || !leaves) return;
     tree.segs.forEach((s, i) => {
       const f = grownFraction(g, s.along, s.length, tree.total);
       tmp.dir.set(s.to[0] - s.from[0], s.to[1] - s.from[1], s.to[2] - s.from[2]).normalize();
@@ -315,11 +351,35 @@ function ArtTreeView({ m }: { m: Materials }) {
     segs.instanceMatrix.needsUpdate = vias.instanceMatrix.needsUpdate = leaves.instanceMatrix.needsUpdate = true;
   });
 
+  // Tapped once grown: off to a book the rider has not read yet, its card open, as a search hit lands.
+  const [grown, setGrown] = useState(false);
+  useFrame(() => { if (!grown && landingT !== null && landingT >= GROWN_AT) setGrown(true); });
+  const visit = () => {
+    const read = new Set(useGame.getState().library);
+    const unread = forest.trees.filter((t) => !read.has(t.book.slug));
+    const pool = unread.length ? unread : forest.trees;
+    const tree = pool[Math.floor(Math.random() * pool.length)];
+    if (!tree) return;
+    const st = useGame.getState();
+    st.pickSearch(tree.book.slug);
+    st.pinTree(tree.book.slug);
+    st.requestJump(treeApproach(tree, forest.home.x, forest.home.z), tree.book.title);
+  };
+
   return (
     <group position={TREE_AT}>
       <instancedMesh ref={segRef} args={[geo.seg, m.treeCopper, tree.segs.length]} frustumCulled={false} />
-      <instancedMesh ref={viaRef} args={[geo.via, m.via, tree.vias.length]} frustumCulled={false} />
-      <instancedMesh ref={leafRef} args={[geo.leaf, m.die, tree.leaves.length]} frustumCulled={false} />
+      <instancedMesh ref={viaRef} args={[geo.via, m.treeVia, tree.vias.length]} frustumCulled={false} />
+      <instancedMesh ref={leafRef} args={[geo.leaf, m.treeDie, tree.leaves.length]} frustumCulled={false} />
+      {/* One invisible column to tap, once the tree is grown: the instances' own bounds go stale as they grow. */}
+      {grown ? (
+        <mesh position={[0, tree.height / 2, 0]} material={m.hit}
+          onClick={(ev) => { ev.stopPropagation(); visit(); }}
+          onPointerOver={() => { document.body.style.cursor = "pointer"; }}
+          onPointerOut={() => { document.body.style.cursor = ""; }}>
+          <cylinderGeometry args={[tree.reach * 0.75, 1.2, tree.height, 8]} />
+        </mesh>
+      ) : null}
     </group>
   );
 }
@@ -471,7 +531,7 @@ function RimLayout({ mesh, place }: { mesh: Ref<InstancedMesh>; place: (i: numbe
 }
 
 /** The craft, its legs, the lift, the light and dust, and the two who come down. */
-function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Materials }) {
+function Visitor({ exhibit, forest, face, m }: { exhibit: Exhibit; forest: Forest; face: number; m: Materials }) {
   const craft = useRef<Group>(null);
   const rimLights = useRef<InstancedMesh>(null);
   const iris = useRef<Group>(null);
@@ -503,6 +563,10 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
   useFrame((state, delta) => {
     const s = useGame.getState();
     const dt = Math.min(delta, 0.1);
+    if (landingT === null && landingSeen()) {
+      // Seen before: already landed, the tree grown and powered, nothing to watch.
+      landingT = VISITOR_END + 60;
+    }
     if (landingT === null) {
       if (Math.hypot(sim.x - exhibit.x, sim.z - exhibit.z) > TRIGGER_DIST) {
         if (craft.current) craft.current.visible = false;
@@ -594,7 +658,10 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
     }
 
     // The camera follows the landing while the rider sits still, and lets go a little after.
-    const watching = landingT < VISITOR_END + 3 && s.preferences.motion && cinema.idle > 1.2 && Math.abs(sim.speed) < 0.3;
+    if (landingT >= VISITOR_END && !landingSeen()) markLandingSeen();
+    // Only near the field: a tap on the tree that flies the rider off ends the watching.
+    const atField = Math.hypot(sim.x - exhibit.x, sim.z - exhibit.z) < 40;
+    const watching = atField && landingT < VISITOR_END + 3 && s.preferences.motion && cinema.idle > 1.2 && Math.abs(sim.speed) < 0.3;
     cinema.weight += ((watching ? 1 : 0) - cinema.weight) * (1 - Math.exp(-1.6 * dt));
     // Clean view while the camera is the landing's, put back as it was after.
     if (!holding && cinema.weight > 0.5) {
@@ -652,13 +719,13 @@ function Visitor({ exhibit, face, m }: { exhibit: Exhibit; face: number; m: Mate
       <Sentinel m={m} groupRef={robot} limbs={robotLimbs} sweepRef={sweep} />
       <Rover m={m} groupRef={cart} wheels={wheels} seedRef={seedOnCart} />
       <mesh ref={seed} rotation={[Math.PI / 4, 0, Math.PI / 4]} material={m.die} visible={false}><boxGeometry args={[0.24, 0.24, 0.24]} /></mesh>
-      <ArtTreeView m={m} />
+      <ArtTreeView m={m} forest={forest} />
 
     </>
   );
 }
 
-export function LandingField({ exhibit }: { exhibit: Exhibit }) {
+export function LandingField({ exhibit, forest }: { exhibit: Exhibit; forest: Forest }) {
   const m = useMaterials();
   const event = useMemo(() => activeEvent(new Date(), window.location.search), []);
   // Local +x runs from the pad toward the road, where the rider stands to watch.
@@ -679,7 +746,7 @@ export function LandingField({ exhibit }: { exhibit: Exhibit }) {
             <boxGeometry args={[Math.hypot(WEDGE.to - WEDGE.from, PAD_TOP - PAVE_Y) + 0.1, 0.08, 1.7]} />
           </mesh>
         </group>
-        {event === "visitor" ? <Visitor exhibit={exhibit} face={face} m={m} /> : null}
+        {event === "visitor" ? <Visitor exhibit={exhibit} forest={forest} face={face} m={m} /> : null}
       </group>
     </group>
   );

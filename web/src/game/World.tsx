@@ -31,7 +31,7 @@ const dummy = new Object3D();
 const gray = new Color();
 const CLEAR = { fogDensity: 0, cloud: 0, kind: "clear" as const };
 
-const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit }>> = {
+const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit; forest: Forest }>> = {
   mysterium: Mysterium,
   flame: FlameOfKnowledge,
   helix: HelixSculpture,
@@ -139,7 +139,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
         <CorpusRedwood forest={forest} season={season} />
         {forest.exhibits.map((e) => {
           const View = EXHIBIT_VIEWS[e.id];
-          return View ? <View key={e.id} exhibit={e} /> : null;
+          return View ? <View key={e.id} exhibit={e} forest={forest} /> : null;
         })}
       </>)}
 
