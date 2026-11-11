@@ -100,6 +100,15 @@ test("only a sun well above the horizon casts shadows", () => {
   assert.ok(at("2026-06-21T23:45:00Z").shadow > 0, "evening sun still casts");
 });
 
+test("dawn and dusk cast clear shadows", () => {
+  const { skyState, effectiveTime } = sky();
+  const now = new Date("2026-11-10T15:00:00Z");
+  for (const mode of ["dawn", "dusk"]) {
+    const shadow = skyState(effectiveTime(mode, now, NYC), NYC).light.shadow;
+    assert.ok(shadow > 0.6, `${mode} shadow ${shadow.toFixed(2)}`);
+  }
+});
+
 test("the season follows the sun, half a year on south of the equator", () => {
   const { seasonFor } = require(`${process.env.FOREST_TEST_BUILD}/seasons.js`);
   const SYDNEY = { lat: -33.9, lon: 151.2 };

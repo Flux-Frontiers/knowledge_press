@@ -19,8 +19,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the shown share of the corpus, so it starts as a sapling (about 8 m with
   the Bible alone) and ends at full size.
 - **The timeline watches from the opening shot.** While it is open, the
-  camera eases onto the start screen's slow circle round the redwood, and
-  back to the cart when it closes.
+  camera circles the redwood as the start screen does, pulled back so the
+  full-grown crown stays in frame. It cuts to the circle and back to the
+  cart rather than gliding, which could pass through the trunk. In god's
+  eye the timeline keeps the overhead view, with its bar moved to the
+  bottom-right corner so the whole ring shows.
+- **The timeline opens in clean view**: no minimap or buttons, only its bar.
+  Closing it puts the view back as it was.
+- **Look around in the timeline's circle**: drag or the arrow keys swing the
+  camera round the redwood and tilt it, and it stays where you leave it. On
+  touch the bar sits level with the stick, beside it.
+- **No drive stick in god's eye** on touch: the cart is not driven from there.
+- **God's-eye grove names are tidier**: "Literature" is shortened to "Lit.",
+  and American Lit., Russian Lit. and Ancient & Classical sit just past
+  their groves' north edge instead of over the middle.
+- **Dawn and dusk cast clear shadows**: low-sun shadows fade between 5 and 2
+  degrees instead of 8 and 3, about three quarters strength at dawn.
 - **Exhibits arrive on the timeline in their own year**: the armillary
   sundial about 255 BC, Kepler 1596, the weather mast 1846, Savonius 1922,
   Darrieus 1931, Double Helix 1953, the Flame of Knowledge 1964, the helical

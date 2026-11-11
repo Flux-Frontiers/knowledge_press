@@ -13,20 +13,22 @@ export function TouchControls() {
   const blocked = useGame((s) => s.paused || s.libraryOpen || s.atlasOpen || s.catalogOpen || s.mootsOpen || Boolean(s.mootId) || Boolean(s.readingSlug) || Boolean(s.plaque));
   const toggleCircuit = useGame((s) => s.toggleCircuit);
   const travelMode = useGame((s) => s.travelMode);
+  /** God's eye looks down on the map; the cart is not driven from there, so the stick goes. */
+  const godEye = useGame((s) => s.preferences.camera === "god" && !s.flight);
 
   useEffect(() => {
     setTouchAxes(0, 0);
     return () => setTouchAxes(0, 0);
-  }, [blocked]);
+  }, [blocked, godEye]);
 
   if (blocked) return null;
   return (
     <div className="touch-controls pointer-events-none absolute inset-x-0 bottom-0 z-20 items-end justify-between p-3">
-      <Stick label="Drag to drive: up forward, down reverse, left or right to steer"
+      {godEye ? null : <Stick label="Drag to drive: up forward, down reverse, left or right to steer"
         onMove={(x, y) => { const a = stickAxes(x, y); setTouchAxes(a.throttle, a.steer); }}
-        onRelease={() => setTouchAxes(0, 0)} />
+        onRelease={() => setTouchAxes(0, 0)} />}
       {/* No look stick: a drag anywhere else on the forest looks around (Player.tsx). */}
-      {clean ? null : <div className="pointer-events-auto flex items-center gap-2">
+      {clean ? null : <div className="pointer-events-auto ml-auto flex items-center gap-2">
         <button type="button" className="min-h-11 rounded-full border border-border bg-surface px-4 text-sm" onClick={toggleCircuit}>
           {travelMode === "circuit" ? "End tour" : "Guided tour"}
         </button>

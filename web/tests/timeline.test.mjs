@@ -81,3 +81,18 @@ test("the redwood grows from the books the timeline shows, and exhibits wait for
   assert.ok(reach(1963) < flame.obstacle, "drives through before 1964");
   assert.ok(reach(1964) >= flame.obstacle + 1, "stopped by the plinth in 1964");
 });
+
+test("the timeline opens in clean view and closing it puts the view back", () => {
+  globalThis.window ??= { localStorage: { getItem: () => null, setItem() {} } };
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const g = () => useGame.getState();
+  for (const before of [false, true]) {
+    useGame.setState({ cleanView: before, timelineYear: null });
+    g().setTimeline(1600);
+    assert.equal(g().cleanView, true);
+    g().setTimeline(1700);
+    assert.equal(g().cleanView, true);
+    g().setTimeline(null);
+    assert.equal(g().cleanView, before);
+  }
+});

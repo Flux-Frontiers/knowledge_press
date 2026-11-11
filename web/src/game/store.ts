@@ -113,6 +113,8 @@ export type GameStore = {
   timelineYear: number | null;
   /** The timeline is stepping forward through its years on its own. */
   timelinePlaying: boolean;
+  /** Opening the timeline turns on clean view; closing it puts back what was there before. */
+  cleanBeforeTimeline: boolean;
   setTimeline: (year: number | null, playing?: boolean) => void;
   library: string[];
   grovesVisited: string[];
@@ -317,7 +319,13 @@ export const useGame = create<GameStore>((set, get) => ({
   cleanView: false,
   timelineYear: null,
   timelinePlaying: false,
-  setTimeline: (timelineYear, timelinePlaying = false) => set({ timelineYear, timelinePlaying }),
+  cleanBeforeTimeline: false,
+  setTimeline: (timelineYear, timelinePlaying = false) => set((s) => ({
+    timelineYear,
+    timelinePlaying,
+    ...(s.timelineYear === null && timelineYear !== null ? { cleanBeforeTimeline: s.cleanView, cleanView: true } : {}),
+    ...(s.timelineYear !== null && timelineYear === null ? { cleanView: s.cleanBeforeTimeline } : {}),
+  })),
   hostWorker: "",
   setHostWorker: (url) => set({ hostWorker: url }),
   portrait: null,
@@ -403,7 +411,7 @@ export const useGame = create<GameStore>((set, get) => ({
   pinTree: (pinnedSlug) => {
     // Going to a tree the timeline has not reached yet ends the timeline, so the tree is there.
     const book = pinnedSlug ? bookBySlug(pinnedSlug) : undefined;
-    set({ pinnedSlug, ...(book && !bookShown(book, get().timelineYear) ? { timelineYear: null, timelinePlaying: false } : {}) });
+    set({ pinnedSlug, ...(book && !bookShown(book, get().timelineYear) ? { timelineYear: null, timelinePlaying: false, cleanView: get().cleanBeforeTimeline } : {}) });
   },
   clearCards: () => set({ pinnedSlug: null, cardSlug: null, nearbyDismissed: get().nearbySlug }),
   dismissNearby: () => {

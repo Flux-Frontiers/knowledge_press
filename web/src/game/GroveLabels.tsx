@@ -9,6 +9,13 @@ const LABEL_PX = 96;
 const LABEL_SCREEN = 0.032;
 /** Above the grove's centre, m, so a label clears the canopy it names. */
 const LABEL_Y = 30;
+/**
+ * Groves whose names sit just past their north edge (screen-up in god's eye)
+ * instead of over the middle, where they crowded their neighbours' names.
+ */
+const LIFTED = new Set(["american-literature", "russian-literature", "ancient-classical"]);
+/** How far past the grove's edge a lifted name sits, m. */
+const LIFT_MARGIN = 2;
 
 /**
  * Grove names over each grove, in god's eye only: from that height the groves
@@ -20,13 +27,15 @@ export function GroveLabels({ forest }: { forest: Forest }) {
   const labels = useMemo(
     () =>
       forest.groves.map((g) => {
+        // Short enough not to crowd from overhead: "English Lit." for "English Literature".
+        const text = g.label.replace(/\bLiterature\b/, "Lit.");
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         const font = `600 ${LABEL_PX * 0.56}px "Source Sans 3", ui-sans-serif, system-ui, sans-serif`;
         let width = LABEL_PX * 4;
         if (ctx) {
           ctx.font = font;
-          width = Math.ceil(ctx.measureText(g.label).width + LABEL_PX * 0.7);
+          width = Math.ceil(ctx.measureText(text).width + LABEL_PX * 0.7);
         }
         canvas.width = width;
         canvas.height = LABEL_PX;
@@ -41,7 +50,7 @@ export function GroveLabels({ forest }: { forest: Forest }) {
           ctx.fillStyle = "#f3e6c2";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillText(g.label, width / 2, LABEL_PX * 0.46);
+          ctx.fillText(text, width / 2, LABEL_PX * 0.46);
         }
         const texture = new CanvasTexture(canvas);
         texture.colorSpace = SRGBColorSpace;
@@ -54,7 +63,7 @@ export function GroveLabels({ forest }: { forest: Forest }) {
   return (
     <group>
       {labels.map(({ grove, texture, aspect }) => (
-        <sprite key={grove.genre} position={[grove.x, LABEL_Y, grove.z]} scale={[LABEL_SCREEN * aspect, LABEL_SCREEN, 1]} renderOrder={10}>
+        <sprite key={grove.genre} position={[grove.x, LABEL_Y, LIFTED.has(grove.genre) ? grove.z - grove.radius - LIFT_MARGIN : grove.z]} scale={[LABEL_SCREEN * aspect, LABEL_SCREEN, 1]} renderOrder={10}>
           <spriteMaterial map={texture} sizeAttenuation={false} depthTest={false} depthWrite={false} transparent fog={false} />
         </sprite>
       ))}
