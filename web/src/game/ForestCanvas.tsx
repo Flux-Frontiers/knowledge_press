@@ -27,6 +27,8 @@ export function ForestCanvas({ forest, onDrawn }: {
     <Canvas
       // "percentage" is PCFShadowMap, which three r186 makes soft itself; "soft" asks for the removed PCFSoftShadowMap.
       shadows={shadows ? "percentage" : false}
+      // The start screen draws on demand, paced by StartPace; play draws every frame.
+      frameloop={playing ? "always" : "demand"}
       camera={{ position: [forest.spawn.x, 6.2, forest.spawn.z + 10], fov: 58, near: 0.12, far: 560 }}
       dpr={[1, PHONE ? 1 : COARSE_POINTER ? 1.25 : 1.5]}
       gl={{ antialias: true, powerPreference: "high-performance", alpha: false }}
@@ -59,8 +61,38 @@ export function ForestCanvas({ forest, onDrawn }: {
       <GodEyeControls forest={forest} />
       <GroveLabels forest={forest} />
       <Player forest={forest} playing={playing} />
+      <StartPace on={!playing} />
     </Canvas>
   );
+}
+
+/** The start screen's frame rate: its slow circle reads the same at half the display's rate, for about half the power. */
+const START_FPS = 30;
+
+/**
+ * While `on`, asks for a frame every 1 / START_FPS seconds; the canvas draws on
+ * demand then, so these are its only frames. A few ms of slack keeps it at every
+ * other frame on a 60 Hz display rather than every third.
+ *
+ * :param on: True on the start screen.
+ */
+function StartPace({ on }: { on: boolean }) {
+  const invalidate = useThree((s) => s.invalidate);
+  useEffect(() => {
+    if (!on) return;
+    let id = 0;
+    let last = -Infinity;
+    const tick = (t: number) => {
+      if (t - last >= 1000 / START_FPS - 4) {
+        last = t;
+        invalidate();
+      }
+      id = requestAnimationFrame(tick);
+    };
+    id = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(id);
+  }, [on, invalidate]);
+  return null;
 }
 
 /**
