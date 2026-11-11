@@ -24,6 +24,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   cart rather than gliding, which could pass through the trunk. In god's
   eye the timeline keeps the overhead view, with its bar moved to the
   bottom-right corner so the whole ring shows.
+- **The timeline opens in clean view**: no minimap or buttons, only its bar.
+  Closing it puts the view back as it was.
 - **Exhibits arrive on the timeline in their own year**: the armillary
   sundial about 255 BC, Kepler 1596, the weather mast 1846, Savonius 1922,
   Darrieus 1931, Double Helix 1953, the Flame of Knowledge 1964, the helical
