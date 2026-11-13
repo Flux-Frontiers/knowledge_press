@@ -11,6 +11,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **A tree's card shows its year and chunk count on every screen**, beside
+  the author: "Herman Melville · 1851 · 2,922 chunks". The count was a faint
+  line hidden on phones, next to the trunk radius, which is gone.
+
 ## [1.41.0] - 2026-11-11
 
 ### Added
