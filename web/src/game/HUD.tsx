@@ -17,7 +17,7 @@ import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
 import { TimelineBar, useTimelinePlayback } from "./TimelineBar";
-import { bookShown, timelineStops } from "./timeline";
+import { bookShown, timelineStops, yearLabel } from "./timeline";
 
 const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
 
@@ -365,9 +365,10 @@ export function HUD({ forest }: { forest: Forest }) {
               </button>
               <p className="text-xs tracking-wide text-muted uppercase">{nearby.book.genreLabel}</p>
               <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">{nearby.book.title}</h2>
-              <p className="text-sm text-muted">{nearby.book.author}</p>
-              <p className="card-extra mt-1 hidden text-xs text-faint tabular-nums sm:block">
-                {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
+              <p className="text-sm text-muted tabular-nums">
+                {nearby.book.author}
+                {nearby.book.year === undefined ? "" : ` · ${yearLabel(nearby.book.year)}`}
+                {` · ${nearby.book.chunks.toLocaleString("en-US")} chunks`}
               </p>
               <p className="card-extra mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
               <div className="mt-3 flex flex-wrap gap-2">
