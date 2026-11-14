@@ -19,7 +19,7 @@ import {
   Vector3,
   type BufferGeometry,
 } from "three";
-import { cinema } from "./cinema";
+import { cinema, UFO_CAM } from "./cinema";
 import { artTree, dieOrder, grownFraction, litDieCount, powerLevel } from "./artTree";
 import { activeEvent, stage } from "./events";
 import type { Exhibit } from "./exhibits";
@@ -531,6 +531,37 @@ function RimLayout({ mesh, place }: { mesh: Ref<InstancedMesh>; place: (i: numbe
 }
 
 /** The craft, its legs, the lift, the light and dust, and the two who come down. */
+/** The craft's heading over the ground for the ride-along camera, kept through the vertical descent. */
+const ufoHeading = { x: 1, z: 0 };
+const ufoA: [number, number, number] = [0, 0, 0], ufoB: [number, number, number] = [0, 0, 0], ufoTree: [number, number, number] = [0, 0, 0];
+
+/**
+ * `?ufocam`: the camera under the craft's belly at `t`, into `cinema`. In flight it looks
+ * along the path two seconds ahead, at the ground at 1.2 times its height away, so it
+ * looks steeply down when high and nearly level when low. Once the legs are down it
+ * turns to the art tree's site.
+ */
+function ufoShot(t: number, toWorld: (p: [number, number, number], out: [number, number, number]) => void, heading: { x: number; z: number }) {
+  const p = visitorPose(t);
+  toWorld(p.saucer, ufoA);
+  toWorld(visitorPose(t + 2).saucer, ufoB);
+  const dx = ufoB[0] - ufoA[0], dz = ufoB[2] - ufoA[2], run = Math.hypot(dx, dz);
+  if (run > 0.5) { heading.x = dx / run; heading.z = dz / run; }
+  if (p.legs > 0) {
+    toWorld(TREE_AT, ufoTree);
+    const tx = ufoTree[0] - ufoA[0], tz = ufoTree[2] - ufoA[2], tl = Math.hypot(tx, tz) || 1;
+    const k = Math.min(1, p.legs) * 0.08;
+    heading.x += (tx / tl - heading.x) * k;
+    heading.z += (tz / tl - heading.z) * k;
+    const n = Math.hypot(heading.x, heading.z) || 1;
+    heading.x /= n; heading.z /= n;
+  }
+  const y = ufoA[1] - 0.6;
+  const reach = Math.max(14, y * 1.2);
+  cinema.cam[0] = ufoA[0]; cinema.cam[1] = y; cinema.cam[2] = ufoA[2];
+  cinema.look[0] = ufoA[0] + heading.x * reach; cinema.look[1] = 0; cinema.look[2] = ufoA[2] + heading.z * reach;
+}
+
 function Visitor({ exhibit, forest, face, m }: { exhibit: Exhibit; forest: Forest; face: number; m: Materials }) {
   const craft = useRef<Group>(null);
   const rimLights = useRef<InstancedMesh>(null);
@@ -563,18 +594,25 @@ function Visitor({ exhibit, forest, face, m }: { exhibit: Exhibit; forest: Fores
   useFrame((state, delta) => {
     const s = useGame.getState();
     const dt = Math.min(delta, 0.1);
-    if (landingT === null && landingSeen()) {
-      // Seen before: already landed, the tree grown and powered, nothing to watch.
-      landingT = VISITOR_END + 60;
-    }
-    if (landingT === null) {
-      if (Math.hypot(sim.x - exhibit.x, sim.z - exhibit.z) > TRIGGER_DIST) {
-        if (craft.current) craft.current.visible = false;
-        return;
+    if (UFO_CAM) {
+      // Ride along from the start, wherever the rider is, and go round again a little after the end.
+      // Held at the start until the ride begins: the splash draws the scene too. Its own clock
+      // only: the rider's reduced-motion setting would otherwise skip straight to the end.
+      landingT = !s.playing || landingT === null || landingT > VISITOR_END + 6 ? 0 : s.paused ? landingT : landingT + dt;
+    } else {
+      if (landingT === null && landingSeen()) {
+        // Seen before: already landed, the tree grown and powered, nothing to watch.
+        landingT = VISITOR_END + 60;
       }
-      landingT = s.preferences.motion ? 0 : VISITOR_END;
-    } else if (!s.paused) {
-      landingT = s.preferences.motion ? landingT + dt : Math.max(landingT, VISITOR_END);
+      if (landingT === null) {
+        if (Math.hypot(sim.x - exhibit.x, sim.z - exhibit.z) > TRIGGER_DIST) {
+          if (craft.current) craft.current.visible = false;
+          return;
+        }
+        landingT = s.preferences.motion ? 0 : VISITOR_END;
+      } else if (!s.paused) {
+        landingT = s.preferences.motion ? landingT + dt : Math.max(landingT, VISITOR_END);
+      }
     }
     const t = Math.min(landingT, VISITOR_END);
     const p = visitorPose(t);
@@ -658,7 +696,7 @@ function Visitor({ exhibit, forest, face, m }: { exhibit: Exhibit; forest: Fores
     }
 
     // The camera follows the landing while the rider sits still, and lets go a little after.
-    if (landingT >= VISITOR_END && !landingSeen()) markLandingSeen();
+    if (landingT >= VISITOR_END && !landingSeen() && !UFO_CAM) markLandingSeen();
     // Only near the field: a tap on the tree that flies the rider off ends the watching.
     const atField = Math.hypot(sim.x - exhibit.x, sim.z - exhibit.z) < 40;
     const watching = atField && landingT < VISITOR_END + 3 && s.preferences.motion && cinema.idle > 1.2 && Math.abs(sim.speed) < 0.3;
@@ -672,7 +710,11 @@ function Visitor({ exhibit, forest, face, m }: { exhibit: Exhibit; forest: Fores
       if (cleanedForShot && useGame.getState().cleanView) useGame.setState({ cleanView: false });
       cleanedForShot = false;
     }
-    if (cinema.weight > 0.001) {
+    if (UFO_CAM) {
+      ufoShot(t, toWorld, ufoHeading);
+      cinema.weight = 1;
+      if (!s.cleanView) useGame.setState({ cleanView: true });
+    } else if (cinema.weight > 0.001) {
       const shot = visitorShot(t);
       toWorld(shot.cam, cinema.cam);
       toWorld(shot.look, cinema.look);
@@ -727,7 +769,14 @@ function Visitor({ exhibit, forest, face, m }: { exhibit: Exhibit; forest: Fores
 
 export function LandingField({ exhibit, forest }: { exhibit: Exhibit; forest: Forest }) {
   const m = useMaterials();
-  const event = useMemo(() => activeEvent(new Date(), window.location.search), []);
+  // `?ufocam` rides the visitor's craft, so it brings the visitor whatever the date.
+  const event = useMemo(() => (UFO_CAM ? "visitor" : activeEvent(new Date(), window.location.search)), []);
+  // And in daylight, whatever the hour, unless `&time=dawn|dusk|night` asks otherwise.
+  useEffect(() => {
+    if (!UFO_CAM) return;
+    const time = new URLSearchParams(window.location.search).get("time");
+    useGame.getState().setTimeMode(time === "dawn" || time === "dusk" || time === "night" ? time : "day");
+  }, []);
   // Local +x runs from the pad toward the road, where the rider stands to watch.
   const face = Math.atan2(-(exhibit.roadZ - exhibit.z), exhibit.roadX - exhibit.x);
   return (

@@ -20,6 +20,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Ride the visitor's craft: `?ufocam`.** The landing starts as soon as you
+  press Start, wherever you are, and the camera rides under the craft's belly:
+  looking ahead and down along its path over the crowns, down onto the pad,
+  then round to the art tree as it grows. It loops, runs in daylight (or
+  `&time=dawn|dusk|night`), and works in every camera mode.
+
 - **The forest in Blender** (`web/scripts/forest3d/`, tooling only). An
   exporter builds the forest from the game's own modules and writes its
   trees, leaves, corpus redwood, roads, plazas and grove grounds. A Blender
