@@ -64,3 +64,6 @@ site/
 
 # AgentKG conversational memory (local)
 .agentkg/
+
+# Blender runs the forest3d scripts with Python and caches their imports.
+__pycache__/

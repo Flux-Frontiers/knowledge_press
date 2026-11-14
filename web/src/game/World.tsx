@@ -84,7 +84,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
   const hemiIntensity = 0.78 * (1 + (DAY_OVERRIDE.hemiIntensity - 1) * t);
   const shadows = useGame((s) => s.preferences.shadows);
   const undergrowth = useGame((s) => s.preferences.undergrowth);
-  const groundTexture = useGroundTexture();
+  const groundTexture = useGroundTexture(2 * (forest.worldRadius + 30));
   const groundColor = useMemo(() => {
     const night = new Color(pal.ground);
     const day = night.clone().offsetHSL(0, -0.08, DAY_OVERRIDE.groundLightness);
