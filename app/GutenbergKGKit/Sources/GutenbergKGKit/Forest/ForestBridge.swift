@@ -66,6 +66,8 @@ public enum ForestCommand: Equatable, Sendable {
     case home
     /// The app's worker address, empty for none. Live moots use it.
     case worker(url: String)
+    /// Stop reading a book aloud and any narration: the app's reader is about to speak.
+    case quiet
 
     /// The command as the JSON `host.ts` parses.
     public var json: String {
@@ -74,6 +76,7 @@ public enum ForestCommand: Equatable, Sendable {
         case .goto(let slug): fields = ["kind": "goto", "slug": slug]
         case .home: fields = ["kind": "home"]
         case .worker(let url): fields = ["kind": "worker", "url": url]
+        case .quiet: fields = ["kind": "quiet"]
         }
         let data = (try? JSONSerialization.data(withJSONObject: fields, options: [.sortedKeys])) ?? Data()
         return String(decoding: data, as: UTF8.self)

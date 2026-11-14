@@ -127,6 +127,12 @@ final class ForestHost: NSObject {
         if pageReady { evaluate(.worker(url: url)) }
     }
 
+    /// Stop the forest's own reading aloud, when the page is up. Nothing is
+    /// held for later: a page still loading has nothing to stop.
+    func quiet() {
+        if pageReady { evaluate(.quiet) }
+    }
+
     /// Deliver a command now if the page is listening, or when it says `ready`.
     ///
     /// :param command: What to ask of the forest.

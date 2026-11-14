@@ -377,6 +377,8 @@ Reading aids, not exact equivalences.
 | `Retrieval/VectorIndex.swift` | Maps the `.vectors` sidecar, precomputes row norms once, scans with vDSP, keeps the best k without sorting everything |
 | `Retrieval/CorpusStore.swift` | `PassagePack`: BM25 over FTS5, passage hydration, the Browse queries |
 | `Retrieval/CatalogPack.swift` | Reads `core.pack` — genres, books, header counts |
+| `Retrieval/ChapterBlocks.swift` | A chapter as the reader's blocks and their spoken text; the twin of the forest's `chapterBlocks.ts`, held to the same fixtures |
+| `KnowledgePressUI/ReadAloud.swift` | The Browse reader's read-aloud queue on `AVSpeechSynthesizer` |
 | `Retrieval/CorpusPacks.swift` | Opens an installed corpus and validates it; the embedder check lives here |
 | `Retrieval/LocalRetrieval.swift` | Embed → dense → lexical → RRF. The Swift half of `_semantic_search` |
 | `Retrieval/SQLiteConnection.swift` | Owns the database handle so the pack types can fail on a bad file before they finish initialising |

@@ -20,7 +20,8 @@ export type HostEvent =
 export type HostCommand =
   | { kind: "goto"; slug: string } // fly to this tree and open its card
   | { kind: "home" } // back to the corpus redwood
-  | { kind: "worker"; url: string }; // the app's worker address, "" for none
+  | { kind: "worker"; url: string } // the app's worker address, "" for none
+  | { kind: "quiet" }; // stop reading a book aloud and any narration: the app's reader is about to speak
 
 type MessageHandler = { postMessage(body: unknown): void };
 type HostWindow = { webkit?: { messageHandlers?: { forest?: MessageHandler } }; __forestHost?: { dispatch(json: unknown): void } };
@@ -43,7 +44,7 @@ export function parseCommand(json: unknown): HostCommand | null {
   }
   if (!c || typeof c !== "object") return null;
   const { kind, slug, url } = c as { kind?: unknown; slug?: unknown; url?: unknown };
-  if (kind === "home") return { kind };
+  if (kind === "home" || kind === "quiet") return { kind };
   if (kind === "goto" && typeof slug === "string" && slug) return { kind, slug };
   if (kind === "worker" && typeof url === "string") return { kind, url };
   return null;

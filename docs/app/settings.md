@@ -62,6 +62,13 @@ cannot draw them on its own. The three resolutions are Preview (768 × 512),
 Standard (1152 × 768) and Full (1536 × 1024). A smaller one renders faster.
 **Backend** lists only the image sources the worker reports as ready now.
 
+## Reading aloud
+
+| Setting | What it does |
+| --- | --- |
+| Voice | The voice that reads a chapter aloud in Browse. **System voice**, the default, is the device's English voice. The list holds the English voices on this device, with their accent and whether they are Enhanced or Premium. Download more in the system's Spoken Content settings. |
+| Speed | How fast a chapter is read, from 0.80× to 1.30× the system's normal rate. Default 0.95×. |
+
 ## Corpus information
 
 Shows where the books are kept. With the corpus installed, it reads
@@ -77,8 +84,8 @@ to GutenbergKG, the project that builds the corpus.
 
 ## Reset all settings
 
-Puts search, synthesis and illustrations back to their defaults and clears the
-worker address. It asks first. Your conversations, the corpus scope and the
+Puts search, synthesis, illustrations and reading aloud back to their
+defaults and clears the worker address. It asks first. Your conversations, the corpus scope and the
 answer engine are kept. The forest has its own reset, in its **Controls and
 settings** panel.
 
