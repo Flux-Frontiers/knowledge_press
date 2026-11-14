@@ -49,6 +49,32 @@ tree within reach.
 - ++esc++, the close button, or a tap outside the page closes the reader. It
   remembers the chapter you were at for the rest of the visit.
 
+## Listen to the book
+
+The play button at the top of the reader, or ++space++, reads the chapter
+aloud. The paragraph being read is tinted and kept in view.
+
+- ++space++ or the button again pauses, and the next press goes on from the
+  same word. After the screen has locked, it starts the paragraph again.
+- While a reading is going, tap a paragraph to read from there.
+- At the end of a chapter the reading goes on to the next one, and it stops
+  at the end of the book.
+- Closing the reader, or turning to another chapter yourself, stops the
+  reading. The book remembers the paragraph, so the play button starts there
+  next time, on this visit or a later one.
+- Footnotes and illustration captions are shown but not read.
+
+The voice matches the book's author: Jane Austen is read in a British
+woman's voice, Mark Twain in a man's. A translated author is read in your
+device's accent; a book with many authors in the system voice. Voices on
+your device come before ones a browser fetches over the network. Settings has
+a **Reading voice** to pick one voice for every book, and a **Reading
+speed**. See [Settings](settings.md).
+
+On an iPhone or iPad the reading stops when the screen locks. When you come
+back, the paragraph it stopped in is read again from its start. On a Mac it
+reads on with the screen locked.
+
 Prose is set as paragraphs that fill the page, whatever the printed
 edition's line length was. Verse and plays keep their lines; a line too long
 for the page continues indented below. Words the edition marked in italics

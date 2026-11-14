@@ -1,10 +1,11 @@
-import { AArrowDown, AArrowUp, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { AArrowDown, AArrowUp, ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Book } from "./catalog";
 import { useGame } from "./store";
 import { getBook, type Chapter } from "./bookText";
 import { blockLines, chapterBlocks, type Block, type Run } from "./chapterBlocks";
 import { READING_SIZES, type ReadingSize } from "./preferences";
+import { canSpeak, pauseReading, readAloud, resumeReading, stopReading, type ReadingState } from "./speech";
 
 const SIZES = Object.keys(READING_SIZES) as ReadingSize[];
 
@@ -17,7 +18,7 @@ type Load<T> = { state: "loading" } | { state: "error"; message: string } | { st
 export function ReaderPanel({ book }: { book: Book }) {
   const close = () => useGame.getState().openReader(null);
   const [chapters, setChapters] = useState<Load<Chapter[]>>({ state: "loading" });
-  const [index, setIndex] = useState(() => lastChapter.get(book.slug) ?? 0);
+  const [index, setIndex] = useState(() => lastChapter.get(book.slug) ?? useGame.getState().preferences.readingAt[book.slug]?.[0] ?? 0);
   const [attempt, setAttempt] = useState(0);
   const page = useRef<HTMLDivElement>(null);
   const size = useGame((s) => s.preferences.readingSize);
@@ -53,6 +54,63 @@ export function ReaderPanel({ book }: { book: Book }) {
 
   const failure = chapters.state === "error" ? chapters.message : null;
 
+  // ---- Reading aloud: one block at a time, on to the next chapter, stopped when the book closes.
+  const [reading, setReading] = useState<{ state: ReadingState; block: number }>({ state: "idle", block: -1 });
+  /** Set when a chapter has been read to its end, so the next one is read too. */
+  const goOn = useRef(false);
+  const voiced = canSpeak() && blocks.some((b) => b.spoken);
+
+  const read = (from: number) => {
+    const { preferences, setPreferences } = useGame.getState();
+    readAloud({
+      blocks: blocks.map((b) => b.spoken),
+      from,
+      want: book.voice,
+      chosen: preferences.readVoice,
+      rate: preferences.readRate,
+      onChange: (state, block) => {
+        setReading({ state, block });
+        if (state === "playing") {
+          const at = useGame.getState().preferences.readingAt;
+          setPreferences({ readingAt: { ...at, [book.slug]: [index, block] } });
+        }
+      },
+      onDone: () => {
+        if (index + 1 < list.length) {
+          goOn.current = true;
+          setIndex(index + 1);
+        }
+      },
+    });
+  };
+  const toggleReading = () => {
+    if (reading.state === "playing") pauseReading();
+    else if (reading.state === "paused") resumeReading();
+    else {
+      const saved = useGame.getState().preferences.readingAt[book.slug];
+      read(saved && saved[0] === index && saved[1] < blocks.length ? saved[1] : 0);
+    }
+  };
+
+  // A new chapter: read on if the last one was read to its end, else stop.
+  useEffect(() => {
+    if (!blocks.length) return;
+    if (goOn.current) {
+      goOn.current = false;
+      read(0);
+    } else {
+      stopReading();
+    }
+    // Only a new chapter starts or stops a reading, so `blocks` is the one dependency.
+  }, [blocks]);
+
+  useEffect(() => () => stopReading(), []);
+
+  useEffect(() => {
+    if (reading.state !== "playing") return;
+    page.current?.querySelector(`[data-block="${reading.block}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [reading]);
+
   // Left and Right turn the chapter; Up and Down scroll the page. The close
   // button holds focus, so the page never gets the keys itself. A focused
   // chapter menu keeps them: Left and Right step its options natively.
@@ -60,7 +118,11 @@ export function ReaderPanel({ book }: { book: Book }) {
     function onKey(e: KeyboardEvent) {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (e.target instanceof HTMLElement && e.target.closest("input, textarea, select")) return;
-      if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
+      if (e.code === "Space" && voiced) {
+        // Also on a focused button, which Space would otherwise press.
+        if (!e.repeat) toggleReading();
+        e.preventDefault();
+      } else if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
         if (e.repeat) return;
         const next = index + (e.code === "ArrowLeft" ? -1 : 1);
         if (next >= 0 && next < list.length) setIndex(next);
@@ -73,7 +135,7 @@ export function ReaderPanel({ book }: { book: Book }) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [index, list.length]);
+  });
 
   return (
     <div className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-bg/60 p-2 sm:p-6" onClick={close}>
@@ -91,6 +153,15 @@ export function ReaderPanel({ book }: { book: Book }) {
             <p className="text-sm text-muted">{book.author}</p>
           </div>
           <div className="flex shrink-0 items-center">
+            {voiced ? (
+              <button type="button" onClick={toggleReading}
+                className="grid size-11 place-items-center rounded-md text-primary"
+                aria-label={reading.state === "playing" ? "Pause reading" : "Read aloud"}>
+                {reading.state === "playing"
+                  ? <Pause className="size-5" strokeWidth={1.75} />
+                  : <Play className="size-5" strokeWidth={1.75} />}
+              </button>
+            ) : null}
             <button type="button" disabled={size === SIZES[0]} onClick={() => step(-1)}
               className="grid size-11 place-items-center rounded-md text-muted disabled:text-faint" aria-label="Smaller text">
               <AArrowDown className="size-5" strokeWidth={1.75} />
@@ -133,7 +204,14 @@ export function ReaderPanel({ book }: { book: Book }) {
           ) : current ? (
             <div className={`mx-auto max-w-[65ch] font-display leading-relaxed text-fg/95 ${READING_SIZES[size]}`}>
               {list.length > 1 ? <h3 className="mb-4 text-[1.3em] leading-tight font-semibold">{current.title}</h3> : null}
-              {blocks.map((block, i) => <BlockView key={i} block={block} />)}
+              {blocks.map((block, i) => (
+                <div key={i} data-block={i}
+                  // While a reading is going, tap a paragraph to read from it.
+                  onClick={reading.state !== "idle" && block.spoken ? () => read(i) : undefined}
+                  className={reading.state !== "idle" && reading.block === i ? "-mx-2 rounded-md bg-primary/10 px-2" : undefined}>
+                  <BlockView block={block} />
+                </div>
+              ))}
             </div>
           ) : (
             <p className="text-sm text-muted">Opening the book...</p>

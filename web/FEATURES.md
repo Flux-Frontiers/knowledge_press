@@ -99,6 +99,7 @@ A rank for how much of the forest you have pressed. Starting over shipped as
 | Named grove signposts with the grove's tree species; signs and plaques lit at night | `Signposts.tsx`, `species.ts` |
 | Denser skeletons (raised attractor / node caps) | `growTree.ts` |
 | Read a book from its tree, from static per-book JSON | `Reader.tsx`, `bookText.ts` |
+| Read a chapter aloud a paragraph at a time, in a voice matching the author; pause, tap to read from a paragraph, on to the next chapter, position saved | `speech.ts` (`readAloud`, `readingVoice`), `Reader.tsx`, `PauseOverlay.tsx` |
 | Reader sets prose as paragraphs, verse by line with a hanging indent, italics, footnotes and captions; text size in four steps | `chapterBlocks.ts`, `Reader.tsx`, `preferences.ts` |
 | Press / local library | `store.ts` |
 | Screenshots without the HUD | `screenshot.ts` |

@@ -26,6 +26,12 @@ export type Preferences = {
   mootVoices: [string, string];
   /** The book reader's text size; see READING_SIZES. */
   readingSize: ReadingSize;
+  /** The voice that reads a book aloud, by name; "" picks one from the book's author. */
+  readVoice: string;
+  /** Reading-aloud speed, 0.8 to 1.3. */
+  readRate: number;
+  /** Where each book was left, by slug: chapter index and block index. */
+  readingAt: Record<string, [number, number]>;
   /** The GutenbergKG worker that holds live moots (liveMoots.ts); "" for none, the default. */
   mootWorker: string;
   /** The worker's MOOT_TOKEN, when it sets one; "" otherwise. */
@@ -88,7 +94,21 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
       && value.mootVoices.every((n) => typeof n === "string")
       ? [value.mootVoices[0], value.mootVoices[1]] : ["", ""],
     readingSize: value?.readingSize && value.readingSize in READING_SIZES ? value.readingSize : "medium",
+    readVoice: typeof value?.readVoice === "string" ? value.readVoice : "",
+    readRate: typeof value?.readRate === "number" && Number.isFinite(value.readRate)
+      ? Math.max(0.8, Math.min(1.3, value.readRate)) : 0.95,
+    readingAt: readingAt(value?.readingAt),
     mootWorker: typeof value?.mootWorker === "string" && value.mootWorker.trim() ? value.mootWorker.trim() : "",
     mootToken: typeof value?.mootToken === "string" ? value.mootToken : "",
   };
+}
+
+/** Saved reading positions, each a pair of whole numbers; anything else is dropped. */
+function readingAt(value: unknown): Record<string, [number, number]> {
+  const out: Record<string, [number, number]> = {};
+  if (!value || typeof value !== "object") return out;
+  for (const [slug, at] of Object.entries(value)) {
+    if (Array.isArray(at) && at.length === 2 && at.every((n) => Number.isInteger(n) && n >= 0)) out[slug] = [at[0], at[1]];
+  }
+  return out;
 }

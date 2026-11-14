@@ -23,6 +23,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   corpus.
 - **The forest reader has a text size control**: four steps, saved.
 
+### Added
+
+- **The forest reader reads books aloud.** A play button (or Space) reads
+  the chapter a paragraph at a time in the device's own voices, tints the
+  paragraph being read and keeps it in view, and goes on to the next chapter.
+  Tap a paragraph to read from there. The voice matches the author (Austen
+  British and female, Twain American and male), from a `voice` the catalog
+  now carries for 252 of 265 books. Settings adds a Reading voice and a
+  Reading speed. Closing the reader stops the reading; the book remembers
+  the paragraph for next time. On iPhone and iPad a reading stops when the
+  screen locks and picks up that paragraph again on return.
+
 - **A tree's card shows its year and chunk count on every screen**, beside
   the author: "Herman Melville · 1851 · 2,922 chunks". The count was a faint
   line hidden on phones, next to the trunk radius, which is gone.
