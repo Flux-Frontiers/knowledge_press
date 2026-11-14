@@ -22,8 +22,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   fixtures both test suites read; the two agree on all 54,444 chapters of the
   corpus.
 - **The forest reader has a text size control**: four steps, saved.
+- **A tree's card shows its year and chunk count on every screen**, beside
+  the author: "Herman Melville · 1851 · 2,922 chunks". The count was a faint
+  line hidden on phones, next to the trunk radius, which is gone.
 
 ### Added
+
+- **A night-sky splash with a book's first line.** The launch splash is a
+  starry night (twinkling unless Reduce Motion is on) with the logo, the
+  name, and the opening line of one of twenty corpus books, word for word
+  as the corpus holds it, a different one each launch. It stays long
+  enough to read the line, 6 to 10 seconds; a tap skips it.
 
 - **The forest reader reads books aloud.** A play button (or Space) reads
   the chapter a paragraph at a time in the device's own voices, tints the
@@ -35,9 +44,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the paragraph for next time. On iPhone and iPad a reading stops when the
   screen locks and picks up that paragraph again on return.
 
-- **A tree's card shows its year and chunk count on every screen**, beside
-  the author: "Herman Melville · 1851 · 2,922 chunks". The count was a faint
-  line hidden on phones, next to the trunk radius, which is gone.
+### Fixed
+
+- **No white flash at launch.** The iOS launch screen is now the splash's
+  night color, and the splash is opaque from its first frame.
+- **The app icon shows on the splash and in About again.** It was looked
+  up outside the folder the package bundles it in.
 
 ## [1.41.0] - 2026-11-11
 
