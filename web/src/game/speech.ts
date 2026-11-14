@@ -149,6 +149,30 @@ export function voicePair<V extends Voice>(
   return [first, second];
 }
 
+/**
+ * The voice for reading a book aloud: the one chosen in Settings when this
+ * browser has it, else `pickVoice` for the book's author, else the system's
+ * English voice.
+ *
+ * Unlike a moot line, a book is read in long utterances, so the automatic
+ * choice keeps to voices on the device where there are any: Chrome's Google
+ * voices are fetched over the network, and those are known to go quiet
+ * partway through a long utterance with no end event.
+ *
+ * :param all: The browser's voices.
+ * :param chosen: The chosen voice name; "" for automatic.
+ * :param want: The author's gender and accent; omitted, the system voice.
+ */
+export function readingVoice<V extends Voice>(all: V[], chosen = "", want: VoiceWant = ANY): V | undefined {
+  const english = all.filter((v) => v.lang.toLowerCase().startsWith("en") && !NOVELTY.has(baseName(v)));
+  const local = english.filter((v) => v.localService);
+  return (chosen ? all.find((v) => v.name === chosen) : undefined)
+    ?? (local.length ? pickVoice(want, local, englishVoice(all)?.lang ?? "en-US") : undefined)
+    ?? pickVoice(want, english, englishVoice(all)?.lang ?? "en-US")
+    ?? englishVoice(english)
+    ?? englishVoice(all);
+}
+
 /** A moot is spoken slower than grove narration: it is argument, read aloud. */
 export const MOOT_RATE = 0.85;
 
@@ -204,8 +228,10 @@ export type MootLine = {
 export function speak(text: string, queue = false, line?: MootLine): void {
   const s = synth();
   if (!s) return;
-  if (!queue) s.cancel();
+  // Overtake first: a cancel can end a reading's utterance at once, and it
+  // must see that someone else is speaking.
   const turn = ++generation;
+  if (!queue) s.cancel();
   const say = () => {
     waiting = false;
     if (turn !== generation) return;
@@ -330,4 +356,189 @@ export function speaking(): boolean {
   // The end event can be lost (tab hidden, voice change); trust the engine too.
   if (active && !s.speaking && !s.pending) active = false;
   return active;
+}
+
+// ---- Reading a chapter aloud -----------------------------------------------
+
+/** idle: nothing to read. playing: a block is being said. paused: stopped at a block, to go on from. */
+export type ReadingState = "idle" | "playing" | "paused";
+
+/** A chapter to read aloud, one block per utterance. */
+export type ReadingRequest = {
+  /** Each block's spoken text; "" for a block that is not said (a note, a caption). */
+  blocks: readonly string[];
+  /** The block to start at. */
+  from: number;
+  /** The author's gender and accent, for the automatic voice. */
+  want?: VoiceWant;
+  /** The voice chosen in Settings; "" for automatic. */
+  chosen?: string;
+  rate?: number;
+  /** Called whenever the state or the current block changes. */
+  onChange?: (state: ReadingState, block: number) => void;
+  /** Called once the last block has been said. */
+  onDone?: () => void;
+};
+
+type Reading = ReadingRequest & {
+  state: ReadingState;
+  at: number;
+  /** The utterance saying block `at`; ends of any other are stale. */
+  utterance: SpeechSynthesisUtterance | null;
+  /** Paused with `pause()`, so `resume()` goes on mid-sentence. */
+  heldByEngine: boolean;
+  /** When the engine last showed progress (start, word boundary). */
+  progress: number;
+  /** The block's voice is on the device; a network voice may send no word boundaries to watch. */
+  local: boolean;
+};
+
+let current: Reading | null = null;
+
+/**
+ * How long after the page comes back the reading may show no progress
+ * before its block is said again. iPadOS stops speech on lock and leaves
+ * the engine stuck, with no end and no error, until it is cancelled; macOS
+ * goes on speaking, and its word boundaries keep this from firing.
+ */
+const STUCK_MS = 1500;
+let watchingVisibility = false;
+
+function setState(r: Reading, state: ReadingState, at = r.at): void {
+  r.state = state;
+  r.at = at;
+  r.onChange?.(state, at);
+}
+
+function readBlock(r: Reading, from: number): void {
+  const s = synth();
+  if (!s || current !== r) return;
+  let i = from;
+  while (i < r.blocks.length && !r.blocks[i]!.trim()) i++;
+  if (i >= r.blocks.length) {
+    current = null;
+    r.utterance = null;
+    setState(r, "idle", 0);
+    r.onDone?.();
+    return;
+  }
+  // Starting a block overtakes any narration line still waiting for voices.
+  const turn = ++generation;
+  waiting = false;
+  const u = new SpeechSynthesisUtterance(r.blocks[i]!);
+  const voice = readingVoice(loadVoices(s), r.chosen, r.want);
+  if (voice) u.voice = voice;
+  u.lang = voice?.lang ?? "en-US";
+  u.rate = r.rate ?? 0.95;
+  r.local = voice?.localService !== false;
+  u.onstart = u.onboundary = () => { r.progress = Date.now(); };
+  const ended = (failed: boolean) => {
+    if (current !== r || r.utterance !== u) return; // a block said again, or a stopped reading
+    r.utterance = null;
+    // Someone else spoke (narration, a moot), or the block was cut off: a
+    // cancel fires an error, though on iPadOS sometimes an end. Wait at this block.
+    if (failed || turn !== generation) setState(r, "paused");
+    else readBlock(r, i + 1);
+  };
+  u.onend = () => ended(false);
+  u.onerror = () => ended(true);
+  r.utterance = u;
+  r.heldByEngine = false;
+  r.progress = Date.now();
+  held = u;
+  setState(r, "playing", i);
+  s.speak(u);
+}
+
+function watchVisibility(): void {
+  if (watchingVisibility || typeof document === "undefined") return;
+  watchingVisibility = true;
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") return;
+    const r = current;
+    // Paused across a lock: the held engine may be stuck too, so play says the block again.
+    if (r?.state === "paused" && r.heldByEngine) {
+      r.heldByEngine = false;
+      r.utterance = null;
+      synth()?.resume();
+      synth()?.cancel();
+      return;
+    }
+    if (!r || r.state !== "playing" || !r.local) return;
+    const back = Date.now();
+    window.setTimeout(() => {
+      if (current !== r || r.state !== "playing" || r.progress > back) return;
+      const at = r.at;
+      r.utterance = null;
+      synth()?.cancel();
+      readBlock(r, at);
+    }, STUCK_MS);
+  });
+}
+
+/**
+ * Read a chapter aloud from a block, one block per utterance, cutting off
+ * any narration or moot. Call it from a tap the first time: iOS speaks only
+ * after one.
+ */
+export function readAloud(request: ReadingRequest): void {
+  const s = synth();
+  if (!s) return;
+  if (current) {
+    current.utterance = null;
+    if (current.heldByEngine) s.resume(); // or the paused engine holds the new utterance
+  }
+  s.cancel();
+  watchVisibility();
+  const r: Reading = { ...request, state: "idle", at: request.from, utterance: null, heldByEngine: false, progress: 0, local: true };
+  current = r;
+  readBlock(r, request.from);
+}
+
+/** Pause the reading where it is. */
+export function pauseReading(): void {
+  const r = current;
+  const s = synth();
+  if (!r || !s || r.state !== "playing") return;
+  s.pause();
+  r.heldByEngine = true;
+  setState(r, "paused");
+}
+
+/**
+ * Go on with a paused reading: mid-sentence after `pauseReading`, or from
+ * the start of its block when another speaker had cut it off.
+ */
+export function resumeReading(): void {
+  const r = current;
+  const s = synth();
+  if (!r || !s || r.state !== "paused") return;
+  if (r.heldByEngine && r.utterance) {
+    s.resume();
+    r.heldByEngine = false;
+    r.progress = Date.now();
+    setState(r, "playing");
+  } else {
+    readBlock(r, r.at);
+  }
+}
+
+/** Stop reading and forget the chapter. */
+export function stopReading(): void {
+  const r = current;
+  if (!r) return;
+  current = null;
+  r.utterance = null;
+  const s = synth();
+  if (s) {
+    // A paused engine would hold the next utterance, whoever speaks it.
+    if (r.heldByEngine) s.resume();
+    s.cancel();
+  }
+  setState(r, "idle", r.at);
+}
+
+/** The reading's state; "idle" when nothing is being read. */
+export function readingState(): ReadingState {
+  return current?.state ?? "idle";
 }
