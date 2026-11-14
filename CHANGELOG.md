@@ -11,6 +11,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **The forest in Blender** (`web/scripts/forest3d/`, tooling only). An
+  exporter builds the forest from the game's own modules and writes its
+  trees, leaves, corpus redwood, roads, plazas and grove grounds. A Blender
+  script rebuilds them as a Cycles scene with leaves as geometry-node
+  instances. The result renders as stills, or as Looking Glass quilts through
+  quiltwright. One grove can be exported alone as a diorama for holograms.
+
 ### Changed
 
 - **The forest reader sets books as books.** Prose fills the page as
