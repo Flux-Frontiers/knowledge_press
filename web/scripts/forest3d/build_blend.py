@@ -91,6 +91,18 @@ ap.add_argument(
     help="scatter grass tufts within this many meters of the point below the camera (0: none)",
 )
 ap.add_argument(
+    "--redwood-bark",
+    choices=["game", "photo"],
+    default="game",
+    help="the corpus redwood's bark: the game's own, or Poly Haven's metasequoia photo",
+)
+ap.add_argument(
+    "--polyhaven",
+    type=Path,
+    default=Path.home() / "Library/Caches/knowledge_press/polyhaven",
+    help="cache from fetch_polyhaven.py",
+)
+ap.add_argument(
     "--grass-density",
     type=float,
     default=30.0,
@@ -122,7 +134,11 @@ for key in ("sun", "sky", "exposure"):
         )
 if args.sun_kelvin is None:
     args.sun_kelvin = preset["kelvin"]
-DT = {"Float32Array": np.float32, "Uint32Array": np.uint32}
+DT = {
+    "Float32Array": np.float32,
+    "Uint32Array": np.uint32,
+    "Uint8ClampedArray": np.uint8,
+}
 
 
 def arr(name):
@@ -230,78 +246,66 @@ def instancer_color(name, roughness, attr_name):
 leaf_mat, _, _ = instancer_color("leaf", 0.8, "leafcol")
 
 
+def image_from_rgba(name, rgba, width, height, color=True):
+    """A packed Blender image from 8-bit RGBA rows, top row first (a canvas's order). Blender
+    stores rows bottom first, which is also how three uploads a canvas (flipY), so the UVs agree."""
+    px = rgba.reshape(height, width, 4)[::-1].astype(np.float32) / 255.0
+    im = bpy.data.images.new(name, width, height, alpha=True)
+    if not color:
+        im.colorspace_settings.name = "Non-Color"
+    im.pixels.foreach_set(px.ravel())
+    im.pack()
+    return im
+
+
 def redwood_bark_material():
-    """Furrowed cinnamon bark in the spirit of CorpusRedwood.tsx's canvas texture:
-    meandering vertical ridges (a distorted wave across u), dark furrows, fibre noise."""
+    """The game's own redwood bark (redwoodTextures.ts): its color and normal map, tiled
+    by the bark's UVs as the game tiles them. --redwood-bark photo uses Poly Haven's
+    metasequoia (dawn redwood) photograph instead."""
     m, nt, bsdf = principled("redwood_bark", 0.95)
-    uv = nt.nodes.new("ShaderNodeTexCoord")
-    wave = nt.nodes.new("ShaderNodeTexWave")
-    wave.wave_type, wave.bands_direction = "BANDS", "X"
-    wave.inputs["Scale"].default_value = 8.0
-    wave.inputs["Distortion"].default_value = 6.0
-    wave.inputs["Detail"].default_value = 3.0
-    nt.links.new(uv.outputs["UV"], wave.inputs["Vector"])
-    ramp = nt.nodes.new("ShaderNodeValToRGB")
-    ramp.color_ramp.elements[0].color = (
-        (38 / 255) ** 2.2,
-        (17 / 255) ** 2.2,
-        (11 / 255) ** 2.2,
-        1,
-    )
-    ramp.color_ramp.elements[1].color = (
-        (156 / 255) ** 2.2,
-        (74 / 255) ** 2.2,
-        (44 / 255) ** 2.2,
-        1,
-    )
-    nt.links.new(wave.outputs["Fac"], ramp.inputs["Fac"])
-    nt.links.new(ramp.outputs["Color"], bsdf.inputs["Base Color"])
-    bump = nt.nodes.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.6
-    nt.links.new(wave.outputs["Fac"], bump.inputs["Height"])
-    nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+    if args.redwood_bark == "photo":
+        ph = args.polyhaven / "metasequoia_bark"
+        color, normal = (
+            image_node(nt, ph / "diff_2k.jpg"),
+            image_node(nt, ph / "nor_gl_2k.jpg", color=False),
+        )
+    else:
+        w, h = man["redwood"]["barkSize"]
+        color = nt.nodes.new("ShaderNodeTexImage")
+        color.image = image_from_rgba(
+            "redwood_bark_color", arr("redwood_bark_color"), w, h
+        )
+        normal = nt.nodes.new("ShaderNodeTexImage")
+        normal.image = image_from_rgba(
+            "redwood_bark_normal", arr("redwood_bark_normalmap"), w, h, color=False
+        )
+    nt.links.new(color.outputs["Color"], bsdf.inputs["Base Color"])
+    nrm = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(normal.outputs["Color"], nrm.inputs["Color"])
+    nt.links.new(nrm.outputs["Normal"], bsdf.inputs["Normal"])
     return m
 
 
 def spray_material():
-    """A flat redwood spray (CorpusRedwood.tsx sprayTexture): a stem along x, short
-    needles either side, longest mid-spray; the rest of the card cut away."""
+    """The game's own redwood spray (redwoodTextures.ts strokes): a near-white card tinted
+    by each spray's color, the card's empty ground cut away (the game's alphaTest 0.5)."""
     m, nt, bsdf = instancer_color("redwood_spray", 0.85, "spraycol")
-    uv = nt.nodes.new("ShaderNodeTexCoord")
-    sep = nt.nodes.new("ShaderNodeSeparateXYZ")
-    nt.links.new(uv.outputs["UV"], sep.inputs["Vector"])
-    math_ = lambda op, a, b=None: _math(nt, op, a, b)  # noqa: E731
-    u, v = sep.outputs["X"], sep.outputs["Y"]
-    # Envelope: half-width of the needles at u, as a fraction of the card (0..0.5).
-    env = math_("MULTIPLY", math_("SINE", math_("MULTIPLY", u, math.pi)), 0.42)
-    off = math_("ABSOLUTE", math_("SUBTRACT", v, 0.5))
-    inside = math_("LESS_THAN", off, env)
-    # Needle comb: about 18 needles a side, swept toward the tip, each a little over half its pitch.
-    comb = math_(
-        "LESS_THAN",
-        math_(
-            "FRACT",
-            math_("MULTIPLY", math_("SUBTRACT", u, math_("MULTIPLY", off, 0.6)), 18.0),
-        ),
-        0.6,
-    )
-    stem = math_("LESS_THAN", off, 0.03)
-    alpha = math_("MAXIMUM", math_("MULTIPLY", inside, comb), stem)
-    nt.links.new(alpha, bsdf.inputs["Alpha"])
+    tint = bsdf.inputs["Base Color"].links[0].from_socket
+    w, h = man["redwood"]["spraySize"]
+    tex = nt.nodes.new("ShaderNodeTexImage")
+    tex.image = image_from_rgba("redwood_spray", arr("redwood_spray_rgba"), w, h)
+    mul = nt.nodes.new("ShaderNodeMix")
+    mul.data_type, mul.blend_type = "RGBA", "MULTIPLY"
+    sock(mul.inputs, "Factor_Float").default_value = 1.0
+    nt.links.new(tex.outputs["Color"], sock(mul.inputs, "A_Color"))
+    nt.links.new(tint, sock(mul.inputs, "B_Color"))
+    nt.links.new(sock(mul.outputs, "Result_Color"), bsdf.inputs["Base Color"])
+    cut = nt.nodes.new("ShaderNodeMath")
+    cut.operation = "GREATER_THAN"
+    cut.inputs[1].default_value = 0.5
+    nt.links.new(tex.outputs["Alpha"], cut.inputs[0])
+    nt.links.new(cut.outputs[0], bsdf.inputs["Alpha"])
     return m
-
-
-def _math(nt, op, a, b):
-    n = nt.nodes.new("ShaderNodeMath")
-    n.operation = op
-    for i, x in enumerate((a, b)):
-        if x is None:
-            continue
-        if isinstance(x, (int, float)):
-            n.inputs[i].default_value = x
-        else:
-            nt.links.new(x, n.inputs[i])
-    return n.outputs[0]
 
 
 # --- instancing --------------------------------------------------------------

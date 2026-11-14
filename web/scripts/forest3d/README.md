@@ -47,7 +47,7 @@ hub is at the origin.
 |---|---|---|
 | Book trees (bark) | `forest.chunks[].bark` | One mesh per grove. The game's normals, its photo bark (`public/textures/bark`), tinted by the season's wood color |
 | Leaves | `forest.leaves` | One point per leaf, instanced by geometry nodes with the game's quaternion, scale and season color. The season's density is applied; wind is not |
-| Corpus redwood | `forest.corpusTree` | Bark mesh with a procedural furrowed-bark shader, plus spray cards instanced like the leaves |
+| Corpus redwood | `forest.corpusTree`, `redwoodTextures.ts` | The game's own bark (color and normal map) and needle-spray texture; spray cards instanced like the leaves. `--redwood-bark photo` uses Poly Haven's metasequoia bark instead |
 | Roads, plazas | `roads.ts` `ribbon` / `fillets` / `disc` | The game's meshes and UVs, herringbone brick |
 | Grove grounds | `forest.groves` | Tinted discs with the game's radial fade, casting no shadow |
 | Ground | season palette | Day color times the game's ground texture, with procedural speckle |

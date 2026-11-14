@@ -48,6 +48,7 @@ const { leafHash } = game("leafLod");
 const { ribbon, fillets, disc, RING_W, SPOKE_W, SPUR_W } = game("roads");
 const { DAY_OVERRIDE } = game("daylight");
 const { floorLitter, rockGeometry, tuftGeometry } = game("forestFloor");
+const { redwoodBarkPixels, sprayStrokes, SPRAY_SIZE } = game("redwoodTextures");
 const sky = game("sky");
 const { starBuffers, applyMatrix } = game("stars");
 
@@ -106,6 +107,34 @@ function dump(name, arr) {
   writeFileSync(join(out, `${name}.bin`), Buffer.from(arr.buffer, arr.byteOffset, arr.byteLength));
   files[name] = { dtype: arr.constructor.name, length: arr.length };
 }
+/**
+ * Draws round-capped strokes, in order, over a transparent canvas, as the game's canvas
+ * does (CorpusRedwood.tsx sprayTexture), with about a pixel of anti-aliasing.
+ * :return: RGBA rows, top first.
+ */
+function rasterize(strokes, width, height) {
+  const out = new Uint8ClampedArray(width * height * 4);
+  for (const s of strokes) {
+    const r = s.width / 2;
+    const [x0, x1] = [Math.floor(Math.min(s.x0, s.x1) - r - 1), Math.ceil(Math.max(s.x0, s.x1) + r + 1)];
+    const [y0, y1] = [Math.floor(Math.min(s.y0, s.y1) - r - 1), Math.ceil(Math.max(s.y0, s.y1) + r + 1)];
+    const dx = s.x1 - s.x0, dy = s.y1 - s.y0, len2 = dx * dx + dy * dy;
+    for (let y = Math.max(0, y0); y < Math.min(height, y1); y++) {
+      for (let x = Math.max(0, x0); x < Math.min(width, x1); x++) {
+        const px = x + 0.5, py = y + 0.5;
+        const t = len2 ? Math.max(0, Math.min(1, ((px - s.x0) * dx + (py - s.y0) * dy) / len2)) : 0;
+        const d = Math.hypot(px - s.x0 - dx * t, py - s.y0 - dy * t);
+        const a = Math.max(0, Math.min(1, r + 0.5 - d));
+        if (a <= 0) continue;
+        const k = (y * width + x) * 4, under = out[k + 3] / 255, alpha = a + under * (1 - a);
+        for (let c = 0; c < 3; c++) out[k + c] = (s.rgb[c] * a + out[k + c] * under * (1 - a)) / alpha;
+        out[k + 3] = alpha * 255;
+      }
+    }
+  }
+  return out;
+}
+
 /** Keeps the triangles of a flat mesh that lie wholly in the region. */
 function clipFlat(m) {
   if (!region) return m;
@@ -198,7 +227,15 @@ if (within(0, 0, forest.corpusTree.baseRadius)) {
   dump("spray_card_pos", card.getAttribute("position").array);
   dump("spray_card_uv", card.getAttribute("uv").array);
   dump("spray_card_index", new Uint32Array(card.getIndex().array));
-  redwood = { height: ct.height, baseRadius: ct.baseRadius, sprays: count };
+  // The game's own redwood textures (redwoodTextures.ts): bark color and normal, RGBA rows top first.
+  const bark = redwoodBarkPixels();
+  dump("redwood_bark_color", bark.color);
+  dump("redwood_bark_normalmap", bark.normal);
+  dump("redwood_spray_rgba", rasterize(sprayStrokes(), SPRAY_SIZE.width, SPRAY_SIZE.height));
+  redwood = {
+    height: ct.height, baseRadius: ct.baseRadius, sprays: count,
+    barkSize: [bark.width, bark.height], spraySize: [SPRAY_SIZE.width, SPRAY_SIZE.height],
+  };
 }
 
 // --- the floor litter (forestFloor.ts): the game's own grass tufts and rocks ----------
