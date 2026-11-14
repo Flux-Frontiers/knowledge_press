@@ -4,6 +4,7 @@ import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
 import { cartLoad, NEUTRAL_SPINE } from "./cartLoad";
 import { cinema, OWNED_SHOT } from "./cinema";
+import { ORBIT_LOOK, ORBIT_R, ORBIT_RATE, ORBIT_UP } from "./startOrbit";
 import { EXPOSURE } from "./Environment";
 import { atGroveStop, treesNear, type Forest } from "./forest";
 import { addDragLook, resetInput, sampleActions, setDragging } from "./input";
@@ -32,16 +33,6 @@ const GOD_NEAR = 2;
 const DRAG_LOOK = 0.0042;
 /** A press that moves farther than this, in pixels, is a drag, not a click. */
 const DRAG_CLICK = 6;
-/**
- * The start screen's and the timeline's slow circle round the redwood: radius and
- * eye height, m, radians a second, and the aim as a fraction of the redwood's height.
- * Far enough out and aimed high enough that the full-grown crown stays in frame
- * (its top about 3° inside the edge at a 58° fov).
- */
-const ORBIT_R = 62;
-const ORBIT_UP = 8;
-const ORBIT_RATE = 0.03;
-const ORBIT_LOOK = 0.4;
 /** The start screen's circle is this much brighter by day, and by START_NIGHT_LIFT more in full dark: behind the title, night reads as black otherwise. */
 const START_DAY_LIFT = 1.25;
 const START_NIGHT_LIFT = 1.0;

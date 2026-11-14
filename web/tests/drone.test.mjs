@@ -4,9 +4,10 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 globalThis.window ??= { localStorage: { getItem: () => null, setItem() {} } };
 
-test("the drone's fly-in stays clear of every leaf, the redwood and the ground, and lands at home", () => {
+test("the drone's fly-in stays clear of every leaf, the redwood and the ground, and ends on the start screen's circle", () => {
   const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
   const { droneFlight, droneSite } = require(`${process.env.FOREST_TEST_BUILD}/droneScript.js`);
+  const { ORBIT_R, ORBIT_UP, ORBIT_RATE, orbitAngle, orbitPose } = require(`${process.env.FOREST_TEST_BUILD}/startOrbit.js`);
   const f = getForest();
   const flight = droneFlight(droneSite(f));
   assert.ok(flight.duration > 40 && flight.duration < 120, `duration ${flight.duration}`);
@@ -25,23 +26,37 @@ test("the drone's fly-in stays clear of every leaf, the redwood and the ground, 
     return best;
   };
   let minLeaf = Infinity, minY = Infinity, minTrunk = Infinity, worst = null;
-  let prev = null, maxStep = 0;
-  for (let t = 0; t <= flight.duration; t += 0.1) {
+  let prev = null, maxStep = 0, maxJerk = 0, prevV = null;
+  const dt = 0.1;
+  // The flight and ten seconds of circling after it.
+  for (let t = 0; t <= flight.duration + 10; t += dt) {
     const { cam } = flight.pose(t);
     const d = nearest(...cam);
     if (d < minLeaf) { minLeaf = d; worst = { t: +t.toFixed(1), cam: cam.map((v) => +v.toFixed(1)) }; }
     minY = Math.min(minY, cam[1]);
-    // Trunks: every book tree's, and the redwood's base.
     for (const tr of f.trees) if (cam[1] < tr.height) minTrunk = Math.min(minTrunk, Math.hypot(cam[0] - tr.x, cam[2] - tr.z) - tr.trunkRadius);
     minTrunk = Math.min(minTrunk, Math.hypot(cam[0], cam[2]) - f.corpusTree.baseRadius);
-    if (prev) maxStep = Math.max(maxStep, Math.hypot(cam[0] - prev[0], cam[1] - prev[1], cam[2] - prev[2]) / 0.1);
+    if (prev) {
+      const v = Math.hypot(cam[0] - prev[0], cam[1] - prev[1], cam[2] - prev[2]) / dt;
+      maxStep = Math.max(maxStep, v);
+      if (prevV !== null) maxJerk = Math.max(maxJerk, Math.abs(v - prevV) / dt);
+      prevV = v;
+    }
     prev = cam;
   }
   assert.ok(minLeaf > 2.5, `within ${minLeaf.toFixed(2)} m of a leaf at ${JSON.stringify(worst)}`);
   assert.ok(minTrunk > 3, `within ${minTrunk.toFixed(2)} m of a trunk`);
   assert.ok(minY >= 1.6, `down to ${minY.toFixed(2)} m`);
   assert.ok(maxStep < 25, `a jump of ${maxStep.toFixed(1)} m/s`);
-  const end = flight.pose(flight.duration).cam;
-  assert.ok(Math.hypot(end[0] - f.home.x, end[2] - f.home.z) < 0.01 && Math.abs(end[1] - 1.7) < 0.01, `ends at ${end}`);
-  console.log(`duration ${flight.duration.toFixed(1)} s, nearest leaf ${minLeaf.toFixed(2)} m, nearest trunk ${minTrunk.toFixed(2)} m, top speed ${maxStep.toFixed(1)} m/s`);
+  // No lurch anywhere, the handover onto the circle included: speed changes by under 6 m/s each second.
+  assert.ok(maxJerk < 6, `speed changes by ${maxJerk.toFixed(1)} m/s per second`);
+  // It ends on the start screen's circle, looking where the start screen looks, and goes on circling at its rate.
+  const end = flight.pose(flight.duration);
+  assert.ok(Math.abs(Math.hypot(end.cam[0], end.cam[2]) - ORBIT_R) < 0.01 && Math.abs(end.cam[1] - ORBIT_UP) < 0.01, `ends at ${end.cam}`);
+  const a = orbitAngle(end.cam[0], end.cam[2]);
+  const later = flight.pose(flight.duration + 5);
+  const want = orbitPose(a + ORBIT_RATE * 5, f.corpusTree.height);
+  assert.ok(Math.hypot(...later.cam.map((v, i) => v - want.cam[i])) < 0.01, "circles on as the start screen does");
+  assert.deepEqual(later.look.map((v) => +v.toFixed(3)), want.look.map((v) => +v.toFixed(3)));
+  console.log(`duration ${flight.duration.toFixed(1)} s, nearest leaf ${minLeaf.toFixed(2)} m, nearest trunk ${minTrunk.toFixed(2)} m, top speed ${maxStep.toFixed(1)} m/s, worst speed change ${maxJerk.toFixed(1)} m/s/s`);
 });
