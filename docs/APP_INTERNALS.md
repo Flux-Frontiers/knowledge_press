@@ -376,7 +376,8 @@ Reading aids, not exact equivalences.
 | `Embedding/BGEEmbedder.swift` | Loads the Core ML encoder and vocabulary, refuses a model that does not match the packs, turns a string into 384 floats |
 | `Retrieval/VectorIndex.swift` | Maps the `.vectors` sidecar, precomputes row norms once, scans with vDSP, keeps the best k without sorting everything |
 | `Retrieval/CorpusStore.swift` | `PassagePack`: BM25 over FTS5, passage hydration, the Browse queries |
-| `Retrieval/CatalogPack.swift` | Reads `core.pack` — genres, books, header counts |
+| `Retrieval/CatalogPack.swift` | Reads `core.pack` — genres, books, header counts, each book's author voice |
+| `Retrieval/AuthorVoice.swift` | Picks the installed voice that fits a book's author: gender, then accent, then quality |
 | `Retrieval/ChapterBlocks.swift` | A chapter as the reader's blocks and their spoken text; the twin of the forest's `chapterBlocks.ts`, held to the same fixtures |
 | `KnowledgePressUI/ReadAloud.swift` | The Browse reader's read-aloud queue on `AVSpeechSynthesizer` |
 | `Retrieval/CorpusPacks.swift` | Opens an installed corpus and validates it; the embedder check lives here |

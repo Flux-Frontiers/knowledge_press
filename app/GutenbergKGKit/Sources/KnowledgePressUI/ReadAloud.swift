@@ -8,6 +8,7 @@
 // something else cut it off.
 
 import AVFoundation
+import GutenbergKGKit
 import Observation
 
 /// What `ReadAloud` speaks through: the system synthesizer in the app, a fake in tests.
@@ -146,6 +147,26 @@ func readingVoiceChoices() -> [(id: String, label: String)] {
             let name = voice.name.replacingOccurrences(of: #"\s*\(.*\)$"#, with: "", options: .regularExpression)
             return (voice.identifier, "\(name) (\(voice.language)\(quality))")
         }
+}
+
+/// The voice a book is read in: the one chosen in Settings, else the
+/// installed voice that best fits its author, else nil for the system voice.
+///
+/// :param chosen: The Settings choice by identifier; empty for automatic.
+/// :param want: The book's author voice from `core.pack`.
+func readingVoiceID(chosen: String, want: AuthorVoice?) -> String? {
+    if !chosen.isEmpty { return chosen }
+    let installed = AVSpeechSynthesisVoice.speechVoices().map { voice in
+        InstalledVoice(
+            id: voice.identifier,
+            name: voice.name.replacingOccurrences(of: #"\s*\(.*\)$"#, with: "", options: .regularExpression),
+            language: voice.language,
+            gender: voice.gender == .male ? .male : voice.gender == .female ? .female : nil,
+            quality: voice.quality == .premium ? .premium : voice.quality == .enhanced ? .enhanced : .standard,
+            novelty: voice.voiceTraits.contains(.isNoveltyVoice))
+    }
+    let device = AVSpeechSynthesisVoice.currentLanguageCode()
+    return VoiceChoice.pick(want, from: installed, deviceAccent: device.hasPrefix("en") ? device : "en-US")
 }
 
 /// AVSpeechSynthesizer behind `Speaker`.

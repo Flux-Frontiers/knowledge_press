@@ -53,13 +53,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **The app's Browse reader reads chapters aloud.** A play button in the
   toolbar reads the chapter a paragraph at a time with the system's speech,
-  tints the paragraph being read and keeps it in view, and goes on to the next
-  chapter; tap a paragraph to read from there. Settings has a Reading aloud
-  section with a voice and a speed. Starting it stops a book the forest is
-  reading. The reader now sets chapters as the forest does (paragraphs, verse
-  lines, italics, small notes and captions): `ChapterBlocks` is the Swift twin
-  of the forest's block model, held to the same fixtures, and the two agree on
-  all 54,444 chapters.
+  tints the paragraph being read and keeps it in view, and goes on to the
+  next chapter; tap a paragraph to read from there. Settings has a Reading
+  aloud section with a voice and a speed. Starting it stops a book the
+  forest is reading. The automatic voice matches the book's author, from the
+  `gender` and `accent` gutenberg_kg 1.36.0 writes into `core.pack`; an
+  older pack reads in the system voice. The reader now sets chapters as the
+  forest does (paragraphs, verse lines, italics, small notes and captions):
+  `ChapterBlocks` is the Swift twin of the forest's block model, held to the
+  same fixtures, and the two agree on all 54,444 chapters.
 - **A night-sky splash with a book's first line.** The launch splash is a
   starry night (twinkling unless Reduce Motion is on) with the logo, the
   name, and the opening line of one of twenty corpus books, word for word
