@@ -1,8 +1,12 @@
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { AArrowDown, AArrowUp, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Book } from "./catalog";
 import { useGame } from "./store";
 import { getBook, type Chapter } from "./bookText";
+import { blockLines, chapterBlocks, type Block, type Run } from "./chapterBlocks";
+import { READING_SIZES, type ReadingSize } from "./preferences";
+
+const SIZES = Object.keys(READING_SIZES) as ReadingSize[];
 
 /** The chapter each book was left at, for this session. */
 const lastChapter = new Map<string, number>();
@@ -16,6 +20,11 @@ export function ReaderPanel({ book }: { book: Book }) {
   const [index, setIndex] = useState(() => lastChapter.get(book.slug) ?? 0);
   const [attempt, setAttempt] = useState(0);
   const page = useRef<HTMLDivElement>(null);
+  const size = useGame((s) => s.preferences.readingSize);
+  const step = (by: number) => {
+    const next = SIZES[SIZES.indexOf(size) + by];
+    if (next) useGame.getState().setPreferences({ readingSize: next });
+  };
 
   useEffect(() => {
     let live = true;
@@ -34,6 +43,7 @@ export function ReaderPanel({ book }: { book: Book }) {
 
   const list = chapters.state === "ready" ? chapters.value : [];
   const current = list[Math.min(index, list.length - 1)];
+  const blocks = useMemo(() => (current ? chapterBlocks(current.text, list.length > 1 ? current.title : "") : []), [current, list.length]);
 
   useEffect(() => {
     if (!current) return;
@@ -80,6 +90,16 @@ export function ReaderPanel({ book }: { book: Book }) {
             <h2 id="reader-title" className="font-display text-2xl leading-tight sm:text-3xl">{book.title}</h2>
             <p className="text-sm text-muted">{book.author}</p>
           </div>
+          <div className="flex shrink-0 items-center">
+            <button type="button" disabled={size === SIZES[0]} onClick={() => step(-1)}
+              className="grid size-11 place-items-center rounded-md text-muted disabled:text-faint" aria-label="Smaller text">
+              <AArrowDown className="size-5" strokeWidth={1.75} />
+            </button>
+            <button type="button" disabled={size === SIZES[SIZES.length - 1]} onClick={() => step(1)}
+              className="grid size-11 place-items-center rounded-md text-muted disabled:text-faint" aria-label="Larger text">
+              <AArrowUp className="size-5" strokeWidth={1.75} />
+            </button>
+          </div>
           <button type="button" autoFocus onClick={close}
             className="grid size-11 shrink-0 place-items-center rounded-md text-muted" aria-label="Close the book">
             <X className="size-5" strokeWidth={1.75} />
@@ -111,11 +131,9 @@ export function ReaderPanel({ book }: { book: Book }) {
           ) : chapters.state === "ready" && list.length === 0 ? (
             <p className="text-sm text-muted">This book has no chapters.</p>
           ) : current ? (
-            <div className="mx-auto max-w-[65ch] font-display text-lg leading-relaxed text-fg/95 sm:text-xl">
-              {list.length > 1 ? <h3 className="mb-4 text-2xl font-semibold">{current.title}</h3> : null}
-              {current.text.split(/\n\s*\n/).map((para, i) => (
-                <p key={i} className="mb-4 whitespace-pre-line">{para.trim()}</p>
-              ))}
+            <div className={`mx-auto max-w-[65ch] font-display leading-relaxed text-fg/95 ${READING_SIZES[size]}`}>
+              {list.length > 1 ? <h3 className="mb-4 text-[1.3em] leading-tight font-semibold">{current.title}</h3> : null}
+              {blocks.map((block, i) => <BlockView key={i} block={block} />)}
             </div>
           ) : (
             <p className="text-sm text-muted">Opening the book...</p>
@@ -138,4 +156,37 @@ export function ReaderPanel({ book }: { book: Book }) {
       </article>
     </div>
   );
+}
+
+/** One run of a block, set as the source marked it. */
+function RunView({ run }: { run: Run }) {
+  switch (run.style) {
+    case "italic": return <em>{run.text}</em>;
+    case "bold": return <strong className="font-semibold">{run.text}</strong>;
+    case "mark": return <sup className="text-[0.6em] text-muted">{run.text}</sup>;
+    case "aside": return <span className="text-[0.8em] text-muted">[{run.text}]</span>;
+    default: return <>{run.text}</>;
+  }
+}
+
+const runs = (list: Run[]) => list.map((run, i) => <RunView key={i} run={run} />);
+
+/** One paragraph: prose, verse line by line with a hanging indent, a heading, a note or a caption. */
+function BlockView({ block }: { block: Block }) {
+  switch (block.kind) {
+    case "verse":
+      return (
+        <p className="mb-4">
+          {blockLines(block.runs).map((line, i) => <span key={i} className="block pl-[2em] -indent-[2em]">{runs(line)}</span>)}
+        </p>
+      );
+    case "heading":
+      return <p className="mt-6 mb-2 text-center text-[0.85em] font-semibold tracking-wide">{runs(block.runs)}</p>;
+    case "note":
+      return <p className="mb-3 font-sans text-[0.75em] leading-normal text-muted">{runs(block.runs)}</p>;
+    case "caption":
+      return <p className="my-4 text-center text-[0.85em] text-muted italic">{runs(block.runs)}</p>;
+    default:
+      return <p className="mb-4">{runs(block.runs)}</p>;
+  }
 }

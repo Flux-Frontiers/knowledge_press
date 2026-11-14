@@ -1,0 +1,72 @@
+[
+  {
+    "name": "unwraps hard-wrapped prose",
+    "input": "You don't know about me without you have read a book by the name of The\nAdventures of Tom Sawyer; but that ain't no matter. That book was made\nby Mr. Mark Twain, and he told the truth, mainly. There was things\nwhich he stretched, but mainly he told the truth.",
+    "expected": "You don't know about me without you have read a book by the name of The Adventures of Tom Sawyer; but that ain't no matter. That book was made by Mr. Mark Twain, and he told the truth, mainly. There was things which he stretched, but mainly he told the truth."
+  },
+  {
+    "name": "keeps verse lines",
+    "input": "Once upon a midnight dreary, while I pondered, weak and weary,\nOver many a quaint and curious volume of forgotten lore—\nWhile I nodded, nearly napping, suddenly there came a tapping,\nAs of some one gently rapping, rapping at my chamber door.",
+    "expected": "Once upon a midnight dreary, while I pondered, weak and weary,\nOver many a quaint and curious volume of forgotten lore—\nWhile I nodded, nearly napping, suddenly there came a tapping,\nAs of some one gently rapping, rapping at my chamber door."
+  },
+  {
+    "name": "joins a verse line the edition wrapped",
+    "input": "Here lands female and male,\nHere the heir-ship and heiress-ship of the world, here the flame of\nmaterials,\nHere spirituality the translatress, the openly-avow'd,",
+    "expected": "Here lands female and male,\nHere the heir-ship and heiress-ship of the world, here the flame of materials,\nHere spirituality the translatress, the openly-avow'd,"
+  },
+  {
+    "name": "keeps blank verse that runs on across lines",
+    "input": "In the midway of this our mortal life,\nI found me in a gloomy wood, astray\nGone from the path direct: and e'en to tell\nIt were no easy task, how savage wild\nThat forest, how robust and rough its growth,",
+    "expected": "In the midway of this our mortal life,\nI found me in a gloomy wood, astray\nGone from the path direct: and e'en to tell\nIt were no easy task, how savage wild\nThat forest, how robust and rough its growth,"
+  },
+  {
+    "name": "keeps Whitman's lines and joins only their wraps",
+    "input": "Swiftly arose and spread around me the peace and knowledge that pass\nall the argument of the earth,\nAnd I know that the hand of God is the promise of my own,\nAnd I know that the spirit of God is the brother of my own,",
+    "expected": "Swiftly arose and spread around me the peace and knowledge that pass all the argument of the earth,\nAnd I know that the hand of God is the promise of my own,\nAnd I know that the spirit of God is the brother of my own,"
+  },
+  {
+    "name": "unwraps prose with stage directions",
+    "input": "RANK.\n_[after a short silence]_. When I am sitting here, talking to you as\nintimately as this, I cannot imagine for a moment what would have\nbecome of me if I had never come into this house.",
+    "expected": "RANK. _[after a short silence]_. When I am sitting here, talking to you as intimately as this, I cannot imagine for a moment what would have become of me if I had never come into this house."
+  },
+  {
+    "name": "keeps a list of short titles",
+    "input": "The Widows\nMoses and the Bulrushers\nMiss Watson\nHuck Stealing Away",
+    "expected": "The Widows\nMoses and the Bulrushers\nMiss Watson\nHuck Stealing Away"
+  },
+  {
+    "name": "keeps paragraph breaks",
+    "input": "First paragraph.\n\nSecond paragraph.",
+    "expected": "First paragraph.\n\nSecond paragraph."
+  },
+  {
+    "name": "an accented lower-case start continues the line",
+    "input": "He spoke of the old house and the garden behind it, where the\némigrés had walked in the evenings before the war came and took\névery one of them away from the town and the river they had loved.",
+    "expected": "He spoke of the old house and the garden behind it, where the émigrés had walked in the evenings before the war came and took évery one of them away from the town and the river they had loved."
+  },
+  {
+    "name": "a line ending in a digit continues, which makes this prose",
+    "input": "The accounts for the year showed a balance of\nsome pounds laid by against the winter of 1659\nQuarters of corn and malt were stored in the barn,\nand the steward kept the key about his own neck.",
+    "expected": "The accounts for the year showed a balance of some pounds laid by against the winter of 1659 Quarters of corn and malt were stored in the barn, and the steward kept the key about his own neck."
+  },
+  {
+    "name": "a whitespace-only line does not separate paragraphs",
+    "input": "The first paragraph ends here.\n   \nThe second one follows after a line of spaces.",
+    "expected": "The first paragraph ends here.\nThe second one follows after a line of spaces."
+  },
+  {
+    "name": "CRLF line ends are normalized",
+    "input": "It was the best of times, it was the worst of times, it was the age\r\nof wisdom, it was the age of foolishness, it was the epoch of belief,\r\nit was the epoch of incredulity, it was the season of Light.\r\n\r\nThere were a king with a large jaw.",
+    "expected": "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light.\n\nThere were a king with a large jaw."
+  },
+  {
+    "name": "blank lines collapse and empty paragraphs drop",
+    "input": "One.\n\n\n\nTwo.\n\n",
+    "expected": "One.\n\nTwo."
+  },
+  {
+    "name": "a single line is kept as is",
+    "input": "  CHAPTER I.  ",
+    "expected": "CHAPTER I."
+  }
+]

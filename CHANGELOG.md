@@ -13,6 +13,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **The forest reader sets books as books.** Prose fills the page as
+  paragraphs instead of keeping the printed edition's short lines; verse and
+  plays keep their lines, with a hanging indent where one wraps. `_word_`
+  shows as italics, footnote marks as small raised numbers, footnotes and
+  sidenotes small and gray, and illustration tags as captions. The rule that
+  unwraps prose is the app reader's, ported to TypeScript and held to it by
+  fixtures both test suites read; the two agree on all 54,444 chapters of the
+  corpus.
+- **The forest reader has a text size control**: four steps, saved.
+
 - **A tree's card shows its year and chunk count on every screen**, beside
   the author: "Herman Melville · 1851 · 2,922 chunks". The count was a faint
   line hidden on phones, next to the trunk radius, which is gone.

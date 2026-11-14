@@ -1,0 +1,326 @@
+[
+  {
+    "name": "prose is unwrapped and italics become a run",
+    "title": "",
+    "input": "Had she merely _dined_ with him, she might\nonly have discovered whether he had a good appetite; but you must\nremember that four evenings have been also spent together.",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "Had she merely "
+          },
+          {
+            "text": "dined",
+            "style": "italic"
+          },
+          {
+            "text": " with him, she might only have discovered whether he had a good appetite; but you must remember that four evenings have been also spent together."
+          }
+        ],
+        "spoken": "Had she merely dined with him, she might only have discovered whether he had a good appetite; but you must remember that four evenings have been also spent together."
+      }
+    ]
+  },
+  {
+    "name": "verse keeps its lines and a speaker line stays in the block",
+    "title": "",
+    "input": "HORATIO.\nWhat art thou that usurp'st this time of night,\nTogether with that fair and warlike form",
+    "expected": [
+      {
+        "kind": "verse",
+        "runs": [
+          {
+            "text": "HORATIO.\nWhat art thou that usurp'st this time of night,\nTogether with that fair and warlike form"
+          }
+        ],
+        "spoken": "HORATIO.\nWhat art thou that usurp'st this time of night,\nTogether with that fair and warlike form"
+      }
+    ]
+  },
+  {
+    "name": "a footnote mark is shown but not spoken, and its body is a note",
+    "title": "",
+    "input": "stopped, like the _Quos ego_[1], a fresh outburst.\n\n[1] A quotation from the Aeneid signifying a threat.",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "stopped, like the "
+          },
+          {
+            "text": "Quos ego",
+            "style": "italic"
+          },
+          {
+            "text": "1",
+            "style": "mark"
+          },
+          {
+            "text": ", a fresh outburst."
+          }
+        ],
+        "spoken": "stopped, like the Quos ego, a fresh outburst."
+      },
+      {
+        "kind": "note",
+        "runs": [
+          {
+            "text": "1",
+            "style": "mark"
+          },
+          {
+            "text": " A quotation from the Aeneid signifying a threat."
+          }
+        ],
+        "spoken": ""
+      }
+    ]
+  },
+  {
+    "name": "an illustration over two paragraphs is one caption",
+    "title": "",
+    "input": "[Illustration: \"_I've got to dissect one of these things before_----\"\n\n\"_First the world's greatest mountains--then this!_\"]\n\nThe next day we flew.",
+    "expected": [
+      {
+        "kind": "caption",
+        "runs": [
+          {
+            "text": "\""
+          },
+          {
+            "text": "I've got to dissect one of these things before",
+            "style": "italic"
+          },
+          {
+            "text": "----\"\n\n\""
+          },
+          {
+            "text": "First the world's greatest mountains--then this!",
+            "style": "italic"
+          },
+          {
+            "text": "\""
+          }
+        ],
+        "spoken": ""
+      },
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "The next day we flew."
+          }
+        ],
+        "spoken": "The next day we flew."
+      }
+    ]
+  },
+  {
+    "name": "a bare illustration tag is dropped",
+    "title": "",
+    "input": "[Illustration]\n\nIt was a dark night.",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "It was a dark night."
+          }
+        ],
+        "spoken": "It was a dark night."
+      }
+    ]
+  },
+  {
+    "name": "an inline footnote is an aside, not spoken",
+    "title": "",
+    "input": "Like the river Ganges [Footnote: Like the river Ganges: presto.] it ran.",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "Like the river Ganges "
+          },
+          {
+            "text": "Footnote: Like the river Ganges: presto.",
+            "style": "aside"
+          },
+          {
+            "text": " it ran."
+          }
+        ],
+        "spoken": "Like the river Ganges it ran."
+      }
+    ]
+  },
+  {
+    "name": "underscores inside a formula are not italics, and are not spoken",
+    "title": "",
+    "input": "the modern Morpheus--C_{2}HCl_{3}O. H_{2}O!",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "the modern Morpheus--C_{2}HCl_{3}O. H_{2}O!"
+          }
+        ],
+        "spoken": "the modern Morpheus--C{2}HCl{3}O. H{2}O!"
+      }
+    ]
+  },
+  {
+    "name": "the export's author line and rule: bold kept, rule dropped",
+    "title": "Pride and Prejudice (Part 1 of 8)",
+    "input": "**Jane Austen**\n\n---\n\nPRIDE.\nand\nPREJUDICE",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "Jane Austen",
+            "style": "bold"
+          }
+        ],
+        "spoken": "Jane Austen"
+      },
+      {
+        "kind": "verse",
+        "runs": [
+          {
+            "text": "PRIDE. and\nPREJUDICE"
+          }
+        ],
+        "spoken": "PRIDE. and\nPREJUDICE"
+      }
+    ]
+  },
+  {
+    "name": "a first line that repeats the chapter title is dropped",
+    "title": "CHAPTER II.",
+    "input": "CHAPTER II\n\nMr. Bennet was among the earliest of those who waited on Mr. Bingley.",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "Mr. Bennet was among the earliest of those who waited on Mr. Bingley."
+          }
+        ],
+        "spoken": "Mr. Bennet was among the earliest of those who waited on Mr. Bingley."
+      }
+    ]
+  },
+  {
+    "name": "a short line in capitals is a heading; a lone I. is not",
+    "title": "",
+    "input": "BOOK THE FIRST\n\nI.",
+    "expected": [
+      {
+        "kind": "heading",
+        "runs": [
+          {
+            "text": "BOOK THE FIRST"
+          }
+        ],
+        "spoken": "BOOK THE FIRST"
+      },
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "I."
+          }
+        ],
+        "spoken": "I."
+      }
+    ]
+  },
+  {
+    "name": "an unclosed footnote is a note of one paragraph",
+    "title": "",
+    "input": "[Footnote: this never closes\n\nAnd the story goes on.",
+    "expected": [
+      {
+        "kind": "note",
+        "runs": [
+          {
+            "text": "Footnote: this never closes"
+          }
+        ],
+        "spoken": ""
+      },
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "And the story goes on."
+          }
+        ],
+        "spoken": "And the story goes on."
+      }
+    ]
+  },
+  {
+    "name": "a plate number with no caption is dropped, even unclosed",
+    "title": "",
+    "input": "[Illustration: 0202\n\nI met her one day alone.",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "I met her one day alone."
+          }
+        ],
+        "spoken": "I met her one day alone."
+      }
+    ]
+  },
+  {
+    "name": "an italic stage direction may run over a line; brackets are not spoken",
+    "title": "",
+    "input": "NORA.\nNo, it shan't happen! _[She bolts the door of\nHELMER'S room.]_",
+    "expected": [
+      {
+        "kind": "verse",
+        "runs": [
+          {
+            "text": "NORA.\nNo, it shan't happen! "
+          },
+          {
+            "text": "[She bolts the door of\nHELMER'S room.]",
+            "style": "italic"
+          }
+        ],
+        "spoken": "NORA.\nNo, it shan't happen! She bolts the door of\nHELMER'S room."
+      }
+    ]
+  },
+  {
+    "name": "italics may close inside a word",
+    "title": "",
+    "input": "offer myself--_my_self, Stryver of the bar.",
+    "expected": [
+      {
+        "kind": "prose",
+        "runs": [
+          {
+            "text": "offer myself--"
+          },
+          {
+            "text": "my",
+            "style": "italic"
+          },
+          {
+            "text": "self, Stryver of the bar."
+          }
+        ],
+        "spoken": "offer myself--myself, Stryver of the bar."
+      }
+    ]
+  }
+]

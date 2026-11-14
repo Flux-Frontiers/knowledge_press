@@ -24,10 +24,22 @@ export type Preferences = {
   speakMoots: boolean;
   /** Each tree's voice by name, first tree first; "" picks one automatically. */
   mootVoices: [string, string];
+  /** The book reader's text size; see READING_SIZES. */
+  readingSize: ReadingSize;
   /** The GutenbergKG worker that holds live moots (liveMoots.ts); "" for none, the default. */
   mootWorker: string;
   /** The worker's MOOT_TOKEN, when it sets one; "" otherwise. */
   mootToken: string;
+};
+
+export type ReadingSize = "small" | "medium" | "large" | "larger";
+
+/** The reader's text sizes, smallest first, with each one's Tailwind type scale. */
+export const READING_SIZES: Record<ReadingSize, string> = {
+  small: "text-base",
+  medium: "text-lg sm:text-xl",
+  large: "text-xl sm:text-2xl",
+  larger: "text-2xl sm:text-3xl",
 };
 
 export type FogLevel = "clear" | "light" | "normal" | "heavy";
@@ -75,6 +87,7 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     mootVoices: Array.isArray(value?.mootVoices) && value.mootVoices.length === 2
       && value.mootVoices.every((n) => typeof n === "string")
       ? [value.mootVoices[0], value.mootVoices[1]] : ["", ""],
+    readingSize: value?.readingSize && value.readingSize in READING_SIZES ? value.readingSize : "medium",
     mootWorker: typeof value?.mootWorker === "string" && value.mootWorker.trim() ? value.mootWorker.trim() : "",
     mootToken: typeof value?.mootToken === "string" ? value.mootToken : "",
   };
