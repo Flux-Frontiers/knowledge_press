@@ -276,6 +276,8 @@ private struct ChapterReaderView: View {
     @State private var content: ChapterContent?
     /// Set when a chapter was read to its end, so the next one is read too.
     @State private var goOn = false
+    /// The book's author voice from `core.pack`, for the automatic voice.
+    @State private var authorVoice: AuthorVoice?
 
     /// The chapter cut into blocks once, when it loads, not on every highlight.
     @State private var blocks: [ChapterBlocks.Block] = []
@@ -342,6 +344,7 @@ private struct ChapterReaderView: View {
             }
         }
         .task(id: sectionId) { await load() }
+        .task { authorVoice = await browser.authorVoice(genre: genre, book: book) }
         // Leaving the chapter for the list, another tab or another book stops the voice.
         .onDisappear { model.reading.stop() }
     }
@@ -357,7 +360,7 @@ private struct ChapterReaderView: View {
     private func read(from index: Int) {
         model.reading.read(
             blocks.map(\.spoken), from: index,
-            voiceID: model.readVoiceID.isEmpty ? nil : model.readVoiceID, rate: model.readRate
+            voiceID: readingVoiceID(chosen: model.readVoiceID, want: authorVoice), rate: model.readRate
         ) {
             if let next = content?.nextId {
                 goOn = true

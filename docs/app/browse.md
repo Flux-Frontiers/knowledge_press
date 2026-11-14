@@ -41,7 +41,11 @@ read is tinted and kept in view.
 - On iPhone and iPad the voice is heard with the ring switch on silent. It
   stops when the screen locks.
 
-The voice and the speed are in Settings, under **Reading aloud**; see
+The voice matches the book's author: Jane Austen is read in a British
+woman's voice, Mark Twain in an American man's. A translated author is read
+in your device's accent, and a book with no known author in the system
+voice. Premium and Enhanced voices are preferred when installed. To use one
+voice for every book, and to set the speed, see **Reading aloud** in
 [Settings](settings.md). Playing a chapter stops a book the forest is reading
 aloud.
 

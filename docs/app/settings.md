@@ -66,7 +66,7 @@ Standard (1152 × 768) and Full (1536 × 1024). A smaller one renders faster.
 
 | Setting | What it does |
 | --- | --- |
-| Voice | The voice that reads a chapter aloud in Browse. **System voice**, the default, is the device's English voice. The list holds the English voices on this device, with their accent and whether they are Enhanced or Premium. Download more in the system's Spoken Content settings. |
+| Voice | The voice that reads a chapter aloud in Browse. **Automatic**, the default, matches the book's author: their gender and accent, from the installed corpus. Choosing a voice from the list reads every book in it. The list holds the English voices on this device, with their accent and whether they are Enhanced or Premium. Download more in the system's Spoken Content settings. |
 | Speed | How fast a chapter is read, from 0.80× to 1.30× the system's normal rate. Default 0.95×. |
 
 ## Corpus information
