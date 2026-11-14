@@ -26,6 +26,8 @@ import { fileURLToPath } from "node:url";
 const web = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const require = createRequire(join(web, "package.json"));
 const ts = require("typescript");
+// The compiled game modules require("three"), which three marks deprecated; the warning is noise here.
+process.noDeprecation = true;
 const THREE = await import("three");
 
 // --- compile the game modules ------------------------------------------------
@@ -45,6 +47,7 @@ const { SEASONS } = game("seasons");
 const { leafHash } = game("leafLod");
 const { ribbon, fillets, disc, RING_W, SPOKE_W, SPUR_W } = game("roads");
 const { DAY_OVERRIDE } = game("daylight");
+const { floorLitter, rockGeometry, tuftGeometry } = game("forestFloor");
 const sky = game("sky");
 const { starBuffers, applyMatrix } = game("stars");
 
@@ -198,6 +201,38 @@ if (within(0, 0, forest.corpusTree.baseRadius)) {
   redwood = { height: ct.height, baseRadius: ct.baseRadius, sprays: count };
 }
 
+// --- the floor litter (forestFloor.ts): the game's own grass tufts and rocks ----------
+const litter = floorLitter(forest, season);
+const litterOut = {};
+{
+  const m = new THREE.Matrix4(), p = new THREE.Vector3(), q = new THREE.Quaternion(), sc = new THREE.Vector3();
+  for (const [name, set] of [["grass", litter.grass], ["rocks", litter.rocks]]) {
+    const P = [], Q = [], S = [], C = [];
+    for (let i = 0; i < set.count; i++) {
+      m.fromArray(set.matrix, i * 16).decompose(p, q, sc);
+      if (!within(p.x, p.z)) continue;
+      P.push(p.x, p.y, p.z);
+      Q.push(q.w, q.x, q.y, q.z);
+      S.push(sc.x, sc.y, sc.z);
+      C.push(set.color[i * 3], set.color[i * 3 + 1], set.color[i * 3 + 2]);
+    }
+    dump(`${name}_pos`, new Float32Array(P));
+    dump(`${name}_quat`, new Float32Array(Q));
+    dump(`${name}_scale`, new Float32Array(S));
+    dump(`${name}_color`, new Float32Array(C));
+    litterOut[name] = P.length / 3;
+  }
+  const tuft = tuftGeometry();
+  dump("tuft_pos", tuft.getAttribute("position").array);
+  dump("tuft_color", tuft.getAttribute("color").array);
+  dump("tuft_index", new Uint32Array(tuft.getIndex().array));
+  // The rock is unindexed (three's icosahedron): index it 0..n-1 for the Blender mesh.
+  const rock = rockGeometry(3.7);
+  dump("rock_pos", rock.getAttribute("position").array);
+  dump("rock_uv", rock.getAttribute("uv").array);
+  dump("rock_index", Uint32Array.from({ length: rock.getAttribute("position").count }, (_, i) => i));
+}
+
 // --- roads and plazas (World.tsx Roads): spokes and spurs lowest, ring and plazas above ---
 const spokes = { pos: [], uv: [], index: [] }, ring = { pos: [], uv: [], index: [] };
 for (const line of forest.roadLines) {
@@ -267,10 +302,11 @@ const manifest = {
   worldRadius: forest.worldRadius,
   home: forest.home,
   sky: skyOut,
+  litter: litterOut,
   trees: forest.trees.map((t) => ({ x: t.x, z: t.z, slug: t.book.slug, chunk: t.chunk })),
 };
 writeFileSync(join(out, "manifest.json"), JSON.stringify(manifest));
 console.log(`sky: ${timeArg} at ${at.toISOString()} (${skyOut.timeZone}), sun ${skyOut.sunAltitude.toFixed(1)} deg up, `
   + `moon ${(state.moonFraction * 100).toFixed(0)}% lit`);
 console.log(`${chunks.length} groves, ${chunks.reduce((n, c) => n + c.leaves, 0)} leaves, redwood ${redwood ? "yes" : "no"}, `
-  + `roads ${roads.length}, grove grounds ${groves.length} -> ${out}`);
+  + `roads ${roads.length}, grove grounds ${groves.length}, grass ${litterOut.grass}, rocks ${litterOut.rocks} -> ${out}`);

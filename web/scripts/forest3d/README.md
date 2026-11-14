@@ -52,12 +52,10 @@ hub is at the origin.
 | Grove grounds | `forest.groves` | Tinted discs with the game's radial fade, casting no shadow |
 | Ground | season palette | Day color times the game's ground texture, with procedural speckle |
 
-Not yet included: grass and rocks, exhibits, signposts, compass rose,
-lantern trail, cart, sundial, sky objects and fog.
+| Grass tufts, rocks | `forestFloor.ts` `floorLitter` | The game's own tufts and rocks, same places and colors, instanced; the rocks carry the game's rock texture |
 
-The grass and rock placement lives inside `Environment.tsx`
-(`ForestFloor`, seeded `mulberry32(247)`). To export it without copying the
-logic, it would have to move into a `.ts` module.
+Not yet included: exhibits, signposts, compass rose, lantern trail, cart,
+sundial, sky objects and fog.
 
 ## Time of day and stars
 

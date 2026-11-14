@@ -31,6 +31,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   Time presets (noon, sunrise, sunset, night) come from the game's own sky
   model, and night renders the game's star catalog as the sky. A textured
   forest floor and scattered grass tufts cover the ground near the camera.
+  The game's own grass tufts and rocks stand where the game puts them; their
+  placement moved from Environment.tsx into forestFloor.ts so both share it.
 
 ### Changed
 

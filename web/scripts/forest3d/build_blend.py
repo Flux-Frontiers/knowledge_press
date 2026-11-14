@@ -425,6 +425,58 @@ if man["redwood"]:
         "redwood_sprays", proto("spray_card", card)
     )
 
+# --- the floor litter: the game's own grass tufts and rocks (forestFloor.ts) ----------------
+
+if man.get("litter", {}).get("grass"):
+    tuft = mesh_from("game_tuft", arr("tuft_pos"), arr("tuft_index"))
+    shade = arr("tuft_color").reshape(-1, 3)
+    tuft.attributes.new("shade", "FLOAT_COLOR", "POINT").data.foreach_set(
+        "color",
+        np.concatenate([shade, np.ones((len(shade), 1), np.float32)], 1).ravel(),
+    )
+    m, nt, bsdf = instancer_color("game_grass", 1.0, "litcol")
+    # The game's tuft is dark at the root and light at the tip (its vertex colors), times the tuft's color.
+    vcol = nt.nodes.new("ShaderNodeAttribute")
+    vcol.attribute_name = "shade"
+    tint = bsdf.inputs["Base Color"].links[0].from_socket
+    mul = nt.nodes.new("ShaderNodeMix")
+    mul.data_type, mul.blend_type = "RGBA", "MULTIPLY"
+    sock(mul.inputs, "Factor_Float").default_value = 1.0
+    nt.links.new(tint, sock(mul.inputs, "A_Color"))
+    nt.links.new(vcol.outputs["Color"], sock(mul.inputs, "B_Color"))
+    nt.links.new(sock(mul.outputs, "Result_Color"), bsdf.inputs["Base Color"])
+    tuft.materials.append(m)
+    pm, _ = points("game_grass_pts", "grass", "litcol")
+    ob = link(bpy.data.objects.new("game_grass", pm))
+    ob.modifiers.new("tufts", "NODES").node_group = instancer(
+        "game_grass", proto("game_tuft", tuft)
+    )
+
+if man.get("litter", {}).get("rocks"):
+    rock = mesh_from("game_rock", arr("rock_pos"), arr("rock_index"), arr("rock_uv"))
+    rock.shade_flat()  # the game's rock is faceted (unindexed, flat normals)
+    m, nt, bsdf = instancer_color("game_rock", 0.95, "litcol")
+    tint = bsdf.inputs["Base Color"].links[0].from_socket
+    tex = image_node(nt, TEX / "rock/rock_color.jpg")
+    mul = nt.nodes.new("ShaderNodeMix")
+    mul.data_type, mul.blend_type = "RGBA", "MULTIPLY"
+    sock(mul.inputs, "Factor_Float").default_value = 1.0
+    nt.links.new(tex.outputs["Color"], sock(mul.inputs, "A_Color"))
+    nt.links.new(tint, sock(mul.inputs, "B_Color"))
+    nt.links.new(sock(mul.outputs, "Result_Color"), bsdf.inputs["Base Color"])
+    nrm = nt.nodes.new("ShaderNodeNormalMap")
+    nt.links.new(
+        image_node(nt, TEX / "rock/rock_normal.jpg", color=False).outputs["Color"],
+        nrm.inputs["Color"],
+    )
+    nt.links.new(nrm.outputs["Normal"], bsdf.inputs["Normal"])
+    rock.materials.append(m)
+    pm, _ = points("game_rock_pts", "rocks", "litcol")
+    ob = link(bpy.data.objects.new("game_rocks", pm))
+    ob.modifiers.new("rocks", "NODES").node_group = instancer(
+        "game_rocks", proto("game_rock", rock)
+    )
+
 bpy.context.view_layer.layer_collection.children["prototypes"].exclude = True
 
 # --- roads, plazas, grove grounds ---------------------------------------------------
