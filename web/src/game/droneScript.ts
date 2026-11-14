@@ -35,6 +35,9 @@ const START_Y = 40;
 const RING_Y = 14;
 /** The close orbit: well outside the redwood's limbs (15.4 m at most). */
 const NEAR_R = 26;
+/** Where the road gives way to the curve onto the close orbit, and how far that curve turns. */
+const ENTRY_R = 45;
+const ENTRY_TURN = (50 * Math.PI) / 180;
 /** How far round the close orbit goes, clockwise like the start screen's circle. */
 const NEAR_TURN = (300 * Math.PI) / 180;
 /** The spiral out to the start screen's circle turns at least this much further. */
@@ -81,22 +84,32 @@ function samples(site: DroneSite): Sample[] {
     const r = lerp(START_R, ringR, k);
     push([ux * r, lerp(START_Y, RING_Y, smooth(k)), uz * r], "approach");
   }
-  // The road: in along the spoke to the close orbit, down to 9 m, rising a little at the end.
+  // The road: in along the spoke, down to 9 m, rising a little toward the end.
   const a0 = Math.atan2(uz, ux);
-  for (let i = 1; i <= 80; i++) {
-    const k = i / 80;
-    const r = lerp(ringR, NEAR_R, k);
+  for (let i = 1; i <= 70; i++) {
+    const k = i / 70;
+    const r = lerp(ringR, ENTRY_R, k);
     push([ux * r, lerp(RING_Y, 9, smooth(Math.min(1, k * 1.6))) + 3 * smooth(Math.max(0, (k - 0.7) / 0.3)), uz * r], "road");
   }
+  // The entry: a curve from the road onto the close orbit. It leaves heading straight in, as the
+  // road does (radius falling fastest, bearing still), and arrives heading round, as the orbit
+  // does (radius still, bearing turning), so the camera never swings round a corner.
+  const yIn = out[out.length - 1]!.p[1];
+  for (let i = 1; i <= 50; i++) {
+    const k = i / 50;
+    const r = ENTRY_R - (ENTRY_R - NEAR_R) * (1 - (1 - k) * (1 - k));
+    push(ring(a0 - ENTRY_TURN * k * k, r, yIn), "road");
+  }
   // The close orbit, clockwise: most of a turn round the redwood, rising to the mid crown and back.
-  const y0 = out[out.length - 1]!.p[1];
+  const y0 = yIn;
+  const aOrbit = a0 - ENTRY_TURN;
   for (let i = 1; i <= 150; i++) {
     const k = i / 150;
-    push(ring(a0 - NEAR_TURN * k, NEAR_R, y0 + 16 * Math.sin(Math.PI * k)), "orbit");
+    push(ring(aOrbit - NEAR_TURN * k, NEAR_R, y0 + 16 * Math.sin(Math.PI * k)), "orbit");
   }
   // Out: a spiral from the close orbit to the start screen's circle and its eye height, joining
   // it where it is clear (site.joinBearing), at least MIN_OUT_TURN on, clockwise.
-  const a1 = a0 - NEAR_TURN;
+  const a1 = aOrbit - NEAR_TURN;
   let outTurn = ((a1 - site.joinBearing) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
   if (outTurn < MIN_OUT_TURN) outTurn += 2 * Math.PI;
   for (let i = 1; i <= 80; i++) {
@@ -225,7 +238,7 @@ export function droneSite(forest: {
     return back > span + pad && back < 2 * Math.PI - before;
   });
   const a0 = Math.atan2(best[1], best[0]);
-  const start = a0 - NEAR_TURN - MIN_OUT_TURN;
+  const start = a0 - ENTRY_TURN - NEAR_TURN - MIN_OUT_TURN;
   let joinBearing = start;
   for (let k = 0; k < 360; k++) {
     const j = start - (k * Math.PI) / 180;

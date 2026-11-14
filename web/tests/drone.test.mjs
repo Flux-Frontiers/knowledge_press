@@ -50,6 +50,27 @@ test("the drone's fly-in stays clear of every leaf, the redwood and the ground, 
   assert.ok(maxStep < 25, `a jump of ${maxStep.toFixed(1)} m/s`);
   // No lurch anywhere, the handover onto the circle included: speed changes by under 6 m/s each second.
   assert.ok(maxJerk < 6, `speed changes by ${maxJerk.toFixed(1)} m/s per second`);
+  // No corners: the heading turns under 45 degrees a second (over half a second), and the view
+  // under 25 (circling the redwood at 26 m and 7 m/s turns it about 15).
+  const dir = (q) => { const d = q.look.map((v, i) => v - q.cam[i]); const n = Math.hypot(...d); return d.map((v) => v / n); };
+  const heads = [];
+  let maxLook = 0, last = null;
+  for (let t = 0; t <= flight.duration; t += 0.05) {
+    const q = flight.pose(t);
+    if (last) {
+      heads.push(Math.atan2(q.cam[2] - last.cam[2], q.cam[0] - last.cam[0]));
+      const a = dir(last), b = dir(q);
+      maxLook = Math.max(maxLook, (Math.acos(Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2])) * 180) / Math.PI / 0.05);
+    }
+    last = q;
+  }
+  let maxTurn = 0;
+  for (let i = 10; i < heads.length; i++) {
+    const d = heads[i] - heads[i - 10];
+    maxTurn = Math.max(maxTurn, (Math.abs(Math.atan2(Math.sin(d), Math.cos(d))) * 180) / Math.PI / 0.5);
+  }
+  assert.ok(maxTurn < 45, `the path turns ${maxTurn.toFixed(1)} degrees a second`);
+  assert.ok(maxLook < 25, `the view turns ${maxLook.toFixed(1)} degrees a second`);
   // It ends on the start screen's circle, looking where the start screen looks, and goes on circling at its rate.
   const end = flight.pose(flight.duration);
   assert.ok(Math.abs(Math.hypot(end.cam[0], end.cam[2]) - ORBIT_R) < 0.01 && Math.abs(end.cam[1] - ORBIT_UP) < 0.01, `ends at ${end.cam}`);
@@ -58,5 +79,5 @@ test("the drone's fly-in stays clear of every leaf, the redwood and the ground, 
   const want = orbitPose(a + ORBIT_RATE * 5, f.corpusTree.height);
   assert.ok(Math.hypot(...later.cam.map((v, i) => v - want.cam[i])) < 0.01, "circles on as the start screen does");
   assert.deepEqual(later.look.map((v) => +v.toFixed(3)), want.look.map((v) => +v.toFixed(3)));
-  console.log(`duration ${flight.duration.toFixed(1)} s, nearest leaf ${minLeaf.toFixed(2)} m, nearest trunk ${minTrunk.toFixed(2)} m, top speed ${maxStep.toFixed(1)} m/s, worst speed change ${maxJerk.toFixed(1)} m/s/s`);
+  console.log(`duration ${flight.duration.toFixed(1)} s, nearest leaf ${minLeaf.toFixed(2)} m, nearest trunk ${minTrunk.toFixed(2)} m, top speed ${maxStep.toFixed(1)} m/s, worst speed change ${maxJerk.toFixed(1)} m/s/s, sharpest turn ${maxTurn.toFixed(1)} deg/s, fastest view turn ${maxLook.toFixed(1)} deg/s`);
 });
