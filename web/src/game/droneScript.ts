@@ -176,6 +176,8 @@ export function droneFlight(site: DroneSite): DroneFlight {
     const a = path[lo]!.p, b = path[hi]!.p;
     return [lerp(a[0], b[0], k), lerp(a[1], b[1], k), lerp(a[2], b[2], k)];
   };
+  // When the close orbit begins: from there on the look is the start screen's.
+  const orbitAt = time[path.findIndex((x) => x.leg === "orbit")]!;
   const last = path[path.length - 1]!.p;
   const endAngle = orbitAngle(last[0], last[2]);
   const tree: P3 = [0, site.redwoodHeight * ORBIT_LOOK, 0];
@@ -188,8 +190,10 @@ export function droneFlight(site: DroneSite): DroneFlight {
       const p = at(s);
       // Look ahead along the path (three seconds on) while crossing the forest, drawn to the
       // redwood as it nears, then held where the start screen looks.
+      // Once round the redwood it stays on the start screen's aim, out to the circle and onto it,
+      // so the handover to the circle is seamless (62 m out, distance alone would only half pull).
       const ahead = at(Math.min(travel, s + SPEED.approach * 3));
-      const pull = smooth(Math.max(0, Math.min(1, (90 - Math.hypot(p[0], p[2])) / 60)));
+      const pull = s >= orbitAt ? 1 : smooth(Math.max(0, Math.min(1, (90 - Math.hypot(p[0], p[2])) / 60)));
       const look: P3 = [lerp(ahead[0], tree[0], pull), lerp(ahead[1] - 4, tree[1], pull), lerp(ahead[2], tree[2], pull)];
       return { cam: p, look };
     },

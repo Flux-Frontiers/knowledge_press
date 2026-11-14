@@ -13,7 +13,7 @@ const CIRCLE_ON = 12;
  * start until the rider presses Start (the splash draws the scene too), then flown in
  * real time onto the start screen's own slow circle, which it follows for a while
  * before going round again. Daylight unless `&time=dawn|dusk|twilight|night`; every leaf,
- * shadows and the undergrowth on.
+ * shadows and the undergrowth on, fog at its clearest, no weather.
  */
 export function FlyIn({ forest }: { forest: Forest }) {
   const flight = useMemo(() => droneFlight(droneSite(forest)), [forest]);
@@ -23,8 +23,9 @@ export function FlyIn({ forest }: { forest: Forest }) {
     const time = new URLSearchParams(window.location.search).get("time");
     const g = useGame.getState();
     g.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day");
-    // The forest at its best for the shot: every leaf, shadows, the undergrowth. Saved, as any setting is.
-    g.setPreferences({ leaves: "ultra", shadows: true, undergrowth: true });
+    // The forest at its best for the shot: every leaf, shadows, the undergrowth, the least fog
+    // and no weather blowing through. Saved, as any setting is.
+    g.setPreferences({ leaves: "ultra", shadows: true, undergrowth: true, fog: "clear", weather: false });
   }, []);
   useFrame((_, delta) => {
     if (!FLY_IN) return;

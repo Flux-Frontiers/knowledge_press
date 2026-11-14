@@ -55,7 +55,8 @@ test("the drone's fly-in stays clear of every leaf, the redwood and the ground, 
   const dir = (q) => { const d = q.look.map((v, i) => v - q.cam[i]); const n = Math.hypot(...d); return d.map((v) => v / n); };
   const heads = [];
   let maxLook = 0, last = null;
-  for (let t = 0; t <= flight.duration; t += 0.05) {
+  // Through the handover onto the start screen's circle and past it.
+  for (let t = 0; t <= flight.duration + 5; t += 0.05) {
     const q = flight.pose(t);
     if (last) {
       heads.push(Math.atan2(q.cam[2] - last.cam[2], q.cam[0] - last.cam[0]));
