@@ -18,3 +18,9 @@ export const cinema = {
  * ahead and down along its path, then turns to the art tree once it is down.
  */
 export const UFO_CAM = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("ufocam");
+
+/** `?flyin` flies the drone's fly-in to the corpus redwood (FlyIn.tsx, droneScript.ts). */
+export const FLY_IN = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("flyin");
+
+/** A shot that owns the camera outright, over any camera mode or flight (Player.tsx). */
+export const OWNED_SHOT = UFO_CAM || FLY_IN;

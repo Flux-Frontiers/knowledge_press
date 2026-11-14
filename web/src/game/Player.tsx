@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
 import { cartLoad, NEUTRAL_SPINE } from "./cartLoad";
-import { cinema, UFO_CAM } from "./cinema";
+import { cinema, OWNED_SHOT } from "./cinema";
 import { EXPOSURE } from "./Environment";
 import { atGroveStop, treesNear, type Forest } from "./forest";
 import { addDragLook, resetInput, sampleActions, setDragging } from "./input";
@@ -410,8 +410,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         lookAt.lerp(camPos.set(...cinema.look), cinema.weight);
       }
     }
-    // `?ufocam` (cinema.ts): the ride along owns the camera outright, over any mode or flight.
-    if (UFO_CAM && playing && cinema.weight > 0.999) {
+    // `?ufocam` and `?flyin` (cinema.ts) own the camera outright, over any mode or flight.
+    if (OWNED_SHOT && playing && cinema.weight > 0.999) {
       state.camera.position.set(...cinema.cam);
       lookAt.set(...cinema.look);
       cam.near = GROUND_NEAR;
