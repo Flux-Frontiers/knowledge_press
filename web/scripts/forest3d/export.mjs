@@ -6,6 +6,14 @@
 // leafScale 1, the season's leaf density, no wind.
 //
 //   node scripts/forest3d/export.mjs OUT_DIR [--season summer] [--region X Z R]
+//        [--time noon|sunrise|sunset|night|ISO] [--date YYYY-MM-DD] [--sun-alt DEG]
+//        [--place LAT LON]
+//
+// --time puts the game's sky (sky.ts) at that moment: sun, moon and the Yale
+// Bright Star catalog turned to it. sunrise and sunset are when today's sun
+// passes --sun-alt (default 10 degrees; the game's own dawn and dusk use 4,
+// whose light is nearly pure orange); noon is the sun's highest; night is the
+// game's own choice (the darkest hour, or when the moon is highest).
 //
 // --region keeps the trees whose trunks stand within R meters of (X, Z), and
 // clips the roads and grove grounds to that disc: one grove as a diorama.
@@ -37,6 +45,8 @@ const { SEASONS } = game("seasons");
 const { leafHash } = game("leafLod");
 const { ribbon, fillets, disc, RING_W, SPOKE_W, SPUR_W } = game("roads");
 const { DAY_OVERRIDE } = game("daylight");
+const sky = game("sky");
+const { starBuffers, applyMatrix } = game("stars");
 
 // --- arguments ---------------------------------------------------------------
 const args = process.argv.slice(2);
@@ -55,6 +65,37 @@ const region = reg ? { x: +reg[0], z: +reg[1], r: +reg[2] } : null;
 const within = (x, z, pad = 0) => !region || Math.hypot(x - region.x, z - region.z) <= region.r + pad;
 
 mkdirSync(out, { recursive: true });
+
+// --- the sky at a moment (sky.ts) ------------------------------------------------
+const RAD = Math.PI / 180;
+const placeArg = opt("--place", 2);
+const place = placeArg ? { lat: +placeArg[0], lon: +placeArg[1] } : { lat: 40, lon: -75 };
+const timeArg = opt("--time", 1)?.[0] ?? "noon";
+const dateArg = opt("--date", 1)?.[0];
+const sunAlt = +(opt("--sun-alt", 1)?.[0] ?? 10);
+/** The moment for a preset: scans the local day in one-minute steps, as effectiveTime does in ten. */
+function presetTime(name) {
+  // Without --date, the season's own solstice or equinox, so the light matches the leaves.
+  const SEASON_DATE = { spring: "03-20", summer: "06-21", autumn: "09-22", winter: "12-21" };
+  const day = new Date(`${dateArg ?? `${new Date().getFullYear()}-${SEASON_DATE[season]}`}T00:00:00`);
+  const start = new Date(day.getFullYear(), day.getMonth(), day.getDate()).valueOf();
+  if (name === "night") return sky.effectiveTime("night", new Date(start), place);
+  let best = start, bestAlt = -Infinity, rise = null, set = null;
+  let prev = sky.sunPosition(new Date(start), place).altitude - sunAlt * RAD;
+  for (let t = start + 60000; t < start + 86400000; t += 60000) {
+    const a = sky.sunPosition(new Date(t), place).altitude;
+    if (a > bestAlt) { bestAlt = a; best = t; }
+    const cur = a - sunAlt * RAD;
+    if (prev < 0 && cur >= 0 && rise === null) rise = t;
+    if (prev >= 0 && cur < 0) set = t;
+    prev = cur;
+  }
+  if (name === "sunrise" && rise !== null) return new Date(rise);
+  if (name === "sunset" && set !== null) return new Date(set);
+  return new Date(best);
+}
+const at = ["noon", "sunrise", "sunset", "night"].includes(timeArg) ? presetTime(timeArg) : new Date(timeArg);
+const state = sky.skyState(at, place);
 const forest = getForest();
 const pal = SEASONS[season];
 const files = {};
@@ -193,6 +234,31 @@ for (const g of forest.groves) {
   groves.push({ name, genre: g.genre, color: [tint.r, tint.g, tint.b] });
 }
 
+// The fixed stars, turned to this moment: world directions (three.js axes), magnitude, color.
+const stars = starBuffers();
+const starDir = new Float32Array(stars.dir.length);
+for (let i = 0; i < stars.mag.length; i++) {
+  starDir.set(applyMatrix(state.starMatrix, [stars.dir[i * 3], stars.dir[i * 3 + 1], stars.dir[i * 3 + 2]]), i * 3);
+}
+dump("star_dir", starDir);
+dump("star_mag", stars.mag);
+dump("star_color", stars.color);
+const sunPos = sky.sunPosition(at, place);
+const skyOut = {
+  time: timeArg,
+  at: at.toISOString(),
+  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  place,
+  sunAltitude: sunPos.altitude / RAD,
+  sunAzimuth: sunPos.azimuth / RAD,
+  sunDir: state.sunDir,
+  moonDir: state.moonDir,
+  moonFraction: state.moonFraction,
+  daylight: state.daylight,
+  warmth: state.warmth,
+  light: state.light,
+};
+
 const manifest = {
   season, region, files, chunks, leafShapes, redwood, roads, groves,
   ground: [ground.r, ground.g, ground.b],
@@ -200,8 +266,11 @@ const manifest = {
   textures: join(web, "public/textures"),
   worldRadius: forest.worldRadius,
   home: forest.home,
+  sky: skyOut,
   trees: forest.trees.map((t) => ({ x: t.x, z: t.z, slug: t.book.slug, chunk: t.chunk })),
 };
 writeFileSync(join(out, "manifest.json"), JSON.stringify(manifest));
+console.log(`sky: ${timeArg} at ${at.toISOString()} (${skyOut.timeZone}), sun ${skyOut.sunAltitude.toFixed(1)} deg up, `
+  + `moon ${(state.moonFraction * 100).toFixed(0)}% lit`);
 console.log(`${chunks.length} groves, ${chunks.reduce((n, c) => n + c.leaves, 0)} leaves, redwood ${redwood ? "yes" : "no"}, `
   + `roads ${roads.length}, grove grounds ${groves.length} -> ${out}`);

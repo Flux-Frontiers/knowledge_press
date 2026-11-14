@@ -11,6 +11,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The forest floor has a real texture.** The ground's flat canvas speckle
+  is replaced by a seamless 9 m tile of mottling and leaf litter, baked from
+  the Blender scene's ground shader. Its average color is the old one's, so
+  every season keeps its color.
+
 ### Added
 
 - **The forest in Blender** (`web/scripts/forest3d/`, tooling only). An
@@ -21,6 +28,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   quiltwright. One grove can be exported alone as a diorama for holograms.
   It can also light the forest with Blender's online Essentials HDRIs
   (sunrise, sunset, forest, night), and pave the roads with Essentials bricks.
+  Time presets (noon, sunrise, sunset, night) come from the game's own sky
+  model, and night renders the game's star catalog as the sky. A textured
+  forest floor and scattered grass tufts cover the ground near the camera.
 
 ### Changed
 

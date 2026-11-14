@@ -1,6 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { AdditiveBlending, BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
+import { AdditiveBlending, BackSide, BufferGeometry, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
 import type { Forest } from "./forest";
 import type { SkyState } from "./sky";
 import { planetPositions } from "./planets";
@@ -335,22 +335,18 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
   </>;
 }
 
+/**
+ * The forest floor: a seamless 9 m tile of mottling and leaf litter, baked from the
+ * Blender scene's ground shader (scripts/forest3d/bake_ground.py; see
+ * public/textures/ground/CREDITS.md). It multiplies the season's ground color, and its
+ * mean is the old canvas speckle's, so the seasons land as before.
+ */
 export function useGroundTexture() {
   const texture = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = 256;
-    const ctx = canvas.getContext("2d")!;
-    const random = mulberry32(372);
-    ctx.fillStyle = "#b2b6a1";
-    ctx.fillRect(0, 0, 256, 256);
-    for (let i = 0; i < 8000; i++) {
-      const value = 80 + Math.floor(random() * 130);
-      ctx.fillStyle = `rgba(${value},${value},${value * 0.85},0.25)`;
-      ctx.fillRect(random() * 256, random() * 256, 1 + random() * 4, 1 + random() * 3);
-    }
-    const result = new CanvasTexture(canvas);
+    const result = new TextureLoader().load("textures/ground/forest_floor.jpg");
     result.wrapS = result.wrapT = RepeatWrapping;
     result.repeat.set(70, 70);
+    result.anisotropy = textureAnisotropy(8);
     result.colorSpace = SRGBColorSpace;
     return result;
   }, []);
