@@ -59,6 +59,59 @@ The grass and rock placement lives inside `Environment.tsx`
 (`ForestFloor`, seeded `mulberry32(247)`). To export it without copying the
 logic, it would have to move into a `.ts` module.
 
+## Time of day and stars
+
+`export.mjs --time noon|sunrise|sunset|night` (or an ISO time) puts the
+game's own sky (`sky.ts`) at that moment, at latitude 40, longitude -75
+unless you pass `--place`. Without `--date`, each season uses its own
+solstice or equinox (summer: June 21), so the light matches the leaves.
+
+- `sunrise` and `sunset` are when the sun crosses `--sun-alt`, 10 degrees
+  by default. The game's own dawn and dusk use 4 degrees, where its light
+  is nearly pure orange.
+- `night` is the game's choice: the darkest hour, or when the moon is
+  highest.
+
+The manifest records the resolved moment and time zone.
+
+`build_blend.py` lights each preset with its own sun irradiance, color
+temperature, sky strength and exposure. Measured on the overview, over the
+lower half of the frame:
+
+| `--time` | Mean (of 255) | Red/blue | Note |
+|---|---|---|---|
+| `noon` | 91, 124, 81 | 1.11 | sun 4 W/m², 5800 K |
+| `sunrise` | 81, 98, 67 | 1.20 | sun 6, 3600 K, exposure +1 |
+| `sunset` | 84, 95, 66 | 1.27 | sun 6, 3200 K, exposure +1 |
+| `night` | 12, 26, 19 | 0.62 | the game's moonlight, faint blue glow, exposure +3 |
+
+`--sun`, `--sun-kelvin`, `--sky` and `--exposure` override a preset.
+
+At night, the game's Yale Bright Star catalog, turned to the exported
+moment, is rasterized into an 8192 px equirectangular map that only camera
+rays see. Brightness and size follow the game's star shader. To check
+orientation, Polaris, Vega and Altair each render at the center of a
+camera aimed at them, and denoising leaves the stars intact. Stars are for
+stills: content at infinity shifts far too much between quilt views.
+
+## The ground
+
+`ground_shader.py` holds the forest floor. It varies at three scales in
+world meters: 30 m patches of greener and drier grass, 1.6 m mottling, and
+5 cm leaf litter that also drives the bump. Both the world ground and the
+grove tints use it. `--grass R` scatters patchy grass tufts within R meters
+of the point below the camera, in the game's seasonal grass color, and
+keeps them off the roads.
+
+`bake_ground.py` bakes the same floor, without the 30 m patches, into the
+game's ground texture. The result is a seamless 9 m tile, 1024 px,
+`public/textures/ground/forest_floor.jpg`. It samples 4-D noise on a
+torus, and its mean color is set to the old canvas speckle's.
+
+```bash
+$BLENDER -b --factory-startup -P scripts/forest3d/bake_ground.py -- public/textures/ground/forest_floor.jpg
+```
+
 ## Light and exposure
 
 The view transform is `Standard`, quiltwright's default, at exposure 0.
