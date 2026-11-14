@@ -19,6 +19,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   script rebuilds them as a Cycles scene with leaves as geometry-node
   instances. The result renders as stills, or as Looking Glass quilts through
   quiltwright. One grove can be exported alone as a diorama for holograms.
+  It can also light the forest with Blender's online Essentials HDRIs
+  (sunrise, sunset, forest, night), and pave the roads with Essentials bricks.
 
 ### Changed
 

@@ -17,6 +17,9 @@ Run from `web/`. `OUT` is any scratch folder outside the repo.
 OUT=/tmp/forest3d
 BLENDER=/Applications/Blender.app/Contents/MacOS/Blender
 
+# 0. Once: fetch the Essentials materials and HDRI worlds (about 113 MB, 30 s).
+python3 scripts/forest3d/fetch_essentials.py
+
 # 1. Export raw arrays and manifest.json (about 5 s for the whole forest).
 node scripts/forest3d/export.mjs $OUT/forest                        # every grove
 node scripts/forest3d/export.mjs $OUT/birch --region 23 78 15       # one grove, as a diorama
@@ -58,12 +61,42 @@ logic, it would have to move into a `.ts` module.
 
 ## Light and exposure
 
-The view transform is `Standard`, quiltwright's default, at exposure 0. The
-sun lamp (4 W/m²) is the key light. The physical sky (strength 0.08) is the
-fill, with its own sun disc off so there is one sun. Measured on the
-overview: the sunlit ground is about 90 to 110 of 255, the visible sky about
-75, and no pixels clip. A stronger sky lightens the shadows and flattens the
-scene; `--sky` and `--exposure` set it per render.
+The view transform is `Standard`, quiltwright's default, at exposure 0.
+
+By default the sun lamp (4 W/m²) is the key light, and Blender's physical
+sky (strength 0.08) is the fill, with its own sun disc off so there is one
+sun. Measured on the overview: the sunlit ground is about 90 to 110 of 255,
+the visible sky about 75, and no pixels clip.
+
+`--world` lights the scene with an HDRI from Blender's online Essentials
+library instead. Pass `--sun 0` with it, since the HDRI carries its own sun.
+The camera still sees the physical sky. The HDRIs are photographs of a city
+square, a real forest and so on, which would otherwise stand behind the
+forest. `--world-angle` turns the HDRI.
+
+| `--world` | Overview ground (of 255) | Note |
+|---|---|---|
+| `sky` (default) | 90-111 | sun lamp plus sky, hard shadows |
+| `Sunrise` | 125-131, 0.8% clipped | warm, low, long shadows |
+| `Sunset` | 79-97 | soft, cool |
+| `Forest Street` | 57-67 at `--exposure 1.5` | dim, green; needs the exposure |
+| `Night` | not measured | |
+
+## Blender's online Essentials library
+
+`fetch_essentials.py` downloads part of the Essentials library's online half
+(`cdn.extensions.blender.org/asset-libraries/essentials`, CC0). Each file is
+checked against the library listing's SHA256. Files go to
+`~/Library/Caches/knowledge_press/blender-essentials`, about 113 MB:
+
+- the brick, metal and wood materials (procedural, in meters)
+- the Forest Street, Sunrise, Sunset and Night HDRI worlds
+
+`build_blend.py --road "Bricks - Natural"` lays an Essentials brick on the
+roads in place of the game's photo herringbone. `--road` also accepts
+`"Bricks - Regular"` and `"Bricks - Cobblestone"`.
+`fetch_essentials.py --list` shows every material and world. The library
+has no bark, ground or foliage, so those keep the game's own textures.
 
 ## Holograms
 

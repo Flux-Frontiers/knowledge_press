@@ -37,12 +37,32 @@ ap.add_argument("--sun", type=float, default=4.0, help="sun irradiance, W/m^2")
 ap.add_argument(
     "--sky",
     type=float,
-    default=0.08,
-    help="sky strength: the fill light, with the sun lamp as the key",
+    default=None,
+    help="world strength: 0.08 for the physical sky (fill, with the sun lamp as key), 1 for an HDRI",
 )
 ap.add_argument("--exposure", type=float, default=0.0)
 ap.add_argument("--samples", type=int, default=64)
+ap.add_argument(
+    "--assets",
+    type=Path,
+    default=Path.home() / "Library/Caches/knowledge_press/blender-essentials",
+    help="cache from fetch_essentials.py (Blender's online Essentials library)",
+)
+ap.add_argument(
+    "--road",
+    default="game",
+    help='road material: "game" (the game\'s photo brick) or an Essentials brick, e.g. "Bricks - Natural"',
+)
+ap.add_argument(
+    "--world",
+    default="sky",
+    help='"sky" (physical sky, sun lamp as key) or an Essentials HDRI world: '
+    '"Forest Street", "Sunrise", "Sunset", "Night"',
+)
+ap.add_argument("--world-angle", type=float, default=0.0, help="HDRI rotation, degrees")
 args = ap.parse_args(argv)
+if args.sky is None:
+    args.sky = 0.08 if args.world == "sky" else 1.0
 
 data = Path(args.data)
 man = json.loads((data / "manifest.json").read_text())
@@ -354,10 +374,63 @@ bpy.context.view_layer.layer_collection.children["prototypes"].exclude = True
 
 # --- roads, plazas, grove grounds ---------------------------------------------------
 
+ESSENTIAL_FILES = {
+    "material": [
+        "materials/materials__bricks.blend",
+        "materials/materials__metal.blend",
+        "materials/materials__wood.blend",
+    ],
+    "world": [
+        "world_hdri/world_hdris__forest.blend",
+        "world_hdri/world_hdris__sunrise.blend",
+        "world_hdri/world_hdris__sunset.blend",
+        "world_hdri/world_hdris__night.blend",
+    ],
+}
+
+
+def essential(kind, name):
+    """Append a material or world by name from the fetched Essentials files."""
+    for rel in ESSENTIAL_FILES[kind]:
+        path = args.assets / rel
+        if not path.exists():
+            continue
+        with bpy.data.libraries.load(str(path)) as (src, dst):
+            found = name in (src.materials if kind == "material" else src.worlds)
+            if found and kind == "material":
+                dst.materials = [name]
+            elif found:
+                dst.worlds = [name]
+        if found:
+            return (bpy.data.materials if kind == "material" else bpy.data.worlds)[name]
+    sys.exit(f"{kind} {name!r} not in {args.assets}; run fetch_essentials.py")
+
+
+BRICK_TILE = 2.4  # roads.ts: road UVs are (x, z) / BRICK_TILE
+
+
+def essential_brick(name):
+    """An Essentials brick, laid flat on the road: its pattern is in meters, so feed it
+    the road's UVs scaled back to ground meters (the roads lie in three.js's XZ plane)."""
+    m = essential("material", name)
+    nt = m.node_tree
+    group = next(n for n in nt.nodes if n.bl_idname == "ShaderNodeGroup")
+    uv = nt.nodes.new("ShaderNodeUVMap")
+    scale = nt.nodes.new("ShaderNodeVectorMath")
+    scale.operation = "SCALE"
+    scale.inputs["Scale"].default_value = BRICK_TILE
+    nt.links.new(uv.outputs["UV"], scale.inputs[0])
+    nt.links.new(scale.outputs["Vector"], group.inputs["Vector"])
+    return m
+
+
 if man["roads"]:
-    brick = textured(
-        "brick", TEX / "road/brick_color.jpg", TEX / "road/brick_normal.jpg", 0.9
-    )
+    if args.road == "game":
+        brick = textured(
+            "brick", TEX / "road/brick_color.jpg", TEX / "road/brick_normal.jpg", 0.9
+        )
+    else:
+        brick = essential_brick(args.road)
     for name in man["roads"]:
         me = flat_mesh(name)
         me.materials.append(brick)
@@ -417,19 +490,47 @@ sun = bpy.data.objects.new("sun", sun_data)
 sun.rotation_euler = (math.pi / 2 - el, 0, az)
 scene.collection.objects.link(sun)
 
-world = bpy.data.worlds.new("sky")
+
+def physical_sky(nt, strength):
+    """A Background shader of Blender's physical sky, its own sun disc off (the lamp is the sun)."""
+    bg = nt.nodes.new("ShaderNodeBackground")
+    bg.inputs["Strength"].default_value = strength
+    try:
+        sky = nt.nodes.new("ShaderNodeTexSky")
+        sky.sun_elevation, sky.sun_rotation = el, az
+        if hasattr(sky, "sun_disc"):
+            sky.sun_disc = False
+        nt.links.new(sky.outputs["Color"], bg.inputs["Color"])
+    except Exception as e:  # sky model names change across Blender versions
+        print("sky texture unavailable:", e)
+        bg.inputs["Color"].default_value = (0.45, 0.6, 0.85, 1)
+    return bg.outputs["Background"]
+
+
+if args.world == "sky":
+    world = bpy.data.worlds.new("sky")
+    nt = world.node_tree
+    out = next(n for n in nt.nodes if n.bl_idname == "ShaderNodeOutputWorld")
+    nt.links.new(physical_sky(nt, args.sky), out.inputs["Surface"])
+else:
+    # An Essentials HDRI lights the scene; the camera sees the physical sky instead
+    # of the HDRI's photograph (a city square or a real forest behind the diorama).
+    world = essential("world", args.world)
+    nt = world.node_tree
+    for n in nt.nodes:
+        if n.bl_idname == "ShaderNodeGroup" and "Angle" in n.inputs:
+            n.inputs["Angle"].default_value = math.radians(args.world_angle)
+        if n.bl_idname == "ShaderNodeBackground":
+            n.inputs["Strength"].default_value = args.sky
+    out = next(n for n in nt.nodes if n.bl_idname == "ShaderNodeOutputWorld")
+    hdri = out.inputs["Surface"].links[0].from_socket
+    mix = nt.nodes.new("ShaderNodeMixShader")
+    path = nt.nodes.new("ShaderNodeLightPath")
+    nt.links.new(path.outputs["Is Camera Ray"], mix.inputs["Fac"])
+    nt.links.new(hdri, mix.inputs[1])
+    nt.links.new(physical_sky(nt, 0.08), mix.inputs[2])
+    nt.links.new(mix.outputs["Shader"], out.inputs["Surface"])
 scene.world = world
-bg = world.node_tree.nodes["Background"]
-bg.inputs["Strength"].default_value = args.sky
-try:
-    sky = world.node_tree.nodes.new("ShaderNodeTexSky")
-    sky.sun_elevation, sky.sun_rotation = el, az
-    if hasattr(sky, "sun_disc"):
-        sky.sun_disc = False  # the sun lamp is the sun; one, not two
-    world.node_tree.links.new(sky.outputs["Color"], bg.inputs["Color"])
-except Exception as e:  # sky model names change across Blender versions
-    print("sky texture unavailable:", e)
-    bg.inputs["Color"].default_value = (0.45, 0.6, 0.85, 1)
 
 cam_data = bpy.data.cameras.new("camera")
 cam_data.sensor_fit = "HORIZONTAL"
