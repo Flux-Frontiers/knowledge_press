@@ -92,9 +92,9 @@ ap.add_argument(
 )
 ap.add_argument(
     "--redwood-bark",
-    choices=["game", "photo"],
-    default="game",
-    help="the corpus redwood's bark: the game's own, or Poly Haven's metasequoia photo",
+    choices=["photo", "game"],
+    default=None,
+    help="the corpus redwood's bark: Poly Haven's metasequoia photo (default when fetched) or the game's own",
 )
 ap.add_argument(
     "--polyhaven",
@@ -258,10 +258,18 @@ def image_from_rgba(name, rgba, width, height, color=True):
     return im
 
 
+REDWOOD_BARK_TILE_M = 2.4  # corpusTree.ts REDWOOD_BARK.tile
+METASEQUOIA_M = 1.94  # Poly Haven metasequoia_bark's real width
+
+
 def redwood_bark_material():
-    """The game's own redwood bark (redwoodTextures.ts): its color and normal map, tiled
-    by the bark's UVs as the game tiles them. --redwood-bark photo uses Poly Haven's
-    metasequoia (dawn redwood) photograph instead."""
+    """The corpus redwood's bark: Poly Haven's metasequoia (dawn redwood) photograph at its
+    true size when fetch_polyhaven.py has cached it, else the game's own bark
+    (redwoodTextures.ts, color and normal map, tiled by the bark's UVs as the game tiles
+    them). --redwood-bark picks one."""
+    if args.redwood_bark is None:
+        fetched = (args.polyhaven / "metasequoia_bark" / "diff_2k.jpg").exists()
+        args.redwood_bark = "photo" if fetched else "game"
     m, nt, bsdf = principled("redwood_bark", 0.95)
     if args.redwood_bark == "photo":
         ph = args.polyhaven / "metasequoia_bark"
@@ -269,6 +277,16 @@ def redwood_bark_material():
             image_node(nt, ph / "diff_2k.jpg"),
             image_node(nt, ph / "nor_gl_2k.jpg", color=False),
         )
+        # The redwood's UVs (growTree.ts emitBark with corpusTree.ts REDWOOD_BARK) make one
+        # unit 2.4 m round the trunk and twice that up it, for the game's 1:2 bark image.
+        # The photo is a 1.94 m square, so scale it to its true size both ways.
+        k = REDWOOD_BARK_TILE_M / METASEQUOIA_M
+        uvmap = nt.nodes.new("ShaderNodeUVMap")
+        mapping = nt.nodes.new("ShaderNodeMapping")
+        mapping.inputs["Scale"].default_value = (k, 2 * k, 1)
+        nt.links.new(uvmap.outputs["UV"], mapping.inputs["Vector"])
+        for tex in (color, normal):
+            nt.links.new(mapping.outputs["Vector"], tex.inputs["Vector"])
     else:
         w, h = man["redwood"]["barkSize"]
         color = nt.nodes.new("ShaderNodeTexImage")
