@@ -596,20 +596,23 @@ function Visitor({ exhibit, forest, face, m }: { exhibit: Exhibit; forest: Fores
     const dt = Math.min(delta, 0.1);
     if (UFO_CAM) {
       // Ride along from the start, wherever the rider is, and go round again a little after the end.
-      // Held at the start until the ride begins: the splash draws the scene too.
+      // Held at the start until the ride begins: the splash draws the scene too. Its own clock
+      // only: the rider's reduced-motion setting would otherwise skip straight to the end.
       landingT = !s.playing || landingT === null || landingT > VISITOR_END + 6 ? 0 : s.paused ? landingT : landingT + dt;
-    } else if (landingT === null && landingSeen()) {
-      // Seen before: already landed, the tree grown and powered, nothing to watch.
-      landingT = VISITOR_END + 60;
-    }
-    if (landingT === null) {
-      if (Math.hypot(sim.x - exhibit.x, sim.z - exhibit.z) > TRIGGER_DIST) {
-        if (craft.current) craft.current.visible = false;
-        return;
+    } else {
+      if (landingT === null && landingSeen()) {
+        // Seen before: already landed, the tree grown and powered, nothing to watch.
+        landingT = VISITOR_END + 60;
       }
-      landingT = s.preferences.motion ? 0 : VISITOR_END;
-    } else if (!s.paused) {
-      landingT = s.preferences.motion ? landingT + dt : Math.max(landingT, VISITOR_END);
+      if (landingT === null) {
+        if (Math.hypot(sim.x - exhibit.x, sim.z - exhibit.z) > TRIGGER_DIST) {
+          if (craft.current) craft.current.visible = false;
+          return;
+        }
+        landingT = s.preferences.motion ? 0 : VISITOR_END;
+      } else if (!s.paused) {
+        landingT = s.preferences.motion ? landingT + dt : Math.max(landingT, VISITOR_END);
+      }
     }
     const t = Math.min(landingT, VISITOR_END);
     const p = visitorPose(t);
