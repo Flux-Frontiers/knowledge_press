@@ -40,9 +40,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   Tap a paragraph to read from there. The voice matches the author (Austen
   British and female, Twain American and male), from a `voice` the catalog
   now carries for 252 of 265 books. Settings adds a Reading voice and a
-  Reading speed. Closing the reader stops the reading; the book remembers
-  the paragraph for next time. On iPhone and iPad a reading stops when the
-  screen locks and picks up that paragraph again on return.
+  Reading speed. The book remembers the paragraph for next time. On iPhone
+  and iPad a reading stops when the screen locks and picks up that paragraph
+  again on return.
+- **Keep listening after the book closes.** The reading goes on while you
+  drive, with a strip above the book cards to pause it, stop it or open the
+  book again. While a book is read, the ring tour shows its cards but does
+  not read them aloud; once the book stops, the tour speaks again if
+  **Read each grove aloud on the ring** is on. A moot pauses the book, and
+  the book goes on from the same paragraph when the moot closes.
 
 ### Fixed
 

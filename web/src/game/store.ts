@@ -12,6 +12,11 @@ import type { GroundCamera } from "./godEye";
 import { host } from "./host";
 import { bookBySlug } from "./catalog";
 import { bookShown } from "./timeline";
+import { stopBook, type BookReading } from "./bookReading";
+import { interruptReading, resumeInterrupted } from "./speech";
+
+/** How long after a moot closes a book it cut off goes on: after the moot player's own hush. */
+const BOOK_RESUME_MS = 400;
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -149,6 +154,8 @@ export type GameStore = {
   plaque: PlaqueText | null;
   /** The book open in the reader (Reader.tsx), by slug. */
   readingSlug: string | null;
+  /** The book being read aloud (bookReading.ts), open or not; the tour says nothing while there is one. */
+  bookReading: BookReading | null;
   /** The list of saved moots (MootOverlay.tsx) is open. */
   mootsOpen: boolean;
   /** The moot playing in the moot overlay, by id; a live moot's is "live-<n>". */
@@ -211,6 +218,8 @@ export type GameStore = {
   openCatalog: (genre: string | null) => void;
   openPlaque: (plaque: PlaqueText | null) => void;
   openReader: (slug: string | null) => void;
+  /** Mirror the book being read aloud, and remember where it is. */
+  setBookReading: (reading: BookReading | null) => void;
   openMoots: (open: boolean) => void;
   playMoot: (id: string | null) => void;
   /** Open the moot player on a new live moot. */
@@ -312,6 +321,7 @@ export const useGame = create<GameStore>((set, get) => ({
   catalogGenre: null,
   plaque: null,
   readingSlug: null,
+  bookReading: null,
   mootsOpen: false,
   mootId: null,
   liveMoot: null,
@@ -339,6 +349,7 @@ export const useGame = create<GameStore>((set, get) => ({
   play: () => set({ playing: true, paused: false }),
   exit: () => {
     resetInput();
+    stopBook();
     set({
       playing: false, paused: false, travelMode: "free", tourStop: null, tourNote: null,
       libraryOpen: false, atlasOpen: false, catalogOpen: false, helpOpen: false, plaque: null, readingSlug: null,
@@ -433,9 +444,24 @@ export const useGame = create<GameStore>((set, get) => ({
   setCatalogOpen: (catalogOpen) => set({ catalogOpen }),
   openPlaque: (plaque) => set(plaque ? { plaque, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { plaque: null }),
   openReader: (readingSlug) => set(readingSlug ? { readingSlug, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { readingSlug: null }),
+  setBookReading: (bookReading) => {
+    set({ bookReading });
+    if (bookReading?.state === "playing") {
+      const at = get().preferences.readingAt;
+      get().setPreferences({ readingAt: { ...at, [bookReading.slug]: [bookReading.chapter, bookReading.block] } });
+    }
+  },
   openMoots: (mootsOpen) => set(mootsOpen ? { mootsOpen, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { mootsOpen }),
-  playMoot: (mootId) => set(mootId ? { mootId, liveMoot: null, mootsOpen: false } : { mootId: null, liveMoot: null, mootSpeaker: null }),
-  holdMoot: (liveMoot) => set({ liveMoot, mootId: `live-${++liveMoots}`, mootsOpen: false }),
+  // A moot cuts off a book being read aloud; the book goes on once the moot closes.
+  playMoot: (mootId) => {
+    if (mootId) interruptReading();
+    else if (get().mootId) window.setTimeout(resumeInterrupted, BOOK_RESUME_MS);
+    set(mootId ? { mootId, liveMoot: null, mootsOpen: false } : { mootId: null, liveMoot: null, mootSpeaker: null });
+  },
+  holdMoot: (liveMoot) => {
+    interruptReading();
+    set({ liveMoot, mootId: `live-${++liveMoots}`, mootsOpen: false });
+  },
   setMootSpeaker: (mootSpeaker) => set({ mootSpeaker }),
   // Leaving the ring drops the grove it was pointing at, so the lantern trail goes with it.
   setTravelMode: (travelMode) =>

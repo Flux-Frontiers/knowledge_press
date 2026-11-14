@@ -155,6 +155,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const dt = Math.min(delta, 0.1);
     const game = useGame.getState();
     const { preferences, jump } = game;
+    // A book read aloud has the voice: the tour shows its cards but says nothing.
+    const narrate = preferences.narrate && !game.bookReading;
     const blocked = !playing || paused || game.helpOpen || game.libraryOpen || game.atlasOpen || game.catalogOpen || Boolean(game.plaque) || Boolean(game.readingSlug) || game.mootsOpen || Boolean(game.mootId) || Boolean(document.activeElement?.matches("input, textarea, select, [contenteditable=true]"));
     if (blocked) {
       sim.speed = sim.lat = sim.steering = 0;
@@ -215,7 +217,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           hush();
         }
         // Taking the wheel is not a jump elsewhere: say goodbye.
-        if (wasTouring && !useGame.getState().jump && preferences.narrate && !preferences.silent) {
+        if (wasTouring && !useGame.getState().jump && narrate && !preferences.silent) {
           speak(TOUR_FAREWELL);
         }
       };
@@ -234,7 +236,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
               const lines = tourIntro({ books: forest.trees.length, groves: forest.groves.length }, tourHeard());
               markTourHeard();
               noteLines(lines);
-              if (preferences.narrate) lines.forEach((line, i) => speak(line, i > 0));
+              if (narrate) lines.forEach((line, i) => speak(line, i > 0));
             }
           }
           const c = steerTour(tourState.tour, sim.x, sim.z, sim.yaw, sim.speed, dt, speaking());
@@ -248,14 +250,14 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
             if (stop) game.setTourNote(null);
             const said = stop ? forest.groves.find((g) => g.genre === stop)?.narration : undefined;
             // Queued, so a stop reached during the welcome waits for it.
-            if (said && preferences.narrate && !preferences.silent) speak(said, true);
+            if (said && narrate && !preferences.silent) speak(said, true);
           }
           // Every grove visited and the cart turning for home: say so once.
           if (tourState.tour.laps > 0 && !lapSaid.current) {
             lapSaid.current = true;
             if (!preferences.silent) {
               note(TOUR_LAP_DONE);
-              if (preferences.narrate) speak(TOUR_LAP_DONE, true);
+              if (narrate) speak(TOUR_LAP_DONE, true);
             }
           }
           useGame.getState().selectGrove(c.genre || null);

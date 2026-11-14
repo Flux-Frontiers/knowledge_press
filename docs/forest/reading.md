@@ -59,9 +59,18 @@ aloud. The paragraph being read is tinted and kept in view.
 - While a reading is going, tap a paragraph to read from there.
 - At the end of a chapter the reading goes on to the next one, and it stops
   at the end of the book.
-- Closing the reader, or turning to another chapter yourself, stops the
-  reading. The book remembers the paragraph, so the play button starts there
-  next time, on this visit or a later one.
+- Closing the reader does not stop the reading. A strip above the book
+  cards shows the book and chapter, with buttons to pause and stop; tap the
+  title to open the book again at the paragraph being read.
+- The stop button, in the reader or the strip, ends the reading. So does
+  turning to another chapter yourself, or leaving the forest. The book
+  remembers the paragraph, so the play button starts there next time, on
+  this visit or a later one.
+- While a book is being read, the ring tour shows its cards but does not
+  read them aloud. When the reading stops, the tour speaks again if
+  **Read each grove aloud on the ring** is on.
+- A [moot](moots.md) pauses the reading. When the moot closes, the book goes
+  on from the start of the paragraph it was in.
 - Footnotes and illustration captions are shown but not read.
 
 The voice matches the book's author: Jane Austen is read in a British

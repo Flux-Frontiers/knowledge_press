@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Pause, Play, Settings2, Search, Sun, Sunrise, Sunset, Square, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { useCorpusTree } from "./CorpusRedwood";
@@ -11,6 +11,7 @@ import { saveScreenshot } from "./screenshot";
 import { SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
 import { ReaderPanel } from "./Reader";
+import { stopBook, toggleBook } from "./bookReading";
 import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import { host } from "./host";
@@ -63,6 +64,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const readingSlug = useGame((s) => s.readingSlug);
   const openReader = useGame((s) => s.openReader);
   const reading = readingSlug ? forest.trees.find((t) => t.book.slug === readingSlug) : undefined;
+  const bookReading = useGame((s) => s.bookReading);
   const mootsOpen = useGame((s) => s.mootsOpen);
   const mootId = useGame((s) => s.mootId);
   const liveMoot = useGame((s) => s.liveMoot);
@@ -315,6 +317,27 @@ export function HUD({ forest }: { forest: Forest }) {
 
       {clean ? null : (<>
         <div className="book-dock pointer-events-auto absolute bottom-24 left-3 right-3 mx-auto max-w-lg sm:bottom-6 sm:left-4 sm:right-auto sm:max-w-[min(32rem,calc(50%-12rem))]">
+          {/* A book read aloud after its reader closed: what it is, pause, stop, and back to the page. */}
+          {bookReading && bookReading.slug !== readingSlug ? (
+            <div className="mb-2 flex items-center gap-1 rounded-lg border border-border bg-surface/94 pl-3" aria-label="Reading aloud">
+              <BookOpen className="size-4 shrink-0 text-primary" strokeWidth={1.75} />
+              <button type="button" onClick={() => openReader(bookReading.slug)}
+                className="min-h-11 min-w-0 flex-1 truncate px-1 text-left text-sm" aria-label={`Open ${bookReading.title}`}>
+                <span className="text-fg">{bookReading.title}</span>
+                {bookReading.chapterTitle ? <span className="text-muted"> · {bookReading.chapterTitle}</span> : null}
+              </button>
+              <button type="button" onClick={toggleBook} className="grid size-11 shrink-0 place-items-center rounded-md text-primary"
+                aria-label={bookReading.state === "playing" ? "Pause reading" : "Go on reading"}>
+                {bookReading.state === "playing"
+                  ? <Pause className="size-5" strokeWidth={1.75} />
+                  : <Play className="size-5" strokeWidth={1.75} />}
+              </button>
+              <button type="button" onClick={stopBook} className="grid size-11 shrink-0 place-items-center rounded-md text-muted"
+                aria-label="Stop reading">
+                <Square className="size-4" strokeWidth={1.75} />
+              </button>
+            </div>
+          ) : null}
           {touring && !silent ? (
             <article className="rounded-lg border border-border bg-surface/94 p-3 sm:p-4" aria-live="polite">
               <p className="flex items-center gap-2 text-xs tracking-wide text-muted uppercase">
