@@ -12,7 +12,7 @@ const CIRCLE_ON = 12;
  * `?flyin`: the drone's fly-in to the corpus redwood (droneScript.ts). Held at the
  * start until the rider presses Start (the splash draws the scene too), then flown in
  * real time onto the start screen's own slow circle, which it follows for a while
- * before going round again. Daylight unless `&time=dawn|dusk|night`; every leaf,
+ * before going round again. Daylight unless `&time=dawn|dusk|twilight|night`; every leaf,
  * shadows and the undergrowth on.
  */
 export function FlyIn({ forest }: { forest: Forest }) {
@@ -22,7 +22,7 @@ export function FlyIn({ forest }: { forest: Forest }) {
     if (!FLY_IN) return;
     const time = new URLSearchParams(window.location.search).get("time");
     const g = useGame.getState();
-    g.setTimeMode(time === "dawn" || time === "dusk" || time === "night" ? time : "day");
+    g.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day");
     // The forest at its best for the shot: every leaf, shadows, the undergrowth. Saved, as any setting is.
     g.setPreferences({ leaves: "ultra", shadows: true, undergrowth: true });
   }, []);

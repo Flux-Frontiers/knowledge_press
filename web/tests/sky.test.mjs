@@ -121,3 +121,26 @@ test("the season follows the sun, half a year on south of the equator", () => {
   assert.equal(seasonFor(new Date("2026-06-22T12:00:00Z"), NYC), "summer");
   assert.equal(seasonFor(new Date("2026-06-20T12:00:00Z"), NYC), "spring");
 });
+
+test("twilight: the sun just below the horizon, stars out, the sky still lit", () => {
+  const { effectiveTime, skyState, sunPosition, moonPosition } = sky();
+  for (const day of ["2026-03-20T12:00:00", "2026-06-21T12:00:00", "2026-11-14T12:00:00", "2026-12-21T12:00:00"]) {
+    const now = new Date(day);
+    const at = effectiveTime("twilight", now, NYC);
+    const alt = (sunPosition(at, NYC).altitude * 180) / Math.PI;
+    assert.ok(Math.abs(alt + 4) < 0.3, `${day}: sun at ${alt.toFixed(2)} degrees`);
+    const s = skyState(at, NYC);
+    // The sky's star limit is 6 - 12 * daylight: magnitude 4 and brighter stand out.
+    assert.ok(s.daylight > 0.05 && s.daylight < 0.25, `${day}: daylight ${s.daylight.toFixed(3)}`);
+    // Of this evening's and tomorrow morning's twilight, the one with the moon higher: a sun
+    // just as low a day earlier or later on the other side of night has the moon no higher.
+    const moon = moonPosition(at, NYC).altitude;
+    for (let h = -18; h <= 18; h += 0.25) {
+      const t = new Date(at.valueOf() + h * 3600000);
+      const a = (sunPosition(t, NYC).altitude * 180) / Math.PI;
+      if (Math.abs(h) > 2 && Math.abs(a + 4) < 0.2 && Math.abs(t - now) < 86400000 && t > now) {
+        assert.ok(moon >= moonPosition(t, NYC).altitude - 0.02, `${day}: the other twilight had the moon higher`);
+      }
+    }
+  }
+});

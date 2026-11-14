@@ -20,6 +20,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Twilight.** A new time of day between dusk and night: the sun 4° below
+  the horizon, the stars out, the sky still lit. It picks this evening's or
+  tomorrow morning's twilight, whichever has the moon higher, and sits in the
+  time-of-day cycle after dusk.
+- **A drone's fly-in: `?flyin`.** From beyond the forest's edge, low over the
+  crowns and down the spoke road toward the redwood's plaque, round the
+  redwood, and out onto the start screen's own slow circle, so it ends on the
+  view the app opens with. Every leaf, shadows and the undergrowth on;
+  `&time=dawn|dusk|twilight|night`.
+
 - **Ride the visitor's craft: `?ufocam`.** The landing starts as soon as you
   press Start, wherever you are, and the camera rides under the craft's belly:
   looking ahead and down along its path over the crowns, down onto the pad,
