@@ -340,8 +340,13 @@ export function canSpeak(): boolean {
   return synth() !== null;
 }
 
-/** Stop speaking at once. */
+/**
+ * Stop the narration or moot line being said, at once. A book being read
+ * aloud is left alone when nothing else is speaking: hush() is "stop
+ * narrating", and the tour calls it whenever a panel opens.
+ */
 export function hush(): void {
+  if (current?.state === "playing" && !active && !waiting) return;
   generation++;
   waiting = false;
   active = false;
@@ -391,6 +396,8 @@ type Reading = ReadingRequest & {
   progress: number;
   /** The block's voice is on the device; a network voice may send no word boundaries to watch. */
   local: boolean;
+  /** Cut off by someone else (a moot), not paused by the listener: `resumeInterrupted` goes on. */
+  interrupted: boolean;
 };
 
 let current: Reading | null = null;
@@ -425,6 +432,7 @@ function readBlock(r: Reading, from: number): void {
   // Starting a block overtakes any narration line still waiting for voices.
   const turn = ++generation;
   waiting = false;
+  r.interrupted = false;
   const u = new SpeechSynthesisUtterance(r.blocks[i]!);
   const voice = readingVoice(loadVoices(s), r.chosen, r.want);
   if (voice) u.voice = voice;
@@ -437,7 +445,10 @@ function readBlock(r: Reading, from: number): void {
     r.utterance = null;
     // Someone else spoke (narration, a moot), or the block was cut off: a
     // cancel fires an error, though on iPadOS sometimes an end. Wait at this block.
-    if (failed || turn !== generation) setState(r, "paused");
+    if (failed || turn !== generation) {
+      r.interrupted = true;
+      setState(r, "paused");
+    }
     else readBlock(r, i + 1);
   };
   u.onend = () => ended(false);
@@ -489,8 +500,13 @@ export function readAloud(request: ReadingRequest): void {
     if (current.heldByEngine) s.resume(); // or the paused engine holds the new utterance
   }
   s.cancel();
+  // Any narration line is over; `speaking()` and `hush()` must not count it.
+  active = false;
+  waiting = false;
   watchVisibility();
-  const r: Reading = { ...request, state: "idle", at: request.from, utterance: null, heldByEngine: false, progress: 0, local: true };
+  const r: Reading = {
+    ...request, state: "idle", at: request.from, utterance: null, heldByEngine: false, progress: 0, local: true, interrupted: false,
+  };
   current = r;
   readBlock(r, request.from);
 }
@@ -502,7 +518,35 @@ export function pauseReading(): void {
   if (!r || !s || r.state !== "playing") return;
   s.pause();
   r.heldByEngine = true;
+  r.interrupted = false;
   setState(r, "paused");
+}
+
+/**
+ * Make way for a moot: cut the block off and wait at it. A reading the
+ * listener paused stays paused, but its engine is let go, or the moot's
+ * lines would queue behind the held utterance and never be heard.
+ */
+export function interruptReading(): void {
+  const r = current;
+  const s = synth();
+  if (!r || !s || r.state === "idle") return;
+  r.utterance = null;
+  if (r.heldByEngine) {
+    r.heldByEngine = false;
+    s.resume();
+  }
+  s.cancel();
+  if (r.state === "playing") {
+    r.interrupted = true;
+    setState(r, "paused");
+  }
+}
+
+/** Go on with a reading a moot cut off, from the start of its block; a listener's pause is kept. */
+export function resumeInterrupted(): void {
+  const r = current;
+  if (r?.state === "paused" && r.interrupted) readBlock(r, r.at);
 }
 
 /**
