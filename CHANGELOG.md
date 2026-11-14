@@ -13,10 +13,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- **The forest floor has a real texture.** The ground's flat canvas speckle
-  is replaced by a seamless 9 m tile of mottling and leaf litter, baked from
-  the Blender scene's ground shader. Its average color is the old one's, so
-  every season keeps its color.
+- **The forest floor is photographed ground.** The flat canvas speckle is
+  replaced by Poly Haven's forrest_ground_01 (CC0), a 2 m square of grass,
+  twigs and leaf litter, repeated at its true size. Its average color is the
+  old one's, so every season keeps its color.
 
 ### Added
 

@@ -335,21 +335,25 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
   </>;
 }
 
+/** Meters of ground one repeat of the floor texture covers: the photo's real size. */
+export const GROUND_TILE_M = 2;
+
 /**
- * The forest floor: a seamless 9 m tile of mottling and leaf litter, baked from the
- * Blender scene's ground shader (scripts/forest3d/bake_ground.py; see
- * public/textures/ground/CREDITS.md). It multiplies the season's ground color, and its
- * mean is the old canvas speckle's, so the seasons land as before.
+ * The forest floor: Poly Haven's forrest_ground_01 (CC0), a photographed 2 m square of
+ * grass, twigs and leaf litter, repeated at its true size across a ground disc of
+ * `diameter` meters (see public/textures/ground/CREDITS.md). It multiplies the
+ * season's ground color, so its mean was set to the old canvas speckle's and the
+ * seasons land as before.
  */
-export function useGroundTexture() {
+export function useGroundTexture(diameter: number) {
   const texture = useMemo(() => {
     const result = new TextureLoader().load("textures/ground/forest_floor.jpg");
     result.wrapS = result.wrapT = RepeatWrapping;
-    result.repeat.set(70, 70);
+    result.repeat.set(diameter / GROUND_TILE_M, diameter / GROUND_TILE_M);
     result.anisotropy = textureAnisotropy(8);
     result.colorSpace = SRGBColorSpace;
     return result;
-  }, []);
+  }, [diameter]);
   useEffect(() => () => texture.dispose(), [texture]);
   return texture;
 }
