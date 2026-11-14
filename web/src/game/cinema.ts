@@ -11,3 +11,10 @@ export const cinema = {
   /** Seconds since the rider last touched a control. */
   idle: 0,
 };
+
+/**
+ * `?ufocam` rides the visitor's craft (LandingField.tsx): the landing starts at once
+ * wherever the rider is, loops, and the camera hangs under the craft's belly looking
+ * ahead and down along its path, then turns to the art tree once it is down.
+ */
+export const UFO_CAM = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("ufocam");
