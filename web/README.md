@@ -171,6 +171,7 @@ World.tsx      ground, roads, lantern trail, fog, plinth
 Signposts.tsx  grove signposts and exhibit plaques
 HUD.tsx        plaque, minimap jump, atlas, book list, lantern query, press, tour caption
 Reader.tsx     a book's chapters, previous / next
+chapterBlocks.ts  a chapter as paragraphs (the app's reflow, ported) with italics and footnotes
 bookText.ts    fetches books/<slug>.json, once per book
 host.ts        the app bridge: events out, goto / home in; a no-op on the web
 StartScreen.tsx, PauseOverlay.tsx, TouchControls.tsx   start, settings, on-screen controls

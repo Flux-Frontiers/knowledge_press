@@ -44,8 +44,17 @@ tree within reach.
   at the bottom.
 - ++left++ and ++right++ turn the chapter. ++up++ and ++down++ scroll the
   page.
+- The two **A** buttons beside the close button make the text smaller or
+  larger, in four steps. The size is saved for later visits.
 - ++esc++, the close button, or a tap outside the page closes the reader. It
   remembers the chapter you were at for the rest of the visit.
+
+Prose is set as paragraphs that fill the page, whatever the printed
+edition's line length was. Verse and plays keep their lines; a line too long
+for the page continues indented below. Words the edition marked in italics
+are set in italics. Footnote marks are small raised numbers, footnotes and
+sidenotes are set small and gray, and illustrations are shown as their
+captions.
 
 Chapters are the book's own sections. A very long section is split into
 parts, shown as "(Part 1 of 4)" and so on. A diary's chapters are its dated
