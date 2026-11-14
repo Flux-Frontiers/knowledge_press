@@ -8,7 +8,7 @@
 export type Vec3 = [number, number, number];
 export type Place = { lat: number; lon: number };
 /** Live follows the device clock; the rest pin the sky to today's sunrise, noon, sunset or tonight. */
-export type TimeMode = "live" | "dawn" | "day" | "dusk" | "night";
+export type TimeMode = "live" | "dawn" | "day" | "dusk" | "twilight" | "night";
 /** Radians. Azimuth is SunCalc's: from south, positive toward the west. */
 export type BodyPosition = { altitude: number; azimuth: number };
 
@@ -177,6 +177,7 @@ const LOW_SUN = 4 * RAD;
  */
 export function effectiveTime(mode: TimeMode, now: Date, place: Place): Date {
   if (mode === "live") return now;
+  if (mode === "twilight") return twilightTime(now, place) ?? effectiveTime("night", now, place);
   if (mode === "day" || mode === "dawn" || mode === "dusk") {
     const start = localMidnight(now);
     let best = start, bestAlt = -Infinity;
@@ -210,6 +211,31 @@ export function effectiveTime(mode: TimeMode, now: Date, place: Place): Date {
     }
   }
   return new Date(moonlit >= 0 ? moonlit : darkest);
+}
+
+/**
+ * Sun altitude for twilight: below the horizon, so the stars are out (the sky's daylight is
+ * about 0.15, a limiting magnitude of about 4), but the sky still lit, short of night.
+ */
+const TWILIGHT_SUN = -4 * RAD;
+
+/**
+ * Twilight: when the sun passes TWILIGHT_SUN this evening going down, or tomorrow morning
+ * coming up, whichever has the moon higher (so it is in the sky if it can be). Null where
+ * the sun never crosses it (polar summer and winter).
+ */
+function twilightTime(now: Date, place: Place): Date | null {
+  const start = localMidnight(now) + DAY_MS / 2;
+  const found: number[] = [];
+  let prev = sunPosition(new Date(start), place).altitude - TWILIGHT_SUN;
+  for (let t = start + STEP; t < start + DAY_MS; t += STEP) {
+    const cur = sunPosition(new Date(t), place).altitude - TWILIGHT_SUN;
+    if ((prev < 0) !== (cur < 0)) found.push(t - STEP * (cur / (cur - prev)));
+    prev = cur;
+  }
+  if (!found.length) return null;
+  const moonUp = (t: number) => moonPosition(new Date(t), place).altitude;
+  return new Date(found.reduce((a, b) => (moonUp(b) > moonUp(a) ? b : a)));
 }
 
 /** The next sunrise or sunset after `now` (sun's upper limb on the horizon, with refraction), within 36 hours. */

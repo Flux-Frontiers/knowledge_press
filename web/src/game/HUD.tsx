@@ -1,4 +1,4 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Pause, Play, Settings2, Search, Sun, Sunrise, Sunset, Square, X, Video } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, MoonStar, Pause, Play, Settings2, Search, Sun, Sunrise, Sunset, Square, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { COARSE_POINTER } from "./Environment";
 import { useCorpusTree } from "./CorpusRedwood";
@@ -20,7 +20,7 @@ import type { TimeMode } from "./sky";
 import { TimelineBar, useTimelinePlayback } from "./TimelineBar";
 import { bookShown, timelineStops, yearLabel } from "./timeline";
 
-const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
+const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", twilight: "Twilight", night: "Night" } as const;
 
 export function HUD({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
@@ -477,7 +477,7 @@ export function HUD({ forest }: { forest: Forest }) {
 }
 
 function TimeIcon({ mode }: { mode: TimeMode }) {
-  const Icon = { live: Clock, dawn: Sunrise, day: Sun, dusk: Sunset, night: Moon }[mode];
+  const Icon = { live: Clock, dawn: Sunrise, day: Sun, dusk: Sunset, twilight: MoonStar, night: Moon }[mode];
   return <Icon className="size-4" strokeWidth={1.75} />;
 }
 

@@ -30,7 +30,7 @@ type SaveBlob = {
   preferences: Preferences;
 };
 
-const TIME_CYCLE: Record<TimeMode, TimeMode> = { live: "dawn", dawn: "day", day: "dusk", dusk: "night", night: "live" };
+const TIME_CYCLE: Record<TimeMode, TimeMode> = { live: "dawn", dawn: "day", day: "dusk", dusk: "twilight", twilight: "night", night: "live" };
 
 function loadSave(): SaveBlob {
   const defaults: SaveBlob = {
