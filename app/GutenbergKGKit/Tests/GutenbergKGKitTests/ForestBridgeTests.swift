@@ -60,6 +60,7 @@ struct ForestCommandTests {
     @Test func commandsAreTheJSONHostTsParses() throws {
         #expect(try decode(ForestCommand.goto(slug: "hamlet").json) == ["kind": "goto", "slug": "hamlet"])
         #expect(try decode(ForestCommand.home.json) == ["kind": "home"])
+        #expect(try decode(ForestCommand.quiet.json) == ["kind": "quiet"])
         #expect(try decode(ForestCommand.worker(url: "http://mac.local:8000").json) == ["kind": "worker", "url": "http://mac.local:8000"])
         #expect(try decode(ForestCommand.worker(url: "").json) == ["kind": "worker", "url": ""])
     }

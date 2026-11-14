@@ -51,9 +51,10 @@ test("on receives a command dispatched through window.__forestHost", () => {
   const off = host.on((c) => heard.push(c));
   window.__forestHost.dispatch('{"kind":"goto","slug":"hamlet"}');
   window.__forestHost.dispatch({ kind: "home" });
+  window.__forestHost.dispatch('{"kind":"quiet"}');
   off();
   window.__forestHost.dispatch({ kind: "home" });
-  assert.deepEqual(heard, [{ kind: "goto", slug: "hamlet" }, { kind: "home" }]);
+  assert.deepEqual(heard, [{ kind: "goto", slug: "hamlet" }, { kind: "home" }, { kind: "quiet" }]);
 });
 
 test("malformed commands are dropped, not thrown", () => {

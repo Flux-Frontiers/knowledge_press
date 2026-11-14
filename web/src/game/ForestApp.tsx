@@ -15,7 +15,8 @@ import { bindInput, isInputTarget } from "./input";
 import { requestPlace } from "./location";
 import { nextCamera, LEAF_SCALE } from "./preferences";
 import { resetSim } from "./sim";
-import { unlockSpeechOnGesture } from "./speech";
+import { hush, unlockSpeechOnGesture } from "./speech";
+import { stopBook } from "./bookReading";
 import { readerTarget, useGame } from "./store";
 
 export function ForestApp() {
@@ -111,6 +112,7 @@ export function ForestApp() {
     const off = host.on((command) => {
       const st = useGame.getState();
       if (command.kind === "worker") { st.setHostWorker(command.url); return; }
+      if (command.kind === "quiet") { stopBook(); hush(); return; }
       const slug = command.kind === "goto" ? command.slug : null;
       const tree = slug ? treeBySlug(slug, forest.trees) : undefined;
       if (slug && !tree) return;

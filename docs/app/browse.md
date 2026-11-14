@@ -21,10 +21,29 @@ or title. Matching authors come first, each with their books below; then
 
 ## Read a chapter
 
-The chapter appears as text you can select and copy. The title and the
-position (for example 3 / 24) are shown, with **Previous** and **Next**
-buttons at the bottom. A very long chapter is split into parts, labelled
-"Part 1 of 4" and so on.
+The chapter appears as text you can select and copy, set as a book: prose
+fills the page as paragraphs, verse and plays keep their lines, italics show
+as italics, and footnotes and illustration captions are small and gray. The
+title and the position (for example 3 / 24) are shown, with **Previous** and
+**Next** buttons at the bottom. A very long chapter is split into parts,
+labelled "Part 1 of 4" and so on.
+
+## Listen to a chapter
+
+The play button in the toolbar reads the chapter aloud. The paragraph being
+read is tinted and kept in view.
+
+- The button again pauses, and the next press goes on from the same word.
+- While a reading is going, tap a paragraph to read from there.
+- At the end of a chapter the reading goes on to the next one.
+- **Previous** or **Next**, or leaving the chapter, stops the reading.
+- Footnotes and illustration captions are shown but not read.
+- On iPhone and iPad the voice is heard with the ring switch on silent. It
+  stops when the screen locks.
+
+The voice and the speed are in Settings, under **Reading aloud**; see
+[Settings](settings.md). Playing a chapter stops a book the forest is reading
+aloud.
 
 ## Diaries
 
