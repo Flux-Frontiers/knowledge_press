@@ -6,9 +6,10 @@ import type { SkyState } from "./sky";
 import { planetPositions } from "./planets";
 import { starBuffers } from "./stars";
 import { fogMix, overcast, weather } from "./weather";
-import { shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
+import { shadowCenter, shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
 import { floorLitter, rockGeometry, tuftGeometry } from "./forestFloor";
 import type { SeasonName } from "./seasons";
+import { cinema, OWNED_SHOT } from "./cinema";
 import { sim } from "./sim";
 import { useGame } from "./store";
 
@@ -306,15 +307,17 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
   useFrame(() => {
     if (!light.current) return;
     const d: [number, number, number] = [dir.x, dir.y, dir.z];
-    const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(sim.x, sim.z, d, (2 * SHADOW_HALF) / SHADOW_MAP) : [sim.x, 0, sim.z];
+    const g = useGame.getState();
+    // A shot that owns the camera (Player.tsx) takes the map with it.
+    const [cx, cz] = shadowCenter(sim.x, sim.z, OWNED_SHOT && g.playing && cinema.weight > 0.999 ? cinema : null, SHADOW_HALF);
+    const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(cx, cz, d, (2 * SHADOW_HALF) / SHADOW_MAP) : [cx, 0, cz];
     target.position.set(tx, ty, tz);
     light.current.position.set(tx + dir.x * SHADOW_BACK, ty + dir.y * SHADOW_BACK, tz + dir.z * SHADOW_BACK);
     target.updateMatrixWorld();
     if (SHADOW_CACHE && casting) {
-      const g = useGame.getState();
-      if (shadowStale(last.current, sim.x, sim.z, d, (g.preferences.motion && !g.paused) || g.timelinePlaying)) {
+      if (shadowStale(last.current, cx, cz, d, (g.preferences.motion && !g.paused) || g.timelinePlaying)) {
         gl.shadowMap.needsUpdate = true;
-        last.current = { x: sim.x, z: sim.z, dir: d, frames: 0 };
+        last.current = { x: cx, z: cz, dir: d, frames: 0 };
       } else if (last.current) {
         last.current.frames++;
       }

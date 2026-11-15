@@ -44,3 +44,13 @@ test("snapping moves less than a texel and holds still between texels", () => {
     }
   }
 });
+
+test("a shot takes the shadow map with its camera, half a map ahead along its view", () => {
+  const { shadowCenter } = require(`${process.env.FOREST_TEST_BUILD}/shadowCache.js`);
+  assert.deepEqual(shadowCenter(5, 7, null, 120), [5, 7]);
+  // Looking down +x from (100, 30, -50): centred 60 m ahead, whatever the height.
+  const [x, z] = shadowCenter(5, 7, { cam: [100, 30, -50], look: [200, 0, -50] }, 120);
+  assert.ok(Math.abs(x - 160) < 1e-9 && Math.abs(z + 50) < 1e-9, `${x}, ${z}`);
+  // Looking straight down: on the camera.
+  assert.deepEqual(shadowCenter(5, 7, { cam: [1, 40, 2], look: [1, 0, 2] }, 40), [1, 2]);
+});

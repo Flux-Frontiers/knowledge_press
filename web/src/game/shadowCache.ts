@@ -69,3 +69,22 @@ export function snapToTexels(x: number, z: number, dir: [number, number, number]
   const sb = Math.round(b / texel) * texel - b;
   return [x + sa * rx + sb * ux, sb * uy, z + sa * rz + sb * uz];
 }
+
+/**
+ * Where the shadow map centres: on the cart, or during a shot that owns the camera
+ * (`?flyin`, `?ufocam`) half a map ahead of the camera along its view, so the square
+ * covers what the shot sees rather than the parked cart.
+ *
+ * :param cartX: The cart, on the ground.
+ * :param cartZ: The cart, on the ground.
+ * :param shot: The shot's camera and look point, or null when the rider has the camera.
+ * :param half: The shadow camera's half-width, metres.
+ * :returns: The ground point to centre on, [x, z].
+ */
+export function shadowCenter(cartX: number, cartZ: number, shot: { cam: number[]; look: number[] } | null, half: number): [number, number] {
+  if (!shot) return [cartX, cartZ];
+  const fx = shot.look[0]! - shot.cam[0]!, fz = shot.look[2]! - shot.cam[2]!;
+  const n = Math.hypot(fx, fz);
+  if (n < 1e-6) return [shot.cam[0]!, shot.cam[2]!];
+  return [shot.cam[0]! + (fx / n) * half * 0.5, shot.cam[2]! + (fz / n) * half * 0.5];
+}
