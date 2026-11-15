@@ -1,4 +1,5 @@
 import type { Forest } from "./forest";
+import { pathToRoad, needsLeadIn, type LeadForest } from "./leadIn";
 import { clamp } from "./math";
 import { wrapAngle, yawToward } from "./sim";
 
@@ -18,6 +19,10 @@ export type Tour = {
   genre: string[];
   /** Points from here on are the ring, which repeats. */
   loopStart: number;
+  /** Points before this are the way out of a grove to the road (leadIn.ts); 0 when it set off on the road. */
+  lead: number;
+  /** Facing the way out before driving it: a cart parked at a trunk turns in place first. */
+  aligning: boolean;
   /** Progress: the route point the cart has reached. */
   i: number;
   /** The cart has reached the route; until then it is heading for it, not straying from it. */
@@ -52,7 +57,15 @@ const TURN_R = 3.5;
 /** The route shared by the cart (Player) and the lanterns that light it (World). */
 export const tourState: { tour: Tour | null } = { tour: null };
 
-export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circuit" | "signs" | "home">, x: number, z: number, yaw: number): Tour {
+export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circuit" | "signs" | "home"> & Partial<LeadForest>, x: number, z: number, yaw: number): Tour {
+  // Out in a grove: find the way round the trunks to the road, and plan the rest from where it comes out.
+  const full = forest.trees && forest.obstacles && forest.roads && forest.plazas ? (forest as LeadForest) : null;
+  const leadPts = full && needsLeadIn(full, x, z) ? pathToRoad(full, x, z) : null;
+  if (leadPts && leadPts.length > 1) {
+    const [ax, az] = leadPts[leadPts.length - 2]!, [bx, bz] = leadPts[leadPts.length - 1]!;
+    x = bx; z = bz;
+    yaw = Math.atan2(-(bx - ax), -(bz - az));
+  }
   const ring = forest.ringPath;
   const nearestRing = (px: number, pz: number) => {
     let k = 0, best = Infinity;
@@ -157,7 +170,15 @@ export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circui
   const hr = Math.hypot(h.x, h.z) || 1;
   const innerR = Math.min(...forest.roadLines.filter((l) => l.kind === "ring").map((l) => Math.hypot(...l.pts[0]!)));
   const home = { x: h.x, z: h.z, junction: [(h.x / hr) * innerR, (h.z / hr) * innerR] as [number, number] };
-  return { pts, genre, loopStart, i: 0, joined: false, stops, next: 0, laps: 0, dwell: null, home, ending: false, arrive: null, done: false };
+  // The way out goes first; its last point is where the rest begins.
+  const lead = leadPts && leadPts.length > 1 ? leadPts.slice(0, -1) : [];
+  const allPts = [...lead, ...pts];
+  const allGenre = [...lead.map(() => genre[0] ?? ""), ...genre];
+  const shifted = stops.map((st) => ({ ...st, k: st.k + lead.length }));
+  return {
+    pts: allPts, genre: allGenre, loopStart: loopStart + lead.length, lead: lead.length, aligning: lead.length > 0,
+    i: 0, joined: false, stops: shifted, next: 0, laps: 0, dwell: null, home, ending: false, arrive: null, done: false,
+  };
 }
 
 /**
@@ -191,6 +212,7 @@ function headHome(t: Tour): void {
   t.pts = route;
   t.genre = route.map(() => "");
   t.i = 0;
+  t.lead = 0;
   t.ending = true;
 }
 
@@ -265,6 +287,13 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
     if (turn.done) t.done = true;
     return { steer: turn.steer, throttle: 0, brake: true, genre: "" };
   }
+  if (t.aligning) {
+    // Parked at a trunk, perhaps facing it: turn in place toward the way out before driving it.
+    const [tx, tz] = t.pts[Math.min(1, t.pts.length - 1)]!;
+    const turn = turnTo(yaw, yawToward(x, z, tx, tz), 0.25);
+    if (!turn.done) return { steer: turn.steer, throttle: 0, brake: true, genre: t.genre[0] ?? "" };
+    t.aligning = false;
+  }
   const stop = t.stops[t.next];
   if (t.dwell && stop) {
     const d = t.dwell;
@@ -330,7 +359,9 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
     return { steer: 0, throttle: 0, brake: true, genre: at.genre };
   }
   // Look further ahead the faster the cart goes: tight at a crawl, smooth at speed.
-  const [tx, tz] = t.pts[along(t, t.i, clamp(2.5 + 0.8 * Math.abs(speed), 3, 6))]!;
+  // Among the trees, a short look ahead, so the cart keeps to the way out rather than cutting past trunks.
+  const ahead = t.i < t.lead ? 2 : clamp(2.5 + 0.8 * Math.abs(speed), 3, 6);
+  const [tx, tz] = t.pts[along(t, t.i, ahead)]!;
   const err = wrapAngle(yawToward(x, z, tx, tz) - yaw);
   // Slow for the bends ahead (the ring doubles back at some grove stops):
   // coast when over the bend's speed, so drag brakes the cart before the turn.
@@ -341,6 +372,8 @@ export function steerTour(t: Tour, x: number, z: number, yaw: number, speed: num
   let limit = (1.2 + 3 * Math.max(0, 1 - bend / 1.9)) * hold;
   // Ease off approaching the stop, so the cart pulls up rather than stands on the brake.
   if (at && t.i >= t.loopStart) limit = Math.min(limit, 0.8 + 0.35 * Math.hypot(t.pts[at.k]![0] - x, t.pts[at.k]![1] - z));
+  // Among the trees: a steady pace, with the trunks close by.
+  if (t.i < t.lead) limit = Math.min(limit, 3.2);
   if (t.ending && t.i >= t.pts.length - 12) limit = Math.min(limit, 0.8 + 0.35 * toEnd);
   return {
     steer: clamp(err * 1.8, -1, 1),

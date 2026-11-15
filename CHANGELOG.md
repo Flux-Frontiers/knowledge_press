@@ -20,6 +20,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **The ring roads on the minimap.** Both rings are drawn under the groves
+  and exhibits, brighter while riding the ring.
 - **Twilight.** A new time of day between dusk and night: the sun 4° below
   the horizon, the stars out, the sky still lit. It picks this evening's or
   tomorrow morning's twilight, whichever has the moon higher, and sits in the
@@ -111,6 +113,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   passes about 3 px from each exhibit's diamond, and the cart's arrow slid
   under each one as it rode by, so the markers seemed to flash. The arrow now
   draws over every marker, and the diamonds are a little smaller on a phone.
+- **Riding the ring from a grove no longer drives into trees.** The tour
+  used to steer straight for the nearest road and ground against any trunk
+  in the way, sometimes for good. It now backs off the tree it is parked
+  at, turns in place to face the way out, and follows a path round the
+  trunks to the road (leadIn.ts), at a steady pace while among the trees.
 - **No white flash at launch.** The iOS launch screen is now the splash's
   night color, and the splash is opaque from its first frame.
 - **The app icon shows on the splash and in About again.** It was looked

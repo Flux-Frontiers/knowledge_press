@@ -533,6 +533,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
 }) {
   const selectedGrove = useGame((s) => s.selectedGrove);
   const timelineYear = useGame((s) => s.timelineYear);
+  const travelMode = useGame((s) => s.travelMode);
   const r = forest.worldRadius;
   const to = (wx: number, wz: number) => {
     const px = ((wx + r) / (2 * r)) * 100;
@@ -542,6 +543,14 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
   const p = to(x, z);
   return (
     <div className="relative h-28 w-28 overflow-hidden rounded-lg border border-border bg-bg/80 sm:h-40 sm:w-40">
+      {/* The ring roads, under every marker: the tour's way round, and how far out the cart is. */}
+      <svg className="pointer-events-none absolute inset-0 size-full" viewBox="-1 -1 2 2" aria-hidden>
+        {forest.roadLines.filter((l) => l.kind === "ring").map((l) => (
+          <circle key={l.pts.length + ":" + l.pts[0]![0]} cx={0} cy={0} r={Math.hypot(...l.pts[0]!) / r}
+            fill="none" stroke="var(--color-fg)" strokeOpacity={travelMode === "circuit" ? 0.55 : 0.3}
+            strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        ))}
+      </svg>
       <Compass className="absolute top-1.5 left-1.5 size-3 text-muted" strokeWidth={1.75} />
       <button
         type="button"
