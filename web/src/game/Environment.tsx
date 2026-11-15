@@ -1,12 +1,14 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { AdditiveBlending, BackSide, Color, DirectionalLight, DoubleSide, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
+import { AdditiveBlending, BackSide, Color, DirectionalLight, DoubleSide, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderChunk, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
 import type { Forest } from "./forest";
 import type { SkyState } from "./sky";
 import { planetPositions } from "./planets";
 import { starBuffers } from "./stars";
 import { fogMix, overcast, weather } from "./weather";
-import { shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
+import { shadowCenter, shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
+import { fadeShadowChunk } from "./shadowFade";
+import { cinema, OWNED_SHOT } from "./cinema";
 import { floorLitter, rockGeometry, tuftGeometry } from "./forestFloor";
 import type { SeasonName } from "./seasons";
 import { sim } from "./sim";
@@ -261,22 +263,19 @@ export function textureAnisotropy(n: number): number {
 }
 
 /**
- * Touch screens' two shadow maps; one texel is 2 * half / map. One is a fixed
- * square 60 m each way round the corpus redwood on a 2048 map (texels 5.9 cm),
- * so the hub's shadows never sweep. The other follows the cart, 40 m each way on
- * 2048 (texels 3.9 cm). Each comes with its own light carrying half the sun, so
- * a shadow only one map holds is half as dark; round the redwood with the cart
- * there, both hold it and it is whole. The lights sit back twice the half-width.
+ * Touch screens: one shadow map round the cart (or a shot's camera), 60 m each
+ * way on 2048 (texels 5.9 cm), redrawn only when stale. Its shadows fade out
+ * over its outer quarter (shadowFade.ts), so groves ease into shadow as the cart
+ * nears them instead of switching on at the edge. The light sits back twice the
+ * half-width.
  */
-const HUB_HALF = 60;
-const CART_HALF = 40;
-const TOUCH_MAP = 2048;
+const CART_HALF = 60;
+const CART_MAP = 2048;
 /**
- * A Mac or desktop that takes an 8192 map shadows the whole world at once from
- * one light: a fixed square 310 m each way from the redwood (the forest's
- * radius is about 290 m), texels 7.6 cm, so every grove casts. The light sits
- * back one half-width, which the tallest tree is well inside. About 256 MB of
- * GPU memory.
+ * A Mac or desktop that takes an 8192 map shadows the whole world at once: a
+ * fixed square 310 m each way from the redwood (the forest's radius is about
+ * 290 m), texels 7.6 cm, so every grove casts. The light sits back one
+ * half-width, which the tallest tree is well inside. About 256 MB of GPU memory.
  */
 const WORLD_HALF = 310;
 const WORLD_MAP = 8192;
@@ -285,84 +284,78 @@ const NOLOD = typeof window !== "undefined" && new URLSearchParams(window.locati
 /** Shadow map texels snapped, so shadow edges keep still as the cart drives. */
 const SHADOW_SNAP = !NOLOD;
 /**
- * Redraw the shadow maps only when stale on touch screens alone. A Mac or
+ * Redraw the shadow map only when stale on touch screens alone. A Mac or
  * desktop GPU affords it every frame, so there shadows are simply on or off.
  */
 const SHADOW_CACHE = COARSE_POINTER && !NOLOD;
 
-type ShadowBox = { half: number; size: number; back: number; follows: boolean; share: number };
+// Before anything compiles: every sun shadow fades out at its map's edge.
+{
+  const { source, patched } = fadeShadowChunk(ShaderChunk.shadowmap_pars_fragment);
+  if (patched > 0) ShaderChunk.shadowmap_pars_fragment = source;
+  else console.warn("shadowFade: three's shadow lookup changed; shadows will not fade at the edge");
+}
 
 /**
- * The sun's (or the moon's, or the stars') light, sky.ts. A Mac or desktop: one
- * light, one map over the whole world. A touch screen: two lights with half the
- * sun each, one shadowing the redwood's hub and one the cart, redrawn only when
- * either is stale (shadowCache.ts shadowStale). Each map is centred on whole
- * texels so its edges keep still as the cart drives.
+ * The sun's (or the moon's, or the stars') one shadow-casting light, sky.ts. A
+ * Mac or desktop: one map over the whole world, redrawn every frame. A touch
+ * screen: a map round the cart, or round a shot's camera (`?flyin`, `?ufocam`),
+ * redrawn only when stale (shadowCache.ts shadowStale). Centred on whole texels
+ * so its edges keep still as the cart drives.
  */
 export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shadows: boolean }) {
+  const light = useRef<DirectionalLight>(null);
+  const target = useMemo(() => new Object3D(), []);
   const gl = useThree((t) => t.gl);
-  const whole = !COARSE_POINTER && gl.capabilities.maxTextureSize >= WORLD_MAP;
-  const boxes: ShadowBox[] = useMemo(() => whole
-    ? [{ half: WORLD_HALF, size: WORLD_MAP, back: WORLD_HALF, follows: false, share: 1 }]
-    : COARSE_POINTER
-      ? [{ half: HUB_HALF, size: TOUCH_MAP, back: 2 * HUB_HALF, follows: false, share: 0.5 },
-         { half: CART_HALF, size: TOUCH_MAP, back: 2 * CART_HALF, follows: true, share: 0.5 }]
-      // A desktop GPU without 8192 textures: one map round the cart.
-      : [{ half: 120, size: 4096, back: 240, follows: true, share: 1 }], [whole]);
-  const lights = useRef<(DirectionalLight | null)[]>([]);
-  const targets = useMemo(() => boxes.map(() => new Object3D()), [boxes]);
-  const last = useRef<(ShadowState | null)[]>([]);
+  const last = useRef<ShadowState | null>(null);
   // Never from below the ground: a sun on the horizon still lights from just above it.
   const dir = useMemo(() => new Vector3(l.dir[0], Math.max(l.dir[1], 0.05), l.dir[2]).normalize(), [l.dir]);
   const casting = shadows && l.shadow > 0.01;
+  const whole = !COARSE_POINTER && gl.capabilities.maxTextureSize >= WORLD_MAP;
+  // A desktop GPU without 8192 textures keeps the old 120 m map round the cart.
+  const half = whole ? WORLD_HALF : COARSE_POINTER ? CART_HALF : 120;
+  const size = whole ? WORLD_MAP : COARSE_POINTER ? CART_MAP : 4096;
+  const back = whole ? WORLD_HALF : 2 * half;
   useEffect(() => {
     if (!SHADOW_CACHE) return;
     gl.shadowMap.autoUpdate = false;
     return () => { gl.shadowMap.autoUpdate = true; };
   }, [gl]);
   // A map that has just started casting has nothing in it yet.
-  useEffect(() => { last.current = []; }, [casting]);
+  useEffect(() => { last.current = null; }, [casting]);
   useFrame(() => {
+    if (!light.current) return;
     const d: [number, number, number] = [dir.x, dir.y, dir.z];
     const g = useGame.getState();
-    const animating = (g.preferences.motion && !g.paused) || g.timelinePlaying;
+    // The whole world's map stays put; the cart's follows the cart, or a shot that owns the
+    // camera (Player.tsx).
+    const [cx, cz] = whole ? [0, 0] : shadowCenter(sim.x, sim.z, OWNED_SHOT && g.playing && cinema.weight > 0.999 ? cinema : null, half);
+    const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(cx, cz, d, (2 * half) / size) : [cx, 0, cz];
+    target.position.set(tx, ty, tz);
+    light.current.position.set(tx + dir.x * back, ty + dir.y * back, tz + dir.z * back);
+    target.updateMatrixWorld();
+    if (SHADOW_CACHE && casting) {
+      if (shadowStale(last.current, cx, cz, d, (g.preferences.motion && !g.paused) || g.timelinePlaying)) {
+        gl.shadowMap.needsUpdate = true;
+        last.current = { x: cx, z: cz, dir: d, frames: 0 };
+      } else if (last.current) {
+        last.current.frames++;
+      }
+    }
     // Fog and cloud take the sun's strength and soften its shadows.
     const o = overcast(weather);
-    let stale = false;
-    boxes.forEach((b, i) => {
-      const light = lights.current[i];
-      if (!light) return;
-      const cx = b.follows ? sim.x : 0, cz = b.follows ? sim.z : 0;
-      const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(cx, cz, d, (2 * b.half) / b.size) : [cx, 0, cz];
-      targets[i]!.position.set(tx, ty, tz);
-      light.position.set(tx + dir.x * b.back, ty + dir.y * b.back, tz + dir.z * b.back);
-      targets[i]!.updateMatrixWorld();
-      light.intensity = b.share * l.intensity * (1 - 0.7 * o);
-      light.shadow.intensity = l.shadow * (1 - o);
-      if (SHADOW_CACHE && casting) {
-        const prev = last.current[i] ?? null;
-        if (shadowStale(prev, cx, cz, d, animating)) {
-          stale = true;
-          last.current[i] = { x: cx, z: cz, dir: d, frames: 0 };
-        } else if (prev) {
-          prev.frames++;
-        }
-      }
-    });
-    // One flag redraws every map, so a stale one brings the other's along.
-    if (stale) gl.shadowMap.needsUpdate = true;
+    light.current.intensity = l.intensity * (1 - 0.7 * o);
+    light.current.shadow.intensity = l.shadow * (1 - o);
   });
   return <>
-    {targets.map((t, i) => <primitive key={`t${i}`} object={t} />)}
+    <primitive object={target} />
     {/* With no shadow to cast (night, twilight, a low sun) the shadow pass is skipped entirely. */}
-    {boxes.map((b, i) => (
-      <directionalLight key={i} ref={(x) => { lights.current[i] = x; }} target={targets[i]} color={l.color}
-        intensity={b.share * l.intensity} castShadow={casting} shadow-intensity={l.shadow}
-        shadow-mapSize={[b.size, b.size]} shadow-camera-left={-b.half} shadow-camera-right={b.half}
-        shadow-camera-top={b.half} shadow-camera-bottom={-b.half} shadow-camera-near={1} shadow-camera-far={2 * b.back}
-        // The bias is a fraction of the camera's depth range: about 3 cm of depth either way.
-        shadow-bias={-0.0002 * 160 / (2 * b.back)} shadow-normalBias={b.half > 120 ? 0.1 : 0.08} />
-    ))}
+    <directionalLight ref={light} target={target} color={l.color}
+      intensity={l.intensity} castShadow={casting} shadow-intensity={l.shadow}
+      shadow-mapSize={[size, size]} shadow-camera-left={-half} shadow-camera-right={half}
+      shadow-camera-top={half} shadow-camera-bottom={-half} shadow-camera-near={1} shadow-camera-far={2 * back}
+      // The bias is a fraction of the camera's depth range: about 3 cm of depth either way.
+      shadow-bias={-0.0002 * 160 / (2 * back)} shadow-normalBias={whole ? 0.1 : 0.08} />
   </>;
 }
 
