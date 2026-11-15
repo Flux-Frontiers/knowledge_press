@@ -6,11 +6,9 @@ import type { SkyState } from "./sky";
 import { planetPositions } from "./planets";
 import { starBuffers } from "./stars";
 import { fogMix, overcast, weather } from "./weather";
-import { shadowCenter, shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
+import { shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
 import { floorLitter, rockGeometry, tuftGeometry } from "./forestFloor";
 import type { SeasonName } from "./seasons";
-import { cinema, OWNED_SHOT } from "./cinema";
-import { sim } from "./sim";
 import { useGame } from "./store";
 
 /**
@@ -263,13 +261,14 @@ export function textureAnisotropy(n: number): number {
 
 /**
  * The shadow camera's half-width, metres, and the shadow map's size; one texel
- * is 2 * SHADOW_HALF / SHADOW_MAP. Touch screens keep 40 m round the cart on a
- * 2048 map (texels 3.9 cm): nothing past that casts a shadow, so a grove's
- * shadows appear as the cart nears it.
+ * is 2 * SHADOW_HALF / SHADOW_MAP. Touch screens shadow a fixed square 60 m each
+ * way round the corpus redwood on a 2048 map (texels 5.9 cm). A square that
+ * followed the cart swept shadows in across the groves as it passed; a fixed
+ * one leaves the hub shadowed and the groves beyond it without.
  */
-const SHADOW_HALF = 40;
+const SHADOW_HALF = 60;
 const SHADOW_MAP = 2048;
-/** How far the light sits back from the cart along its direction; the shadow camera reaches twice this. */
+/** How far the light sits back from the redwood along its direction; the shadow camera reaches twice this. */
 const SHADOW_BACK = 2 * SHADOW_HALF;
 /**
  * A Mac or desktop that takes an 8192 map shadows the whole world at once: a
@@ -292,10 +291,9 @@ const SHADOW_CACHE = COARSE_POINTER && !NOLOD;
 
 /**
  * The one shadow-casting light, from the sun, the moon or the stars (sky.ts),
- * On touch screens kept on a modest shadow map around the cart (or a shot's
- * camera), redrawn only when stale (shadowCache.ts shadowStale); on a Mac or
- * desktop one large map over the whole world, redrawn every frame. Centred on
- * whole texels so its edges keep still as the cart drives.
+ * On touch screens kept on a modest shadow map round the redwood, redrawn only
+ * when stale (shadowCache.ts shadowStale); on a Mac or desktop one large map
+ * over the whole world, redrawn every frame. Both are fixed on the redwood.
  */
 export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shadows: boolean }) {
   const light = useRef<DirectionalLight>(null);
@@ -318,9 +316,8 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
     if (!light.current) return;
     const d: [number, number, number] = [dir.x, dir.y, dir.z];
     const g = useGame.getState();
-    // The whole world's map stays put; the cart's follows the cart, or a shot that owns the
-    // camera (Player.tsx).
-    const [cx, cz] = whole ? [0, 0] : shadowCenter(sim.x, sim.z, OWNED_SHOT && g.playing && cinema.weight > 0.999 ? cinema : null, half);
+    // Both maps stay put on the redwood.
+    const cx = 0, cz = 0;
     const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(cx, cz, d, (2 * half) / size) : [cx, 0, cz];
     target.position.set(tx, ty, tz);
     light.current.position.set(tx + dir.x * back, ty + dir.y * back, tz + dir.z * back);
