@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DoubleSide, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, RepeatWrapping, RGBADepthPacking, SRGBColorSpace } from "three";
+import { BufferAttribute, BufferGeometry, CanvasTexture, Color, DoubleSide, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, PlaneGeometry, RepeatWrapping, RGBADepthPacking, SRGBColorSpace, TextureLoader } from "three";
+import { REDWOOD_BARK } from "./corpusTree";
 import { textureAnisotropy } from "./Environment";
 import { corpusTreeAt, HUB_PLAQUE_DIR, HUB_PLAQUE_DIST, type Forest } from "./forest";
 import type { SeasonName } from "./seasons";
 import { Lectern } from "./Signposts";
-import { redwoodBarkPixels, sprayStrokes, SPRAY_SIZE } from "./redwoodTextures";
+import { sprayStrokes, SPRAY_SIZE } from "./redwoodTextures";
 import { useGame } from "./store";
 import { UplightFixtures, useUplitMaterials } from "./Uplights";
 
@@ -17,32 +18,22 @@ const FOLIAGE: Record<SeasonName, string> = {
   winter: "#4a5d52",
 };
 
-/**
- * Redwood bark, drawn once: long fibrous ridges between deep furrows that
- * wander as they climb, cinnamon on the ridges and near-black in the cracks.
- * A height field gives both the colour and the normal map, and every term is
- * periodic, so the tile repeats without a seam (REDWOOD_BARK sets its size).
- */
+// Poly Haven's metasequoia (dawn redwood) bark, CC0; see public/textures/bark/CREDITS.md.
+// The photo is a 1.94 m square. The redwood's UVs make one unit REDWOOD_BARK.tile metres round
+// the trunk and REDWOOD_BARK.aspect times that up it, so repeat it to show its true size.
+const METASEQUOIA_M = 1.94;
+
 function redwoodBark() {
-  const px = redwoodBarkPixels();
-  const color = document.createElement("canvas");
-  const normal = document.createElement("canvas");
-  color.width = normal.width = px.width;
-  color.height = normal.height = px.height;
-  const cctx = color.getContext("2d")!, nctx = normal.getContext("2d")!;
-  const cimg = cctx.createImageData(px.width, px.height), nimg = nctx.createImageData(px.width, px.height);
-  cimg.data.set(px.color);
-  nimg.data.set(px.normal);
-  cctx.putImageData(cimg, 0, 0);
-  nctx.putImageData(nimg, 0, 0);
-  const wrap = (c: HTMLCanvasElement, srgb: boolean) => {
-    const tex = new CanvasTexture(c);
+  const loader = new TextureLoader();
+  const load = (map: string, srgb = false) => {
+    const tex = loader.load(`textures/bark/redwood_${map}.jpg`);
     tex.wrapS = tex.wrapT = RepeatWrapping;
+    tex.repeat.set(REDWOOD_BARK.tile / METASEQUOIA_M, (REDWOOD_BARK.aspect * REDWOOD_BARK.tile) / METASEQUOIA_M);
     tex.anisotropy = textureAnisotropy(8);
     if (srgb) tex.colorSpace = SRGBColorSpace;
     return tex;
   };
-  return new MeshStandardMaterial({ map: wrap(color, true), normalMap: wrap(normal, false), roughness: 0.95, metalness: 0 });
+  return new MeshStandardMaterial({ map: load("color", true), normalMap: load("normal"), roughness: 0.95, metalness: 0 });
 }
 
 /**

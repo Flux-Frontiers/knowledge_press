@@ -16,3 +16,9 @@ normal maps from each 1K JPG set, recompressed; no other changes.
 | `poplar_*` | Bark 007 (https://ambientcg.com/view?id=Bark007) |
 
 The pine, birch, willow and poplar sets are also downscaled to 384 x 384.
+
+`redwood_*` (the corpus redwood) is Poly Haven's **metasequoia_bark**
+(https://polyhaven.com/a/metasequoia_bark), CC0 1.0: dawn-redwood bark, a
+photographed 1.94 m square that the game repeats at that true size. From the
+1K diffuse and OpenGL normal JPGs (`scripts/forest3d/fetch_polyhaven.py --res 1k`),
+recompressed; no other changes.
