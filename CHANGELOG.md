@@ -102,6 +102,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **A phone reload puts you back in the forest.** When iOS kills the page for
+  memory, the app reloads it, and the reload used to land on the start screen,
+  as if the forest had quit mid-ride. The rider's place, and whether they were
+  riding the ring, is now kept for the session, so the reload resumes there.
+  Exit clears it, and a fresh launch still opens on the start screen.
+- **The minimap's arrow stays on top.** On a phone's smaller map the ring
+  passes about 3 px from each exhibit's diamond, and the cart's arrow slid
+  under each one as it rode by, so the markers seemed to flash. The arrow now
+  draws over every marker, and the diamonds are a little smaller on a phone.
 - **No white flash at launch.** The iOS launch screen is now the splash's
   night color, and the splash is opaque from its first frame.
 - **The app icon shows on the splash and in About again.** It was looked

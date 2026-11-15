@@ -554,7 +554,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
         const c = to(e.x, e.z);
         return (
           <button key={e.id} type="button" onClick={() => jumpToExhibit(e)}
-            className="absolute size-2 border border-bg bg-[#c9a24a]"
+            className="absolute size-1.5 border border-bg bg-[#c9a24a] sm:size-2"
             style={{ left: c.left, top: c.top, transform: "translate(-50%, -50%) rotate(45deg)", zIndex: 1 }}
             title={`Jump to ${e.label}`} aria-label={`Jump to ${e.label}`} />
         );
@@ -600,12 +600,15 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
         return <MapPin className="pointer-events-none absolute size-4 text-primary" strokeWidth={2}
           style={{ left: c.left, top: c.top, transform: "translate(-50%, -100%)", zIndex: 3 }} aria-hidden />;
       })() : null}
+      {/* Over every marker: the ring passes about 3 px from each exhibit on a phone's map, and an
+          arrow under the diamonds blinked in and out as the cart rode by. */}
       <span
         className="pointer-events-none absolute h-0 w-0 border-x-4 border-b-8 border-x-transparent border-b-fg"
         style={{
           left: p.left,
           top: p.top,
           transform: `translate(-50%, -70%) rotate(${-yaw}rad)`,
+          zIndex: 4,
         }}
       />
     </div>
