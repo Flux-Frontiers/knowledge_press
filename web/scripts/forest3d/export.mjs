@@ -7,8 +7,10 @@
 //
 //   node scripts/forest3d/export.mjs OUT_DIR [--season summer] [--region X Z R]
 //        [--time noon|sunrise|sunset|night|ISO] [--date YYYY-MM-DD] [--sun-alt DEG]
-//        [--place LAT LON]
+//        [--place LAT LON] [--flyin FPS T0 T1]
 //
+// --flyin writes the game's fly-in camera (droneScript.ts) from T0 to T1 seconds, a pose
+// per frame at FPS, for build_blend.py to key.
 // --time puts the game's sky (sky.ts) at that moment: sun, moon and the Yale
 // Bright Star catalog turned to it. sunrise and sunset are when today's sun
 // passes --sun-alt (default 10 degrees; the game's own dawn and dusk use 4,
@@ -65,6 +67,7 @@ const opt = (name, n) => {
 };
 const season = opt("--season", 1)?.[0] ?? "summer";
 const reg = opt("--region", 3);
+const flyArg = opt("--flyin", 3);
 const region = reg ? { x: +reg[0], z: +reg[1], r: +reg[2] } : null;
 const within = (x, z, pad = 0) => !region || Math.hypot(x - region.x, z - region.z) <= region.r + pad;
 
@@ -331,6 +334,17 @@ const skyOut = {
   light: state.light,
 };
 
+// --- the drone's fly-in (droneScript.ts), as the game flies it: one camera pose per frame ---
+let flyin = null;
+if (flyArg) {
+  const { droneFlight, droneSite } = game("droneScript");
+  const [fps, t0, t1] = flyArg.map(Number);
+  const flight = droneFlight(droneSite(forest));
+  const frames = [];
+  for (let f = Math.round(t0 * fps); f <= Math.round(t1 * fps); f++) frames.push(flight.pose(f / fps));
+  flyin = { fps, t0, t1, duration: flight.duration, frames };
+}
+
 const manifest = {
   season, region, files, chunks, leafShapes, redwood, roads, groves,
   ground: [ground.r, ground.g, ground.b],
@@ -340,6 +354,7 @@ const manifest = {
   home: forest.home,
   sky: skyOut,
   litter: litterOut,
+  flyin,
   trees: forest.trees.map((t) => ({ x: t.x, z: t.z, slug: t.book.slug, chunk: t.chunk })),
 };
 writeFileSync(join(out, "manifest.json"), JSON.stringify(manifest));

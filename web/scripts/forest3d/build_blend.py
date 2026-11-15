@@ -29,8 +29,15 @@ argv = sys.argv[sys.argv.index("--") + 1 :]
 ap = argparse.ArgumentParser()
 ap.add_argument("data")
 ap.add_argument("out")
-ap.add_argument("--eye", type=float, nargs=3, required=True)
-ap.add_argument("--target", type=float, nargs=3, required=True)
+ap.add_argument(
+    "--eye",
+    type=float,
+    nargs=3,
+    default=None,
+    help="camera, game coordinates (not with an exported fly-in)",
+)
+ap.add_argument("--target", type=float, nargs=3, default=None)
+ap.add_argument("--resolution", type=int, nargs=2, default=(1280, 720))
 ap.add_argument(
     "--fov", type=float, default=50.0, help="horizontal field of view, degrees"
 )
@@ -994,23 +1001,44 @@ if SKY and SKY["sunAltitude"] < -4:
 scene.world = world
 
 cam_data = bpy.data.cameras.new("camera")
-cam_data.sensor_fit = "HORIZONTAL"
-cam_data.angle = math.radians(args.fov)
 cam_data.clip_start, cam_data.clip_end = 0.1, 2000
 cam = bpy.data.objects.new("camera", cam_data)
-eye, target = three_to_blender(args.eye), three_to_blender(args.target)
-if args.grass > 0:
-    grass(Vector((eye.x, eye.y, 0.0)), args.grass)
-cam.location = eye
-cam.rotation_euler = (target - eye).to_track_quat("-Z", "Y").to_euler()
-cam_data.dof.focus_distance = (target - eye).length
 scene.collection.objects.link(cam)
 scene.camera = cam
+FLY = man.get("flyin")
+if FLY:
+    # The game's fly-in: its camera keyed on every frame, with the game's 58 degree vertical
+    # field of view (three's PerspectiveCamera fov is vertical; Player.tsx).
+    cam_data.sensor_fit = "VERTICAL"
+    cam_data.angle_y = math.radians(58.0)
+    cam.rotation_mode = "QUATERNION"
+    scene.render.fps = int(FLY["fps"])
+    scene.frame_start, scene.frame_end = 1, len(FLY["frames"])
+    for i, pose in enumerate(FLY["frames"], start=1):
+        eye, target = three_to_blender(pose["cam"]), three_to_blender(pose["look"])
+        cam.location = eye
+        cam.rotation_quaternion = (target - eye).to_track_quat("-Z", "Y")
+        cam.keyframe_insert("location", frame=i)
+        cam.keyframe_insert("rotation_quaternion", frame=i)
+    scene.frame_set(1)
+else:
+    if args.eye is None or args.target is None:
+        sys.exit(
+            "--eye and --target are needed unless the export has a fly-in (export.mjs --flyin)"
+        )
+    cam_data.sensor_fit = "HORIZONTAL"
+    cam_data.angle = math.radians(args.fov)
+    eye, target = three_to_blender(args.eye), three_to_blender(args.target)
+    if args.grass > 0:
+        grass(Vector((eye.x, eye.y, 0.0)), args.grass)
+    cam.location = eye
+    cam.rotation_euler = (target - eye).to_track_quat("-Z", "Y").to_euler()
+    cam_data.dof.focus_distance = (target - eye).length
 
 scene.render.engine = "CYCLES"
 scene.cycles.samples = args.samples
 scene.cycles.use_denoising = True
-scene.render.resolution_x, scene.render.resolution_y = 1280, 720
+scene.render.resolution_x, scene.render.resolution_y = args.resolution
 scene.view_settings.view_transform = "Standard"
 scene.view_settings.exposure = args.exposure
 prefs = bpy.context.preferences.addons["cycles"].preferences
