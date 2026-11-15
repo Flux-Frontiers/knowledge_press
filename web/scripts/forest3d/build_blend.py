@@ -115,6 +115,18 @@ ap.add_argument(
     default=30.0,
     help="tufts per square meter at the center",
 )
+ap.add_argument(
+    "--haze",
+    type=float,
+    default=0.0,
+    help="volumetric haze over the forest, scattering per meter (0.002 is light; 0 is none)",
+)
+ap.add_argument(
+    "--dof",
+    type=float,
+    default=0.0,
+    help="depth of field as an f-stop (2.8 is shallow; 0 is none); the fly-in focuses on its look point",
+)
 args = ap.parse_args(argv)
 
 data = Path(args.data)
@@ -1020,6 +1032,8 @@ if FLY:
         cam.rotation_quaternion = (target - eye).to_track_quat("-Z", "Y")
         cam.keyframe_insert("location", frame=i)
         cam.keyframe_insert("rotation_quaternion", frame=i)
+        cam_data.dof.focus_distance = (target - eye).length
+        cam_data.dof.keyframe_insert("focus_distance", frame=i)
     scene.frame_set(1)
 else:
     if args.eye is None or args.target is None:
@@ -1034,6 +1048,33 @@ else:
     cam.location = eye
     cam.rotation_euler = (target - eye).to_track_quat("-Z", "Y").to_euler()
     cam_data.dof.focus_distance = (target - eye).length
+
+if args.dof > 0:
+    cam_data.dof.use_dof = True
+    cam_data.dof.aperture_fstop = args.dof
+if args.haze > 0:
+    # A 60 m layer of forward-scattering haze over the whole world disc (taller, and the low
+    # sun crosses so much of it that it never arrives), so the sun throws shafts through the canopy.
+    bpy.ops.mesh.primitive_cube_add(size=1)
+    box = bpy.context.object
+    box.name = "haze"
+    r = man["worldRadius"] + 30
+    box.scale = (2 * r, 2 * r, 70)
+    box.location = (0, 0, 25)
+    mat = bpy.data.materials.new("haze")
+    vol = mat.node_tree.nodes.new("ShaderNodeVolumePrincipled")
+    vol.inputs["Density"].default_value = args.haze
+    vol.inputs["Anisotropy"].default_value = 0.6
+    vol.inputs["Color"].default_value = (0.9, 0.92, 1.0, 1)
+    mo = next(
+        n for n in mat.node_tree.nodes if n.bl_idname == "ShaderNodeOutputMaterial"
+    )
+    for link in list(mo.inputs["Surface"].links):
+        mat.node_tree.links.remove(link)
+    mat.node_tree.links.new(vol.outputs["Volume"], mo.inputs["Volume"])
+    box.data.materials.append(mat)
+    scene.cycles.volume_step_rate = 4.0
+    scene.cycles.volume_max_steps = 256
 
 scene.render.engine = "CYCLES"
 scene.cycles.samples = args.samples
