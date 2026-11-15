@@ -9,6 +9,7 @@ import { fogMix, overcast, weather } from "./weather";
 import { shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
 import { floorLitter, rockGeometry, tuftGeometry } from "./forestFloor";
 import type { SeasonName } from "./seasons";
+import { sim } from "./sim";
 import { useGame } from "./store";
 
 /**
@@ -260,90 +261,108 @@ export function textureAnisotropy(n: number): number {
 }
 
 /**
- * The shadow camera's half-width, metres, and the shadow map's size; one texel
- * is 2 * SHADOW_HALF / SHADOW_MAP. Touch screens shadow a fixed square 60 m each
- * way round the corpus redwood on a 2048 map (texels 5.9 cm). A square that
- * followed the cart swept shadows in across the groves as it passed; a fixed
- * one leaves the hub shadowed and the groves beyond it without.
+ * Touch screens' two shadow maps; one texel is 2 * half / map. One is a fixed
+ * square 60 m each way round the corpus redwood on a 2048 map (texels 5.9 cm),
+ * so the hub's shadows never sweep. The other follows the cart, 40 m each way on
+ * 2048 (texels 3.9 cm). Each comes with its own light carrying half the sun, so
+ * a shadow only one map holds is half as dark; round the redwood with the cart
+ * there, both hold it and it is whole. The lights sit back twice the half-width.
  */
-const SHADOW_HALF = 60;
-const SHADOW_MAP = 2048;
-/** How far the light sits back from the redwood along its direction; the shadow camera reaches twice this. */
-const SHADOW_BACK = 2 * SHADOW_HALF;
+const HUB_HALF = 60;
+const CART_HALF = 40;
+const TOUCH_MAP = 2048;
 /**
- * A Mac or desktop that takes an 8192 map shadows the whole world at once: a
- * fixed square 310 m each way from the redwood (the forest's radius is about
- * 290 m), texels 7.6 cm, so every grove casts. The light sits back one
- * half-width, which the tallest tree is well inside. About 256 MB of GPU memory.
+ * A Mac or desktop that takes an 8192 map shadows the whole world at once from
+ * one light: a fixed square 310 m each way from the redwood (the forest's
+ * radius is about 290 m), texels 7.6 cm, so every grove casts. The light sits
+ * back one half-width, which the tallest tree is well inside. About 256 MB of
+ * GPU memory.
  */
 const WORLD_HALF = 310;
 const WORLD_MAP = 8192;
-const WORLD_BACK = WORLD_HALF;
 /** `?nolod` turns off texel snapping and the shadow cache, to compare (shadowCache.ts). */
 const NOLOD = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("nolod");
 /** Shadow map texels snapped, so shadow edges keep still as the cart drives. */
 const SHADOW_SNAP = !NOLOD;
 /**
- * Redraw the shadow map only when stale on touch screens alone. A Mac or
+ * Redraw the shadow maps only when stale on touch screens alone. A Mac or
  * desktop GPU affords it every frame, so there shadows are simply on or off.
  */
 const SHADOW_CACHE = COARSE_POINTER && !NOLOD;
 
+type ShadowBox = { half: number; size: number; back: number; follows: boolean; share: number };
+
 /**
- * The one shadow-casting light, from the sun, the moon or the stars (sky.ts),
- * On touch screens kept on a modest shadow map round the redwood, redrawn only
- * when stale (shadowCache.ts shadowStale); on a Mac or desktop one large map
- * over the whole world, redrawn every frame. Both are fixed on the redwood.
+ * The sun's (or the moon's, or the stars') light, sky.ts. A Mac or desktop: one
+ * light, one map over the whole world. A touch screen: two lights with half the
+ * sun each, one shadowing the redwood's hub and one the cart, redrawn only when
+ * either is stale (shadowCache.ts shadowStale). Each map is centred on whole
+ * texels so its edges keep still as the cart drives.
  */
 export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shadows: boolean }) {
-  const light = useRef<DirectionalLight>(null);
-  const target = useMemo(() => new Object3D(), []);
   const gl = useThree((t) => t.gl);
-  const last = useRef<ShadowState | null>(null);
+  const whole = !COARSE_POINTER && gl.capabilities.maxTextureSize >= WORLD_MAP;
+  const boxes: ShadowBox[] = useMemo(() => whole
+    ? [{ half: WORLD_HALF, size: WORLD_MAP, back: WORLD_HALF, follows: false, share: 1 }]
+    : COARSE_POINTER
+      ? [{ half: HUB_HALF, size: TOUCH_MAP, back: 2 * HUB_HALF, follows: false, share: 0.5 },
+         { half: CART_HALF, size: TOUCH_MAP, back: 2 * CART_HALF, follows: true, share: 0.5 }]
+      // A desktop GPU without 8192 textures: one map round the cart.
+      : [{ half: 120, size: 4096, back: 240, follows: true, share: 1 }], [whole]);
+  const lights = useRef<(DirectionalLight | null)[]>([]);
+  const targets = useMemo(() => boxes.map(() => new Object3D()), [boxes]);
+  const last = useRef<(ShadowState | null)[]>([]);
   // Never from below the ground: a sun on the horizon still lights from just above it.
   const dir = useMemo(() => new Vector3(l.dir[0], Math.max(l.dir[1], 0.05), l.dir[2]).normalize(), [l.dir]);
   const casting = shadows && l.shadow > 0.01;
-  const whole = !COARSE_POINTER && gl.capabilities.maxTextureSize >= WORLD_MAP;
-  const half = whole ? WORLD_HALF : SHADOW_HALF, size = whole ? WORLD_MAP : SHADOW_MAP, back = whole ? WORLD_BACK : SHADOW_BACK;
   useEffect(() => {
     if (!SHADOW_CACHE) return;
     gl.shadowMap.autoUpdate = false;
     return () => { gl.shadowMap.autoUpdate = true; };
   }, [gl]);
   // A map that has just started casting has nothing in it yet.
-  useEffect(() => { last.current = null; }, [casting]);
+  useEffect(() => { last.current = []; }, [casting]);
   useFrame(() => {
-    if (!light.current) return;
     const d: [number, number, number] = [dir.x, dir.y, dir.z];
     const g = useGame.getState();
-    // Both maps stay put on the redwood.
-    const cx = 0, cz = 0;
-    const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(cx, cz, d, (2 * half) / size) : [cx, 0, cz];
-    target.position.set(tx, ty, tz);
-    light.current.position.set(tx + dir.x * back, ty + dir.y * back, tz + dir.z * back);
-    target.updateMatrixWorld();
-    if (SHADOW_CACHE && casting) {
-      if (shadowStale(last.current, cx, cz, d, (g.preferences.motion && !g.paused) || g.timelinePlaying)) {
-        gl.shadowMap.needsUpdate = true;
-        last.current = { x: cx, z: cz, dir: d, frames: 0 };
-      } else if (last.current) {
-        last.current.frames++;
-      }
-    }
+    const animating = (g.preferences.motion && !g.paused) || g.timelinePlaying;
     // Fog and cloud take the sun's strength and soften its shadows.
     const o = overcast(weather);
-    light.current.intensity = l.intensity * (1 - 0.7 * o);
-    light.current.shadow.intensity = l.shadow * (1 - o);
+    let stale = false;
+    boxes.forEach((b, i) => {
+      const light = lights.current[i];
+      if (!light) return;
+      const cx = b.follows ? sim.x : 0, cz = b.follows ? sim.z : 0;
+      const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(cx, cz, d, (2 * b.half) / b.size) : [cx, 0, cz];
+      targets[i]!.position.set(tx, ty, tz);
+      light.position.set(tx + dir.x * b.back, ty + dir.y * b.back, tz + dir.z * b.back);
+      targets[i]!.updateMatrixWorld();
+      light.intensity = b.share * l.intensity * (1 - 0.7 * o);
+      light.shadow.intensity = l.shadow * (1 - o);
+      if (SHADOW_CACHE && casting) {
+        const prev = last.current[i] ?? null;
+        if (shadowStale(prev, cx, cz, d, animating)) {
+          stale = true;
+          last.current[i] = { x: cx, z: cz, dir: d, frames: 0 };
+        } else if (prev) {
+          prev.frames++;
+        }
+      }
+    });
+    // One flag redraws every map, so a stale one brings the other's along.
+    if (stale) gl.shadowMap.needsUpdate = true;
   });
   return <>
-    <primitive object={target} />
+    {targets.map((t, i) => <primitive key={`t${i}`} object={t} />)}
     {/* With no shadow to cast (night, twilight, a low sun) the shadow pass is skipped entirely. */}
-    <directionalLight ref={light} target={target} color={l.color}
-      intensity={l.intensity} castShadow={casting} shadow-intensity={l.shadow}
-      shadow-mapSize={[size, size]} shadow-camera-left={-half} shadow-camera-right={half}
-      shadow-camera-top={half} shadow-camera-bottom={-half} shadow-camera-near={1} shadow-camera-far={2 * back}
-      // The bias is a fraction of the camera's depth range: about 3 cm of depth either way.
-      shadow-bias={-0.0002 * (2 * SHADOW_BACK) / (2 * back)} shadow-normalBias={whole ? 0.1 : 0.08} />
+    {boxes.map((b, i) => (
+      <directionalLight key={i} ref={(x) => { lights.current[i] = x; }} target={targets[i]} color={l.color}
+        intensity={b.share * l.intensity} castShadow={casting} shadow-intensity={l.shadow}
+        shadow-mapSize={[b.size, b.size]} shadow-camera-left={-b.half} shadow-camera-right={b.half}
+        shadow-camera-top={b.half} shadow-camera-bottom={-b.half} shadow-camera-near={1} shadow-camera-far={2 * b.back}
+        // The bias is a fraction of the camera's depth range: about 3 cm of depth either way.
+        shadow-bias={-0.0002 * 160 / (2 * b.back)} shadow-normalBias={b.half > 120 ? 0.1 : 0.08} />
+    ))}
   </>;
 }
 
