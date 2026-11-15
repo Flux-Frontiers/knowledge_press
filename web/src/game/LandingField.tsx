@@ -83,6 +83,8 @@ function markLandingSeen() {
 /** The camera is the landing's (cinema weight past half), and whether clean view was turned on for it. */
 let holding = false;
 let cleanedForShot = false;
+/** `?ufocam` has put clean view on for this ride (once, so the eye button can take it off). */
+let ufoCleaned = false;
 
 const PALETTE = {
   obsidian: "#161d1a", panel: "#121a17", copper: "#c77c48", gold: "#d4af5a",
@@ -713,7 +715,8 @@ function Visitor({ exhibit, forest, face, m }: { exhibit: Exhibit; forest: Fores
     if (UFO_CAM) {
       ufoShot(t, toWorld, ufoHeading);
       cinema.weight = 1;
-      if (!s.cleanView) useGame.setState({ cleanView: true });
+      if (s.playing && !ufoCleaned) { ufoCleaned = true; useGame.setState({ cleanView: true }); }
+      if (!s.playing) ufoCleaned = false;
     } else if (cinema.weight > 0.001) {
       const shot = visitorShot(t);
       toWorld(shot.cam, cinema.cam);

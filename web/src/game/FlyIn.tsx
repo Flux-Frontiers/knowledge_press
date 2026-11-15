@@ -18,6 +18,7 @@ const CIRCLE_ON = 12;
 export function FlyIn({ forest }: { forest: Forest }) {
   const flight = useMemo(() => droneFlight(droneSite(forest)), [forest]);
   const clock = useRef(0);
+  const cleaned = useRef(false);
   useEffect(() => {
     if (!FLY_IN) return;
     const time = new URLSearchParams(window.location.search).get("time");
@@ -36,7 +37,10 @@ export function FlyIn({ forest }: { forest: Forest }) {
     cinema.cam[0] = cam[0]; cinema.cam[1] = cam[1]; cinema.cam[2] = cam[2];
     cinema.look[0] = look[0]; cinema.look[1] = look[1]; cinema.look[2] = look[2];
     cinema.weight = 1;
-    if (s.playing && !s.cleanView) useGame.setState({ cleanView: true });
+    // Clean view once as the ride starts; the eye button can bring the buttons (and the menu's
+    // way out) back.
+    if (s.playing && !cleaned.current) { cleaned.current = true; useGame.setState({ cleanView: true }); }
+    if (!s.playing) cleaned.current = false;
   });
   return null;
 }

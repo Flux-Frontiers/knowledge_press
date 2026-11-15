@@ -24,3 +24,21 @@ export const FLY_IN = typeof window !== "undefined" && new URLSearchParams(windo
 
 /** A shot that owns the camera outright, over any camera mode or flight (Player.tsx). */
 export const OWNED_SHOT = UFO_CAM || FLY_IN;
+
+/**
+ * Reload into a shot, or out of one with null. The app's web view has no address bar, so
+ * the menu does this. A shot keeps a set time of day as `&time=` and drops `?tree=`.
+ *
+ * :param shot: `flyin`, `ufocam`, or null for the ordinary forest.
+ * :param time: The time of day now set; `live` and `day` add nothing.
+ */
+export function goToShot(shot: "flyin" | "ufocam" | null, time: string) {
+  const p = new URLSearchParams(window.location.search);
+  for (const k of ["flyin", "ufocam", "time", "tree"]) p.delete(k);
+  if (shot) {
+    p.set(shot, "");
+    if (time !== "live" && time !== "day") p.set("time", time);
+  }
+  const q = p.toString().replace(/=(&|$)/g, "$1");
+  window.location.search = q ? `?${q}` : "";
+}
