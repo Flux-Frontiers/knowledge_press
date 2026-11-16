@@ -18,7 +18,13 @@ Great books, searched offline
 
 ## Promotional text (170, changeable without a new version)
 
-Unchanged since 1.40.0, and carried on 1.41.0 (live 2026-11-12) and 1.50.0:
+For 1.50.0 (163 characters), leading with reading aloud:
+
+```text
+Hear the classics read aloud in a voice that suits each author, or walk a 3-D forest where every tree is a book. 261 classics and four diaries, all on your device.
+```
+
+From 1.40.0 through 1.41.0 (live 2026-11-12) it was:
 
 ```text
 Walk a 3-D forest where every tree is a book, then ask it a question. 261 classics and four diaries on your device, and every answer shows its sources.
@@ -30,15 +36,17 @@ version ships, never on the live one.
 
 ## Description (4000)
 
-Per version. This text is for 1.50.0 and later: it adds reading aloud (READ,
-NOT JUST SEARCH) and achievements (THE FOREST), both new in 1.50.0. The text
+Per version. This text is for 1.50.0 and later: it adds reading aloud (READ
+OR LISTEN) and achievements (THE FOREST), both new in 1.50.0, and the
+Timeline from 1.41.0. The genre list is checked against the 1.50.0 corpus
+(`core.pack`: 265 works in 20 genres, the diaries one of them). The text
 before it went in for iOS 1.34.1 and, unchanged, for iOS and Mac 1.40.0 and
 1.41.0; a 1.4x build must not use this one. Ask about this book's book-only
 scope and the working Siri shortcut both need 1.34.1. Paragraphs are on one
 line each, so it pastes cleanly. The same text serves the Mac.
 
 ```text
-The Knowledge Press is a library of 261 public-domain books and four diaries that you can search and question, entirely on your device.
+The Knowledge Press is a library of 261 public-domain books and four diaries that you can search, question and listen to, entirely on your device.
 
 Ask it anything: what Marcus Aurelius says about anger, how Darwin describes the Galapagos finches, where Pepys was on the day of the Great Fire. The app searches the whole library two ways at once, by meaning and by exact wording, and answers from the passages it found. Every answer shows its sources, and marks which passages the model actually read.
 
@@ -48,19 +56,19 @@ The books, the search index and the language model are all on the device. Nothin
 
 THE LIBRARY
 
-Twenty genres: philosophy, English, American, Russian, French, German and Spanish literature, the ancient and classical world, drama and Shakespeare, science fiction, horror, biography, letters, travel, natural history and sacred texts. Plato, Aristotle, Epictetus, Marcus Aurelius, Kant, Nietzsche, Homer, Dante, Cervantes, Austen, Dickens, Melville, Tolstoy, Dostoevsky, Twain, Poe, Shelley, Stoker, Verne, Wells, Darwin, Thoreau, Whitman, and more.
+Twenty genres: philosophy, English, American, Russian, French, German, Spanish and world literature, the ancient and classical world, drama and Shakespeare, science fiction, horror, biography, letters, diaries, travel, natural history, sacred texts, and Audel's classic electrical library. Plato, Aristotle, Epictetus, Marcus Aurelius, Kant, Nietzsche, Homer, Dante, Cervantes, Austen, Dickens, Melville, Tolstoy, Dostoevsky, Twain, Poe, Shelley, Stoker, Verne, Wells, Darwin, Thoreau, Whitman, and more.
 
 Four diaries, searchable by date: Samuel Pepys, John Evelyn (two volumes), and Boswell's journal of his tour of the Hebrides with Samuel Johnson.
 
-READ, NOT JUST SEARCH
+READ OR LISTEN
 
-Browse the library by genre, open any book, and read it chapter by chapter. The diaries open by date. Every source passage under an answer can be read in full.
+Browse the library by genre, open any book, and read it chapter by chapter, with paragraphs, verse, italics and footnotes set as in a printed book. The diaries open by date. Every source passage under an answer can be read in full.
 
-Or listen. The app reads any book aloud a paragraph at a time, following along on the page, in a voice chosen to suit the author, with the voice and speed yours to change.
+Press play and the app reads the book aloud, a paragraph at a time, highlighting each one as it goes and carrying on into the next chapter. Start from any paragraph. The voice is chosen to suit the author, British for Austen and American for Twain, and you can change the voice and speed in Settings. It uses your device's own voices, so listening works offline too.
 
 THE FOREST
 
-Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. Ride the ring of groves, read the exhibits, and press books into your cart to earn achievements in bronze, silver and gold. The forest works offline, like the rest of the app.
+Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, listen to it, or ask a question about that book alone; a book keeps reading aloud while you drive on. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The Timeline grows the forest by date, from 1000 BC to 1931, each tree appearing in the year its book was written. Ride the ring of groves, read the exhibits, and press books into your cart to earn achievements in bronze, silver and gold. The forest works offline, like the rest of the app.
 
 ANSWERS YOU CAN CHECK
 
