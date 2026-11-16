@@ -51,6 +51,24 @@ struct ConversationStoreTests {
         return try! JSONDecoder().decode(Hit.self, from: Data(json.utf8))
     }
 
+    @Test("a listing that runs beside a save never leaves a stale index behind")
+    func listingBesideSaveKeepsTheIndex() throws {
+        // A listing rebuilds the index too; one that read the directory before
+        // the save landed must not write its older list over the save's.
+        for _ in 0..<200 {
+            try withScratchStore { store in
+                let conversation = Conversation(
+                    title: "circles of Hell", createdAt: Date(), updatedAt: Date(),
+                    turns: [completedTurn()])
+                DispatchQueue.concurrentPerform(iterations: 2) { i in
+                    if i == 0 { _ = try? store.summaries() } else { try? store.save(conversation) }
+                }
+                let listed = try store.summaries().map(\.id)
+                #expect(listed == [conversation.id])
+            }
+        }
+    }
+
     @Test("a saved conversation round-trips with its passages, metrics, and image path")
     func roundTrip() throws {
         try withScratchStore { store in
