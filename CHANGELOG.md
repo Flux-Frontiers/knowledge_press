@@ -11,12 +11,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-### Changed
+## [1.50.0] - 2026-11-16
 
-- **The forest floor is photographed ground.** The flat canvas speckle is
-  replaced by Poly Haven's forrest_ground_01 (CC0), a 2 m square of grass,
-  twigs and leaf litter, repeated at its true size. Its average color is the
-  old one's, so every season keeps its color.
+1.50 marks reading aloud and achievements; there are no 1.42-1.49 releases.
 
 ### Added
 
@@ -33,7 +30,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   opening of one of its books, up to a pin about a hand high. The studs are
   shaded enamel pegs now, not flat glowing discs, and the plaque's key shows
   each grove's count. The save keeps the counts.
-
 - **Achievements.** Four tracks, each bronze, silver and gold: Wayfarer
   (ride the whole ring home to the redwood; three rides; a ride in every
   season), Explorer (groves visited), Reader (books pressed) and Curator
@@ -59,7 +55,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   redwood, and out onto the start screen's own slow circle, so it ends on the
   view the app opens with. Every leaf, shadows and the undergrowth on;
   `&time=dawn|dusk|twilight|night`.
-
 - **Ride the visitor's craft: `?ufocam`.** The landing starts as soon as you
   press Start, wherever you are, and the camera rides under the craft's belly:
   looking ahead and down along its path over the crowns, down onto the pad,
@@ -67,7 +62,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `&time=dawn|dusk|night`), and works in every camera mode. The More menu
   offers it only while the visitor's in-app event is on (or with
   `?event=visitor`).
-
 - **The forest in Blender** (`web/scripts/forest3d/`, tooling only). An
   exporter builds the forest from the game's own modules and writes its
   trees, leaves, corpus redwood, roads, plazas and grove grounds. A Blender
@@ -81,37 +75,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   forest floor and scattered grass tufts cover the ground near the camera.
   The game's own grass tufts and rocks stand where the game puts them; their
   placement moved from Environment.tsx into forestFloor.ts so both share it.
-
-### Fixed
-
-- **A ride finishes the ring it is on.** A ride set off, or picked up,
-  partway round a ring used to leave for the other ring and come back later
-  for the groves behind it. It now carries on round its own ring until every
-  grove there is seen, then takes the spoke to the other ring, then goes home.
-- **The Wayfarer's Wheel stands on the compass rose's paper**, 7.1 m out
-  between two wind points, instead of on a dark point where it was hard to see.
-  Its roads are gilt, bright against the bronze, and a lamp on a post at its
-  north edge lights the map after dark. Tapped, its plaque now carries a flat
-  map of the ring: a numbered stud per grove, in its color once this ride has
-  stopped there, with a key to the numbers in the ride's order.
-
-### Changed
-
-- **The forest reader sets books as books.** Prose fills the page as
-  paragraphs instead of keeping the printed edition's short lines; verse and
-  plays keep their lines, with a hanging indent where one wraps. `_word_`
-  shows as italics, footnote marks as small raised numbers, footnotes and
-  sidenotes small and gray, and illustration tags as captions. The rule that
-  unwraps prose is the app reader's, ported to TypeScript and held to it by
-  fixtures both test suites read; the two agree on all 54,444 chapters of the
-  corpus.
-- **The forest reader has a text size control**: four steps, saved.
-- **A tree's card shows its year and chunk count on every screen**, beside
-  the author: "Herman Melville · 1851 · 2,922 chunks". The count was a faint
-  line hidden on phones, next to the trunk radius, which is gone.
-
-### Added
-
 - **The app's Browse reader reads chapters aloud.** A play button in the
   toolbar reads the chapter a paragraph at a time with the system's speech,
   tints the paragraph being read and keeps it in view, and goes on to the
@@ -128,7 +91,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   name, and the opening line of one of twenty corpus books, word for word
   as the corpus holds it, a different one each launch. It stays long
   enough to read the line, 6 to 10 seconds; a tap skips it.
-
 - **The forest reader reads books aloud.** A play button (or Space) reads
   the chapter a paragraph at a time in the device's own voices, tints the
   paragraph being read and keeps it in view, and goes on to the next chapter.
@@ -144,9 +106,52 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   not read them aloud; once the book stops, the tour speaks again if
   **Read each grove aloud on the ring** is on. A moot pauses the book, and
   the book goes on from the same paragraph when the moot closes.
+- **Shots from the menu.** The app has no address bar, so the More menu
+  starts the drone's fly-in to the redwood. **Ride the visitor's craft** is
+  offered there only while the visitor's in-app event is on. In a shot the
+  menu offers **End the shot** instead.
+
+### Changed
+
+- **The forest floor is photographed ground.** The flat canvas speckle is
+  replaced by Poly Haven's forrest_ground_01 (CC0), a 2 m square of grass,
+  twigs and leaf litter, repeated at its true size. Its average color is the
+  old one's, so every season keeps its color.
+- **The forest reader sets books as books.** Prose fills the page as
+  paragraphs instead of keeping the printed edition's short lines; verse and
+  plays keep their lines, with a hanging indent where one wraps. `_word_`
+  shows as italics, footnote marks as small raised numbers, footnotes and
+  sidenotes small and gray, and illustration tags as captions. The rule that
+  unwraps prose is the app reader's, ported to TypeScript and held to it by
+  fixtures both test suites read; the two agree on all 54,444 chapters of the
+  corpus.
+- **The forest reader has a text size control**: four steps, saved.
+- **A tree's card shows its year and chunk count on every screen**, beside
+  the author: "Herman Melville · 1851 · 2,922 chunks". The count was a faint
+  line hidden on phones, next to the trunk radius, which is gone.
+- **Shadows across the whole forest on a Mac.** A Mac or desktop that takes
+  an 8192 map now shadows every grove from one fixed map 310 m each way,
+  instead of 120 m round the cart.
+- **Shadows fade in on iPhone and iPad.** The shadow map follows the cart,
+  60 m each way on 2048, and every shadow fades out over the outer quarter
+  of the map, so groves ease into shadow as the cart nears them instead of
+  switching on at the edge. A shot (`?flyin`, `?ufocam`) takes the shadow
+  map with its camera.
+- **Photo bark on the corpus redwood.** Poly Haven's metasequoia_bark (CC0),
+  repeated at its true 1.94 m size, replaces the drawn bark.
 
 ### Fixed
 
+- **A ride finishes the ring it is on.** A ride set off, or picked up,
+  partway round a ring used to leave for the other ring and come back later
+  for the groves behind it. It now carries on round its own ring until every
+  grove there is seen, then takes the spoke to the other ring, then goes home.
+- **The Wayfarer's Wheel stands on the compass rose's paper**, 7.1 m out
+  between two wind points, instead of on a dark point where it was hard to see.
+  Its roads are gilt, bright against the bronze, and a lamp on a post at its
+  north edge lights the map after dark. Tapped, its plaque now carries a flat
+  map of the ring: a numbered stud per grove, in its color once this ride has
+  stopped there, with a key to the numbers in the ride's order.
 - **A phone reload puts you back in the forest.** When iOS kills the page for
   memory, the app reloads it, and the reload used to land on the start screen,
   as if the forest had quit mid-ride. The rider's place, and whether they were

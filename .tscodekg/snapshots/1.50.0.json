@@ -1,0 +1,99 @@
+{
+  "key": "1.50.0",
+  "branch": "main",
+  "timestamp": "2026-11-16T05:11:43.093450+00:00",
+  "version": "1.50.0",
+  "subject": "repo:knowledge_press",
+  "tool": "tscode-kg",
+  "tool_version": "0.8.2",
+  "tree_hash": "41efe769400aff439270250ba78dfa2f90919d35",
+  "metrics": {
+    "db_path": ".tscodekg/graph.sqlite",
+    "meaningful_nodes": 786,
+    "module_count": 106,
+    "class_count": 2,
+    "function_count": 543,
+    "method_count": 0,
+    "docstring_coverage": 0.656,
+    "snapshot_count": 16,
+    "vector_backend": "sqlite-vec",
+    "total_nodes": 786,
+    "node_counts": {
+      "class": 2,
+      "function": 543,
+      "interface": 1,
+      "module": 106,
+      "type_alias": 134
+    },
+    "total_edges": 2389,
+    "edge_counts": {
+      "CALLS": 1304,
+      "CONTAINS": 680,
+      "IMPORTS": 403,
+      "INHERITS": 2
+    },
+    "critical_issues": 2,
+    "complexity_median": 7.0
+  },
+  "hotspots": [
+    {
+      "name": "fn:web/src/game/speech.ts:synth",
+      "callers": 14,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/math.ts:clamp",
+      "callers": 13,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/math.ts:mulberry32",
+      "callers": 10,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/timeline.ts:bookShown",
+      "callers": 10,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/Signposts.tsx:ExhibitPlaque",
+      "callers": 9,
+      "callees": 1
+    },
+    {
+      "name": "fn:web/src/game/Environment.tsx:textureAnisotropy",
+      "callers": 8,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/sim.ts:wrapAngle",
+      "callers": 7,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/math.ts:seedFromKey",
+      "callers": 7,
+      "callees": 0
+    },
+    {
+      "name": "fn:web/src/game/Uplights.tsx:useNightLamps",
+      "callers": 6,
+      "callees": 1
+    },
+    {
+      "name": "fn:web/src/game/speech.ts:baseName",
+      "callers": 6,
+      "callees": 0
+    }
+  ],
+  "issues": [
+    "[WARN] 60 orphaned declarations: `redwoodBark`, `sprayTexture`, `starUniformSet`, `FlameOfKnowledge`, `ForestApp` (and 55 more) \u2014 zero callers detected; verify these aren't dead code",
+    "[WARN] Moderate JSDoc coverage (59.7%) \u2014 semantic retrieval is degraded for undocumented nodes; prioritize high-fan-in functions first"
+  ],
+  "vs_previous": null,
+  "vs_baseline": {
+    "nodes": 471,
+    "edges": 1578
+  }
+}
