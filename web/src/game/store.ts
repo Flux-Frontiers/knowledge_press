@@ -14,6 +14,7 @@ import { bookBySlug } from "./catalog";
 import { bookShown } from "./timeline";
 import { stopBook, type BookReading } from "./bookReading";
 import { interruptReading, resumeInterrupted } from "./speech";
+import { finishLap, readRing, ringStop, startRide, type RingProgress, type Tier } from "./achievements";
 
 /** How long after a moot closes a book it cut off goes on: after the moot player's own hush. */
 const BOOK_RESUME_MS = 400;
@@ -25,6 +26,10 @@ type SaveBlob = {
   version: number;
   library: string[];
   grovesVisited: string[];
+  /** Exhibits whose plaque has been opened to read, by exhibit id. */
+  plaques: string[];
+  /** The ring: groves stopped at on the lap under way, laps done, and their seasons. */
+  ring: RingProgress;
   /** The browser's location, rounded to 0.1 degree, once it has been given. */
   place: Place | null;
   preferences: Preferences;
@@ -37,6 +42,8 @@ function loadSave(): SaveBlob {
     version: SAVE_VERSION,
     library: [],
     grovesVisited: [],
+    plaques: [],
+    ring: readRing(null),
     place: null,
     preferences: readPreferences(),
   };
@@ -51,6 +58,8 @@ function loadSave(): SaveBlob {
       version: SAVE_VERSION,
       library: Array.isArray(parsed.library) ? parsed.library : [],
       grovesVisited: Array.isArray(parsed.grovesVisited) ? parsed.grovesVisited : [],
+      plaques: Array.isArray(parsed.plaques) ? parsed.plaques.filter((p): p is string => typeof p === "string") : [],
+      ring: readRing(parsed.ring),
       place: parsed.place && Number.isFinite(parsed.place.lat) && Number.isFinite(parsed.place.lon) ? parsed.place : null,
       preferences: readPreferences(parsed.preferences),
     };
@@ -62,6 +71,8 @@ function loadSave(): SaveBlob {
 function persist(s: {
   library: string[];
   grovesVisited: string[];
+  plaques: string[];
+  ring: RingProgress;
   place: Place | null;
   preferences: Preferences;
 }) {
@@ -70,6 +81,8 @@ function persist(s: {
       version: SAVE_VERSION,
       library: s.library,
       grovesVisited: s.grovesVisited,
+      plaques: s.plaques,
+      ring: s.ring,
       place: s.place,
       preferences: s.preferences,
     };
@@ -123,6 +136,19 @@ export type GameStore = {
   setTimeline: (year: number | null, playing?: boolean) => void;
   library: string[];
   grovesVisited: string[];
+  plaques: string[];
+  ring: RingProgress;
+  /** A level just reached, for the award card (HUD AwardCard); null once dismissed. */
+  award: { title: string; tier: Tier; line: string } | null;
+  setAward: (award: { title: string; tier: Tier; line: string } | null) => void;
+  /** An exhibit's plaque opened to read: Curator progress. */
+  markPlaque: (id: string) => void;
+  /** A ring ride setting off: a finished lap's studs go dark for the new one. */
+  startRide: () => void;
+  /** Pulled up at a grove's sign on the ring: the lap under way has been there. */
+  markRingStop: (genre: string) => void;
+  /** Home at the redwood off the ring: counts the lap if every grove was stopped at. */
+  finishRing: (groves: string[]) => boolean;
   nearbySlug: string | null;
   nearbyDist: number;
   nearbyDismissed: string | null;
@@ -298,6 +324,8 @@ export const useGame = create<GameStore>((set, get) => ({
   searchPick: null,
   library: initial.library,
   grovesVisited: initial.grovesVisited,
+  plaques: initial.plaques,
+  ring: initial.ring,
   nearbySlug: null,
   nearbyDist: 99,
   nearbyDismissed: null,
@@ -393,6 +421,33 @@ export const useGame = create<GameStore>((set, get) => ({
     set({ library: [], lastReadSlug: null });
     persist(get());
   },
+  markPlaque: (id) => {
+    if (get().plaques.includes(id)) return;
+    const plaques = [...get().plaques, id];
+    set({ plaques });
+    persist({ ...get(), plaques });
+  },
+  startRide: () => {
+    const ring = startRide(get().ring);
+    if (ring === get().ring) return;
+    set({ ring });
+    persist({ ...get(), ring });
+  },
+  markRingStop: (genre) => {
+    const ring = ringStop(get().ring, genre);
+    if (ring === get().ring) return;
+    set({ ring });
+    persist({ ...get(), ring });
+  },
+  finishRing: (groves) => {
+    const { ring, counted } = finishLap(get().ring, groves, get().season);
+    if (!counted) return false;
+    set({ ring });
+    persist({ ...get(), ring });
+    return true;
+  },
+  award: null,
+  setAward: (award) => set({ award }),
   markGrove: (genre) => {
     const grovesVisited = get().grovesVisited;
     if (grovesVisited.includes(genre)) return;

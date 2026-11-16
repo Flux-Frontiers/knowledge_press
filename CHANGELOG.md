@@ -20,6 +20,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Achievements.** Four tracks, each bronze, silver and gold: Wayfarer
+  (ride the whole ring home to the redwood; three rides; a ride in every
+  season), Explorer (groves visited), Reader (books pressed) and Curator
+  (exhibit plaques read). The Press tab lists them with what the next level
+  asks; a card, and with narration on a spoken line, marks each level.
+- **The Wayfarer's Wheel.** A bronze table on the hub plaza, in the widest
+  gap between spokes: the forest's roads in relief, true to north, with a
+  stud per grove that lights as the ring stops there, a gold pin for a whole
+  ride, and a rim in the Wayfarer level's metal. Built for phones: no
+  textures, one merged bronze mesh and two instanced stud meshes. Tap it for
+  its plaque.
+- **The ring remembers where you got to.** The groves stopped at on the lap
+  under way are saved, so a ride broken off, or cut short by a reload, picks
+  up where it left off and stops only at the rest.
 - **The ring roads on the minimap.** Both rings are drawn under the groves
   and exhibits, brighter while riding the ring.
 - **Twilight.** A new time of day between dusk and night: the sun 4° below

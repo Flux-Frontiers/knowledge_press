@@ -57,7 +57,11 @@ const TURN_R = 3.5;
 /** The route shared by the cart (Player) and the lanterns that light it (World). */
 export const tourState: { tour: Tour | null } = { tour: null };
 
-export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circuit" | "signs" | "home"> & Partial<LeadForest>, x: number, z: number, yaw: number): Tour {
+/**
+ * :param visited: Groves already stopped at on the lap under way (a ride broken
+ *   off, or the page reloaded): the cart passes their signs and stops at the rest.
+ */
+export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circuit" | "signs" | "home"> & Partial<LeadForest>, x: number, z: number, yaw: number, visited: readonly string[] = []): Tour {
   // Out in a grove: find the way round the trunks to the road, and plan the rest from where it comes out.
   const full = forest.trees && forest.obstacles && forest.roads && forest.plazas ? (forest as LeadForest) : null;
   const leadPts = full && needsLeadIn(full, x, z) ? pathToRoad(full, x, z) : null;
@@ -174,11 +178,17 @@ export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circui
   const lead = leadPts && leadPts.length > 1 ? leadPts.slice(0, -1) : [];
   const allPts = [...lead, ...pts];
   const allGenre = [...lead.map(() => genre[0] ?? ""), ...genre];
-  const shifted = stops.map((st) => ({ ...st, k: st.k + lead.length }));
-  return {
+  const shifted = stops.filter((st) => !visited.includes(st.genre)).map((st) => ({ ...st, k: st.k + lead.length }));
+  const tour: Tour = {
     pts: allPts, genre: allGenre, loopStart: loopStart + lead.length, lead: lead.length, aligning: lead.length > 0,
     i: 0, joined: false, stops: shifted, next: 0, laps: 0, dwell: null, home, ending: false, arrive: null, done: false,
   };
+  // Every grove already seen this lap: straight on round to home.
+  if (!shifted.length) {
+    tour.laps = 1;
+    headHome(tour);
+  }
+  return tour;
 }
 
 /**

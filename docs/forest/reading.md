@@ -124,3 +124,32 @@ Five hints appear as you drive, each a small thing to do in the forest:
 
 A hint can be dismissed. Silent mode hides them. They are for your own
 amusement; nothing is locked behind them.
+
+## Achievements
+
+Four tracks each have a bronze, silver and gold level. The **Press** tab under
+**Browse** lists them, with what the next level asks and how far along you
+are. A card shows when you reach a level; with **Read each grove aloud on the
+ring** on, it is said aloud too.
+
+| Track | Bronze | Silver | Gold |
+| --- | --- | --- | --- |
+| Wayfarer | Ride the whole ring home to the redwood | Ride it three times | Ride it in every season |
+| Explorer | Visit 4 groves | Visit 10 groves | Visit every grove |
+| Reader | Press 3 books | Press 25 books | Press every book |
+| Curator | Read 3 exhibit plaques | Read 6 plaques | Read every exhibit's plaque |
+
+A ride counts for Wayfarer once the tour has stopped at every grove and
+brought the cart home, even across rides broken off and reloads.
+
+### The Wayfarer's Wheel
+
+A bronze table on the hub plaza, beside the redwood, maps the forest: the
+redwood at the centre, the spoke roads, both rings, and a stud for every
+grove. Each stud lights in its grove's colour as the tour stops there. A
+whole ride lights the gold pin at the centre, and the rim shows your
+Wayfarer level. The studs stay lit until the next ride sets off. Tap the
+table to read its plaque.
+
+Achievements are saved in this browser with the press; see
+[Where your progress lives](getting-started.md#where-your-progress-lives).

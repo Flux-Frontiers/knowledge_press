@@ -380,7 +380,7 @@ export function ExhibitPlaque({ exhibit: e, title, byline, body, aside = 0 }: {
   // Tapping the plaque opens its text full size (HUD PlaquePanel).
   return (
     <group position={[x, 0, z]} rotation={[0, Math.atan2(e.roadX - e.x - x, e.roadZ - e.z - z), 0]}
-      onClick={(ev) => { ev.stopPropagation(); useGame.getState().openPlaque({ title, byline, body }); }}
+      onClick={(ev) => { ev.stopPropagation(); useGame.getState().openPlaque({ title, byline, body }); useGame.getState().markPlaque(e.id); }}
       onPointerOver={() => { document.body.style.cursor = "pointer"; }}
       onPointerOut={() => { document.body.style.cursor = ""; }}>
       <Lectern title={title} byline={byline} body={body} />

@@ -151,3 +151,26 @@ test("?tree=<slug> names a tree by its catalog slug, and anything else names non
   assert.equal(treeFromSearch("?tree=", trees), undefined);
   assert.equal(treeFromSearch("", trees), undefined);
 });
+
+test("a ride picked up mid-lap stops only at the groves not yet seen, then goes home", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const { sim, teleportSim, stepVehicle } = require(`${process.env.FOREST_TEST_BUILD}/sim.js`);
+  const { planTour, steerTour, tourStop } = require(`${process.env.FOREST_TEST_BUILD}/tour.js`);
+  const f = getForest();
+  const seen = f.circuit.slice(0, 15).map((wp) => wp.genre);
+  for (const visited of [seen, f.circuit.map((wp) => wp.genre)]) {
+    teleportSim(f.home.x, f.home.z, f.home.yaw);
+    const tour = planTour(f, sim.x, sim.z, sim.yaw, visited);
+    const stopped = new Set();
+    const hz = 30;
+    for (let i = 0; i < 900 * hz && !tour.done; i++) {
+      const c = steerTour(tour, sim.x, sim.z, sim.yaw, sim.speed, 1 / hz);
+      stepVehicle(f, c.throttle, c.steer, false, 1 / hz, { brake: c.brake });
+      const st = tourStop(tour);
+      if (st) stopped.add(st);
+    }
+    assert.ok(tour.done, `with ${visited.length} seen, the tour never got home`);
+    assert.deepEqual([...stopped].sort(), f.circuit.map((wp) => wp.genre).filter((g) => !visited.includes(g)).sort());
+    assert.ok(Math.hypot(sim.x - f.home.x, sim.z - f.home.z) < 2, "pulled up away from home");
+  }
+});

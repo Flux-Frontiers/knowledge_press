@@ -7,6 +7,7 @@ import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest
 import { GenreGlyph } from "./GenreGlyph";
 import { SPECIES, speciesFor } from "./species";
 import { QUESTS, questProgress } from "./quests";
+import { AchievementsList, AwardCard, useAwards } from "./AwardCard";
 import { saveScreenshot } from "./screenshot";
 import { SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
@@ -85,6 +86,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const timelineYear = useGame((s) => s.timelineYear);
   const redwood = useCorpusTree(forest);
   useTimelinePlayback(forest);
+  useAwards(forest);
   const standing = timelineYear === null ? forest.trees.length : forest.trees.filter((t) => bookShown(t.book, timelineYear)).length;
 
   // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
@@ -466,6 +468,7 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
       ) : null}
 
+      <AwardCard />
       {browsing ? <BrowsePanel forest={forest} /> : null}
       {plaque ? <PlaquePanel plaque={plaque} /> : null}
       {reading ? <ReaderPanel key={reading.book.slug} book={reading.book} /> : null}
@@ -734,7 +737,8 @@ function PressTab({ forest }: { forest: Forest }) {
   const collected = forest.trees.filter((t) => library.includes(t.book.slug));
 
   return (<>
-    <p className="mt-2 text-sm text-muted">
+    <AchievementsList forest={forest} />
+    <p className="mt-3 text-sm text-muted">
       {collected.length} collected of {forest.trees.length}
     </p>
     <ul className="mt-3 min-h-0 flex-1 space-y-2 overflow-auto">
