@@ -220,7 +220,13 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           useGame.getState().setToast("Free drive");
         } else {
           if (!tourState.tour) {
-            tourState.tour = planTour(forest, sim.x, sim.z, sim.yaw);
+            // Groves already stopped at this lap are passed: a ride broken off picks up where it left off.
+            useGame.getState().startRide();
+            const seen = useGame.getState().ring.stops.filter((g) => forest.circuit.some((wp) => wp.genre === g));
+            tourState.tour = planTour(forest, sim.x, sim.z, sim.yaw, seen);
+            if (seen.length) game.setToast(seen.length >= forest.circuit.length
+              ? "Every grove seen · home to the redwood"
+              : `Picking up the ring · ${forest.circuit.length - seen.length} groves to go`);
             lapSaid.current = false;
             // Set off with the welcome: the whole background the first time, a line after that.
             if (!preferences.silent) {
@@ -238,6 +244,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           const stop = tourStop(tourState.tour);
           if (stop !== game.tourStop) {
             game.setTourStop(stop);
+            if (stop) game.markRingStop(stop);
             if (stop) game.setTourNote(null);
             const said = stop ? forest.groves.find((g) => g.genre === stop)?.narration : undefined;
             // Queued, so a stop reached during the welcome waits for it.
@@ -254,6 +261,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           useGame.getState().selectGrove(c.genre || null);
           // Back at the redwood: the tour is over, and the cart is the rider's.
           if (tourState.tour.done) {
+            // Every grove this lap, and home: the lap counts (the HUD shows any level it earns).
+            useGame.getState().finishRing(forest.circuit.map((wp) => wp.genre));
             endTour();
             useGame.getState().setTravelMode("free");
             useGame.getState().setToast("Tour over · back at the redwood");

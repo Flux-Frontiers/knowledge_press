@@ -7,6 +7,7 @@ import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest
 import { GenreGlyph } from "./GenreGlyph";
 import { SPECIES, speciesFor } from "./species";
 import { QUESTS, questProgress } from "./quests";
+import { AchievementsList, AwardCard, useAwards } from "./AwardCard";
 import { saveScreenshot } from "./screenshot";
 import { SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
@@ -14,6 +15,7 @@ import { ReaderPanel } from "./Reader";
 import { stopBook, toggleBook } from "./bookReading";
 import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
+import { WayfarerMap } from "./WayfarerMap";
 import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
@@ -85,6 +87,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const timelineYear = useGame((s) => s.timelineYear);
   const redwood = useCorpusTree(forest);
   useTimelinePlayback(forest);
+  useAwards(forest);
   const standing = timelineYear === null ? forest.trees.length : forest.trees.filter((t) => bookShown(t.book, timelineYear)).length;
 
   // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
@@ -466,8 +469,9 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
       ) : null}
 
+      <AwardCard />
       {browsing ? <BrowsePanel forest={forest} /> : null}
-      {plaque ? <PlaquePanel plaque={plaque} /> : null}
+      {plaque ? <PlaquePanel plaque={plaque} forest={forest} /> : null}
       {reading ? <ReaderPanel key={reading.book.slug} book={reading.book} /> : null}
       {mootsOpen ? <MootList /> : null}
       {mootId && liveMoot ? <LiveMootPlayer key={mootId} request={liveMoot} forest={forest} />
@@ -533,6 +537,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
 }) {
   const selectedGrove = useGame((s) => s.selectedGrove);
   const timelineYear = useGame((s) => s.timelineYear);
+  const travelMode = useGame((s) => s.travelMode);
   const r = forest.worldRadius;
   const to = (wx: number, wz: number) => {
     const px = ((wx + r) / (2 * r)) * 100;
@@ -542,6 +547,14 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
   const p = to(x, z);
   return (
     <div className="relative h-28 w-28 overflow-hidden rounded-lg border border-border bg-bg/80 sm:h-40 sm:w-40">
+      {/* The ring roads, under every marker: the tour's way round, and how far out the cart is. */}
+      <svg className="pointer-events-none absolute inset-0 size-full" viewBox="-1 -1 2 2" aria-hidden>
+        {forest.roadLines.filter((l) => l.kind === "ring").map((l) => (
+          <circle key={l.pts.length + ":" + l.pts[0]![0]} cx={0} cy={0} r={Math.hypot(...l.pts[0]!) / r}
+            fill="none" stroke="var(--color-fg)" strokeOpacity={travelMode === "circuit" ? 0.55 : 0.3}
+            strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        ))}
+      </svg>
       <Compass className="absolute top-1.5 left-1.5 size-3 text-muted" strokeWidth={1.75} />
       <button
         type="button"
@@ -554,7 +567,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
         const c = to(e.x, e.z);
         return (
           <button key={e.id} type="button" onClick={() => jumpToExhibit(e)}
-            className="absolute size-2 border border-bg bg-[#c9a24a]"
+            className="absolute size-1.5 border border-bg bg-[#c9a24a] sm:size-2"
             style={{ left: c.left, top: c.top, transform: "translate(-50%, -50%) rotate(45deg)", zIndex: 1 }}
             title={`Jump to ${e.label}`} aria-label={`Jump to ${e.label}`} />
         );
@@ -600,12 +613,15 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
         return <MapPin className="pointer-events-none absolute size-4 text-primary" strokeWidth={2}
           style={{ left: c.left, top: c.top, transform: "translate(-50%, -100%)", zIndex: 3 }} aria-hidden />;
       })() : null}
+      {/* Over every marker: the ring passes about 3 px from each exhibit on a phone's map, and an
+          arrow under the diamonds blinked in and out as the cart rode by. */}
       <span
         className="pointer-events-none absolute h-0 w-0 border-x-4 border-b-8 border-x-transparent border-b-fg"
         style={{
           left: p.left,
           top: p.top,
           transform: `translate(-50%, -70%) rotate(${-yaw}rad)`,
+          zIndex: 4,
         }}
       />
     </div>
@@ -722,7 +738,8 @@ function PressTab({ forest }: { forest: Forest }) {
   const collected = forest.trees.filter((t) => library.includes(t.book.slug));
 
   return (<>
-    <p className="mt-2 text-sm text-muted">
+    <AchievementsList forest={forest} />
+    <p className="mt-3 text-sm text-muted">
       {collected.length} collected of {forest.trees.length}
     </p>
     <ul className="mt-3 min-h-0 flex-1 space-y-2 overflow-auto">
@@ -845,7 +862,7 @@ function BooksTab({ forest }: { forest: Forest }) {
 }
 
 /** An exhibit's plaque at reading size, in the plaque's own cream, ink and brass (makePlaqueTexture). */
-function PlaquePanel({ plaque }: { plaque: PlaqueText }) {
+function PlaquePanel({ plaque, forest }: { plaque: PlaqueText; forest: Forest }) {
   const close = () => useGame.getState().openPlaque(null);
   return (
     <div className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-bg/55 p-3 sm:p-6" onClick={close}>
@@ -869,6 +886,7 @@ function PlaquePanel({ plaque }: { plaque: PlaqueText }) {
           <h2 id="plaque-title" className="pr-10 font-display text-3xl font-semibold text-[#1a2030] italic sm:text-4xl">{plaque.title}</h2>
           <p className="mt-1 text-sm font-semibold tracking-wide text-[#8a6a22]">{plaque.byline}</p>
           <p className="mt-5 text-base leading-relaxed text-[#2a2a2a] sm:text-lg">{plaque.body}</p>
+          {plaque.figure === "wayfarer" ? <WayfarerMap forest={forest} /> : null}
         </div>
       </article>
     </div>

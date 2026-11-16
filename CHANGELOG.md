@@ -20,6 +20,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Achievements.** Four tracks, each bronze, silver and gold: Wayfarer
+  (ride the whole ring home to the redwood; three rides; a ride in every
+  season), Explorer (groves visited), Reader (books pressed) and Curator
+  (exhibit plaques read). The Press tab lists them with what the next level
+  asks; a card, and with narration on a spoken line, marks each level.
+- **The Wayfarer's Wheel.** A bronze table on the hub plaza, in the widest
+  gap between spokes: the forest's roads in relief, true to north, with a
+  stud per grove that lights as the ring stops there, a gold pin for a whole
+  ride, and a rim in the Wayfarer level's metal. Built for phones: no
+  textures, one merged bronze mesh and two instanced stud meshes. Tap it for
+  its plaque.
+- **The ring remembers where you got to.** The groves stopped at on the lap
+  under way are saved, so a ride broken off, or cut short by a reload, picks
+  up where it left off and stops only at the rest.
+- **The ring roads on the minimap.** Both rings are drawn under the groves
+  and exhibits, brighter while riding the ring.
 - **Twilight.** A new time of day between dusk and night: the sun 4° below
   the horizon, the stars out, the sky still lit. It picks this evening's or
   tomorrow morning's twilight, whichever has the moon higher, and sits in the
@@ -49,6 +65,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   forest floor and scattered grass tufts cover the ground near the camera.
   The game's own grass tufts and rocks stand where the game puts them; their
   placement moved from Environment.tsx into forestFloor.ts so both share it.
+
+### Fixed
+
+- **A ride finishes the ring it is on.** A ride set off, or picked up,
+  partway round a ring used to leave for the other ring and come back later
+  for the groves behind it. It now carries on round its own ring until every
+  grove there is seen, then takes the spoke to the other ring, then goes home.
+- **The Wayfarer's Wheel stands on the compass rose's paper**, 7.1 m out
+  between two wind points, instead of on a dark point where it was hard to see.
+  Its roads are gilt, bright against the bronze, and a lamp on a post at its
+  north edge lights the map after dark. Tapped, its plaque now carries a flat
+  map of the ring: a numbered stud per grove, in its color once this ride has
+  stopped there, with a key to the numbers in the ride's order.
 
 ### Changed
 
@@ -102,6 +131,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **A phone reload puts you back in the forest.** When iOS kills the page for
+  memory, the app reloads it, and the reload used to land on the start screen,
+  as if the forest had quit mid-ride. The rider's place, and whether they were
+  riding the ring, is now kept for the session, so the reload resumes there.
+  Exit clears it, and a fresh launch still opens on the start screen.
+- **The minimap's arrow stays on top.** On a phone's smaller map the ring
+  passes about 3 px from each exhibit's diamond, and the cart's arrow slid
+  under each one as it rode by, so the markers seemed to flash. The arrow now
+  draws over every marker, and the diamonds are a little smaller on a phone.
+- **Riding the ring from a grove no longer drives into trees.** The tour
+  used to steer straight for the nearest road and ground against any trunk
+  in the way, sometimes for good. It now backs off the tree it is parked
+  at, turns in place to face the way out, and follows a path round the
+  trunks to the road (leadIn.ts), at a steady pace while among the trees.
 - **No white flash at launch.** The iOS launch screen is now the splash's
   night color, and the splash is opaque from its first frame.
 - **The app icon shows on the splash and in About again.** It was looked

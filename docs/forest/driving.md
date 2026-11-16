@@ -71,6 +71,16 @@ welcome and a line on how the forest is made; later tours say a line.
 The tour says when it has been around every grove, then drives back to the
 redwood and ends there, facing it. The cart is yours again.
 
+Started from among the trees, the tour first finds a way round the trunks to
+the nearest road: the cart backs off the tree it is parked at, turns to face
+the way out, and drives it at a steady pace.
+
+A ride broken off is not lost. The forest remembers which groves the tour has
+stopped at on the lap under way, so the next ride, after a reload too, drives
+past those and stops only at the rest. Riding every grove and home to the
+redwood earns the Wayfarer award; see
+[Achievements](reading.md#achievements).
+
 To hop off, steer, brake, or reverse. ++q++ or **End tour** also ends it.
 The cart is yours again where you left it.
 

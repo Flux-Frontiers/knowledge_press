@@ -93,6 +93,15 @@ const JUNCTION_CLEAR = 12;
 /** Bearing of the redwood's plaque from the hub; home looks back along it. */
 export const HUB_PLAQUE_DIR = Math.atan2(4.6, -4.2);
 export const HUB_PLAQUE_DIST = 7.2;
+/** The Wayfarer's Wheel: its distance from the hub, and the radius the cart keeps off. */
+const WAYFARER_DIST = 7.1;
+/**
+ * How far round from a long wind of the compass rose (compassRoseArt.ts) the Wheel stands: at
+ * WAYFARER_DIST that is clear paper between the wind's point and its short neighbor's tip, so
+ * the bronze reads against cream, not the dark points.
+ */
+const WAYFARER_SLOT = (14 * Math.PI) / 180;
+const WAYFARER_R = 0.95;
 // Home: 11.5 m out along the plaque's bearing, so the plaque stands between the
 // cart and the redwood; facing the hub (yaw convention of sim.yawToward). At 15 m
 // the chase camera sat beside the Ancient & Classical signpost, which filled the view.
@@ -165,6 +174,8 @@ export type Forest = {
   corpusTree: CorpusTree;
   /** Set pieces in roadside glades. */
   exhibits: Exhibit[];
+  /** The Wayfarer's Wheel (WayfarersWheel.tsx): on the hub plaza, in the widest gap between spokes. */
+  wayfarer: { x: number; z: number; r: number };
   /** Discs the cart cannot drive into besides trunks: the redwood and each exhibit's plinth (with its timeline year). */
   obstacles: { x: number; z: number; r: number; year?: number }[];
   grid: Map<string, number[]>;
@@ -598,6 +609,19 @@ function buildForest(leafMultiplier: number): Forest {
     return { x, z, yaw: Math.atan2(-(nx - x), -(nz - z)), genre: nextGenre[i]!, label: labelOf.get(nextGenre[i]!)! };
   });
 
+  // The widest gap between spokes on the hub plaza, halfway round it: clear of every road,
+  // the redwood's plaque and the uplights round its foot.
+  const bearings = wheel.spokes.map((a) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)).sort((a, b) => a - b);
+  let gapAt = 0, gap = 0;
+  bearings.forEach((a, i) => {
+    const b = i + 1 < bearings.length ? bearings[i + 1]! : bearings[0]! + 2 * Math.PI;
+    if (b - a > gap) { gap = b - a; gapAt = a + (b - a) / 2; }
+  });
+  // Then onto the rose's paper beside the nearest long wind, on the gap's side of it.
+  const wind = Math.round(gapAt / (Math.PI / 4)) * (Math.PI / 4);
+  const wheelAt = wind + (gapAt < wind ? -WAYFARER_SLOT : WAYFARER_SLOT);
+  const wayfarer = { x: Math.cos(wheelAt) * WAYFARER_DIST, z: Math.sin(wheelAt) * WAYFARER_DIST, r: WAYFARER_R };
+
   return {
     trees,
     groves,
@@ -623,7 +647,8 @@ function buildForest(leafMultiplier: number): Forest {
     worldRadius: worldRadius + 18,
     corpusTree,
     exhibits,
-    obstacles: [{ x: 0, z: 0, r: corpusTree.baseRadius }, ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.obstacle, year: e.year }))],
+    wayfarer,
+    obstacles: [{ x: 0, z: 0, r: corpusTree.baseRadius }, wayfarer, ...exhibits.map((e) => ({ x: e.x, z: e.z, r: e.obstacle, year: e.year }))],
     grid,
     cell,
   };
