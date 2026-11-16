@@ -69,6 +69,28 @@ public final class CatalogPack: @unchecked Sendable {
         return path
     }
 
+    /// The book's author voice, for reading it aloud.
+    ///
+    /// A pack exported before `core.pack` carried `gender` and `accent` has no
+    /// such columns; the query then fails and the answer is nil, as for an
+    /// unknown author.
+    ///
+    /// :param genre: Genre slug.
+    /// :param book: Book directory name.
+    /// :returns: The voice, or nil when neither gender nor accent is known.
+    public func voice(genre: String, book: String) -> AuthorVoice? {
+        var voice: AuthorVoice?
+        database.tryEach(
+            "SELECT gender, accent FROM books WHERE genre = ? AND book = ? LIMIT 1",
+            text: [genre, book]
+        ) { statement in
+            let gender = SQLiteConnection.string(statement, 0).flatMap(AuthorVoice.Gender.init)
+            let accent = SQLiteConnection.string(statement, 1)
+            if gender != nil || accent != nil { voice = AuthorVoice(gender: gender, accent: accent) }
+        }
+        return voice
+    }
+
     /// Live corpus totals for the header caption — the worker's `stats` op.
     ///
     /// :param embedModel: The embedder named by the manifest, so the caption

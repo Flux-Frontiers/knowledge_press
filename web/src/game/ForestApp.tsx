@@ -14,8 +14,11 @@ import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
 import { requestPlace } from "./location";
 import { nextCamera, LEAF_SCALE } from "./preferences";
-import { resetSim } from "./sim";
-import { unlockSpeechOnGesture } from "./speech";
+import { resetSim, teleportSim } from "./sim";
+import { clearResume, readResume, saveResume } from "./resume";
+import { OWNED_SHOT } from "./cinema";
+import { hush, unlockSpeechOnGesture } from "./speech";
+import { stopBook } from "./bookReading";
 import { readerTarget, useGame } from "./store";
 
 export function ForestApp() {
@@ -111,6 +114,7 @@ export function ForestApp() {
     const off = host.on((command) => {
       const st = useGame.getState();
       if (command.kind === "worker") { st.setHostWorker(command.url); return; }
+      if (command.kind === "quiet") { stopBook(); hush(); return; }
       const slug = command.kind === "goto" ? command.slug : null;
       const tree = slug ? treeBySlug(slug, forest.trees) : undefined;
       if (slug && !tree) return;
@@ -168,7 +172,7 @@ export function ForestApp() {
     st.setPreferences({ camera: "follow", fog: "light", weather: false, motion: false });
     st.setSeason("summer");
     const time = new URLSearchParams(window.location.search).get("time");
-    st.setTimeMode(time === "dawn" || time === "dusk" ? time : "day");
+    st.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" ? time : "day");
     resetSim(forest);
     aim(first);
     play();
@@ -183,6 +187,36 @@ export function ForestApp() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("qa") === "1") play();
   }, [forest, play]);
+
+  // Back where the rider was after a reload: on a phone the system kills the page for memory
+  // and the app reloads it (resume.ts). A shot, a QA run or a `?tree=` link opens as asked.
+  const resume = useRef(
+    OWNED_SHOT || shotSlug(window.location.search) || /[?&](qa|tree)=/.test(window.location.search) ? null : readResume(),
+  );
+  useEffect(() => {
+    let last = 0;
+    return useGame.subscribe((s, prev) => {
+      if (prev.playing && !s.playing) { clearResume(); return; }
+      if (!s.playing) return;
+      const now = Date.now();
+      if (now - last < 2000 && s.travelMode === prev.travelMode) return;
+      last = now;
+      saveResume({ x: s.x, z: s.z, yaw: s.yaw, circuit: s.travelMode === "circuit" }, now);
+    });
+  }, []);
+  useEffect(() => {
+    const r = resume.current;
+    if (!forest || !drawn || !r) return;
+    resume.current = null;
+    resetSim(forest);
+    teleportSim(r.x, r.z, r.yaw);
+    const st = useGame.getState();
+    // The store's pose too, or the first save after this records the spawn point.
+    st.setPose(r.x, r.z, r.yaw, 0);
+    play();
+    if (r.circuit) st.toggleCircuit();
+    st.setToast(r.circuit ? "Back on the ring" : "Back where you were");
+  }, [forest, drawn, play]);
 
   useEffect(() => {
     if (!toast) return;

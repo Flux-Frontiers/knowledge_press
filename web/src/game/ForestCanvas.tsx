@@ -9,6 +9,8 @@ import { Player } from "./Player";
 import { setScreenshotCapture } from "./screenshot";
 import { Trees } from "./Trees";
 import { World } from "./World";
+import { FLY_IN } from "./cinema";
+import { FlyIn } from "./FlyIn";
 import { useGame } from "./store";
 import { bookShown } from "./timeline";
 
@@ -61,6 +63,7 @@ export function ForestCanvas({ forest, onDrawn }: {
       <GodEyeControls forest={forest} />
       <GroveLabels forest={forest} />
       <Player forest={forest} playing={playing} />
+      {FLY_IN ? <FlyIn forest={forest} /> : null}
       <StartPace on={!playing} />
     </Canvas>
   );

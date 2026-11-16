@@ -18,6 +18,8 @@ public protocol CorpusBrowser: Sendable {
     /// Every chapter of one book, in reading order: the forest's reader takes a
     /// book whole.
     func wholeBook(genre: String, book: String) async throws -> [BookChapterText]
+    /// The book's author voice, for reading it aloud; nil when unknown.
+    func authorVoice(genre: String, book: String) async -> AuthorVoice?
 }
 
 /// One chapter of a whole book, as the forest's reader shows it.
@@ -32,6 +34,9 @@ public struct BookChapterText: Sendable, Equatable {
 }
 
 extension CorpusBrowser {
+    /// No voice: the worker's catalog does not carry one.
+    public func authorVoice(genre: String, book: String) async -> AuthorVoice? { nil }
+
     /// The list, then each chapter in turn. Fine for a book's few dozen
     /// chapters; a diary's thousands of entries need ``LocalBrowser``'s single
     /// query instead.
@@ -90,6 +95,10 @@ public struct LocalBrowser: CorpusBrowser {
     public func listBooks(genre: String) async throws -> [Book] {
         guard let catalog = packs.catalog else { throw BrowseError.noCatalog }
         return catalog.books(genre: genre)
+    }
+
+    public func authorVoice(genre: String, book: String) async -> AuthorVoice? {
+        packs.catalog?.voice(genre: genre, book: book)
     }
 
     public func chapters(genre: String, book: String) async throws -> [Chapter] {

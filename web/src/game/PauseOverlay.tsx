@@ -78,6 +78,7 @@ export function PauseOverlay() {
           }} />
         </label>
         {prefs.speakMoots && canSpeak() && <MootVoiceChoice />}
+        {canSpeak() && <ReadingVoiceChoice />}
         <label className="flex items-center justify-between gap-4">Silent mode · no pop-up cards
           <input type="checkbox" checked={prefs.silent} onChange={(e) => setPreferences({ silent: e.target.checked })} />
         </label>
@@ -144,6 +145,36 @@ export function PauseOverlay() {
       <button type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
     </dialog>
   );
+}
+
+/**
+ * The voice and speed that read a book aloud. "Automatic" takes a voice
+ * matching the book's author.
+ */
+function ReadingVoiceChoice() {
+  const voice = useGame((s) => s.preferences.readVoice);
+  const rate = useGame((s) => s.preferences.readRate);
+  const setPreferences = useGame((s) => s.setPreferences);
+  const [names, setNames] = useState(mootVoiceNames);
+  useEffect(() => onVoicesChanged(() => setNames(mootVoiceNames())), []);
+  return (<>
+    <label className="flex items-center justify-between gap-4">Reading voice
+      <select value={voice} onChange={(e) => setPreferences({ readVoice: e.target.value })}
+        className="max-w-48 rounded-md border border-border bg-bg p-2 text-fg">
+        <option value="">Automatic · from the author</option>
+        {voice && !names.includes(voice) && <option value={voice}>{voice} (not here)</option>}
+        {names.map((n) => <option key={n} value={n}>{n}</option>)}
+      </select>
+    </label>
+    <label className="grid gap-2">Reading speed · {rate.toFixed(2)}×
+      <input type="range" min="0.8" max="1.3" step="0.05" value={rate} onChange={(e) => setPreferences({ readRate: Number(e.target.value) })} />
+    </label>
+    <p className="-mt-2 text-xs text-muted">
+      Voices come from this device. More natural ones can be downloaded in Settings &gt; Accessibility &gt;
+      Spoken Content &gt; Voices on iPhone and iPad (System Settings on a Mac); they appear here when this
+      browser offers them.
+    </p>
+  </>);
 }
 
 /**

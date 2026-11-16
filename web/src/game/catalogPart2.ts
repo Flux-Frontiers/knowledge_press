@@ -12,6 +12,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "DIO. This timing song I take from you. FR. That's a dreadful thing to do. DIO. Much more dreadful, if I row Till I burst myself, I trow. FR. and DIO. Brekekekex, ko-ax, ko-ax. DIO. Go, hang yourselves; for what care I? FR. All the same we'll shout and cry, Stretching all our…",
     tags: ["ancient-classical"],
     year: -405,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_golden_sayings_of_epictetus_with_the_hymn_of_cleanthes",
@@ -24,6 +25,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "Epaphroditus had a shoemaker whom he sold as being good-for-nothing. This fellow, by some accident, was afterwards purchased by one of Cæsar’s men, and became a shoemaker to Cæsar. You should have seen what respect Epaphroditus paid him then. “How does the good Felicion?…",
     tags: ["ancient-classical"],
     year: 108,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_house_of_atreus_being_the_agamemnon_the_libation_bearers",
@@ -36,6 +38,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "And still the smoke of fallen Ilion Rises in sight of all men, and the flame Of Atè’s hecatomb is living yet, And where the towers in dusty ashes sink, Rise the rich fumes of pomp and wealth consumed. For this must all men pay unto the gods The meed of mindful hearts and…",
     tags: ["ancient-classical"],
     year: -458,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_iliad",
@@ -48,6 +51,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "“Haste, happy nymph! for thee thy Paris calls, Safe from the fight, in yonder lofty walls, Fair as a god; with odours round him spread, He lies, and waits thee on the well-known bed; Not like a warrior parted from the foe, But some gay dancer in the public show.” She spoke,…",
     tags: ["ancient-classical"],
     year: -750,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_meditations_of_the_emperor_marcus_aurelius_antoninus",
@@ -60,6 +64,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "Behold the chaos of eternity which besets us on either side. Think how empty is the noisy echo of acclamation; how fickle and how scant of judgment are they who would seem to praise us, and how narrow the bounds within which their praise is confined. All the earth is but a…",
     tags: ["ancient-classical"],
     year: 170,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_odyssey",
@@ -72,6 +77,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "I will also give you clothes, and will send you a fair wind to take you home, if the gods in heaven so will it—for they know more about these things, and can settle them better than I can.” Ulysses shuddered as he heard her. “Now goddess,” he answered, “there is something…",
     tags: ["ancient-classical"],
     year: -725,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_teaching_of_epictetus",
@@ -84,6 +90,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "And when is a disjunctive safe? When it fulfills its promise. And when are flutes, or a lyre, or a horse, or a dog? What marvel is it, then, if a man also is to be saved in the same way, and perish in the same way? 6. But each thing is increased and saved by the corresponding…",
     tags: ["ancient-classical"],
     year: 108,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "thoughts_of_marcus_aurelius_antoninus",
@@ -96,6 +103,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "I would have all men think as they please, or as they can, and I only claim the same freedom which I give. When a man writes anything, we may fairly try to find out all that his words must mean, even if the result is that they mean what he did not mean; and if we find this…",
     tags: ["ancient-classical"],
     year: 170,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "audels_electric_library_vol_1",
@@ -204,6 +212,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "The _Traité de Legislation_ wound up with what was to me a most impressive picture of human life as it would be made by such opinions and such laws as were recommended in the treatise. The anticipations of practicable improvement were studiously moderate, deprecating and…",
     tags: ["biography"],
     year: 1873,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "autobiography_of_benjamin_franklin",
@@ -216,6 +225,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "He lik'd it, but ask'd me if my being on the spot in England to chuse the types, and see that every thing was good of the kind, might not be of some advantage. \"Then,\" says he, \"when there, you may make acquaintances, and establish correspondences in the bookselling and…",
     tags: ["biography"],
     year: 1771,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "autobiography_of_benvenuto_cellini",
@@ -228,6 +238,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "However, to prevent your thinking that I want to save myself the trouble of so slight a matter, I will gladly sketch you something; but meanwhile speak to Benvenuto, and let him also make a model; he can then execute the better of the two designs.” Federigo Ginori came to me,…",
     tags: ["biography"],
     year: 1558,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "confessions_jean_jacques_rousseau",
@@ -240,6 +251,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "I know not what I should have said to her; but her friend entered, and at that moment I thought her ugly. At length, they bethought themselves, that they must return to town before night; even now we had but just time to reach it by daylight; and we hastened our departure in…",
     tags: ["biography"],
     year: 1765,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "confessions_saint_augustine",
@@ -252,6 +264,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "For as deeds of violence arise, if that emotion of the soul be corrupted, whence vehement action springs, stirring itself insolently and unrulily; and lusts, when that affection of the soul is ungoverned, whereby carnal pleasures are drunk in, so do errors and false opinions…",
     tags: ["biography"],
     year: 397,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "incidents_in_the_life_of_a_slave_girl_harriet_jacobs",
@@ -264,6 +277,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "She had not forgotten poor Benjamin’s sufferings, and she was afraid that if another child tried to escape, he would have a similar or a worse fate. To me, nothing seemed more dreadful than my present life. I said to myself, “William _must_ be free. He shall go to the north,…",
     tags: ["biography"],
     year: 1861,
+    voice: { gender: "female", accent: "en-US" },
   },
   {
     slug: "miracle_mongers_and_their_methods_harry_houdini",
@@ -276,6 +290,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "Chabert an IMPOSSIBILITY. He will give a COMPLETE explanation by illustrations of the PRINCIPLES of the EUROPEAN and the AMERICAN CHESS PLAYERS. He will also (unless prevented by indisposition) swallow a sufficient quantity of phosphorus, (presented by either chemist or…",
     tags: ["biography"],
     year: 1920,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "narrative_of_the_life_of_frederick_douglass",
@@ -288,6 +303,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "The slaves selected to go to the Great House Farm, for the monthly allowance for themselves and their fellow-slaves, were peculiarly enthusiastic. While on their way, they would make the dense old woods, for miles around, reverberate with their wild songs, revealing at once…",
     tags: ["biography"],
     year: 1845,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "personal_memoirs_of_ulysses_s_grant_volume_1",
@@ -300,6 +316,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "He was a brave and very earnest soldier. No man in the service was more sincere in his devotion to the cause for which we were battling; none more ready to make sacrifices or risk life in it. On the 4th of September I removed my headquarters to Cairo and found Colonel Richard…",
     tags: ["biography"],
     year: 1884,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_education_of_henry_adams",
@@ -312,6 +329,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "His friends were good to him. Life was amusing. Paris rapidly became familiar. In a month or six weeks he forgot even to disapprove of it; but he studied nothing, entered no society, and made no acquaintance.",
     tags: ["biography"],
     year: 1918,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_life_of_samuel_johnson_james_boswell",
@@ -324,6 +342,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "He said, 'Sir, I make a distinction between what a man may experience by the mere strength of his imagination, and what imagination cannot possibly produce. Thus, suppose I should think that I saw a form, and heard a voice cry \"Johnson, you are a very wicked fellow, and…",
     tags: ["biography"],
     year: 1791,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "up_from_slavery_booker_t_washington",
@@ -336,6 +355,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "Take the broom and sweep it.” It occurred to me at once that here was my chance. Never did I receive an order with more delight. I knew that I could sweep, for Mrs. Ruffner had thoroughly taught me how to do that when I lived with her. I swept the recitation-room three times.…",
     tags: ["biography"],
     year: 1900,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_diary_of_john_evelyn_volume_1",
@@ -348,6 +368,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "We embarked in a felucca for Livorno, or Leghorn; but the sea running very high, we put in at Porto Venere, which we made with peril, between two narrow horrid rocks, against which the sea dashed with great velocity; but we were soon delivered into as great a calm and a most…",
     tags: ["diaries"],
     year: 1632,
+    voice: { gender: "male", accent: "en-GB" },
     periods: [
       { label: "1632", entries: 1, bins: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3] },
       { label: "1633", entries: 1, bins: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3] },
@@ -393,6 +414,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "Lord Ossory several times deplored to me his being engaged in it; he had more justice and honor than in the least to approve of it, though he had been over-persuaded to the expedition.",
     tags: ["diaries"],
     year: 1632,
+    voice: { gender: "male", accent: "en-GB" },
     periods: [
       { label: "1665", entries: 68, bins: [6,3,0,3,1,7,0,4,2,1,0,0,1,3,1,3,2,2,0,1,0,3,2,6,2,3,6,3,1,0,0,5,1,0,2,1,2,2,2,5,1,2,3,0,1,0,0,3,0,2,0,0,3] },
       { label: "1666", entries: 88, bins: [3,2,0,0,3,3,0,3,1,1,2,2,0,1,4,1,1,0,2,0,2,2,6,3,3,0,6,2,2,2,2,2,0,1,8,21,21,4,0,1,0,2,6,3,1,0,7,4,4] },
@@ -449,6 +471,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "He also told me that he heard that exceptions were taken at his carrying his wife down to Portsmouth, saying that the King should not pay for it, but I denied that I had spoke of it, nor did I. At last he desired the difference between our wives might not make a difference…",
     tags: ["diaries"],
     year: 1660,
+    voice: { gender: "male", accent: "en-GB" },
     periods: [
       { label: "1660", entries: 936, bins: [30,28,46,42,53,38,60,49,58,52,39,45,28,28,25,20,33,51,40,71,82,48,39,19,50,27,29,25,38,24,31,27,32,25,27,29,16,20,40,27,25,24,31,33,27,37,33,26,30,34,20,13,35] },
       { label: "1661", entries: 573, bins: [35,36,37,23,23,26,15,29,29,17,13,22,25,17,33,28,53,18,17,20,21,28,21,28,15,16,17,8,8,23,21,14,26,22,30,37,21,15,21,23,18,16,21,19,21,18,18,19,19,26,18,21,37] },
@@ -473,6 +496,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "That stone was the capital one of the circle which surrounded what now remains. Mr Fraser was very hospitable. There was a fair at Strichen; and he had several of his neighbours from it at dinner.",
     tags: ["diaries"],
     year: 1773,
+    voice: { gender: "male", accent: "en-GB" },
     periods: [
       { label: "part 1", entries: 83, bins: [5,2,4,2,4,2,4,4,2,4,2,3,2,3,1,4,2,1,2,1,2,1,2,2,1,2,2,4,2,3,4,2,4,2,4,2,4,4,1,3,1,2,1,2,2,2,2,1,2,1,2,2,4] },
       { label: "part 2", entries: 83, bins: [4,2,4,2,3,1,2,2,1,3,2,3,2,4,1,4,4,2,4,1,3,2,3,2,1,2,1,2,1,3,2,1,2,2,4,2,3,4,2,4,2,4,2,4,2,4,4,2,4,2,4,2,4] },
@@ -508,6 +532,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "NORA. Be so good as to go into the study, then. _[She bows indifferently to him and shuts the door into the hall; then comes back and makes up the fire in the stove.]_ MRS LINDE. Nora—who was that man? NORA. A lawyer, of the name of Krogstad. MRS LINDE. Then it really was he.…",
     tags: ["drama"],
     year: 1879,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "doctor_faustus_christopher_marlowe",
@@ -520,6 +545,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "FAUSTUS. Already Faustus hath hazarded that for thee. MEPHIST. But, Faustus, thou must bequeath it solemnly, And write a deed of gift with thine own blood; For that security craves great Lucifer. If thou deny it, I will back to hell. FAUSTUS. Stay, Mephistophilis, and tell…",
     tags: ["drama"],
     year: 1593,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "hedda_gabler_henrik_ibsen",
@@ -532,6 +558,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "MISS TESMAN. Yes, don't be uneasy, my dear boy.--Besides, I have given security for the furniture and all the carpets. TESMAN. Security? You? My dear Aunt Julia--what sort of security could you give? MISS TESMAN. I have given a mortgage on our annuity. TESMAN. [Jumps up.]…",
     tags: ["drama"],
     year: 1890,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "major_barbara",
@@ -544,6 +571,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "UNDERSHAFT. Well, I will make a bargain with you. If I go to see you to-morrow in your Salvation Shelter, will you come the day after to see me in my cannon works? BARBARA. Take care. It may end in your giving up the cannons for the sake of the Salvation Army. UNDERSHAFT. Are…",
     tags: ["drama"],
     year: 1905,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "plays_by_anton_chekhov_second_series_chekhov",
@@ -556,6 +584,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "I only found out to-day that those tickets are in pawn. You must excuse me, _maman_, but it’s only swindlers who behave like that. I’m not doing this out of egoisticism [Note: So in the original]--I don’t want your tickets--but on principle; and I don’t allow myself to be…",
     tags: ["drama"],
     year: 1884,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "pygmalion_george_bernard_shaw",
@@ -568,6 +597,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "Well, you wouldn’t have the face to ask me the same for teaching me my own language as you would for French; so I won’t give more than a shilling. Take it or leave it. HIGGINS [walking up and down the room, rattling his keys and his cash in his pockets] You know, Pickering,…",
     tags: ["drama"],
     year: 1913,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "tamburlaine_the_great_christopher_marlowe",
@@ -580,6 +610,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "USUMCASANE. Long may Theridamas remain with us! TAMBURLAINE. These are my friends, in whom I more rejoice Than doth the king of Persia in his crown; And, by the love of Pylades and Orestes, Whose statues [61] we adore in Scythia, Thyself and them shall never part from me…",
     tags: ["drama"],
     year: 1587,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_duchess_of_malfi_john_webster",
@@ -592,6 +623,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "[Enter] BOSOLA and CASTRUCCIO BOSOLA. You say you would fain be taken for an eminent courtier? CASTRUCCIO. 'Tis the very main[31] of my ambition. BOSOLA. Let me see: you have a reasonable good face for 't already, and your night-cap expresses your ears sufficient largely. I…",
     tags: ["drama"],
     year: 1613,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_importance_of_being_earnest_oscar_wilde",
@@ -604,6 +636,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "But I’ll run over the programme I’ve drawn out, if you will kindly come into the next room for a moment. LADY BRACKNELL. Thank you, Algernon. It is very thoughtful of you. [Rising, and following Algernon.] I’m sure the programme will be delightful, after a few expurgations.…",
     tags: ["drama"],
     year: 1895,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_master_builder",
@@ -616,6 +649,7 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "Then BROVIK comes into the front room. BROVIK. May I have a few words with you? SOLNESS. Certainly. BROVIK. [To KAIA.] Just go in there for moment, Kaia. KAIA. [Uneasily.] Oh, but uncle-- BROVIK. Do as I say, child. And shut the door after you. [KAIA goes reluctantly into the…",
     tags: ["drama"],
     year: 1892,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_playboy_of_the_western_world_synge",
@@ -628,5 +662,6 @@ export const BOOKS_PART2: Book[] = [
     excerpt: "CHRISTY. I did not then. I just riz the loy and let fall the edge of it on the ridge of his skull, and he went down at my feet like an empty sack, and never let a grunt or groan from him at all. MICHAEL. _making a sign to Pegeen to fill Christy’s glass._—And what way weren’t…",
     tags: ["drama"],
     year: 1907,
+    voice: { gender: "male", accent: "en-GB" },
   },
 ];

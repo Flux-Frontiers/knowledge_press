@@ -1,5 +1,6 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, Settings2, Search, Sun, Sunrise, Sunset, X, Video } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clapperboard, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, MoonStar, Pause, Play, Settings2, Search, Sun, Sunrise, Sunset, Square, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { goToShot, OWNED_SHOT } from "./cinema";
 import { COARSE_POINTER } from "./Environment";
 import { useCorpusTree } from "./CorpusRedwood";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -7,19 +8,24 @@ import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest
 import { GenreGlyph } from "./GenreGlyph";
 import { SPECIES, speciesFor } from "./species";
 import { QUESTS, questProgress } from "./quests";
+import { AchievementsList, AwardCard, useAwards } from "./AwardCard";
 import { saveScreenshot } from "./screenshot";
 import { SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
 import { ReaderPanel } from "./Reader";
+import { stopBook, toggleBook } from "./bookReading";
 import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
+import { WayfarerMap } from "./WayfarerMap";
+import { activeEvent } from "./events";
+import { useWheelPlaque } from "./WayfarersWheel";
 import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
 import { TimelineBar, useTimelinePlayback } from "./TimelineBar";
-import { bookShown, timelineStops } from "./timeline";
+import { bookShown, timelineStops, yearLabel } from "./timeline";
 
-const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", night: "Night" } as const;
+const TIME_NAME = { dawn: "Dawn", day: "Day", dusk: "Dusk", twilight: "Twilight", night: "Night" } as const;
 
 export function HUD({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
@@ -63,6 +69,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const readingSlug = useGame((s) => s.readingSlug);
   const openReader = useGame((s) => s.openReader);
   const reading = readingSlug ? forest.trees.find((t) => t.book.slug === readingSlug) : undefined;
+  const bookReading = useGame((s) => s.bookReading);
   const mootsOpen = useGame((s) => s.mootsOpen);
   const mootId = useGame((s) => s.mootId);
   const liveMoot = useGame((s) => s.liveMoot);
@@ -83,6 +90,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const timelineYear = useGame((s) => s.timelineYear);
   const redwood = useCorpusTree(forest);
   useTimelinePlayback(forest);
+  useAwards(forest);
   const standing = timelineYear === null ? forest.trees.length : forest.trees.filter((t) => bookShown(t.book, timelineYear)).length;
 
   // Silent mode keeps every card from popping up on its own; a tree the player picked still shows.
@@ -99,6 +107,14 @@ export function HUD({ forest }: { forest: Forest }) {
   // God's eye opens on a clear view; the redwood's card waits until the cart leaves the hub.
   useEffect(() => { if (godEye) setRedwoodClosed(true); }, [godEye]);
   const atRedwood = !flying && !silent && !pinnedSlug && hubDist < 16 && !redwoodClosed;
+  // Beside the Wayfarer's Wheel, or looking down on it, its card shows in place of the redwood's;
+  // closed, it stays closed until the cart moves off.
+  const wheel = useWheelPlaque(forest);
+  const wheelDist = Math.hypot(x - forest.wayfarer.x, z - forest.wayfarer.z);
+  const [wheelClosed, setWheelClosed] = useState(false);
+  const leftWheel = wheelDist > 6 && camera !== "wheel";
+  useEffect(() => { if (leftWheel) setWheelClosed(false); }, [leftWheel]);
+  const atWheel = !flying && !silent && !pinnedSlug && (wheelDist < 3.5 || camera === "wheel") && !wheelClosed;
   const progress = questProgress({ library, grovesVisited, season });
   const nextQuest = QUESTS.find((q) => !q.done({ library, grovesVisited, season }));
   const selected = forest.groves.find((g) => g.genre === selectedGrove);
@@ -200,7 +216,7 @@ export function HUD({ forest }: { forest: Forest }) {
                   "grid size-11 place-items-center rounded-md border " +
                   (menuOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
                 }
-                aria-label="More: time of day, silent mode, moots, settings, about, exit, and on a phone the other buttons too"
+                aria-label="More: time of day, silent mode, moots, settings, shots, about, exit, and on a phone the other buttons too"
                 aria-expanded={menuOpen}
               >
                 <Ellipsis className="size-4" strokeWidth={1.75} />
@@ -227,6 +243,18 @@ export function HUD({ forest }: { forest: Forest }) {
                     onClick={() => { setMenuOpen(false); pause(true); }} />
                   <MenuItem icon={<Info className="size-4" strokeWidth={1.75} />} label="About and tonight's sky"
                     onClick={() => { setMenuOpen(false); useGame.getState().toggleHelp(); }} />
+                  {OWNED_SHOT ? (
+                    <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="End the shot · back to the forest"
+                      onClick={() => goToShot(null, timeMode)} />
+                  ) : (<>
+                    <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="Fly-in to the redwood"
+                      onClick={() => goToShot("flyin", timeMode)} />
+                    {/* Only while the visitor's event is on (events.ts), or `?event=visitor`. */}
+                    {activeEvent(new Date(), window.location.search) === "visitor" ? (
+                      <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="Ride the visitor's craft"
+                        onClick={() => goToShot("ufocam", timeMode)} />
+                    ) : null}
+                  </>)}
                   <MenuItem icon={<LogOut className="size-4" strokeWidth={1.75} />} label="Exit to the start screen"
                     onClick={() => { setMenuOpen(false); useGame.getState().exit(); }} />
                 </ul>
@@ -315,6 +343,27 @@ export function HUD({ forest }: { forest: Forest }) {
 
       {clean ? null : (<>
         <div className="book-dock pointer-events-auto absolute bottom-24 left-3 right-3 mx-auto max-w-lg sm:bottom-6 sm:left-4 sm:right-auto sm:max-w-[min(32rem,calc(50%-12rem))]">
+          {/* A book read aloud after its reader closed: what it is, pause, stop, and back to the page. */}
+          {bookReading && bookReading.slug !== readingSlug ? (
+            <div className="mb-2 flex items-center gap-1 rounded-lg border border-border bg-surface/94 pl-3" aria-label="Reading aloud">
+              <BookOpen className="size-4 shrink-0 text-primary" strokeWidth={1.75} />
+              <button type="button" onClick={() => openReader(bookReading.slug)}
+                className="min-h-11 min-w-0 flex-1 truncate px-1 text-left text-sm" aria-label={`Open ${bookReading.title}`}>
+                <span className="text-fg">{bookReading.title}</span>
+                {bookReading.chapterTitle ? <span className="text-muted"> · {bookReading.chapterTitle}</span> : null}
+              </button>
+              <button type="button" onClick={toggleBook} className="grid size-11 shrink-0 place-items-center rounded-md text-primary"
+                aria-label={bookReading.state === "playing" ? "Pause reading" : "Go on reading"}>
+                {bookReading.state === "playing"
+                  ? <Pause className="size-5" strokeWidth={1.75} />
+                  : <Play className="size-5" strokeWidth={1.75} />}
+              </button>
+              <button type="button" onClick={stopBook} className="grid size-11 shrink-0 place-items-center rounded-md text-muted"
+                aria-label="Stop reading">
+                <Square className="size-4" strokeWidth={1.75} />
+              </button>
+            </div>
+          ) : null}
           {touring && !silent ? (
             <article className="rounded-lg border border-border bg-surface/94 p-3 sm:p-4" aria-live="polite">
               <p className="flex items-center gap-2 text-xs tracking-wide text-muted uppercase">
@@ -329,6 +378,27 @@ export function HUD({ forest }: { forest: Forest }) {
             <article className="rounded-lg border border-border bg-surface/94 p-3 sm:p-4" aria-live="polite">
               <p className="flex items-center gap-2 text-xs tracking-wide text-muted uppercase">On the ring</p>
               <p className="mt-1 text-sm leading-relaxed text-fg/90">{tourNote}</p>
+            </article>
+          ) : atWheel ? (
+            <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">
+              <button
+                type="button"
+                onClick={() => setWheelClosed(true)}
+                className="absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-md text-muted"
+                aria-label="Dismiss"
+              >
+                <X className="size-5" strokeWidth={1.75} />
+              </button>
+              <p className="text-xs tracking-wide text-muted uppercase">On the hub plaza</p>
+              <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">{wheel.plaque.title}</h2>
+              <p className="text-sm text-muted tabular-nums">{wheel.plaque.byline}</p>
+              <p className="card-extra mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">
+                The ring in bronze: each grove's stud lights as the ring stops there, and rises with every visit and every book read.
+              </p>
+              <button type="button" onClick={() => useGame.getState().openPlaque(wheel.plaque)}
+                className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg">
+                Read the plaque
+              </button>
             </article>
           ) : atRedwood ? (
             <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">
@@ -365,9 +435,10 @@ export function HUD({ forest }: { forest: Forest }) {
               </button>
               <p className="text-xs tracking-wide text-muted uppercase">{nearby.book.genreLabel}</p>
               <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">{nearby.book.title}</h2>
-              <p className="text-sm text-muted">{nearby.book.author}</p>
-              <p className="card-extra mt-1 hidden text-xs text-faint tabular-nums sm:block">
-                {nearby.book.chunks.toLocaleString()} chunks · trunk r {nearby.trunkRadius.toFixed(2)}
+              <p className="text-sm text-muted tabular-nums">
+                {nearby.book.author}
+                {nearby.book.year === undefined ? "" : ` · ${yearLabel(nearby.book.year)}`}
+                {` · ${nearby.book.chunks.toLocaleString("en-US")} chunks`}
               </p>
               <p className="card-extra mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">{nearby.book.excerpt}</p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -442,8 +513,9 @@ export function HUD({ forest }: { forest: Forest }) {
         </div>
       ) : null}
 
+      <AwardCard />
       {browsing ? <BrowsePanel forest={forest} /> : null}
-      {plaque ? <PlaquePanel plaque={plaque} /> : null}
+      {plaque ? <PlaquePanel plaque={plaque} forest={forest} /> : null}
       {reading ? <ReaderPanel key={reading.book.slug} book={reading.book} /> : null}
       {mootsOpen ? <MootList /> : null}
       {mootId && liveMoot ? <LiveMootPlayer key={mootId} request={liveMoot} forest={forest} />
@@ -453,7 +525,7 @@ export function HUD({ forest }: { forest: Forest }) {
 }
 
 function TimeIcon({ mode }: { mode: TimeMode }) {
-  const Icon = { live: Clock, dawn: Sunrise, day: Sun, dusk: Sunset, night: Moon }[mode];
+  const Icon = { live: Clock, dawn: Sunrise, day: Sun, dusk: Sunset, twilight: MoonStar, night: Moon }[mode];
   return <Icon className="size-4" strokeWidth={1.75} />;
 }
 
@@ -509,6 +581,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
 }) {
   const selectedGrove = useGame((s) => s.selectedGrove);
   const timelineYear = useGame((s) => s.timelineYear);
+  const travelMode = useGame((s) => s.travelMode);
   const r = forest.worldRadius;
   const to = (wx: number, wz: number) => {
     const px = ((wx + r) / (2 * r)) * 100;
@@ -518,6 +591,14 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
   const p = to(x, z);
   return (
     <div className="relative h-28 w-28 overflow-hidden rounded-lg border border-border bg-bg/80 sm:h-40 sm:w-40">
+      {/* The ring roads, under every marker: the tour's way round, and how far out the cart is. */}
+      <svg className="pointer-events-none absolute inset-0 size-full" viewBox="-1 -1 2 2" aria-hidden>
+        {forest.roadLines.filter((l) => l.kind === "ring").map((l) => (
+          <circle key={l.pts.length + ":" + l.pts[0]![0]} cx={0} cy={0} r={Math.hypot(...l.pts[0]!) / r}
+            fill="none" stroke="var(--color-fg)" strokeOpacity={travelMode === "circuit" ? 0.55 : 0.3}
+            strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        ))}
+      </svg>
       <Compass className="absolute top-1.5 left-1.5 size-3 text-muted" strokeWidth={1.75} />
       <button
         type="button"
@@ -530,7 +611,7 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
         const c = to(e.x, e.z);
         return (
           <button key={e.id} type="button" onClick={() => jumpToExhibit(e)}
-            className="absolute size-2 border border-bg bg-[#c9a24a]"
+            className="absolute size-1.5 border border-bg bg-[#c9a24a] sm:size-2"
             style={{ left: c.left, top: c.top, transform: "translate(-50%, -50%) rotate(45deg)", zIndex: 1 }}
             title={`Jump to ${e.label}`} aria-label={`Jump to ${e.label}`} />
         );
@@ -576,12 +657,15 @@ function Minimap({ forest, x, z, yaw, pins, picked }: {
         return <MapPin className="pointer-events-none absolute size-4 text-primary" strokeWidth={2}
           style={{ left: c.left, top: c.top, transform: "translate(-50%, -100%)", zIndex: 3 }} aria-hidden />;
       })() : null}
+      {/* Over every marker: the ring passes about 3 px from each exhibit on a phone's map, and an
+          arrow under the diamonds blinked in and out as the cart rode by. */}
       <span
         className="pointer-events-none absolute h-0 w-0 border-x-4 border-b-8 border-x-transparent border-b-fg"
         style={{
           left: p.left,
           top: p.top,
           transform: `translate(-50%, -70%) rotate(${-yaw}rad)`,
+          zIndex: 4,
         }}
       />
     </div>
@@ -698,7 +782,8 @@ function PressTab({ forest }: { forest: Forest }) {
   const collected = forest.trees.filter((t) => library.includes(t.book.slug));
 
   return (<>
-    <p className="mt-2 text-sm text-muted">
+    <AchievementsList forest={forest} />
+    <p className="mt-3 text-sm text-muted">
       {collected.length} collected of {forest.trees.length}
     </p>
     <ul className="mt-3 min-h-0 flex-1 space-y-2 overflow-auto">
@@ -821,7 +906,7 @@ function BooksTab({ forest }: { forest: Forest }) {
 }
 
 /** An exhibit's plaque at reading size, in the plaque's own cream, ink and brass (makePlaqueTexture). */
-function PlaquePanel({ plaque }: { plaque: PlaqueText }) {
+function PlaquePanel({ plaque, forest }: { plaque: PlaqueText; forest: Forest }) {
   const close = () => useGame.getState().openPlaque(null);
   return (
     <div className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-bg/55 p-3 sm:p-6" onClick={close}>
@@ -845,6 +930,7 @@ function PlaquePanel({ plaque }: { plaque: PlaqueText }) {
           <h2 id="plaque-title" className="pr-10 font-display text-3xl font-semibold text-[#1a2030] italic sm:text-4xl">{plaque.title}</h2>
           <p className="mt-1 text-sm font-semibold tracking-wide text-[#8a6a22]">{plaque.byline}</p>
           <p className="mt-5 text-base leading-relaxed text-[#2a2a2a] sm:text-lg">{plaque.body}</p>
+          {plaque.figure === "wayfarer" ? <WayfarerMap forest={forest} /> : null}
         </div>
       </article>
     </div>

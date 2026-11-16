@@ -44,8 +44,52 @@ tree within reach.
   at the bottom.
 - ++left++ and ++right++ turn the chapter. ++up++ and ++down++ scroll the
   page.
+- The two **A** buttons beside the close button make the text smaller or
+  larger, in four steps. The size is saved for later visits.
 - ++esc++, the close button, or a tap outside the page closes the reader. It
   remembers the chapter you were at for the rest of the visit.
+
+## Listen to the book
+
+The play button at the top of the reader, or ++space++, reads the chapter
+aloud. The paragraph being read is tinted and kept in view.
+
+- ++space++ or the button again pauses, and the next press goes on from the
+  same word. After the screen has locked, it starts the paragraph again.
+- While a reading is going, tap a paragraph to read from there.
+- At the end of a chapter the reading goes on to the next one, and it stops
+  at the end of the book.
+- Closing the reader does not stop the reading. A strip above the book
+  cards shows the book and chapter, with buttons to pause and stop; tap the
+  title to open the book again at the paragraph being read.
+- The stop button, in the reader or the strip, ends the reading. So does
+  turning to another chapter yourself, or leaving the forest. The book
+  remembers the paragraph, so the play button starts there next time, on
+  this visit or a later one.
+- While a book is being read, the ring tour shows its cards but does not
+  read them aloud. When the reading stops, the tour speaks again if
+  **Read each grove aloud on the ring** is on.
+- A [moot](moots.md) pauses the reading. When the moot closes, the book goes
+  on from the start of the paragraph it was in.
+- Footnotes and illustration captions are shown but not read.
+
+The voice matches the book's author: Jane Austen is read in a British
+woman's voice, Mark Twain in a man's. A translated author is read in your
+device's accent; a book with many authors in the system voice. Voices on
+your device come before ones a browser fetches over the network. Settings has
+a **Reading voice** to pick one voice for every book, and a **Reading
+speed**. See [Settings](settings.md).
+
+On an iPhone or iPad the reading stops when the screen locks. When you come
+back, the paragraph it stopped in is read again from its start. On a Mac it
+reads on with the screen locked.
+
+Prose is set as paragraphs that fill the page, whatever the printed
+edition's line length was. Verse and plays keep their lines; a line too long
+for the page continues indented below. Words the edition marked in italics
+are set in italics. Footnote marks are small raised numbers, footnotes and
+sidenotes are set small and gray, and illustrations are shown as their
+captions.
 
 Chapters are the book's own sections. A very long section is split into
 parts, shown as "(Part 1 of 4)" and so on. A diary's chapters are its dated
@@ -80,3 +124,32 @@ Five hints appear as you drive, each a small thing to do in the forest:
 
 A hint can be dismissed. Silent mode hides them. They are for your own
 amusement; nothing is locked behind them.
+
+## Achievements
+
+Four tracks each have a bronze, silver and gold level. The **Press** tab under
+**Browse** lists them, with what the next level asks and how far along you
+are. A card shows when you reach a level; with **Read each grove aloud on the
+ring** on, it is said aloud too.
+
+| Track | Bronze | Silver | Gold |
+| --- | --- | --- | --- |
+| Wayfarer | Ride the whole ring home to the redwood | Ride it three times | Ride it in every season |
+| Explorer | Visit 4 groves | Visit 10 groves | Visit every grove |
+| Reader | Press 3 books | Press 25 books | Press every book |
+| Curator | Read 3 exhibit plaques | Read 6 plaques | Read every exhibit's plaque |
+
+A ride counts for Wayfarer once the tour has stopped at every grove and
+brought the cart home, even across rides broken off and reloads.
+
+### The Wayfarer's Wheel
+
+A bronze table on the hub plaza, beside the redwood, maps the forest: the
+redwood at the centre, the spoke roads, both rings, and a stud for every
+grove. Each stud lights in its grove's colour as the tour stops there. A
+whole ride lights the gold pin at the centre, and the rim shows your
+Wayfarer level. The studs stay lit until the next ride sets off. Tap the
+table to read its plaque.
+
+Achievements are saved in this browser with the press; see
+[Where your progress lives](getting-started.md#where-your-progress-lives).

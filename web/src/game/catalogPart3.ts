@@ -12,6 +12,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "I, the spirit of the universe, I alone am immutable and eternal. [A pause] Like a captive in a dungeon deep and void, I know not where I am, nor what awaits me. One thing only is not hidden from me: in my fierce and obstinate battle with Satan, the source of the forces of…",
     tags: ["drama"],
     year: 1895,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "a_christmas_carol_in_prose_being_a_ghost_story_of_christmas",
@@ -24,6 +25,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Not to know that any Christian spirit working kindly in its little sphere, whatever it may be, will find its mortal life too short for its vast means of usefulness. Not to know that no space of regret can make amends for one life's opportunity misused! Yet such was I! Oh!…",
     tags: ["english-literature"],
     year: 1843,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "a_modest_proposal",
@@ -36,6 +38,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "For we can neither employ them in handicraft or agriculture; they neither build houses, (I mean in the country) nor cultivate land: they can very seldom pick up a livelihood by stealing till they arrive at six years old; except where they are of towardly parts, although I…",
     tags: ["english-literature"],
     year: 1729,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "a_room_with_a_view_forster",
@@ -48,6 +51,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "I must have dropped them out there in the square.” She looked at him cautiously. “Would you add to your kindness by fetching them?” He added to his kindness. As soon as he had turned his back, Lucy arose with the running of a maniac and stole down the arcade towards the Arno.…",
     tags: ["english-literature"],
     year: 1908,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "a_tale_of_two_cities",
@@ -60,6 +64,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Lorry said it; perhaps not quite disinterestedly, but with the interested object of squeezing himself back again. “You think so?” said Mr. Stryver. “Well! you have been present all day, and you ought to know. You are a man of business, too.” “And as such,” quoth Mr. Lorry,…",
     tags: ["english-literature"],
     year: 1859,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "alices_adventures_in_wonderland",
@@ -72,6 +77,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "However, when they had been running half an hour or so, and were quite dry again, the Dodo suddenly called out “The race is over!” and they all crowded round it, panting, and asking, “But who has won?” This question the Dodo could not answer without a great deal of thought,…",
     tags: ["english-literature"],
     year: 1865,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "bleak_house_dickens",
@@ -84,6 +90,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Then I felt I could not do it. Sometimes I considered whether I should write to his mother, but that ended in my being convinced that to open a correspondence would be to make the matter worse. I always came to the conclusion, finally, that I could do nothing. Mr.",
     tags: ["english-literature"],
     year: 1853,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "cranford_gaskell",
@@ -96,6 +103,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Then we had suet puddings, boiled in the broth with the beef: and then the meat itself. If we did not sup our broth, we had no ball, which we liked a deal better; and the beef came last of all, and only those had it who had done justice to the broth and the ball. Now folks…",
     tags: ["english-literature"],
     year: 1851,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "david_copperfield_dickens",
@@ -108,6 +116,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "I had barely time to get down again before the coach started, and I could hardly see the family for the handkerchiefs they waved. It was gone in a minute. The Orfling and I stood looking vacantly at each other in the middle of the road, and then shook hands and said good-bye;…",
     tags: ["english-literature"],
     year: 1850,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "dracula",
@@ -120,6 +129,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "His mouth moved as though he were praying. After a few minutes’ silence, he got up, shook hands with me, and blessed me, and said good-bye, and hobbled off. It all touched me, and upset me very much. I was glad when the coastguard came along, with his spy-glass under his arm.…",
     tags: ["english-literature"],
     year: 1897,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "emma",
@@ -132,6 +142,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Come, my dear Emma, let us be friends, and say no more about it. Tell your aunt, little Emma, that she ought to set you a better example than to be renewing old grievances, and that if she were not wrong before, she is now.” “That’s true,” she cried—“very true. Little Emma,…",
     tags: ["english-literature"],
     year: 1815,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "far_from_the_madding_crowd_hardy",
@@ -144,6 +155,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Every looker-on’s inside shook with the blows of the great drum to his deepest vitals, and there was not a dry eye throughout the town among the public-house people and the nameless women!” “But they’re not gone to any war?” “No, ma’am; but they be gone to take the places of…",
     tags: ["english-literature"],
     year: 1874,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "great_expectations",
@@ -156,6 +168,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "She was seated at her dressing-table, and looked round at us immediately. “Oh!” said she to Joe. “You are the husband of the sister of this boy?” I could hardly have imagined dear old Joe looking so unlike himself or so like some extraordinary bird; standing as he did…",
     tags: ["english-literature"],
     year: 1861,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "grimms_fairy_tales",
@@ -168,6 +181,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "All this the old king saw: so he went home without being seen; and when the little goose-girl came back in the evening he called her aside, and asked her why she did so: but she burst into tears, and said, ‘That I must not tell you or any man, or I shall lose my life.’ But…",
     tags: ["english-literature"],
     year: 1812,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "gullivers_travels",
@@ -180,6 +194,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "He represented to the emperor “the low condition of his treasury; that he was forced to take up money at a great discount; that exchequer bills would not circulate under nine per cent. below par; that I had cost his majesty above a million and a half of _sprugs_” (their…",
     tags: ["english-literature"],
     year: 1726,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "heart_of_darkness",
@@ -192,6 +207,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "He had been out nearly three years; and, later, I could not help asking him how he managed to sport such linen. He had just the faintest blush, and said modestly, ‘I’ve been teaching one of the native women about the station. It was difficult. She had a distaste for the…",
     tags: ["english-literature"],
     year: 1899,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "howards_end",
@@ -204,6 +220,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Now and then I do.” “I thought of you as one of the early risers.” “At Howards End—yes; there is nothing to get up for in London.” “Nothing to get up for?” cried the scandalized Margaret. “When there are all the autumn exhibitions, and Ysaye playing in the afternoon! Not to…",
     tags: ["english-literature"],
     year: 1910,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "jane_eyre",
@@ -216,6 +233,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "It is a very strange sensation to inexperienced youth to feel itself quite alone in the world, cut adrift from every connection, uncertain whether the port to which it is bound can be reached, and prevented by many impediments from returning to that it has quitted. The charm…",
     tags: ["english-literature"],
     year: 1847,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "kim_kipling",
@@ -228,6 +246,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "The old man’s face lit with pride. “My child!” said he briefly, and strove to rein the pony’s neck to a fitting arch. “Am I to be beaten before the police?” cried the carter. “Justice! I will have Justice—” “Am I to be blocked by a shouting ape who upsets ten thousand sacks…",
     tags: ["english-literature"],
     year: 1901,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "middlemarch",
@@ -240,6 +259,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Tyke said they should have no more coals if they came to hear you preach.” Mrs. Farebrother laid down her knitting, which she had resumed after her small allowance of tea and toast, and looked at her son as if to say “You hear that?” Miss Noble said, “Oh poor things! poor…",
     tags: ["english-literature"],
     year: 1871,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "north_and_south_gaskell",
@@ -252,6 +272,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "The sharpness in her eye turned to a wistful longing as she met Margaret’s soft and friendly gaze. “I ha’ none so many to care for me; if yo’ care yo’ may come.” So they walked on together in silence. As they turned up into a small court, out of a squalid street, Bessy said,…",
     tags: ["english-literature"],
     year: 1855,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "pride_and_prejudice",
@@ -264,6 +285,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Bennet’s expectations were fully answered. His cousin was as absurd as he had hoped; and he listened to him with the keenest enjoyment, maintaining at the same time the most resolute composure of countenance, and, except in an occasional glance at Elizabeth, requiring no…",
     tags: ["english-literature"],
     year: 1813,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "robinson_crusoe",
@@ -276,6 +298,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "I was not so much surprised with the lightning as I was with the thought which darted into my mind as swift as the lightning itself—Oh, my powder! My very heart sank within me when I thought that, at one blast, all my powder might be destroyed; on which, not my defence only,…",
     tags: ["english-literature"],
     year: 1719,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "sense_and_sensibility",
@@ -288,6 +311,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "My visits to Mrs. Smith are never repeated within the twelvemonth.” “And is Mrs. Smith your only friend? Is Allenham the only house in the neighbourhood to which you will be welcome? For shame, Willoughby, can you wait for an invitation here?” His colour increased; and with…",
     tags: ["english-literature"],
     year: 1811,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "tess_of_the_durbervilles_hardy",
@@ -300,6 +324,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "He asked in a business-like manner if he should take her basket, which she permitted him to do, walking beside him. “It is early to be astir this Sabbath morn!” he said cheerfully. “Yes,” said Tess. “When most people are at rest from their week’s work.” She also assented to…",
     tags: ["english-literature"],
     year: 1891,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_adventures_of_sherlock_holmes",
@@ -312,6 +337,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "That will just show you how fond he was of me, Mr. Holmes, and the little things that he would think of.” “It was most suggestive,” said Holmes. “It has long been an axiom of mine that the little things are infinitely the most important. Can you remember any other little…",
     tags: ["english-literature"],
     year: 1892,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_jungle_book_kipling",
@@ -324,6 +350,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "For a time he was afraid of being dropped. Then he grew angry but knew better than to struggle, and then he began to think. The first thing was to send back word to Baloo and Bagheera, for, at the pace the monkeys were going, he knew his friends would be left far behind. It…",
     tags: ["english-literature"],
     year: 1894,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_man_who_was_thursday_chesterton",
@@ -336,6 +363,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "One of his uncles always walked about without a hat, and another had made an unsuccessful attempt to walk about with a hat and nothing else. His father cultivated art and self-realisation; his mother went in for simplicity and hygiene. Hence the child, during his tenderer…",
     tags: ["english-literature"],
     year: 1908,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_mayor_of_casterbridge_hardy",
@@ -348,6 +376,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Henchard preceded her through the door in the wall to the suddenly changed scene of the garden and flowers, and onward into the house. The dining-room to which he introduced her still exhibited the remnants of the lavish breakfast laid for Farfrae. It was furnished to…",
     tags: ["english-literature"],
     year: 1886,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_picture_of_dorian_gray",
@@ -360,6 +389,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "In fact I consider you extremely dangerous, and if anything happens to our good duchess, we shall all look on you as being primarily responsible. But I should like to talk to you about life. The generation into which I was born was tedious. Some day, when you are tired of…",
     tags: ["english-literature"],
     year: 1890,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_portrait_of_a_lady_volume_1",
@@ -372,6 +402,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "I infer also that you like my mother.” “I like your mother very much, because--because--” And Isabel found herself attempting to assign a reason for her affection for Mrs. Touchett. “Ah, we never know why!” said her companion, laughing. “I always know why,” the girl answered.…",
     tags: ["english-literature"],
     year: 1881,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_portrait_of_a_lady_volume_2",
@@ -384,6 +415,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "But I care myself if I tell fibs; I never tell them unless there’s something rather good to be gained. I don’t see what’s to be gained with you--especially as you wouldn’t believe me. I don’t make professions any more than I make paper flowers or flouncey lampshades--I don’t…",
     tags: ["english-literature"],
     year: 1881,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_strange_case_of_dr_jekyll_and_mr_hyde",
@@ -396,6 +428,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "The last, I think; for, O my poor old Harry Jekyll, if ever I read Satan’s signature upon a face, it is on that of your new friend.” Round the corner from the by-street, there was a square of ancient, handsome houses, now for the most part decayed from their high estate and…",
     tags: ["english-literature"],
     year: 1886,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_time_machine",
@@ -408,6 +441,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "What strange developments of humanity, what wonderful advances upon our rudimentary civilisation, I thought, might not appear when I came to look nearly into the dim elusive world that raced and fluctuated before my eyes! I saw great and splendid architecture rising about me,…",
     tags: ["english-literature"],
     year: 1895,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_turn_of_the_screw_henry_james",
@@ -420,6 +454,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Agitation, in the interval, certainly had held me and driven me, for I must, in circling about the place, have walked three miles; but I was to be, later on, so much more overwhelmed that this mere dawn of alarm was a comparatively human chill. The most singular part of it,…",
     tags: ["english-literature"],
     year: 1898,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_war_of_the_worlds",
@@ -432,6 +467,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Close on the heels of that came a violent rattling crash, quite close to us, that shook the ground; and, starting out upon the lawn, I saw the tops of the trees about the Oriental College burst into smoky red flame, and the tower of the little church beside it slide down into…",
     tags: ["english-literature"],
     year: 1897,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "treasure_island",
@@ -444,6 +480,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "They go the length of declaring that this honest creature would do anything for money, that the HISPANIOLA belonged to him, and that he sold it me absurdly high--the most transparent calumnies. None of them dare, however, to deny the merits of the ship. So far there was not a…",
     tags: ["english-literature"],
     year: 1883,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "vanity_fair_thackeray",
@@ -456,6 +493,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "\"Vamous,\" said Sir Pitt. \"Who'd ha' thought it! what a sly little devil! what a little fox it waws!\" he muttered to himself, chuckling with pleasure. \"Who'd have thought what?\" cries Miss Crawley, stamping with her foot. \"Pray, Miss Sharp, are you waiting for the Prince…",
     tags: ["english-literature"],
     year: 1848,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "wuthering_heights",
@@ -468,6 +506,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "His childhood’s sense of superiority, instilled into him by the favours of old Mr. Earnshaw, was faded away. He struggled long to keep up an equality with Catherine in her studies, and yielded with poignant though silent regret: but he yielded completely; and there was no…",
     tags: ["english-literature"],
     year: 1847,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "around_the_world_in_eighty_days_verne",
@@ -480,6 +519,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "It happened to be the day of a Parsee festival. These descendants of the sect of Zoroaster—the most thrifty, civilised, intelligent, and austere of the East Indians, among whom are counted the richest native merchants of Bombay—were celebrating a sort of religious carnival,…",
     tags: ["french-literature"],
     year: 1872,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "candide",
@@ -492,6 +532,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Hitherto I had imagined that nothing could equal the beauty of Thunder-ten-Tronckh Castle; but I found I was mistaken. \"The Grand Inquisitor, seeing me one day at Mass, stared long at me, and sent to tell me that he wished to speak on private matters. I was conducted to his…",
     tags: ["french-literature"],
     year: 1759,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "from_the_earth_to_the_moon_verne",
@@ -504,6 +545,7 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "Russia paid in as her contingent the enormous sum of 368,733 roubles. No one need be surprised at this, who bears in mind the scientific taste of the Russians, and the impetus which they have given to astronomical studies—thanks to their numerous observatories. France began…",
     tags: ["french-literature"],
     year: 1865,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "germinal",
@@ -516,5 +558,6 @@ export const BOOKS_PART3: Book[] = [
     excerpt: "For a moment the schoolmaster's pale head was also seen behind the school-house hedge. Among the gardens, the man who was digging stood with one foot on his spade, and with rounded eyes. And the murmur of gossiping gradually increased, with a sound of rattles, like a gust of…",
     tags: ["french-literature"],
     year: 1885,
+    voice: { gender: "male", accent: "en-GB" },
   },
 ];

@@ -159,6 +159,27 @@ struct ChapterTextReflowTests {
     }
 }
 
+/// The reflow cases the web forest's `chapterBlocks.ts` port is tested on too
+/// (`web/tests/chapterBlocks.test.mjs`), so the two rules stay in step.
+struct ChapterTextSharedFixtureTests {
+
+    struct Case: Decodable {
+        let name: String
+        let input: String
+        let expected: String
+    }
+
+    @Test func reflowMatchesTheSharedFixtures() throws {
+        let url = try #require(
+            Bundle.module.url(forResource: "chapter_reflow", withExtension: "json", subdirectory: "Fixtures"))
+        let cases = try JSONDecoder().decode([Case].self, from: Data(contentsOf: url))
+        #expect(!cases.isEmpty)
+        for item in cases {
+            #expect(ChapterText.reflow(item.input) == item.expected, "\(item.name)")
+        }
+    }
+}
+
 private var packsDirectory: URL? {
     guard let path = ProcessInfo.processInfo.environment["GUTENBERG_PACKS"], !path.isEmpty
     else { return nil }

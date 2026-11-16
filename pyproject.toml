@@ -1,0 +1,6 @@
+# Tool configuration only; knowledge_press is not a Python package.
+
+[tool.tscodekg]
+# Index only the web app (web/src); skip its tests and build scripts.
+include = ["web"]
+exclude = ["tests", "scripts", "public"]

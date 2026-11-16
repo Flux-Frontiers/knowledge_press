@@ -297,6 +297,44 @@ public final class AppModel {
 
     static let imageResolutionKey = "imageResolution"
 
+    // MARK: Reading aloud
+
+    /// The Browse reader's read-aloud queue: one, so two chapters never
+    /// speak at once. Starting it quiets the forest's own reading.
+    @ObservationIgnored private(set) lazy var reading: ReadAloud = {
+        let reading = ReadAloud()
+        reading.onStart = { [weak self] in self?.forest.quiet() }
+        return reading
+    }()
+
+    /// The voice the reader reads in, by identifier; empty for the system's
+    /// English voice. Persisted, like the other reading choices.
+    var readVoiceID: String {
+        get { storedReadVoiceID }
+        set {
+            storedReadVoiceID = newValue
+            AppModel.defaults.set(newValue, forKey: AppModel.readVoiceKey)
+        }
+    }
+
+    /// How fast the reader reads, as a multiple of the system's normal rate:
+    /// 0.80 to 1.30, the forest's range.
+    var readRate: Double {
+        get { storedReadRate }
+        set {
+            storedReadRate = newValue
+            AppModel.defaults.set(newValue, forKey: AppModel.readRateKey)
+        }
+    }
+
+    private var storedReadVoiceID: String = AppModel.defaults.string(forKey: AppModel.readVoiceKey) ?? ""
+    private var storedReadRate: Double =
+        AppModel.defaults.object(forKey: AppModel.readRateKey) as? Double ?? AppModel.defaultReadRate
+
+    static let readVoiceKey = "readVoice"
+    static let readRateKey = "readRate"
+    static let defaultReadRate = 0.95
+
     static func initialImageResolution() -> ImageResolution {
         guard let stored = defaults.string(forKey: imageResolutionKey),
             let resolution = ImageResolution(rawValue: stored)
@@ -444,6 +482,7 @@ public final class AppModel {
         searchSettingsAreDefault && synthesisTuning == .default
             && imageResolution == .preview && imageBackendChoice == AppModel.imageAuto
             && workerURLString.isEmpty
+            && readVoiceID.isEmpty && readRate == AppModel.defaultReadRate
     }
 
     /// Put every setting back to its shipped value and clear the worker
@@ -459,6 +498,8 @@ public final class AppModel {
         imageResolution = .preview
         imageBackendChoice = AppModel.imageAuto
         workerURLString = ""
+        readVoiceID = ""
+        readRate = AppModel.defaultReadRate
     }
 
     /// Which engine writes the answer. Defaults to on-device when the

@@ -2,8 +2,10 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
+import { wheelViewPose } from "./wheelMap";
 import { cartLoad, NEUTRAL_SPINE } from "./cartLoad";
-import { cinema } from "./cinema";
+import { cinema, OWNED_SHOT } from "./cinema";
+import { ORBIT_LOOK, ORBIT_R, ORBIT_RATE, ORBIT_UP } from "./startOrbit";
 import { EXPOSURE } from "./Environment";
 import { atGroveStop, treesNear, type Forest } from "./forest";
 import { addDragLook, resetInput, sampleActions, setDragging } from "./input";
@@ -32,16 +34,6 @@ const GOD_NEAR = 2;
 const DRAG_LOOK = 0.0042;
 /** A press that moves farther than this, in pixels, is a drag, not a click. */
 const DRAG_CLICK = 6;
-/**
- * The start screen's and the timeline's slow circle round the redwood: radius and
- * eye height, m, radians a second, and the aim as a fraction of the redwood's height.
- * Far enough out and aimed high enough that the full-grown crown stays in frame
- * (its top about 3° inside the edge at a 58° fov).
- */
-const ORBIT_R = 62;
-const ORBIT_UP = 8;
-const ORBIT_RATE = 0.03;
-const ORBIT_LOOK = 0.4;
 /** The start screen's circle is this much brighter by day, and by START_NIGHT_LIFT more in full dark: behind the title, night reads as black otherwise. */
 const START_DAY_LIFT = 1.25;
 const START_NIGHT_LIFT = 1.0;
@@ -98,7 +90,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     let draggedAt = -Infinity;
     const canLook = () => {
       const g = useGame.getState();
-      return playingRef.current && !g.paused && !g.helpOpen && !g.flight && !g.portrait && g.preferences.camera !== "god";
+      return playingRef.current && !g.paused && !g.helpOpen && !g.flight && !g.portrait && g.preferences.camera !== "god" && g.preferences.camera !== "wheel";
     };
     const end = () => {
       if (drag && drag.moved > DRAG_CLICK) draggedAt = performance.now();
@@ -155,6 +147,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const dt = Math.min(delta, 0.1);
     const game = useGame.getState();
     const { preferences, jump } = game;
+    // A book read aloud has the voice: the tour shows its cards but says nothing.
+    const narrate = preferences.narrate && !game.bookReading;
     const blocked = !playing || paused || game.helpOpen || game.libraryOpen || game.atlasOpen || game.catalogOpen || Boolean(game.plaque) || Boolean(game.readingSlug) || game.mootsOpen || Boolean(game.mootId) || Boolean(document.activeElement?.matches("input, textarea, select, [contenteditable=true]"));
     if (blocked) {
       sim.speed = sim.lat = sim.steering = 0;
@@ -186,6 +180,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       const a = sampleActions();
       let throttle = a.throttle;
       let steer = a.steer;
+      // Driving off from the Wheel's view takes the cart's own view back.
+      if (preferences.camera === "wheel" && (a.throttle || a.steer)) game.setPreferences({ camera: game.groundCamera });
       let tourBrake = false;
       const mode = useGame.getState().travelMode;
       /** Show a tour caption for a while, and drop it once it has had its time (unless replaced). */
@@ -215,7 +211,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           hush();
         }
         // Taking the wheel is not a jump elsewhere: say goodbye.
-        if (wasTouring && !useGame.getState().jump && preferences.narrate && !preferences.silent) {
+        if (wasTouring && !useGame.getState().jump && narrate && !preferences.silent) {
           speak(TOUR_FAREWELL);
         }
       };
@@ -227,14 +223,20 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           useGame.getState().setToast("Free drive");
         } else {
           if (!tourState.tour) {
-            tourState.tour = planTour(forest, sim.x, sim.z, sim.yaw);
+            // Groves already stopped at this lap are passed: a ride broken off picks up where it left off.
+            useGame.getState().startRide();
+            const seen = useGame.getState().ring.stops.filter((g) => forest.circuit.some((wp) => wp.genre === g));
+            tourState.tour = planTour(forest, sim.x, sim.z, sim.yaw, seen);
+            if (seen.length) game.setToast(seen.length >= forest.circuit.length
+              ? "Every grove seen · home to the redwood"
+              : `Picking up the ring · ${forest.circuit.length - seen.length} groves to go`);
             lapSaid.current = false;
             // Set off with the welcome: the whole background the first time, a line after that.
             if (!preferences.silent) {
               const lines = tourIntro({ books: forest.trees.length, groves: forest.groves.length }, tourHeard());
               markTourHeard();
               noteLines(lines);
-              if (preferences.narrate) lines.forEach((line, i) => speak(line, i > 0));
+              if (narrate) lines.forEach((line, i) => speak(line, i > 0));
             }
           }
           const c = steerTour(tourState.tour, sim.x, sim.z, sim.yaw, sim.speed, dt, speaking());
@@ -245,22 +247,25 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
           const stop = tourStop(tourState.tour);
           if (stop !== game.tourStop) {
             game.setTourStop(stop);
+            if (stop) game.markRingStop(stop);
             if (stop) game.setTourNote(null);
             const said = stop ? forest.groves.find((g) => g.genre === stop)?.narration : undefined;
             // Queued, so a stop reached during the welcome waits for it.
-            if (said && preferences.narrate && !preferences.silent) speak(said, true);
+            if (said && narrate && !preferences.silent) speak(said, true);
           }
           // Every grove visited and the cart turning for home: say so once.
           if (tourState.tour.laps > 0 && !lapSaid.current) {
             lapSaid.current = true;
             if (!preferences.silent) {
               note(TOUR_LAP_DONE);
-              if (preferences.narrate) speak(TOUR_LAP_DONE, true);
+              if (narrate) speak(TOUR_LAP_DONE, true);
             }
           }
           useGame.getState().selectGrove(c.genre || null);
           // Back at the redwood: the tour is over, and the cart is the rider's.
           if (tourState.tour.done) {
+            // Every grove this lap, and home: the lap counts (the HUD shows any level it earns).
+            useGame.getState().finishRing(forest.circuit.map((wp) => wp.genre));
             endTour();
             useGame.getState().setTravelMode("free");
             useGame.getState().setToast("Tour over · back at the redwood");
@@ -298,6 +303,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const v = forwardOf(sim.yaw + look.current);
     const inCart = preferences.camera === "cart";
     const godEye = preferences.camera === "god";
+    const wheelView = preferences.camera === "wheel";
     const cam = state.camera as PerspectiveCamera;
     const flight = game.flight;
     const flying = Boolean(flight && flightFrom.current);
@@ -362,6 +368,13 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       // buffer cannot tell the roads from the ground a kilometre away.
       cam.far = state.camera.position.length() + forest.worldRadius * 2;
       cam.near = GOD_NEAR;
+    } else if (wheelView) {
+      // Down on the Wayfarer's Wheel, north up; eased in from wherever the camera was.
+      const pose = wheelViewPose(forest.wayfarer, cam.fov, cam.aspect);
+      state.camera.position.lerp(camPos.set(...pose.cam), 1 - Math.exp(-3 * dt));
+      lookAt.set(...pose.look);
+      cam.far = GROUND_FAR;
+      cam.near = GROUND_NEAR;
     } else if (inCart) {
       // A standing adult's eye level (1.65 m), gazing level over the lantern, so the
       // horizon, plaques and plinths sit where they would on foot; tilt to look up.
@@ -396,7 +409,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     // Tilt by raising or lowering the look point over its horizontal distance.
     // Not on the start screen: god's eye set up there would skip its reset on entering.
     wasGod.current = playing && godEye && !flying && !timeline;
-    if (playing && !godEye && !flying && !timeline) {
+    if (playing && !godEye && !wheelView && !flying && !timeline) {
       // On a portrait screen the level chase view is half road and cart; rest it tilted up a little.
       const rest = preferences.camera === "follow" && cam.aspect < 1 ? PORTRAIT_TILT : 0;
       lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current + rest);
@@ -407,6 +420,13 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
         state.camera.position.lerp(camPos.set(...cinema.cam), cinema.weight);
         lookAt.lerp(camPos.set(...cinema.look), cinema.weight);
       }
+    }
+    // `?ufocam` and `?flyin` (cinema.ts) own the camera outright, over any mode or flight.
+    if (OWNED_SHOT && playing && cinema.weight > 0.999) {
+      state.camera.position.set(...cinema.cam);
+      lookAt.set(...cinema.look);
+      cam.near = GROUND_NEAR;
+      cam.far = GROUND_FAR;
     }
     state.camera.lookAt(lookAt);
     const fovTarget = inCart ? 60 : 58;
@@ -439,6 +459,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       game.selectGrove(null);
     }
 
+    // Well clear of every grove, the next one entered (the same one again too) is a new visit.
+    if (forest.groves.every((g) => Math.hypot(g.x - sim.x, g.z - sim.z) > g.radius * 1.25)) lastMarked.current = null;
     for (const grove of forest.groves) {
       if (Math.hypot(grove.x - sim.x, grove.z - sim.z) < grove.radius) {
         if (lastMarked.current !== grove.genre) {

@@ -1,13 +1,15 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { AdditiveBlending, BackSide, BufferGeometry, CanvasTexture, Color, DirectionalLight, DoubleSide, Float32BufferAttribute, IcosahedronGeometry, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
+import { AdditiveBlending, BackSide, Color, DirectionalLight, DoubleSide, InstancedMesh, Matrix3, MeshStandardMaterial, Object3D, RepeatWrapping, ShaderChunk, ShaderMaterial, SRGBColorSpace, TextureLoader, Vector3 } from "three";
 import type { Forest } from "./forest";
 import type { SkyState } from "./sky";
 import { planetPositions } from "./planets";
 import { starBuffers } from "./stars";
 import { fogMix, overcast, weather } from "./weather";
-import { shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
-import { mulberry32 } from "./math";
+import { shadowCenter, shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
+import { fadeShadowChunk } from "./shadowFade";
+import { cinema, OWNED_SHOT } from "./cinema";
+import { floorLitter, rockGeometry, tuftGeometry } from "./forestFloor";
 import type { SeasonName } from "./seasons";
 import { sim } from "./sim";
 import { useGame } from "./store";
@@ -261,16 +263,22 @@ export function textureAnisotropy(n: number): number {
 }
 
 /**
- * The shadow camera's half-width, metres, and the shadow map's size; one texel
- * is 2 * SHADOW_HALF / SHADOW_MAP. Nothing past SHADOW_HALF from the cart casts
- * a shadow, so at 40 m a grove's shadows appeared as the cart neared it. A Mac
- * or desktop covers 120 m on a 4096 map (texels 5.9 cm, against 3.9 cm);
- * touch screens keep 40 m on 2048.
+ * Touch screens: one shadow map round the cart (or a shot's camera), 60 m each
+ * way on 2048 (texels 5.9 cm), redrawn only when stale. Its shadows fade out
+ * over its outer quarter (shadowFade.ts), so groves ease into shadow as the cart
+ * nears them instead of switching on at the edge. The light sits back twice the
+ * half-width.
  */
-const SHADOW_HALF = COARSE_POINTER ? 40 : 120;
-const SHADOW_MAP = COARSE_POINTER ? 2048 : 4096;
-/** How far the light sits back from the cart along its direction; the shadow camera reaches twice this. */
-const SHADOW_BACK = 2 * SHADOW_HALF;
+const CART_HALF = 60;
+const CART_MAP = 2048;
+/**
+ * A Mac or desktop that takes an 8192 map shadows the whole world at once: a
+ * fixed square 310 m each way from the redwood (the forest's radius is about
+ * 290 m), texels 7.6 cm, so every grove casts. The light sits back one
+ * half-width, which the tallest tree is well inside. About 256 MB of GPU memory.
+ */
+const WORLD_HALF = 310;
+const WORLD_MAP = 8192;
 /** `?nolod` turns off texel snapping and the shadow cache, to compare (shadowCache.ts). */
 const NOLOD = typeof window !== "undefined" && new URLSearchParams(window.location.search).has("nolod");
 /** Shadow map texels snapped, so shadow edges keep still as the cart drives. */
@@ -281,12 +289,19 @@ const SHADOW_SNAP = !NOLOD;
  */
 const SHADOW_CACHE = COARSE_POINTER && !NOLOD;
 
+// Before anything compiles: every sun shadow fades out at its map's edge.
+{
+  const { source, patched } = fadeShadowChunk(ShaderChunk.shadowmap_pars_fragment);
+  if (patched > 0) ShaderChunk.shadowmap_pars_fragment = source;
+  else console.warn("shadowFade: three's shadow lookup changed; shadows will not fade at the edge");
+}
+
 /**
- * The one shadow-casting light, from the sun, the moon or the stars (sky.ts),
- * kept on a modest shadow map around the cart instead of covering the forest.
- * On touch screens the map is redrawn only when stale (shadowCache.ts
- * shadowStale); elsewhere every frame. It is centred on whole texels so its
- * edges keep still as the cart drives.
+ * The sun's (or the moon's, or the stars') one shadow-casting light, sky.ts. A
+ * Mac or desktop: one map over the whole world, redrawn every frame. A touch
+ * screen: a map round the cart, or round a shot's camera (`?flyin`, `?ufocam`),
+ * redrawn only when stale (shadowCache.ts shadowStale). Centred on whole texels
+ * so its edges keep still as the cart drives.
  */
 export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shadows: boolean }) {
   const light = useRef<DirectionalLight>(null);
@@ -296,6 +311,11 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
   // Never from below the ground: a sun on the horizon still lights from just above it.
   const dir = useMemo(() => new Vector3(l.dir[0], Math.max(l.dir[1], 0.05), l.dir[2]).normalize(), [l.dir]);
   const casting = shadows && l.shadow > 0.01;
+  const whole = !COARSE_POINTER && gl.capabilities.maxTextureSize >= WORLD_MAP;
+  // A desktop GPU without 8192 textures keeps the old 120 m map round the cart.
+  const half = whole ? WORLD_HALF : COARSE_POINTER ? CART_HALF : 120;
+  const size = whole ? WORLD_MAP : COARSE_POINTER ? CART_MAP : 4096;
+  const back = whole ? WORLD_HALF : 2 * half;
   useEffect(() => {
     if (!SHADOW_CACHE) return;
     gl.shadowMap.autoUpdate = false;
@@ -306,15 +326,18 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
   useFrame(() => {
     if (!light.current) return;
     const d: [number, number, number] = [dir.x, dir.y, dir.z];
-    const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(sim.x, sim.z, d, (2 * SHADOW_HALF) / SHADOW_MAP) : [sim.x, 0, sim.z];
+    const g = useGame.getState();
+    // The whole world's map stays put; the cart's follows the cart, or a shot that owns the
+    // camera (Player.tsx).
+    const [cx, cz] = whole ? [0, 0] : shadowCenter(sim.x, sim.z, OWNED_SHOT && g.playing && cinema.weight > 0.999 ? cinema : null, half);
+    const [tx, ty, tz] = SHADOW_SNAP ? snapToTexels(cx, cz, d, (2 * half) / size) : [cx, 0, cz];
     target.position.set(tx, ty, tz);
-    light.current.position.set(tx + dir.x * SHADOW_BACK, ty + dir.y * SHADOW_BACK, tz + dir.z * SHADOW_BACK);
+    light.current.position.set(tx + dir.x * back, ty + dir.y * back, tz + dir.z * back);
     target.updateMatrixWorld();
     if (SHADOW_CACHE && casting) {
-      const g = useGame.getState();
-      if (shadowStale(last.current, sim.x, sim.z, d, (g.preferences.motion && !g.paused) || g.timelinePlaying)) {
+      if (shadowStale(last.current, cx, cz, d, (g.preferences.motion && !g.paused) || g.timelinePlaying)) {
         gl.shadowMap.needsUpdate = true;
-        last.current = { x: sim.x, z: sim.z, dir: d, frames: 0 };
+        last.current = { x: cx, z: cz, dir: d, frames: 0 };
       } else if (last.current) {
         last.current.frames++;
       }
@@ -329,92 +352,34 @@ export function Sunlight({ light: l, shadows }: { light: SkyState["light"]; shad
     {/* With no shadow to cast (night, twilight, a low sun) the shadow pass is skipped entirely. */}
     <directionalLight ref={light} target={target} color={l.color}
       intensity={l.intensity} castShadow={casting} shadow-intensity={l.shadow}
-      shadow-mapSize={[SHADOW_MAP, SHADOW_MAP]} shadow-camera-left={-SHADOW_HALF} shadow-camera-right={SHADOW_HALF}
-      shadow-camera-top={SHADOW_HALF} shadow-camera-bottom={-SHADOW_HALF} shadow-camera-near={1} shadow-camera-far={2 * SHADOW_BACK}
-      shadow-bias={-0.0002} shadow-normalBias={0.08} />
+      shadow-mapSize={[size, size]} shadow-camera-left={-half} shadow-camera-right={half}
+      shadow-camera-top={half} shadow-camera-bottom={-half} shadow-camera-near={1} shadow-camera-far={2 * back}
+      // The bias is a fraction of the camera's depth range: about 3 cm of depth either way.
+      shadow-bias={-0.0002 * 160 / (2 * back)} shadow-normalBias={whole ? 0.1 : 0.08} />
   </>;
 }
 
-export function useGroundTexture() {
-  const texture = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = 256;
-    const ctx = canvas.getContext("2d")!;
-    const random = mulberry32(372);
-    ctx.fillStyle = "#b2b6a1";
-    ctx.fillRect(0, 0, 256, 256);
-    for (let i = 0; i < 8000; i++) {
-      const value = 80 + Math.floor(random() * 130);
-      ctx.fillStyle = `rgba(${value},${value},${value * 0.85},0.25)`;
-      ctx.fillRect(random() * 256, random() * 256, 1 + random() * 4, 1 + random() * 3);
-    }
-    const result = new CanvasTexture(canvas);
-    result.wrapS = result.wrapT = RepeatWrapping;
-    result.repeat.set(70, 70);
-    result.colorSpace = SRGBColorSpace;
-    return result;
-  }, []);
-  useEffect(() => () => texture.dispose(), [texture]);
-  return texture;
-}
-
-/** A lumpy, faceted rock: an icosahedron whose vertices are pushed in and out by a hash of their direction. */
-function rockGeometry(seed: number) {
-  const g = new IcosahedronGeometry(1, 1);
-  const p = g.getAttribute("position");
-  for (let i = 0; i < p.count; i++) {
-    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-    // Same direction, same push: shared corners of adjacent faces stay welded.
-    const h = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719 + seed) * 43758.5453;
-    const k = 0.78 + 0.36 * (h - Math.floor(h));
-    p.setXYZ(i, x * k, y * k * 0.72, z * k);
-  }
-  g.computeVertexNormals();
-  return g;
-}
+/** Meters of ground one repeat of the floor texture covers: the photo's real size. */
+export const GROUND_TILE_M = 2;
 
 /**
- * A grass tuft: nine slender blades fanning out from one root, each a curved
- * three-segment strip that tapers to a point and bends outward as it rises.
- * Vertex colour runs dark at the base to light at the tip, so a tuft reads as
- * grass rather than as a solid shape.
+ * The forest floor: Poly Haven's forrest_ground_01 (CC0), a photographed 2 m square of
+ * grass, twigs and leaf litter, repeated at its true size across a ground disc of
+ * `diameter` meters (see public/textures/ground/CREDITS.md). It multiplies the
+ * season's ground color, so its mean was set to the old canvas speckle's and the
+ * seasons land as before.
  */
-function tuftGeometry() {
-  const pos: number[] = [];
-  const col: number[] = [];
-  const index: number[] = [];
-  const rng = mulberry32(911);
-  const blades = 9;
-  for (let b = 0; b < blades; b++) {
-    const a = (b / blades) * Math.PI * 2 + rng() * 0.5;
-    const ox = Math.cos(a), oz = Math.sin(a);
-    // Perpendicular for blade width.
-    const px = -oz, pz = ox;
-    const h = 0.6 + rng() * 0.4;
-    const bend = 0.25 + rng() * 0.35;
-    const w = 0.03 + rng() * 0.015;
-    const first = pos.length / 3;
-    const segs = 3;
-    for (let s = 0; s <= segs; s++) {
-      const t = s / segs;
-      const out = bend * t * t + 0.04; // curves outward more near the tip
-      const cx = ox * out, cz = oz * out, cy = h * t;
-      const half = w * (1 - t) + 0.002;
-      pos.push(cx - px * half, cy, cz - pz * half, cx + px * half, cy, cz + pz * half);
-      const shade = 0.45 + 0.65 * t;
-      col.push(shade, shade, shade, shade, shade, shade);
-    }
-    for (let s = 0; s < segs; s++) {
-      const i = first + s * 2;
-      index.push(i, i + 1, i + 2, i + 1, i + 3, i + 2);
-    }
-  }
-  const g = new BufferGeometry();
-  g.setAttribute("position", new Float32BufferAttribute(pos, 3));
-  g.setAttribute("color", new Float32BufferAttribute(col, 3));
-  g.setIndex(index);
-  g.computeVertexNormals();
-  return g;
+export function useGroundTexture(diameter: number) {
+  const texture = useMemo(() => {
+    const result = new TextureLoader().load("textures/ground/forest_floor.jpg");
+    result.wrapS = result.wrapT = RepeatWrapping;
+    result.repeat.set(diameter / GROUND_TILE_M, diameter / GROUND_TILE_M);
+    result.anisotropy = textureAnisotropy(8);
+    result.colorSpace = SRGBColorSpace;
+    return result;
+  }, [diameter]);
+  useEffect(() => () => texture.dispose(), [texture]);
+  return texture;
 }
 
 /** CC0 ambientCG Rock028 (see public/textures/rock/CREDITS.md), tinted per rock by instance colour. */
@@ -428,6 +393,8 @@ function rockMaterial() {
   };
   return new MeshStandardMaterial({ map: load("color", true), normalMap: load("normal"), roughness: 0.95 });
 }
+
+const litterColor = new Color();
 
 export function ForestFloor({ forest, season }: { forest: Forest; season: SeasonName }) {
   const grass = useRef<InstancedMesh>(null);
@@ -460,53 +427,11 @@ export function ForestFloor({ forest, season }: { forest: Forest; season: Season
   });
   useLayoutEffect(() => {
     if (!grass.current || !rocks.current) return;
-    const random = mulberry32(247);
-    const dummy = new Object3D();
-    const color = new Color();
-    let blades = 0;
-    let stones = 0;
-    const placeRock = (x: number, z: number, size: number) => {
-      dummy.position.set(x, size * 0.18, z); // half-sunk
-      dummy.rotation.set(random() * 0.6, random() * Math.PI * 2, random() * 0.6);
-      dummy.scale.set(size * (0.8 + random() * 0.5), size * (0.6 + random() * 0.5), size * (0.8 + random() * 0.5));
-      dummy.updateMatrix();
-      rocks.current!.setMatrixAt(stones, dummy.matrix);
-      color.set(season === "winter" ? "#eef2f2" : "#d9d8cf").offsetHSL(0, 0, (random() - 0.5) * 0.14);
-      rocks.current!.setColorAt(stones++, color);
-    };
-    for (const tree of forest.trees) {
-      for (let i = 0; i < 24; i++) {
-        const angle = random() * Math.PI * 2;
-        const radius = tree.trunkRadius + 1.3 + random() * 6;
-        const x = tree.x + Math.cos(angle) * radius;
-        const z = tree.z + Math.sin(angle) * radius;
-        // Leave the carriage paths and plazas clear.
-        if (forest.plazas.some((p) => Math.hypot(x - p.x, z - p.z) < p.r)) continue;
-        if (forest.roads.some((r) => {
-          const dx = r.bx - r.ax, dz = r.bz - r.az;
-          const t = Math.max(0, Math.min(1, ((x - r.ax) * dx + (z - r.az) * dz) / (dx * dx + dz * dz)));
-          return Math.hypot(x - r.ax - dx * t, z - r.az - dz * t) < 2;
-        })) continue;
-        // A quarter of the floor litter is stone, the rest grass.
-        if (random() < 0.25) {
-          placeRock(x, z, 0.18 + random() * 0.32);
-          continue;
-        }
-        const height = 0.3 + random() * 0.4;
-        dummy.position.set(x, 0, z);
-        dummy.rotation.set(0, random() * Math.PI * 2, 0);
-        const spread = 0.7 + random() * 0.5;
-        dummy.scale.set(spread, height, spread);
-        dummy.updateMatrix();
-        grass.current.setMatrixAt(blades, dummy.matrix);
-        color.set(season === "winter" ? "#c1bca1" : season === "autumn" ? "#9a793e" : "#637747");
-        color.offsetHSL(0, 0, (random() - 0.5) * 0.16);
-        grass.current.setColorAt(blades++, color);
-      }
-    }
-    grass.current.count = blades;
-    rocks.current.count = stones;
-    for (const mesh of [grass.current, rocks.current]) {
+    const litter = floorLitter(forest, season);
+    for (const [mesh, set] of [[grass.current, litter.grass], [rocks.current, litter.rocks]] as const) {
+      mesh.instanceMatrix.array.set(set.matrix);
+      for (let i = 0; i < set.count; i++) mesh.setColorAt(i, litterColor.fromArray(set.color, i * 3));
+      mesh.count = set.count;
       mesh.instanceMatrix.needsUpdate = true;
       if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
       mesh.computeBoundingSphere();

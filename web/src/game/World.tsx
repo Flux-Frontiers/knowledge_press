@@ -1,3 +1,4 @@
+import { WayfarersWheel } from "./WayfarersWheel";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type ComponentType } from "react";
 import { BufferAttribute, BufferGeometry, CanvasTexture, Color, type FogExp2, InstancedMesh, MeshStandardMaterial, Object3D, RepeatWrapping, SRGBColorSpace, TextureLoader } from "three";
@@ -84,7 +85,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
   const hemiIntensity = 0.78 * (1 + (DAY_OVERRIDE.hemiIntensity - 1) * t);
   const shadows = useGame((s) => s.preferences.shadows);
   const undergrowth = useGame((s) => s.preferences.undergrowth);
-  const groundTexture = useGroundTexture();
+  const groundTexture = useGroundTexture(2 * (forest.worldRadius + 30));
   const groundColor = useMemo(() => {
     const night = new Color(pal.ground);
     const day = night.clone().offsetHSL(0, -0.08, DAY_OVERRIDE.groundLightness);
@@ -139,6 +140,7 @@ export function World({ forest, season }: { forest: Forest; season: SeasonName }
         })}
 
         <CorpusRedwood forest={forest} season={season} />
+        <WayfarersWheel forest={forest} />
         {forest.exhibits.map((e) => {
           const View = EXHIBIT_VIEWS[e.id];
           // An exhibit the timeline has not reached yet is not built; its plaza stays paved.

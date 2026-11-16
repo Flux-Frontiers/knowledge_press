@@ -15,6 +15,12 @@ export type Book = {
    */
   year?: number;
   /**
+   * What a voice reading the book should sound like: its author's gender and
+   * accent, from corpus/authors/voices.json. Absent when neither is known
+   * ("Various"); `accent` is null for a translated author.
+   */
+  voice?: { gender: "male" | "female" | null; accent: string | null };
+  /**
    * Diaries only: one limb per period (a calendar year when dated), earliest
    * first. `bins` counts the period's chunks in equal slices along its limb,
    * by each entry's fraction of the year; trailing empty slices are dropped.

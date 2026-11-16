@@ -194,6 +194,40 @@ test("a voice chosen in Settings wins for its speaker when the browser has it", 
   assert.deepEqual(pair(all, ["Gone Voice", "Also Gone"], men), [daniel, daniel]); // not here: automatic
 });
 
+test("a book read aloud takes its author's voice, and the Settings choice wins", () => {
+  const { readingVoice } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
+  const { all, daniel, moira, samantha, karen } = safari();
+  assert.equal(readingVoice(all, "", want("female", "en-GB")), moira); // Austen
+  assert.equal(readingVoice(all, "", want("male", "en-US")), daniel); // Twain: Safari has no American man
+  assert.equal(readingVoice(all, "", want("male", null)), daniel); // Tolstoy, translated
+  assert.equal(readingVoice(all, ""), samantha); // "Various": the system voice
+  assert.equal(readingVoice(all, "Karen", want("male", "en-US")), karen);
+  assert.equal(readingVoice(all, "Gone Voice", want("female", "en-GB")), moira); // not here: automatic
+});
+
+test("Chrome reads a book in a voice on the device, not a Google voice from the network", () => {
+  const { readingVoice } = require(`${process.env.FOREST_TEST_BUILD}/speech.js`);
+  const daniel = voice("Daniel (English (UK))", "en-GB");
+  const moira = voice("Moira (English (Ireland))", "en-IE");
+  const ukFemale = voice("Google UK English Female", "en-GB", false, false);
+  const ukMale = voice("Google UK English Male", "en-GB", false, false);
+  const chrome = [ukFemale, ukMale, daniel, moira, voice("Samantha (English (US))", "en-US", true)];
+  assert.equal(readingVoice(chrome, "", want("female", "en-GB")), moira);
+  assert.equal(readingVoice(chrome, "", want("male", "en-GB")), daniel);
+  assert.equal(readingVoice(chrome, "Google UK English Male", want("female", "en-GB")), ukMale); // chosen wins
+  assert.equal(readingVoice([ukFemale, ukMale], "", want("female", "en-GB")), ukFemale); // nothing local
+});
+
+test("the reading settings keep a voice name, a speed in range and whole-number positions", () => {
+  const { readPreferences } = require(`${process.env.FOREST_TEST_BUILD}/preferences.js`);
+  const fresh = readPreferences();
+  assert.deepEqual([fresh.readVoice, fresh.readRate, fresh.readingAt], ["", 0.95, {}]);
+  assert.equal(readPreferences({ readRate: 3 }).readRate, 1.3);
+  assert.equal(readPreferences({ readRate: "fast" }).readRate, 0.95);
+  assert.equal(readPreferences({ readVoice: "Moira" }).readVoice, "Moira");
+  assert.deepEqual(readPreferences({ readingAt: { emma: [3, 12], bad: [1], worse: [-1, 2], odd: "x" } }).readingAt, { emma: [3, 12] });
+});
+
 test("a tree's voice decodes from the pack, anything unknown as null", () => {
   const { decodeMoot } = moots();
   const p = pack();

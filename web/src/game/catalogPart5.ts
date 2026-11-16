@@ -12,6 +12,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "They turned out to be messengers or ambassadors from a large body of Indians, united in the common cause of defence, near the Cordillera. The tribe to which they had been sent was on the point of holding a grand council, the feast of mare's flesh was ready, and the dance…",
     tags: ["natural-history"],
     year: 1839,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "a_pickle_for_the_knowing_ones",
@@ -24,6 +25,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "She thought him an honest man, and not so deficient in intellect as many people supposed, and attributed his eccentricities to an excess of animal spirits.--This was probably to some extent true, though it is certain that other spirits contributed in no small degree to the…",
     tags: ["philosophy"],
     year: 1802,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "a_vindication_of_the_rights_of_woman_wollstonecraft",
@@ -36,6 +38,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Women, as well as despots, have now, perhaps, more power than they would have, if the world, divided and subdivided into kingdoms and families, was governed by laws deduced from the exercise of reason; but in obtaining it, to carry on the comparison, their character is…",
     tags: ["philosophy"],
     year: 1792,
+    voice: { gender: "female", accent: "en-GB" },
   },
   {
     slug: "apology_plato",
@@ -48,6 +51,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Or are these sophistries to be regarded as belonging to the age in which he lived and to his personal character, and this apparent haughtiness as flowing from the natural elevation of his position?",
     tags: ["philosophy"],
     year: -399,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "beyond_good_and_evil",
@@ -60,6 +64,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "There is far too much witchery and sugar in the sentiments \"for others\" and \"NOT for myself,\" for one not needing to be doubly distrustful here, and for one asking promptly: \"Are they not perhaps--DECEPTIONS?\"--That they PLEASE--him who has them, and him who enjoys their…",
     tags: ["philosophy"],
     year: 1886,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "common_sense",
@@ -72,6 +77,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "And a man hath good reason to believe that there is as much of king-craft, as priest-craft, in withholding the scripture from the public in Popish countries. For monarchy in every instance is the Popery of government. To the evil of monarchy we have added that of hereditary…",
     tags: ["philosophy"],
     year: 1776,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "critique_of_pure_reason_kant",
@@ -84,6 +90,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "But if I investigate more closely the relation of given cognitions in every judgement, and distinguish it, as belonging to the understanding, from the relation which is produced according to laws of the reproductive imagination (which has only subjective validity), I find…",
     tags: ["philosophy"],
     year: 1781,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "discourse_on_the_method_of_rightly_conducting_ones_reason_an",
@@ -96,6 +103,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "For my own part, I should doubtless have belonged to the latter class, had I received instruction from but one master, or had I never known the diversities of opinion that from time immemorial have prevailed among men of the greatest learning.",
     tags: ["philosophy"],
     year: 1637,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "ecce_homo",
@@ -108,6 +116,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "The best cooking is that of Piedmont. Alcoholic drinks do not agree with me; a single glass of wine or beer a day is amply sufficient to turn life into a valley of tears for me;--in Munich live my antipodes. Although I admit that this knowledge came to me somewhat late, it…",
     tags: ["philosophy"],
     year: 1888,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "essays_first_and_second_series_emerson",
@@ -120,6 +129,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Check this lying hospitality and lying affection. Live no longer to the expectation of these deceived and deceiving people with whom we converse. Say to them, ‘O father, O mother, O wife, O brother, O friend, I have lived with you after appearances hitherto. Henceforward I am…",
     tags: ["philosophy"],
     year: 1841,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "groundwork_of_the_metaphysics_of_morals_kant",
@@ -132,6 +142,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "But what sort of law can that be, the conception of which must determine the will, even without paying any regard to the effect expected from it, in order that this will may be called good absolutely and without qualification?",
     tags: ["philosophy"],
     year: 1785,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "hegels_lectures_on_the_history_of_philosophy_volume_3_of_3",
@@ -144,6 +155,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Their fate, their lives, their writings—which often fill many volumes—manifest only this restlessness of their being, this tearing asunder, the revolt of their inner being against present existence and the longing to get out of it and reach certainty. These remarkable…",
     tags: ["philosophy"],
     year: 1805,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "leviathan",
@@ -156,6 +168,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Therefore a Righteous man, does not lose that Title, by one, or a few unjust Actions, that proceed from sudden Passion, or mistake of Things, or Persons: nor does an Unrighteous man, lose his character, for such Actions, as he does, of forbeares to do, for feare: because his…",
     tags: ["philosophy"],
     year: 1651,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "meditations",
@@ -168,6 +181,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "To follow reason for ordinary duties and actions is common to them also, who believe not that there be any gods, and for their advantage would make no conscience to betray their own country; and who when once the doors be shut upon them, dare do anything.",
     tags: ["philosophy"],
     year: 170,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "nicomachean_ethics_aristotle",
@@ -180,6 +194,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "These things then to which the bias is, we call more contrary, and so total want of self-control (the excess) is more contrary than the defect is to perfected self-mastery.",
     tags: ["philosophy"],
     year: -340,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "on_liberty_mill",
@@ -192,6 +207,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "It is necessary to consider separately these two hypotheses, each of which has a distinct branch of the argument corresponding to it. We can never be sure that the opinion we are endeavouring to stifle is a false opinion; and if we were sure, stifling it would be an evil…",
     tags: ["philosophy"],
     year: 1859,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "on_the_duty_of_civil_disobedience_thoreau",
@@ -204,6 +220,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "In their practice, nations agree with Paley; but does anyone think that Massachusetts does exactly what is right at the present crisis? “A drab of state, a cloth-o’-silver slut, To have her train borne up, and her soul trail in the dirt.” Practically speaking, the opponents…",
     tags: ["philosophy"],
     year: 1849,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "phaedo_plato",
@@ -216,6 +233,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "The last ground of our belief in immortality, and the strongest, is the perfection of the divine nature. The mere fact of the existence of God does not tend to show the continued existence of man. An evil God or an indifferent God might have had the power, but not the will,…",
     tags: ["philosophy"],
     year: -360,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "plutarchs_morals",
@@ -228,6 +246,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "But if a wife be by nature austere and apathetic, and no lover of pleasure, the husband must make the best of it, for, as Phocion said, when Antipater enjoined on him an action neither honourable nor becoming, \"You cannot have me as a friend and flatterer both,\" so he must…",
     tags: ["philosophy"],
     year: 100,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "poetics_aristotle",
@@ -240,6 +259,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Again, if you string together a set of speeches expressive of character, and well finished in point of diction and thought, you will not produce the essential tragic effect nearly so well as with a play which, however deficient in these respects, yet has a plot and…",
     tags: ["philosophy"],
     year: -335,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "politics_aristotle",
@@ -252,6 +272,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "By this means he says he shall necessarily have an equal number of each rank, but he is mistaken--for the majority will always consist of those of the first rank, and the most considerable people; and for this reason, that many of the commonalty not being obliged to it, will…",
     tags: ["philosophy"],
     year: -350,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "second_treatise_of_government",
@@ -264,6 +285,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "And if he also bartered away plums, that would have rotted in a week, for nuts that would last good for his eating a whole year, he did no injury; he wasted not the common stock; destroyed no part of the portion of goods that belonged to others, so long as nothing perished…",
     tags: ["philosophy"],
     year: 1689,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_art_of_war_sun_tzu",
@@ -276,6 +298,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "In spite of all this, the great body of Chinese sentiment, from Lao Tzŭ downwards, and especially as reflected in the standard literature of Confucianism, has been consistently pacific and intensely opposed to militarism in any form. It is such an uncommon thing to find any…",
     tags: ["philosophy"],
     year: -500,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_birth_of_tragedy_or_hellenism_and_pessimism",
@@ -288,6 +311,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "But also that delicate line, which the dream-picture must not overstep--lest it act pathologically (in which case appearance, being reality pure and simple, would impose upon us)--must not be wanting in the picture of Apollo: that measured limitation, that freedom from the…",
     tags: ["philosophy"],
     year: 1872,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_city_of_god_volume_i",
@@ -300,6 +324,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "But, in Numa's reign, I would know whether the long peace was maintained in spite of the incursions of wicked neighbours, or if these incursions were discontinued that the peace might be maintained? For if even then Rome was harassed by wars, and yet did not meet force with…",
     tags: ["philosophy"],
     year: 426,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_crown_of_wild_olive",
@@ -312,6 +337,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "It is no otherwise withdrawn if I bury it, nor even if I choose to make it, and others, into a golden cup, and drink out of them; since a rise in the price of the wine, or of other things, may at any time cause me to melt the cup and throw it back into currency; and the…",
     tags: ["philosophy"],
     year: 1866,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_enchiridion",
@@ -324,6 +350,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "For this reason there is a continuous renascence of Stoicism from Descartes, Grotius, and Bishop Butler, to Montesquieu, Adam Smith, and Kant. In this long development in modern times, the tiny _Enchiridion_ of Epictetus played a remarkable part. The translations of Epictetus…",
     tags: ["philosophy"],
     year: 125,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_federalist_papers",
@@ -336,6 +363,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Controversies and wars among the members themselves have been so common, that the German annals are crowded with the bloody pages which describe them. Previous to the peace of Westphalia, Germany was desolated by a war of thirty years, in which the emperor, with one half of…",
     tags: ["philosophy"],
     year: 1788,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_kama_sutra_of_vatsyayana",
@@ -348,6 +376,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "On the other hand when the female exceeds the male in point of size, her union with a man immediately next to her in size is called low union, and is of two kinds; while her union with a man most remote from her in size is called the lowest union, and is of one kind only. In…",
     tags: ["philosophy"],
     year: 300,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_lives_and_opinions_of_eminent_philosophers",
@@ -360,6 +389,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "III. He is, as some people say, the first writer who reduced the conversations of Socrates into the form of dialogues. And when Pericles offered to provide for him, and invited him to come to him, he said that he would not sell his freedom of speech. IV. There was also…",
     tags: ["philosophy"],
     year: 230,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_prince",
@@ -372,6 +402,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Further, it facilitates matters when the prince, having no other state, is compelled to reside there in person. But to come to those who, by their own ability and not through fortune, have risen to be princes, I say that Moses, Cyrus, Romulus, Theseus, and such like are the…",
     tags: ["philosophy"],
     year: 1513,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_problems_of_philosophy_russell",
@@ -384,6 +415,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Thus the colour we see is a result of the ray as it reaches the eye, and not simply a property of the object from which the ray comes. Hence, also, provided certain waves reach the eye, we shall see a certain colour, whether the object from which the waves start has any…",
     tags: ["philosophy"],
     year: 1912,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_republic",
@@ -396,6 +428,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "But now imagine further, that they descend into their old habitations;—in that underground dwelling they will not see as well as their fellows, and will not be able to compete with them in the measurement of the shadows on the wall; there will be many jokes about the man who…",
     tags: ["philosophy"],
     year: -375,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_social_contract_rousseau",
@@ -408,6 +441,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Sometimes they confuse all these sections, and sometimes they distinguish them; they turn the Sovereign into a fantastic being composed of several connected pieces: it is as if they were making man of several bodies, one with eyes, one with arms, another with feet, and each…",
     tags: ["philosophy"],
     year: 1762,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_symposium_plato",
@@ -420,6 +454,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Like the sophists and like Plato himself, though in a different sense, he begins his discussion by an appeal to mythology, and distinguishes between the elder and younger love. The value which he attributes to such loves as motives to virtue and philosophy is at variance with…",
     tags: ["philosophy"],
     year: -385,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_twilight_of_the_idols_or_how_to_philosophize_with_the_ha",
@@ -432,6 +467,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Christianity as sprung from Jewish roots and comprehensible only as grown upon this soil, represents the counter-movement against that morality of breeding, of race and of privilege:—it is essentially an anti-Aryan religion: Christianity is the transvaluation of all Aryan…",
     tags: ["philosophy"],
     year: 1889,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_wealth_of_nations",
@@ -444,6 +480,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "These, however, though the highest, are by no means the only high prices which seem to have been occasioned by the civil wars. The second event was the bounty upon the exportation of corn, granted in 1688. The bounty, it has been thought by many people, by encouraging…",
     tags: ["philosophy"],
     year: 1776,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "the_origin_and_development_of_the_moral_ideas",
@@ -456,6 +493,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Even a dog which, in playing with another dog, hurts itself, for instance, by running into a tree, changes its angry attitude immediately it notices the real nature of that which caused it pain.[1] [Footnote 1: Hiram Stanley, _Studies in the Evolutionary Psychology of…",
     tags: ["philosophy"],
     year: 1906,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "thus_spake_zarathustra",
@@ -468,6 +506,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Every one regardeth dying as a great matter: but as yet death is not a festival. Not yet have people learned to inaugurate the finest festivals. The consummating death I show unto you, which becometh a stimulus and promise to the living. His death, dieth the consummating one…",
     tags: ["philosophy"],
     year: 1883,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "utilitarianism_mill",
@@ -480,6 +519,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "The objectors perhaps may doubt whether human beings, if taught to consider happiness as the end of life, would be satisfied with such a moderate share of it. But great numbers of mankind have been satisfied with much less. The main constituents of a satisfied life appear to…",
     tags: ["philosophy"],
     year: 1861,
+    voice: { gender: "male", accent: "en-GB" },
   },
   {
     slug: "anna_karenina",
@@ -492,6 +532,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "He stood, listened, and gazed sometimes down at the wet mossy ground, sometimes at Laska listening all alert, sometimes at the sea of bare tree tops that stretched on the slope below him, sometimes at the darkening sky, covered with white streaks of cloud. A hawk flew high…",
     tags: ["russian-literature"],
     year: 1877,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "boyhood_tolstoy",
@@ -504,6 +545,7 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "When for the first time Woloda wore Dutch pleated shirts, I at once said that I was greatly put out at not being given similar ones, and each time that he arranged his collar, I felt that he was doing so on purpose to offend me. But, what tormented me most of all was the idea…",
     tags: ["russian-literature"],
     year: 1854,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "childhood_tolstoy",
@@ -516,5 +558,6 @@ export const BOOKS_PART5: Book[] = [
     excerpt: "Indeed, he more than once asked as he patted it, “Is he quiet?” He looked very well on horseback--almost a grown-up young man, and held himself so upright in the saddle that I envied him since my shadow seemed to show that I could not compare with him in looks. Presently…",
     tags: ["russian-literature"],
     year: 1852,
+    voice: { gender: "male", accent: null },
   },
 ];

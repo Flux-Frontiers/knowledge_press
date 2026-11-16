@@ -12,6 +12,12 @@ import type { GroundCamera } from "./godEye";
 import { host } from "./host";
 import { bookBySlug } from "./catalog";
 import { bookShown } from "./timeline";
+import { stopBook, type BookReading } from "./bookReading";
+import { interruptReading, resumeInterrupted } from "./speech";
+import { finishLap, readRing, ringStop, startRide, type RingProgress, type Tier } from "./achievements";
+
+/** How long after a moot closes a book it cut off goes on: after the moot player's own hush. */
+const BOOK_RESUME_MS = 400;
 
 const SAVE_KEY = "kpf-library-v1";
 const SAVE_VERSION = 1;
@@ -20,18 +26,30 @@ type SaveBlob = {
   version: number;
   library: string[];
   grovesVisited: string[];
+  /** Exhibits whose plaque has been opened to read, by exhibit id. */
+  plaques: string[];
+  /** The ring: groves stopped at on the lap under way, laps done, and their seasons. */
+  ring: RingProgress;
+  /** Times each grove has been arrived at (driven into, or stopped at on the ring), by genre. */
+  groveVisits: Record<string, number>;
+  /** Times each book has been opened in the reader, by slug. */
+  reads: Record<string, number>;
   /** The browser's location, rounded to 0.1 degree, once it has been given. */
   place: Place | null;
   preferences: Preferences;
 };
 
-const TIME_CYCLE: Record<TimeMode, TimeMode> = { live: "dawn", dawn: "day", day: "dusk", dusk: "night", night: "live" };
+const TIME_CYCLE: Record<TimeMode, TimeMode> = { live: "dawn", dawn: "day", day: "dusk", dusk: "twilight", twilight: "night", night: "live" };
 
 function loadSave(): SaveBlob {
   const defaults: SaveBlob = {
     version: SAVE_VERSION,
     library: [],
     grovesVisited: [],
+    plaques: [],
+    ring: readRing(null),
+    groveVisits: {},
+    reads: {},
     place: null,
     preferences: readPreferences(),
   };
@@ -46,6 +64,10 @@ function loadSave(): SaveBlob {
       version: SAVE_VERSION,
       library: Array.isArray(parsed.library) ? parsed.library : [],
       grovesVisited: Array.isArray(parsed.grovesVisited) ? parsed.grovesVisited : [],
+      plaques: Array.isArray(parsed.plaques) ? parsed.plaques.filter((p): p is string => typeof p === "string") : [],
+      ring: readRing(parsed.ring),
+      groveVisits: readTally(parsed.groveVisits),
+      reads: readTally(parsed.reads),
       place: parsed.place && Number.isFinite(parsed.place.lat) && Number.isFinite(parsed.place.lon) ? parsed.place : null,
       preferences: readPreferences(parsed.preferences),
     };
@@ -54,9 +76,25 @@ function loadSave(): SaveBlob {
   }
 }
 
+/** A saved count per key, keeping only whole positive counts. */
+function readTally(v: unknown): Record<string, number> {
+  if (!v || typeof v !== "object") return {};
+  return Object.fromEntries(Object.entries(v as Record<string, unknown>)
+    .filter((e): e is [string, number] => typeof e[1] === "number" && Number.isInteger(e[1]) && e[1] > 0));
+}
+
+/** The tally with one more for `key`. */
+function bump(t: Record<string, number>, key: string): Record<string, number> {
+  return { ...t, [key]: (t[key] ?? 0) + 1 };
+}
+
 function persist(s: {
   library: string[];
   grovesVisited: string[];
+  plaques: string[];
+  ring: RingProgress;
+  groveVisits: Record<string, number>;
+  reads: Record<string, number>;
   place: Place | null;
   preferences: Preferences;
 }) {
@@ -65,6 +103,10 @@ function persist(s: {
       version: SAVE_VERSION,
       library: s.library,
       grovesVisited: s.grovesVisited,
+      plaques: s.plaques,
+      ring: s.ring,
+      groveVisits: s.groveVisits,
+      reads: s.reads,
       place: s.place,
       preferences: s.preferences,
     };
@@ -82,7 +124,8 @@ export type JumpPose = {
   yaw: number;
 };
 
-export type PlaqueText = { title: string; byline: string; body: string };
+/** `figure` adds a drawing under the text: "wayfarer" is the Wayfarer's Wheel's map (WayfarerMap.tsx). */
+export type PlaqueText = { title: string; byline: string; body: string; figure?: "wayfarer" };
 
 export type GameStore = {
   playing: boolean;
@@ -118,6 +161,23 @@ export type GameStore = {
   setTimeline: (year: number | null, playing?: boolean) => void;
   library: string[];
   grovesVisited: string[];
+  plaques: string[];
+  ring: RingProgress;
+  /** Times each grove has been arrived at, by genre; grows its stud on the Wayfarer's Wheel. */
+  groveVisits: Record<string, number>;
+  /** Times each book has been opened in the reader, by slug; grows its grove's stud. */
+  reads: Record<string, number>;
+  /** A level just reached, for the award card (HUD AwardCard); null once dismissed. */
+  award: { title: string; tier: Tier; line: string } | null;
+  setAward: (award: { title: string; tier: Tier; line: string } | null) => void;
+  /** An exhibit's plaque opened to read: Curator progress. */
+  markPlaque: (id: string) => void;
+  /** A ring ride setting off: a finished lap's studs go dark for the new one. */
+  startRide: () => void;
+  /** Pulled up at a grove's sign on the ring: the lap under way has been there. */
+  markRingStop: (genre: string) => void;
+  /** Home at the redwood off the ring: counts the lap if every grove was stopped at. */
+  finishRing: (groves: string[]) => boolean;
   nearbySlug: string | null;
   nearbyDist: number;
   nearbyDismissed: string | null;
@@ -149,6 +209,8 @@ export type GameStore = {
   plaque: PlaqueText | null;
   /** The book open in the reader (Reader.tsx), by slug. */
   readingSlug: string | null;
+  /** The book being read aloud (bookReading.ts), open or not; the tour says nothing while there is one. */
+  bookReading: BookReading | null;
   /** The list of saved moots (MootOverlay.tsx) is open. */
   mootsOpen: boolean;
   /** The moot playing in the moot overlay, by id; a live moot's is "live-<n>". */
@@ -211,6 +273,8 @@ export type GameStore = {
   openCatalog: (genre: string | null) => void;
   openPlaque: (plaque: PlaqueText | null) => void;
   openReader: (slug: string | null) => void;
+  /** Mirror the book being read aloud, and remember where it is. */
+  setBookReading: (reading: BookReading | null) => void;
   openMoots: (open: boolean) => void;
   playMoot: (id: string | null) => void;
   /** Open the moot player on a new live moot. */
@@ -267,7 +331,8 @@ export const useGame = create<GameStore>((set, get) => ({
   setPreferences: (patch) => {
     const preferences = readPreferences({ ...get().preferences, ...patch });
     const intoGodEye = preferences.camera === "god" && get().preferences.camera !== "god";
-    set(preferences.camera === "god" ? { preferences } : { preferences, groundCamera: preferences.camera });
+    // God's eye and the Wheel's view are not the cart's: the cart's last view is kept to come back to.
+    set(preferences.camera === "god" || preferences.camera === "wheel" ? { preferences } : { preferences, groundCamera: preferences.camera });
     if (intoGodEye) get().clearCards();
     persist(get());
   },
@@ -289,6 +354,10 @@ export const useGame = create<GameStore>((set, get) => ({
   searchPick: null,
   library: initial.library,
   grovesVisited: initial.grovesVisited,
+  plaques: initial.plaques,
+  ring: initial.ring,
+  groveVisits: initial.groveVisits,
+  reads: initial.reads,
   nearbySlug: null,
   nearbyDist: 99,
   nearbyDismissed: null,
@@ -312,6 +381,7 @@ export const useGame = create<GameStore>((set, get) => ({
   catalogGenre: null,
   plaque: null,
   readingSlug: null,
+  bookReading: null,
   mootsOpen: false,
   mootId: null,
   liveMoot: null,
@@ -339,6 +409,7 @@ export const useGame = create<GameStore>((set, get) => ({
   play: () => set({ playing: true, paused: false }),
   exit: () => {
     resetInput();
+    stopBook();
     set({
       playing: false, paused: false, travelMode: "free", tourStop: null, tourNote: null,
       libraryOpen: false, atlasOpen: false, catalogOpen: false, helpOpen: false, plaque: null, readingSlug: null,
@@ -382,12 +453,38 @@ export const useGame = create<GameStore>((set, get) => ({
     set({ library: [], lastReadSlug: null });
     persist(get());
   },
+  markPlaque: (id) => {
+    if (get().plaques.includes(id)) return;
+    const plaques = [...get().plaques, id];
+    set({ plaques });
+    persist({ ...get(), plaques });
+  },
+  startRide: () => {
+    const ring = startRide(get().ring);
+    if (ring === get().ring) return;
+    set({ ring });
+    persist({ ...get(), ring });
+  },
+  markRingStop: (genre) => {
+    // Every stop is a visit to the grove, even one already seen this lap.
+    const ring = ringStop(get().ring, genre);
+    set({ ring, groveVisits: bump(get().groveVisits, genre) });
+    persist(get());
+  },
+  finishRing: (groves) => {
+    const { ring, counted } = finishLap(get().ring, groves, get().season);
+    if (!counted) return false;
+    set({ ring });
+    persist({ ...get(), ring });
+    return true;
+  },
+  award: null,
+  setAward: (award) => set({ award }),
   markGrove: (genre) => {
     const grovesVisited = get().grovesVisited;
-    if (grovesVisited.includes(genre)) return;
-    const next = [...grovesVisited, genre];
-    set({ grovesVisited: next });
-    persist({ ...get(), grovesVisited: next });
+    const next = grovesVisited.includes(genre) ? grovesVisited : [...grovesVisited, genre];
+    set({ grovesVisited: next, groveVisits: bump(get().groveVisits, genre) });
+    persist(get());
   },
   setNearby: (nearbySlug, nearbyDist, speed, pinnedDist = Infinity) => {
     // Roads pass within 3 m of trunks, so distance alone would pop a card at
@@ -432,10 +529,33 @@ export const useGame = create<GameStore>((set, get) => ({
   openCatalog: (catalogGenre) => set({ catalogOpen: true, catalogGenre, atlasOpen: false, libraryOpen: false }),
   setCatalogOpen: (catalogOpen) => set({ catalogOpen }),
   openPlaque: (plaque) => set(plaque ? { plaque, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { plaque: null }),
-  openReader: (readingSlug) => set(readingSlug ? { readingSlug, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { readingSlug: null }),
+  openReader: (readingSlug) => {
+    if (!readingSlug) {
+      set({ readingSlug: null });
+      return;
+    }
+    const reads = readingSlug === get().readingSlug ? get().reads : bump(get().reads, readingSlug);
+    set({ readingSlug, reads, catalogOpen: false, atlasOpen: false, libraryOpen: false });
+    persist(get());
+  },
+  setBookReading: (bookReading) => {
+    set({ bookReading });
+    if (bookReading?.state === "playing") {
+      const at = get().preferences.readingAt;
+      get().setPreferences({ readingAt: { ...at, [bookReading.slug]: [bookReading.chapter, bookReading.block] } });
+    }
+  },
   openMoots: (mootsOpen) => set(mootsOpen ? { mootsOpen, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { mootsOpen }),
-  playMoot: (mootId) => set(mootId ? { mootId, liveMoot: null, mootsOpen: false } : { mootId: null, liveMoot: null, mootSpeaker: null }),
-  holdMoot: (liveMoot) => set({ liveMoot, mootId: `live-${++liveMoots}`, mootsOpen: false }),
+  // A moot cuts off a book being read aloud; the book goes on once the moot closes.
+  playMoot: (mootId) => {
+    if (mootId) interruptReading();
+    else if (get().mootId) window.setTimeout(resumeInterrupted, BOOK_RESUME_MS);
+    set(mootId ? { mootId, liveMoot: null, mootsOpen: false } : { mootId: null, liveMoot: null, mootSpeaker: null });
+  },
+  holdMoot: (liveMoot) => {
+    interruptReading();
+    set({ liveMoot, mootId: `live-${++liveMoots}`, mootsOpen: false });
+  },
   setMootSpeaker: (mootSpeaker) => set({ mootSpeaker }),
   // Leaving the ring drops the grove it was pointing at, so the lantern trail goes with it.
   setTravelMode: (travelMode) =>
@@ -457,6 +577,8 @@ export const useGame = create<GameStore>((set, get) => ({
       ...(next === "free" ? { selectedGrove: null } : {}),
       toast,
     });
+    // Setting off from the Wheel's view: ride in the cart's own view, not watching the table.
+    if (next === "circuit" && get().preferences.camera === "wheel") get().setPreferences({ camera: get().groundCamera });
   },
   requestJump: (jump, toast) => {
     resetInput();
@@ -470,7 +592,7 @@ export const useGame = create<GameStore>((set, get) => ({
     });
   },
   clearJump: () => set({ jump: null }),
-  groundCamera: initial.preferences.camera === "god" ? "follow" : initial.preferences.camera,
+  groundCamera: initial.preferences.camera === "god" || initial.preferences.camera === "wheel" ? "follow" : initial.preferences.camera,
   flight: null,
   flyTo: (pose, toast, reopen) => {
     // The cards close so the flight can be watched; `reopen`'s card comes back on landing.

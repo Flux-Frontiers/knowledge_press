@@ -18,6 +18,8 @@ on:
     paths:
       - "web/**"
       - "!web/**.md"
+      # The reflow fixtures web/tests/chapterBlocks.test.mjs shares with the app.
+      - "app/GutenbergKGKit/Tests/GutenbergKGKitTests/Fixtures/chapter_*.json"
       - "docs/**"
       - "mkdocs.yml"
       - ".github/workflows/web.yml"
@@ -26,6 +28,8 @@ on:
     paths:
       - "web/**"
       - "!web/**.md"
+      # The reflow fixtures web/tests/chapterBlocks.test.mjs shares with the app.
+      - "app/GutenbergKGKit/Tests/GutenbergKGKitTests/Fixtures/chapter_*.json"
       - "docs/**"
       - "mkdocs.yml"
       - ".github/workflows/web.yml"

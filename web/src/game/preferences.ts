@@ -1,8 +1,8 @@
 export type Preferences = {
   pace: "gentle" | "brisk";
   sensitivity: number;
-  /** "god" looks down on the whole forest from above the hub. */
-  camera: "follow" | "high" | "cart" | "god";
+  /** "god" looks down on the whole forest from above the hub; "wheel" down on the Wayfarer's Wheel. */
+  camera: "follow" | "high" | "cart" | "wheel" | "god";
   motion: boolean;
   /** The sun's shadows. Off by default: on an iPad mini they halved the frame rate. */
   shadows: boolean;
@@ -24,10 +24,28 @@ export type Preferences = {
   speakMoots: boolean;
   /** Each tree's voice by name, first tree first; "" picks one automatically. */
   mootVoices: [string, string];
+  /** The book reader's text size; see READING_SIZES. */
+  readingSize: ReadingSize;
+  /** The voice that reads a book aloud, by name; "" picks one from the book's author. */
+  readVoice: string;
+  /** Reading-aloud speed, 0.8 to 1.3. */
+  readRate: number;
+  /** Where each book was left, by slug: chapter index and block index. */
+  readingAt: Record<string, [number, number]>;
   /** The GutenbergKG worker that holds live moots (liveMoots.ts); "" for none, the default. */
   mootWorker: string;
   /** The worker's MOOT_TOKEN, when it sets one; "" otherwise. */
   mootToken: string;
+};
+
+export type ReadingSize = "small" | "medium" | "large" | "larger";
+
+/** The reader's text sizes, smallest first, with each one's Tailwind type scale. */
+export const READING_SIZES: Record<ReadingSize, string> = {
+  small: "text-base",
+  medium: "text-lg sm:text-xl",
+  large: "text-xl sm:text-2xl",
+  larger: "text-2xl sm:text-3xl",
 };
 
 export type FogLevel = "clear" | "light" | "normal" | "heavy";
@@ -45,11 +63,11 @@ export type LeafDetail = "low" | "medium" | "high" | "ultra";
 export const LEAF_SCALE: Record<LeafDetail, number> = { low: 0.1, medium: 0.25, high: 0.5, ultra: 1 };
 
 /** The camera views' names, in the order the C key and the bar's button step through them. */
-export const CAMERA_NAME = { follow: "Behind the cart", high: "High view", cart: "In the cart", god: "God's eye" } as const;
+export const CAMERA_NAME = { cart: "In the cart", follow: "Behind the cart", high: "High view", god: "God's eye", wheel: "The Wayfarer's Wheel" } as const;
 
 /** The view after this one. */
 export function nextCamera(camera: Preferences["camera"]): Preferences["camera"] {
-  return ({ follow: "high", high: "cart", cart: "god", god: "follow" } as const)[camera];
+  return ({ cart: "follow", follow: "high", high: "god", god: "wheel", wheel: "cart" } as const)[camera];
 }
 
 export function readPreferences(value?: Partial<Preferences>): Preferences {
@@ -57,7 +75,7 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     pace: value?.pace === "brisk" ? "brisk" : "gentle",
     sensitivity: typeof value?.sensitivity === "number" && Number.isFinite(value.sensitivity)
       ? Math.max(0.5, Math.min(1.5, value.sensitivity)) : 1,
-    camera: value?.camera === "high" || value?.camera === "cart" || value?.camera === "god" ? value.camera : "follow",
+    camera: value?.camera === "high" || value?.camera === "cart" || value?.camera === "wheel" || value?.camera === "god" ? value.camera : "follow",
     motion: typeof value?.motion === "boolean" ? value.motion
       : !(typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches),
     // The old `detail` setting is ignored on purpose: it was saved on for everyone, so reading it would keep shadows on.
@@ -75,7 +93,22 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     mootVoices: Array.isArray(value?.mootVoices) && value.mootVoices.length === 2
       && value.mootVoices.every((n) => typeof n === "string")
       ? [value.mootVoices[0], value.mootVoices[1]] : ["", ""],
+    readingSize: value?.readingSize && value.readingSize in READING_SIZES ? value.readingSize : "medium",
+    readVoice: typeof value?.readVoice === "string" ? value.readVoice : "",
+    readRate: typeof value?.readRate === "number" && Number.isFinite(value.readRate)
+      ? Math.max(0.8, Math.min(1.3, value.readRate)) : 0.95,
+    readingAt: readingAt(value?.readingAt),
     mootWorker: typeof value?.mootWorker === "string" && value.mootWorker.trim() ? value.mootWorker.trim() : "",
     mootToken: typeof value?.mootToken === "string" ? value.mootToken : "",
   };
+}
+
+/** Saved reading positions, each a pair of whole numbers; anything else is dropped. */
+function readingAt(value: unknown): Record<string, [number, number]> {
+  const out: Record<string, [number, number]> = {};
+  if (!value || typeof value !== "object") return out;
+  for (const [slug, at] of Object.entries(value)) {
+    if (Array.isArray(at) && at.length === 2 && at.every((n) => Number.isInteger(n) && n >= 0)) out[slug] = [at[0], at[1]];
+  }
+  return out;
 }

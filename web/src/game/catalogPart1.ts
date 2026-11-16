@@ -12,6 +12,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Does three hundred dollars lay around every day for people to pick up? Some folks think the nigger ain’t far from here. I’m one of them—but I hain’t talked it around. A few days ago I was talking with an old couple that lives next door in the log shanty, and they happened to…",
     tags: ["american-literature"],
     year: 1884,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "ebony_and_crystal_poems_in_verse_and_prose",
@@ -24,6 +25,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "*Black dreams; the pale and sorrowful desire* Whose eyes have looked on Lethe, and have seen, Deep in the sliding ebon tide serene, Their own vain light inverted; ashen fire, With wasted lilies, late and languishing; Autumnal roses blind with rain; slow foam From…",
     tags: ["american-literature"],
     year: 1922,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "leaves_of_grass",
@@ -36,6 +38,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "To have the gag remov’d from one’s mouth! To have the feeling to-day or any day I am sufficient as I am. O something unprov’d! something in a trance! To escape utterly from others’ anchors and holds! To drive free! to love free! to dash reckless and dangerous! To court…",
     tags: ["american-literature"],
     year: 1855,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "moby_dick",
@@ -48,6 +51,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "And who composed the first narrative of a whaling-voyage? Who, but no less a prince than Alfred the Great, who, with his own royal pen, took down the words from Other, the Norwegian whale-hunter of those times! And who pronounced our glowing eulogy in Parliament? Who, but…",
     tags: ["american-literature"],
     year: 1851,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "my_antonia_cather",
@@ -60,6 +64,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Fuchs said he ‘got on fine with the kids,’ and liked the mother, though she played a sorry trick on him. In mid-ocean she proceeded to have not one baby, but three! This event made Fuchs the object of undeserved notoriety, since he was travelling with her. The steerage…",
     tags: ["american-literature"],
     year: 1918,
+    voice: { gender: "female", accent: "en-US" },
   },
   {
     slug: "o_pioneers_cather",
@@ -72,6 +77,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Bergson was weeping quietly. These family discussions always depressed her, and made her remember all that she had been torn away from. “I don’t see why the boys are always taking on about going away,” she said, wiping her eyes. “I don’t want to move again; out to some raw…",
     tags: ["american-literature"],
     year: 1913,
+    voice: { gender: "female", accent: "en-US" },
   },
   {
     slug: "tales_of_mystery_and_imagination_poe",
@@ -84,6 +90,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Thus I found that my senses would shortly give way altogether, and I had already clutched one of the valve ropes with the view of attempting a descent, when the recollection of the trick I had played the three creditors, and the possible consequences to myself, should I…",
     tags: ["american-literature"],
     year: 1845,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_age_of_innocence_wharton",
@@ -96,6 +103,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "He tried to analyse the trick, to find a clue to it in the way the chairs and tables were grouped, in the fact that only two Jacqueminot roses (of which nobody ever bought less than a dozen) had been placed in the slender vase at his elbow, and in the vague pervading perfume…",
     tags: ["american-literature"],
     year: 1920,
+    voice: { gender: "female", accent: "en-US" },
   },
   {
     slug: "the_awakening_chopin",
@@ -108,6 +116,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "I wonder if any night on earth will ever again be like this one. It is like a night in a dream. The people about me are like some uncanny, half-human beings. There must be spirits abroad to-night.” “There are,” whispered Robert, “Didn’t you know this was the twenty-eighth of…",
     tags: ["american-literature"],
     year: 1899,
+    voice: { gender: "female", accent: "en-US" },
   },
   {
     slug: "the_call_of_the_wild",
@@ -120,6 +129,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "They made good time down the chain of lakes which fills the craters of extinct volcanoes, and late that night pulled into the huge camp at the head of Lake Bennett, where thousands of goldseekers were building boats against the break-up of the ice in the spring. Buck made his…",
     tags: ["american-literature"],
     year: 1903,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_house_of_mirth_wharton",
@@ -132,6 +142,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "But perhaps it’s rather that I never had any choice. There was no one, I mean, to tell me about the republic of the spirit.” “There never is—it’s a country one has to find the way to one’s self.” “But I should never have found my way there if you hadn’t told me.” “Ah, there…",
     tags: ["american-literature"],
     year: 1905,
+    voice: { gender: "female", accent: "en-US" },
   },
   {
     slug: "the_jungle_sinclair",
@@ -144,6 +155,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "He had gone all to ruin with the drink, however, and lost his power; one of his sons, who was a good man, had kept him and the family up for a year or two, but then he had got sick with consumption. That was another thing, Grandmother Majauszkiene interrupted herself—this…",
     tags: ["american-literature"],
     year: 1905,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_legend_of_sleepy_hollow_irving",
@@ -156,6 +168,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Thus, by divers little makeshifts, in that ingenious way which is commonly denominated “by hook and by crook,” the worthy pedagogue got on tolerably enough, and was thought, by all who understood nothing of the labor of headwork, to have a wonderfully easy life of it.",
     tags: ["american-literature"],
     year: 1820,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_raven_and_other_poems_poe",
@@ -168,6 +181,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "One by one they sound, like the chiming of the brazen and ebony clock, in \"The Masque of the Red Death,\" which made the waltzers pause with \"disconcert and tremulousness and meditation,\" as often as the hour came round. Of all these mystical cadences, the plaint of _The…",
     tags: ["american-literature"],
     year: 1845,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_red_badge_of_courage",
@@ -180,6 +194,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "The strain of present circumstances he felt to be intolerable. The philosophical tall soldier measured a sandwich of cracker and pork and swallowed it in a nonchalant manner. “Oh, I suppose we must go reconnoitering around the country jest to keep ’em from getting too close,…",
     tags: ["american-literature"],
     year: 1894,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_scarlet_letter",
@@ -192,6 +207,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Madame Hester would have winced at that, I warrant me. But she—the naughty baggage—little will she care what they put upon the bodice of her gown!",
     tags: ["american-literature"],
     year: 1850,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_sea_wolf",
@@ -204,6 +220,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "And ever out of the north-east the brave wind blows, driving us on our course two hundred and fifty miles between the dawns. It saddens me and gladdens me, the gait with which we are leaving San Francisco behind and with which we are foaming down upon the tropics. Each day…",
     tags: ["american-literature"],
     year: 1904,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_souls_of_black_folk_du_bois",
@@ -216,6 +233,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Naturally the Negroes resented, at first bitterly, signs of compromise which surrendered their civil and political rights, even though this was to be exchanged for larger chances of economic development. The rich and dominating North, however, was not only weary of the race…",
     tags: ["american-literature"],
     year: 1903,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_star_treader_and_other_poems",
@@ -228,6 +246,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Thy darks subdue All light that treads thee down a space, Exulting o'er thy deeps. The cycles die, and lo! thy darkness reaps The flame of mightiest stars; In aeon-implicating wars Thou tearest planets from their place; Worlds granite-spined To thine erodents yield Their…",
     tags: ["american-literature"],
     year: 1912,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_works_of_edgar_allan_poe_volume_2_poe",
@@ -240,6 +259,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "My acquaintance with him was casual altogether; and I am scarcely warranted in saying that I know him at all; but to have seen and conversed with a man of so _prodigious_ a notoriety as he has attained, or _will_ attain in a few days, is not a small matter, as times go. “The…",
     tags: ["american-literature"],
     year: 1845,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_works_of_edgar_allan_poe_volume_3_poe",
@@ -252,6 +272,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "With this end, great attention must be paid, not only to the bulk taken in, but to the nature of the bulk, and whether there be a full or only a partial cargo. In most kinds of freight the stowage is accomplished by means of a screw. Thus, in a load of tobacco or flour, the…",
     tags: ["american-literature"],
     year: 1845,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_works_of_edgar_allan_poe_volume_4_poe",
@@ -264,6 +285,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "This fact was unknown to the travelling companion who introduced me. The keepers, ten in number, having been suddenly overpowered, were first well tarred, then carefully feathered, and then shut up in underground cells. They had been so imprisoned for more than a month,…",
     tags: ["american-literature"],
     year: 1845,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_works_of_edgar_allan_poe_volume_5_poe",
@@ -276,6 +298,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "But these are my own reflections and I am by no means sure that I am right in attributing them to him. At all events the phrase in question grew daily in favor, notwithstanding the gross impropriety of a man betting his brains like bank-notes—but this was a point which my…",
     tags: ["american-literature"],
     year: 1845,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "the_yellow_wallpaper",
@@ -288,6 +311,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "He said we came here solely on my account, that I was to have perfect rest and all the air I could get. “Your exercise depends on your strength, my dear,” said he, “and your food somewhat on your appetite; but air you can absorb all the time.” So we took the nursery, at the…",
     tags: ["american-literature"],
     year: 1892,
+    voice: { gender: "female", accent: "en-US" },
   },
   {
     slug: "uncle_toms_cabin",
@@ -300,6 +324,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "It took no inconsiderable perseverance to arouse the inmates; but at last the respectable proprietor appeared, and undid the door. He was a great, tall, bristling Orson of a fellow, full six feet and some inches in his stockings, and arrayed in a red flannel hunting-shirt. A…",
     tags: ["american-literature"],
     year: 1852,
+    voice: { gender: "female", accent: "en-US" },
   },
   {
     slug: "walden",
@@ -312,6 +337,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "There are those who have used all their arts to persuade me to undertake the support of some poor family in the town; and if I had nothing to do,—for the devil finds employment for the idle,—I might try my hand at some such pastime as that.",
     tags: ["american-literature"],
     year: 1854,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "white_fang_london",
@@ -324,6 +350,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "He could resist the call of the world no longer. Besides, he was hungry. He crawled over to his mate and tried to persuade her to get up. But she only snarled at him, and he walked out alone into the bright sunshine to find the snow-surface soft under foot and the travelling…",
     tags: ["american-literature"],
     year: 1906,
+    voice: { gender: "male", accent: "en-US" },
   },
   {
     slug: "a_selection_from_the_discourses_of_epictetus_with_the_enchei",
@@ -336,6 +363,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "It is shameful for philosophers thus to contemplate the works of nature. For what is a master? Man is not the master of man; but death is, and life and pleasure and pain; for if he comes without these things, bring Cæsar to me and you will see how firm I am. But when he shall…",
     tags: ["ancient-classical"],
     year: 108,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "de_officiis_cicero",
@@ -348,6 +376,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "All this the citizen who is patriotic, brave, and worthy of a leading place in the state will shun with abhorrence; he will dedicate himself unreservedly to his country, without aiming at influence or power for himself; and he will devote himself to the state in its entirety…",
     tags: ["ancient-classical"],
     year: -44,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "histories_herodotus",
@@ -360,6 +389,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "For this reason then the Ionians also made for themselves twelve cities; for at any rate to say that these are any more Ionians than the other Ionians, or have at all a nobler descent, is mere folly, considering that a large part of them are Abantians from Euboea, who have no…",
     tags: ["ancient-classical"],
     year: -440,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "history_of_the_peloponnesian_war_thucydides",
@@ -372,6 +402,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "And it is only the Athenians, who, fearless of consequences, confer their benefits not from calculations of expediency, but in the confidence of liberality. “In short, I say that as a city we are the school of Hellas, while I doubt if the world can produce a man who, where he…",
     tags: ["ancient-classical"],
     year: -431,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "medea_of_euripides",
@@ -384,6 +415,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "The feast hath filled them: all is well! _Others._ I heard a song, but it comes no more. Where the tears ran over: A keen cry but tired, tired: A woman's cry for her heart's desired, For a traitor's kiss and a lost lover. But a prayer, methinks, yet riseth sore To God, to…",
     tags: ["ancient-classical"],
     year: -431,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "metamorphoses_ovid",
@@ -396,6 +428,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Soon as the son of Clymene had arrived thither by an ascending path, and entered the house of his parent, {thus} doubted of; he immediately turned his steps to the presence of his father, and stood at a distance, for he could not bear the refulgence nearer. Arrayed in a…",
     tags: ["ancient-classical"],
     year: 1,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "minor_dialogues_together_with_the_dialogue_on_clemency",
@@ -408,6 +441,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Now, no sane man is angry with nature: for what should we say if a man chose to be surprised that fruit did not hang on the thickets of a forest, or to wonder at bushes and thorns not being covered with some useful berry? No one is angry when nature excuses a defect.",
     tags: ["ancient-classical"],
     year: 55,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "oedipus_king_of_thebes",
@@ -420,6 +454,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "OEDIPUS. And what was that? One thing has often brought Others, could we but catch one little clue. CREON. 'Twas not one man, 'twas robbers--that he knew-- Who barred the road and slew him: a great band. OEDIPUS. Robbers?... What robber, save the work was planned By treason…",
     tags: ["ancient-classical"],
     year: -429,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "on_the_nature_of_things_lucretius",
@@ -432,6 +467,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Lastly, whatso thou markest to disperse Upon the instant--smoke, and cloud, and flame-- Must not (even though not all of smooth and round) Be yet co-linked with atoms intertwined, That thus they can, without together cleaving, So pierce our body and so bore the rocks.…",
     tags: ["ancient-classical"],
     year: -55,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "parallel_lives_plutarch",
@@ -444,6 +480,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "As, indeed, there came no good of it; for the tribunes, who were present, perceiving how the proposal of Marcius took, ran out into the crowd with exclamations, calling on the plebeians to stand together, and come in to their assistance. The assembly met, and soon became…",
     tags: ["ancient-classical"],
     year: 110,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_aeneid",
@@ -456,6 +493,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Far on the right, her dogs foul Scylla hides: Charybdis roaring on the left presides, And in her greedy whirlpool sucks the tides; Then spouts them from below: with fury driv’n, The waves mount up and wash the face of heav’n. But Scylla from her den, with open jaws, The…",
     tags: ["ancient-classical"],
     year: -19,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_birds_aristophanes",
@@ -468,6 +506,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "PISTHETAERUS What for? EUELPIDES Epops is going to sing again. EPOPS (IN THE COPPICE) Epopoi poi popoi, epopoi, popoi, here, here, quick, quick, quick, my comrades in the air; all you who pillage the fertile lands of the husbandmen, the numberless tribes who gather and devour…",
     tags: ["ancient-classical"],
     year: -414,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_clouds_aristophanes",
@@ -480,6 +519,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "Soc. It becomes the old man to speak words of good omen, and to hearken to my prayer. O sovereign King, immeasurable Air, who keepest the earth suspended, and through bright Aether, and ye august goddesses, the Clouds, sending thunder and lightning, arise, appear in the air,…",
     tags: ["ancient-classical"],
     year: -423,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_consolation_of_philosophy_boethius",
@@ -492,6 +532,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "She who still veils herself from others hath fully discovered to thee her whole character. If thou likest her, take her as she is, and do not complain. If thou abhorrest her perfidy, turn from her in disdain, renounce her, for baneful are her delusions. The very thing which…",
     tags: ["ancient-classical"],
     year: 523,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_eleven_comedies_volume_1",
@@ -504,6 +545,7 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "SAUSAGE-SELLER. I will undertake that, and in three days too! But listen to this further oracle, by which Apollo puts you on your guard against the snares of the greedy fist. DEMOS. Of what greedy fist? SAUSAGE-SELLER. The god in this oracle very clearly points to the hand of…",
     tags: ["ancient-classical"],
     year: -425,
+    voice: { gender: "male", accent: null },
   },
   {
     slug: "the_eleven_comedies_volume_2",
@@ -516,5 +558,6 @@ export const BOOKS_PART1: Book[] = [
     excerpt: "PISTHETAERUS. By Zeus, it no longer croaks the same thing it did. EUELPIDES. And which way does it tell us to go now? PISTHETAERUS. It says that, by dint of gnawing, it will devour my fingers. EUELPIDES. What misfortune is ours! we strain every nerve to get to the birds,[179]…",
     tags: ["ancient-classical"],
     year: -425,
+    voice: { gender: "male", accent: null },
   },
 ];

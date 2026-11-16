@@ -94,6 +94,8 @@ public struct SettingsView: View {
 
             illustrationSection
 
+            readingSection
+
             corpusSection
 
             Section {
@@ -287,6 +289,28 @@ public struct SettingsView: View {
             .foregroundStyle(.secondary)
         }
         .task { await model.refreshImageBackends() }
+    }
+
+    /// The Browse reader's voice and speed.
+    private var readingSection: some View {
+        @Bindable var model = model
+        return CollapsibleSection("🔊 Reading aloud", key: "reading") {
+            Picker("Voice", selection: $model.readVoiceID) {
+                Text("Automatic").tag("")
+                ForEach(readingVoiceChoices(), id: \.id) { voice in
+                    Text(voice.label).tag(voice.id)
+                }
+            }
+            LabeledSlider(label: "Speed", value: $model.readRate, range: 0.8...1.3, format: "%.2f×")
+            Text(
+                "The play button in a chapter reads it aloud and goes on to the next. "
+                    + "Automatic matches the book's author: Austen in a British woman's voice, "
+                    + "Twain in an American man's. Enhanced and Premium voices sound best; "
+                    + "download them in the system's Spoken Content settings."
+            )
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        }
     }
 
 }

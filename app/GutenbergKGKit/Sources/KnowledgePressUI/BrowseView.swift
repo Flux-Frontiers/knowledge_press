@@ -267,30 +267,64 @@ private struct ChapterListView: View {
 }
 
 private struct ChapterReaderView: View {
+    @Environment(AppModel.self) private var model
     let genre: String
     let book: String
     @State var sectionId: String
     let browser: any CorpusBrowser
     @Binding var loadError: String?
     @State private var content: ChapterContent?
+    /// Set when a chapter was read to its end, so the next one is read too.
+    @State private var goOn = false
+    /// The book's author voice from `core.pack`, for the automatic voice.
+    @State private var authorVoice: AuthorVoice?
+
+    /// The chapter cut into blocks once, when it loads, not on every highlight.
+    @State private var blocks: [ChapterBlocks.Block] = []
+
+    /// The block being read aloud, or -1.
+    private var readingBlock: Int {
+        model.reading.state == .idle ? -1 : model.reading.block
+    }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-                if let content {
-                    Text(content.title ?? "")
-                        .font(.title2.bold())
-                    Text(ChapterText.reflow(content.text))
-                        .font(.body)
-                        .textSelection(.enabled)
-                        .lineSpacing(4)
-                    pager(content)
-                } else {
-                    ProgressView().padding(.top, 40)
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 14) {
+                    if let content {
+                        Text(content.title ?? "")
+                            .font(.title2.bold())
+                            .id("top")
+                        ForEach(Array(blocks.enumerated()), id: \.offset) { index, block in
+                            BlockText(block: block)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(
+                                    index == readingBlock ? Color.accentColor.opacity(0.12) : .clear,
+                                    in: RoundedRectangle(cornerRadius: 6)
+                                )
+                                .padding(.horizontal, -6)
+                                .contentShape(Rectangle())
+                                // While a reading is going, tap a paragraph to read from it.
+                                .onTapGesture {
+                                    if model.reading.state != .idle, !block.spoken.isEmpty { read(from: index) }
+                                }
+                                .id(index)
+                        }
+                        pager(content)
+                    } else {
+                        ProgressView().padding(.top, 40)
+                    }
                 }
+                .textSelection(.enabled)
+                .padding()
+                .frame(maxWidth: 700, alignment: .leading)
             }
-            .padding()
-            .frame(maxWidth: 700, alignment: .leading)
+            .onChange(of: readingBlock) { _, block in
+                guard block >= 0, model.reading.state == .playing else { return }
+                withAnimation { proxy.scrollTo(block, anchor: .center) }
+            }
+            .onChange(of: sectionId) { _, _ in proxy.scrollTo("top", anchor: .top) }
         }
         .navigationTitle(content?.title ?? "Chapter")
         // The chapter heading is already the first thing in the body; a
@@ -298,12 +332,53 @@ private struct ChapterReaderView: View {
         #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
         #endif
+        .toolbar {
+            if blocks.contains(where: { !$0.spoken.isEmpty }) {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: toggleReading) {
+                        Label(
+                            model.reading.state == .playing ? "Pause reading" : "Read aloud",
+                            systemImage: model.reading.state == .playing ? "pause.fill" : "play.fill")
+                    }
+                }
+            }
+        }
         .task(id: sectionId) { await load() }
+        .task { authorVoice = await browser.authorVoice(genre: genre, book: book) }
+        // Leaving the chapter for the list, another tab or another book stops the voice.
+        .onDisappear { model.reading.stop() }
+    }
+
+    private func toggleReading() {
+        switch model.reading.state {
+        case .playing: model.reading.pause()
+        case .paused: model.reading.resume()
+        case .idle: read(from: 0)
+        }
+    }
+
+    private func read(from index: Int) {
+        model.reading.read(
+            blocks.map(\.spoken), from: index,
+            voiceID: readingVoiceID(chosen: model.readVoiceID, want: authorVoice), rate: model.readRate
+        ) {
+            if let next = content?.nextId {
+                goOn = true
+                sectionId = next
+            }
+        }
+    }
+
+    /// Turn the chapter by hand: a reading stops.
+    private func turn(to id: String?) {
+        guard let id else { return }
+        model.reading.stop()
+        sectionId = id
     }
 
     private func pager(_ content: ChapterContent) -> some View {
         HStack {
-            Button("◀︎ Previous") { if let id = content.prevId { sectionId = id } }
+            Button("◀︎ Previous") { turn(to: content.prevId) }
                 .disabled(content.prevId == nil)
             Spacer()
             if let index = content.index, let total = content.total {
@@ -312,7 +387,7 @@ private struct ChapterReaderView: View {
                     .foregroundStyle(.secondary)
             }
             Spacer()
-            Button("Next ▶︎") { if let id = content.nextId { sectionId = id } }
+            Button("Next ▶︎") { turn(to: content.nextId) }
                 .disabled(content.nextId == nil)
         }
         .font(.callout)
@@ -321,8 +396,85 @@ private struct ChapterReaderView: View {
 
     private func load() async {
         do {
-            content = try await browser.chapter(genre: genre, book: book, sectionId: sectionId)
+            let loaded = try await browser.chapter(genre: genre, book: book, sectionId: sectionId)
+            blocks = ChapterBlocks.blocks(loaded.text, title: loaded.title ?? "")
+            content = loaded
             loadError = nil
+            if goOn {
+                goOn = false
+                read(from: 0)
+            }
         } catch { loadError = error.localizedDescription }
+    }
+}
+
+/// One block as the page sets it: prose and verse in a serif face, verse
+/// line by line, headings centered, notes and captions small and gray.
+private struct BlockText: View {
+    let block: ChapterBlocks.Block
+
+    var body: some View {
+        switch block.kind {
+        case .verse:
+            VStack(alignment: .leading, spacing: 2) {
+                ForEach(Array(ChapterBlocks.lines(block.runs).enumerated()), id: \.offset) { _, line in
+                    Text(Self.styled(line))
+                }
+            }
+            .font(.system(.body, design: .serif))
+            .lineSpacing(3)
+        case .heading:
+            Text(Self.styled(block.runs))
+                .font(.system(.callout, design: .serif).weight(.semibold))
+                .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center)
+                .padding(.top, 8)
+        case .note:
+            Text(Self.styled(block.runs))
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        case .caption:
+            Text(Self.styled(block.runs))
+                .font(.system(.callout, design: .serif).italic())
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center)
+        case .prose:
+            Text(Self.styled(block.runs))
+                .font(.system(.body, design: .serif))
+                .lineSpacing(4)
+        }
+    }
+
+    /// The runs as one attributed string: italics, bold, footnote marks
+    /// raised and small, asides small in brackets.
+    static func styled(_ runs: [ChapterBlocks.Run]) -> AttributedString {
+        var out = AttributedString()
+        for run in runs {
+            switch run.style {
+            case .italic:
+                var piece = AttributedString(run.text)
+                piece.inlinePresentationIntent = .emphasized
+                out += piece
+            case .bold:
+                var piece = AttributedString(run.text)
+                piece.inlinePresentationIntent = .stronglyEmphasized
+                out += piece
+            case .mark:
+                var piece = AttributedString(run.text)
+                piece.font = .caption2
+                piece.baselineOffset = 6
+                piece.foregroundColor = .secondary
+                out += piece
+            case .aside:
+                var piece = AttributedString("[\(run.text)]")
+                piece.font = .footnote
+                piece.foregroundColor = .secondary
+                out += piece
+            case nil:
+                out += AttributedString(run.text)
+            }
+        }
+        return out
     }
 }

@@ -34,11 +34,8 @@ app/fm-repro/FMRepro.xcodeproj/
 app/fm-repro/Info.plist
 app/fm-repro/build/
 
-# Screenshots and test renders from checking the forest by hand.
-renders/tests/
-
-# Icon concept sketches; the chosen artwork lives in app/icon/.
-renders/icon-concepts/
+# Renders: test screenshots, icon concepts, tvOS tests, forest videos.
+renders/
 
 # KG artefacts. The snapshot manifests under .tscodekg/snapshots/ are the
 # tracked history; the graph and vector databases are rebuilt locally.
@@ -61,3 +58,6 @@ site/
 
 # AgentKG conversational memory (local)
 .agentkg/
+
+# Blender runs the forest3d scripts with Python and caches their imports.
+__pycache__/

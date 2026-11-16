@@ -30,14 +30,15 @@ driving.
 
 ## Cameras
 
-++c++ steps through four cameras. **Camera** in settings picks one directly.
+++c++ steps through five cameras, in this order. **Camera** in settings picks one directly.
 
 | Camera | View |
 | --- | --- |
+| In the cart | From the seat. The lantern is beside you. |
 | Behind the cart | The default. Follows a few meters behind, at head height. |
 | High view | Behind and above, looking down at the cart and the road ahead. |
-| In the cart | From the seat. The lantern is beside you. |
 | God's eye | The whole forest from above the hub, with each grove's name over it. |
+| The Wayfarer's Wheel | Down on the Wheel's table on the hub plaza. Driving, or setting off on the guided tour, goes back to the cart's view. |
 
 ### Zoom, pan and fly from god's eye
 
@@ -70,6 +71,16 @@ welcome and a line on how the forest is made; later tours say a line.
 
 The tour says when it has been around every grove, then drives back to the
 redwood and ends there, facing it. The cart is yours again.
+
+Started from among the trees, the tour first finds a way round the trunks to
+the nearest road: the cart backs off the tree it is parked at, turns to face
+the way out, and drives it at a steady pace.
+
+A ride broken off is not lost. The forest remembers which groves the tour has
+stopped at on the lap under way, so the next ride, after a reload too, drives
+past those and stops only at the rest. Riding every grove and home to the
+redwood earns the Wayfarer award; see
+[Achievements](reading.md#achievements).
 
 To hop off, steer, brake, or reverse. ++q++ or **End tour** also ends it.
 The cart is yours again where you left it.
