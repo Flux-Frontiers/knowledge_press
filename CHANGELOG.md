@@ -22,6 +22,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   most every ten minutes, and offers a reload when a newer version is out.
   The app's own forest never shows it.
 
+### Fixed
+
+- **A chat saved as the app opens stays in the sidebar.** Listing the saved
+  chats rewrites their index, and a listing that ran beside a save could write
+  the older list last, so the chat stayed on disk but dropped off the sidebar
+  until the next save. The store now takes one lock across reads and writes.
+  This was also the occasional App CI failure in the relaunch test.
+
 ## [1.50.0] - 2026-11-16
 
 1.50 marks reading aloud and achievements; there are no 1.42-1.49 releases.

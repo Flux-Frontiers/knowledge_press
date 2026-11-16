@@ -28,6 +28,13 @@ struct ConversationStore: Sendable {
     private static let conversationFile = "conversation.json"
     private static let imagesDirectory = "images"
 
+    /// Held across every read-modify-write of the directory. `summaries()`
+    /// rebuilds the index as well as `save`, so a listing that read the
+    /// directory just before a save landed could otherwise write its older
+    /// list over the save's: the chat stays on disk but drops off the sidebar.
+    /// Static because each `AppModel` holds its own copy of the store.
+    private static let lock = NSLock()
+
     init(directory: URL) {
         self.directory = directory
     }
@@ -129,6 +136,10 @@ struct ConversationStore: Sendable {
     /// titles without decoding every answer, and it is never the authority on
     /// what conversations exist.
     func summaries() throws -> [ConversationSummary] {
+        try Self.lock.withLock { try unlockedSummaries() }
+    }
+
+    private func unlockedSummaries() throws -> [ConversationSummary] {
         if let data = try? Data(contentsOf: indexURL),
             let decoded = try? Self.decoder.decode([ConversationSummary].self, from: data)
         {
@@ -151,6 +162,10 @@ struct ConversationStore: Sendable {
     /// into place, so a crash or a kill mid-write leaves the previous version
     /// intact rather than a truncated file that will not decode.
     func save(_ conversation: Conversation) throws {
+        try Self.lock.withLock { try unlockedSave(conversation) }
+    }
+
+    private func unlockedSave(_ conversation: Conversation) throws {
         let directory = conversationDirectory(conversation.id)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
 
@@ -165,11 +180,13 @@ struct ConversationStore: Sendable {
 
     /// Remove a conversation and everything under it, then refresh the index.
     func delete(_ id: UUID) throws {
-        let directory = conversationDirectory(id)
-        if FileManager.default.fileExists(atPath: directory.path) {
-            try FileManager.default.removeItem(at: directory)
+        try Self.lock.withLock {
+            let directory = conversationDirectory(id)
+            if FileManager.default.fileExists(atPath: directory.path) {
+                try FileManager.default.removeItem(at: directory)
+            }
+            _ = try? rebuildIndex()
         }
-        _ = try? rebuildIndex()
     }
 
     /// Remove every conversation, then refresh the index.
@@ -178,13 +195,15 @@ struct ConversationStore: Sendable {
     /// uses to decide what counts as a conversation, so anything else that
     /// ends up beside them is left alone.
     func deleteAll() throws {
-        let contents =
-            (try? FileManager.default.contentsOfDirectory(
-                at: directory, includingPropertiesForKeys: nil)) ?? []
-        for url in contents where UUID(uuidString: url.lastPathComponent) != nil {
-            try FileManager.default.removeItem(at: url)
+        try Self.lock.withLock {
+            let contents =
+                (try? FileManager.default.contentsOfDirectory(
+                    at: directory, includingPropertiesForKeys: nil)) ?? []
+            for url in contents where UUID(uuidString: url.lastPathComponent) != nil {
+                try FileManager.default.removeItem(at: url)
+            }
+            _ = try? rebuildIndex()
         }
-        _ = try? rebuildIndex()
     }
 
     /// Write a turn's illustration beside its conversation.
