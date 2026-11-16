@@ -75,6 +75,8 @@ public struct SplashOverlay<Content: View>: View {
                     }
             }
         }
+        // After the splash, so the notes are not hidden under it.
+        .modifier(WhatsNewOnUpdate(ready: !showSplash))
     }
 
     private func dismiss() {
