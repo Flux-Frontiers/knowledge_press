@@ -30,14 +30,15 @@ driving.
 
 ## Cameras
 
-++c++ steps through four cameras. **Camera** in settings picks one directly.
+++c++ steps through five cameras, in this order. **Camera** in settings picks one directly.
 
 | Camera | View |
 | --- | --- |
+| In the cart | From the seat. The lantern is beside you. |
 | Behind the cart | The default. Follows a few meters behind, at head height. |
 | High view | Behind and above, looking down at the cart and the road ahead. |
-| In the cart | From the seat. The lantern is beside you. |
 | God's eye | The whole forest from above the hub, with each grove's name over it. |
+| The Wayfarer's Wheel | Down on the Wheel's table on the hub plaza. Driving, or setting off on the guided tour, goes back to the cart's view. |
 
 ### Zoom, pan and fly from god's eye
 

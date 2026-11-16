@@ -21,9 +21,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - **A view of the Wayfarer's Wheel.** The camera button (and C) gains a
-  fifth view between In the cart and God's eye: down on the Wheel at a slant,
+  fifth view, after God's eye: down on the Wheel at a slant,
   north up, the table filling the screen. Driving off returns to the cart's
-  view.
+  view. The views now step In the cart, Behind the cart, High view, God's
+  eye, the Wheel, and round again.
 - **The Wayfarer's Wheel has a card.** Beside the table, or looking down on
   it, a card shows its level and this ride's progress, with a button that
   opens the full plaque and map. It takes the redwood's card's place there.
