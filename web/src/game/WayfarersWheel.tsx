@@ -22,6 +22,10 @@ const TOP_Y = 0.95;
 const TABLE_R = 0.82;
 const MAP_R = 0.7;
 const STUD_R = 0.028;
+/** The lamp: its post this far north of the centre, inside the cart's keep-off radius; its hood this high, this far north. */
+const LAMP_POST = 0.9;
+const LAMP_Y = 1.75;
+const LAMP_REACH = 0.15;
 
 const BODY =
   "The forest from above, in bronze: the redwood at the hub, its spoke roads, the two ring roads, " +
@@ -38,6 +42,7 @@ export function WayfarersWheel({ forest }: { forest: Forest }) {
   const library = useGame((s) => s.library);
   const grovesVisited = useGame((s) => s.grovesVisited);
   const plaques = useGame((s) => s.plaques);
+  const day = useGame((s) => s.timeOfDay === "day");
   const tier = tracks({ library, grovesVisited, plaques, ring },
     { books: forest.trees.length, groves: forest.groves.length, exhibits: forest.exhibits.length })[0]!.tier;
 
@@ -57,6 +62,20 @@ export function WayfarersWheel({ forest }: { forest: Forest }) {
     const top = new CylinderGeometry(TABLE_R, TABLE_R - 0.03, 0.05, 48);
     top.translate(0, TOP_Y - 0.02, 0);
     parts.push(top);
+    // A lamp post at the table's north edge, its arm reaching over the map.
+    const post = new CylinderGeometry(0.024, 0.032, LAMP_Y + 0.08, 10);
+    post.translate(0, (LAMP_Y + 0.08) / 2, -LAMP_POST);
+    parts.push(post);
+    const arm = new CylinderGeometry(0.016, 0.016, LAMP_POST - LAMP_REACH, 8);
+    arm.rotateX(Math.PI / 2);
+    arm.translate(0, LAMP_Y + 0.08, -(LAMP_POST + LAMP_REACH) / 2);
+    parts.push(arm);
+    const hood = new CylinderGeometry(0.03, 0.11, 0.08, 16, 1, true);
+    hood.translate(0, LAMP_Y + 0.04, -LAMP_REACH);
+    parts.push(hood);
+    const body = mergeGeometries(parts.map((p) => p.toNonIndexed()));
+    parts.forEach((p) => p.dispose());
+    parts.length = 0;
     // The roads in relief: rings as thin tori, spokes as bars from hub to the last ring.
     const lastRing = Math.max(...forest.roadLines.filter((l) => l.kind === "ring").map((l) => Math.hypot(...l.pts[0]!)));
     for (const l of forest.roadLines) {
@@ -78,12 +97,15 @@ export function WayfarersWheel({ forest }: { forest: Forest }) {
     const boss = new CylinderGeometry(0.045, 0.06, 0.03, 16);
     boss.translate(0, TOP_Y + 0.015, 0);
     parts.push(boss);
-    const merged = mergeGeometries(parts.map((p) => p.toNonIndexed()));
+    const relief = mergeGeometries(parts.map((p) => p.toNonIndexed()));
     parts.forEach((p) => p.dispose());
-    return merged;
+    return { body, relief };
   }, [forest, scale]);
   const materials = useMemo(() => ({
     bronze: bronze(),
+    // The roads in gilt, bright against the bronze so the map reads from the cart.
+    gilt: new MeshStandardMaterial({ color: "#e0bb62", metalness: 0.7, roughness: 0.3 }),
+    bulb: new MeshStandardMaterial({ color: "#fff2d0", roughness: 0.4 }),
     dark: new MeshStandardMaterial({ color: "#3b2c1c", metalness: 0.6, roughness: 0.5 }),
     lit: new MeshBasicMaterial({ toneMapped: false }),
     rim: new MeshStandardMaterial({ metalness: 0.85, roughness: 0.3 }),
@@ -100,7 +122,8 @@ export function WayfarersWheel({ forest }: { forest: Forest }) {
     return { rim, stud, pin };
   }, []);
   useEffect(() => () => {
-    body.dispose();
+    body.body.dispose();
+    body.relief.dispose();
   }, [body]);
   useEffect(() => () => {
     Object.values(parts).forEach((g) => g.dispose());
@@ -108,6 +131,7 @@ export function WayfarersWheel({ forest }: { forest: Forest }) {
   }, [parts, materials]);
 
   materials.rim.color.set(TIER_COLOR[tier]);
+  materials.bulb.emissive.set(day ? "#000000" : "#ffd99a");
   const home = ring.laps > 0;
   materials.pin.color.set(home ? "#e2b83f" : "#4a3a26");
   materials.pin.emissive.set(home ? "#6a4a08" : "#000000");
@@ -143,10 +167,14 @@ export function WayfarersWheel({ forest }: { forest: Forest }) {
   const byline = `${TIER_NAME[tier] || "Not yet ridden"} · ${stops.length} of ${n} groves this ride · ${ring.laps} ${ring.laps === 1 ? "ride" : "rides"} home`;
   return (
     <group position={[x, 0, z]}
-      onClick={(ev) => { ev.stopPropagation(); useGame.getState().openPlaque({ title: "The Wayfarer's Wheel", byline, body: BODY }); }}
+      onClick={(ev) => { ev.stopPropagation(); useGame.getState().openPlaque({ title: "The Wayfarer's Wheel", byline, body: BODY, figure: "wayfarer" }); }}
       onPointerOver={() => { document.body.style.cursor = "pointer"; }}
       onPointerOut={() => { document.body.style.cursor = ""; }}>
-      <mesh geometry={body} material={materials.bronze} castShadow receiveShadow />
+      <mesh geometry={body.body} material={materials.bronze} castShadow receiveShadow />
+      <mesh geometry={body.relief} material={materials.gilt} />
+      <mesh position={[0, LAMP_Y + 0.01, -LAMP_REACH]} material={materials.bulb}><sphereGeometry args={[0.04, 12, 8]} /></mesh>
+      {/* After dark the lamp lights the map, as the Mysterium's sun lights its orrery. */}
+      {!day ? <pointLight position={[0, LAMP_Y - 0.06, -LAMP_REACH]} color="#ffd99a" intensity={5} distance={6} decay={2} /> : null}
       <mesh geometry={parts.rim} material={materials.rim} />
       <mesh geometry={parts.pin} material={materials.pin} />
       {/* Allocated for every grove once; `count` says how many of each are shown. */}

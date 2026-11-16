@@ -100,7 +100,8 @@ export type JumpPose = {
   yaw: number;
 };
 
-export type PlaqueText = { title: string; byline: string; body: string };
+/** `figure` adds a drawing under the text: "wayfarer" is the Wayfarer's Wheel's map (WayfarerMap.tsx). */
+export type PlaqueText = { title: string; byline: string; body: string; figure?: "wayfarer" };
 
 export type GameStore = {
   playing: boolean;

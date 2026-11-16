@@ -15,6 +15,7 @@ import { ReaderPanel } from "./Reader";
 import { stopBook, toggleBook } from "./bookReading";
 import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
+import { WayfarerMap } from "./WayfarerMap";
 import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
@@ -470,7 +471,7 @@ export function HUD({ forest }: { forest: Forest }) {
 
       <AwardCard />
       {browsing ? <BrowsePanel forest={forest} /> : null}
-      {plaque ? <PlaquePanel plaque={plaque} /> : null}
+      {plaque ? <PlaquePanel plaque={plaque} forest={forest} /> : null}
       {reading ? <ReaderPanel key={reading.book.slug} book={reading.book} /> : null}
       {mootsOpen ? <MootList /> : null}
       {mootId && liveMoot ? <LiveMootPlayer key={mootId} request={liveMoot} forest={forest} />
@@ -861,7 +862,7 @@ function BooksTab({ forest }: { forest: Forest }) {
 }
 
 /** An exhibit's plaque at reading size, in the plaque's own cream, ink and brass (makePlaqueTexture). */
-function PlaquePanel({ plaque }: { plaque: PlaqueText }) {
+function PlaquePanel({ plaque, forest }: { plaque: PlaqueText; forest: Forest }) {
   const close = () => useGame.getState().openPlaque(null);
   return (
     <div className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-bg/55 p-3 sm:p-6" onClick={close}>
@@ -885,6 +886,7 @@ function PlaquePanel({ plaque }: { plaque: PlaqueText }) {
           <h2 id="plaque-title" className="pr-10 font-display text-3xl font-semibold text-[#1a2030] italic sm:text-4xl">{plaque.title}</h2>
           <p className="mt-1 text-sm font-semibold tracking-wide text-[#8a6a22]">{plaque.byline}</p>
           <p className="mt-5 text-base leading-relaxed text-[#2a2a2a] sm:text-lg">{plaque.body}</p>
+          {plaque.figure === "wayfarer" ? <WayfarerMap forest={forest} /> : null}
         </div>
       </article>
     </div>

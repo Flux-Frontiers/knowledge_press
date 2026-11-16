@@ -74,6 +74,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   grove there is seen, then takes the spoke to the other ring, then goes home.
 - **The Wayfarer's Wheel stands on the compass rose's paper**, 7.1 m out
   between two wind points, instead of on a dark point where it was hard to see.
+  Its roads are gilt, bright against the bronze, and a lamp on a post at its
+  north edge lights the map after dark. Tapped, its plaque now carries a flat
+  map of the ring: a numbered stud per grove, in its color once this ride has
+  stopped there, with a key to the numbers in the ride's order.
 
 ### Changed
 
