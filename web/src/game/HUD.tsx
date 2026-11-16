@@ -1,5 +1,6 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, MoonStar, Pause, Play, Settings2, Search, Sun, Sunrise, Sunset, Square, X, Video } from "lucide-react";
+import { Bell, BellOff, BookOpen, Camera, Check, Clapperboard, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, MoonStar, Pause, Play, Settings2, Search, Sun, Sunrise, Sunset, Square, X, Video } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { goToShot, OWNED_SHOT } from "./cinema";
 import { COARSE_POINTER } from "./Environment";
 import { useCorpusTree } from "./CorpusRedwood";
 import { exhibitApproach, type Exhibit } from "./exhibits";
@@ -205,7 +206,7 @@ export function HUD({ forest }: { forest: Forest }) {
                   "grid size-11 place-items-center rounded-md border " +
                   (menuOpen ? "border-primary bg-primary text-primary-fg" : "border-border bg-surface")
                 }
-                aria-label="More: time of day, silent mode, moots, settings, about, exit, and on a phone the other buttons too"
+                aria-label="More: time of day, silent mode, moots, settings, shots, about, exit, and on a phone the other buttons too"
                 aria-expanded={menuOpen}
               >
                 <Ellipsis className="size-4" strokeWidth={1.75} />
@@ -232,6 +233,15 @@ export function HUD({ forest }: { forest: Forest }) {
                     onClick={() => { setMenuOpen(false); pause(true); }} />
                   <MenuItem icon={<Info className="size-4" strokeWidth={1.75} />} label="About and tonight's sky"
                     onClick={() => { setMenuOpen(false); useGame.getState().toggleHelp(); }} />
+                  {OWNED_SHOT ? (
+                    <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="End the shot · back to the forest"
+                      onClick={() => goToShot(null, timeMode)} />
+                  ) : (<>
+                    <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="Fly-in to the redwood"
+                      onClick={() => goToShot("flyin", timeMode)} />
+                    <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="Ride the visitor's craft"
+                      onClick={() => goToShot("ufocam", timeMode)} />
+                  </>)}
                   <MenuItem icon={<LogOut className="size-4" strokeWidth={1.75} />} label="Exit to the start screen"
                     onClick={() => { setMenuOpen(false); useGame.getState().exit(); }} />
                 </ul>
