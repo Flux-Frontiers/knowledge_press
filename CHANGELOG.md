@@ -63,7 +63,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   press Start, wherever you are, and the camera rides under the craft's belly:
   looking ahead and down along its path over the crowns, down onto the pad,
   then round to the art tree as it grows. It loops, runs in daylight (or
-  `&time=dawn|dusk|night`), and works in every camera mode.
+  `&time=dawn|dusk|night`), and works in every camera mode. The More menu
+  offers it only while the visitor's in-app event is on (or with
+  `?event=visitor`).
 
 - **The forest in Blender** (`web/scripts/forest3d/`, tooling only). An
   exporter builds the forest from the game's own modules and writes its

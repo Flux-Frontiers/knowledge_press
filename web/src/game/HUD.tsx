@@ -17,6 +17,7 @@ import { stopBook, toggleBook } from "./bookReading";
 import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import { WayfarerMap } from "./WayfarerMap";
+import { activeEvent } from "./events";
 import { useWheelPlaque } from "./WayfarersWheel";
 import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
@@ -248,8 +249,11 @@ export function HUD({ forest }: { forest: Forest }) {
                   ) : (<>
                     <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="Fly-in to the redwood"
                       onClick={() => goToShot("flyin", timeMode)} />
-                    <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="Ride the visitor's craft"
-                      onClick={() => goToShot("ufocam", timeMode)} />
+                    {/* Only while the visitor's event is on (events.ts), or `?event=visitor`. */}
+                    {activeEvent(new Date(), window.location.search) === "visitor" ? (
+                      <MenuItem icon={<Clapperboard className="size-4" strokeWidth={1.75} />} label="Ride the visitor's craft"
+                        onClick={() => goToShot("ufocam", timeMode)} />
+                    ) : null}
                   </>)}
                   <MenuItem icon={<LogOut className="size-4" strokeWidth={1.75} />} label="Exit to the start screen"
                     onClick={() => { setMenuOpen(false); useGame.getState().exit(); }} />
