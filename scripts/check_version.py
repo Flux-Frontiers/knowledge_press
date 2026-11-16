@@ -35,6 +35,11 @@ SITES = [
     ("README.md", r"version\s+= \{([^}]+)\}"),
     ("CHANGELOG.md", r"^## \[([0-9][^\]]*)\] - "),
     ("release-notes.md", r"^# Release Notes -- v(\S+)"),
+    # The copy the apps show once after an update (WhatsNew.swift).
+    (
+        "app/GutenbergKGKit/Sources/KnowledgePressUI/Resources/ReleaseNotes.md",
+        r"^# Release Notes -- v(\S+)",
+    ),
 ]
 
 

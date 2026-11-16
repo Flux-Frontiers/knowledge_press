@@ -11,6 +11,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **What's new, after an update.** The first launch of a newer version on
+  iPhone, iPad or Mac shows that release's notes in a sheet once the splash
+  clears. A fresh install shows nothing; nor does the first update to this
+  version, which has no earlier launch to compare against.
+- **The web forest says when it is out of date.** A page left open in a tab
+  checks the published `version.json` when the tab comes back into view, at
+  most every ten minutes, and offers a reload when a newer version is out.
+  The app's own forest never shows it.
+
 ### Fixed
 
 - **A chat saved as the app opens stays in the sidebar.** Listing the saved

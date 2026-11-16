@@ -20,6 +20,7 @@ import { OWNED_SHOT } from "./cinema";
 import { hush, unlockSpeechOnGesture } from "./speech";
 import { stopBook } from "./bookReading";
 import { readerTarget, useGame } from "./store";
+import { UpdateBanner } from "./UpdateBanner";
 
 export function ForestApp() {
   const [mounted, setMounted] = useState(false);
@@ -309,6 +310,7 @@ export function ForestApp() {
         />
       )}
       {shot ? null : <About />}
+      {shot ? null : <UpdateBanner />}
     </main>
   );
 }

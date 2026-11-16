@@ -18,8 +18,7 @@ Great books, searched offline
 
 ## Promotional text (170, changeable without a new version)
 
-Live on iOS since 2026-11-06, with 1.34.1, and on the Mac 1.40.0 version,
-submitted 2026-11-08:
+Unchanged since 1.40.0, and carried on 1.41.0 (live 2026-11-12) and 1.50.0:
 
 ```text
 Walk a 3-D forest where every tree is a book, then ask it a question. 261 classics and four diaries on your device, and every answer shows its sources.
@@ -31,10 +30,12 @@ version ships, never on the live one.
 
 ## Description (4000)
 
-Per version. This text is for 1.34.1 and later: Ask about this book's
-book-only scope and the working Siri shortcut both need 1.34.1. It went in for
-iOS 1.34.1 and, unchanged, for iOS and Mac 1.40.0. Paragraphs are on one line
-each, so it pastes cleanly. The same text serves the Mac.
+Per version. This text is for 1.50.0 and later: it adds reading aloud (READ,
+NOT JUST SEARCH) and achievements (THE FOREST), both new in 1.50.0. The text
+before it went in for iOS 1.34.1 and, unchanged, for iOS and Mac 1.40.0 and
+1.41.0; a 1.4x build must not use this one. Ask about this book's book-only
+scope and the working Siri shortcut both need 1.34.1. Paragraphs are on one
+line each, so it pastes cleanly. The same text serves the Mac.
 
 ```text
 The Knowledge Press is a library of 261 public-domain books and four diaries that you can search and question, entirely on your device.
@@ -55,9 +56,11 @@ READ, NOT JUST SEARCH
 
 Browse the library by genre, open any book, and read it chapter by chapter. The diaries open by date. Every source passage under an answer can be read in full.
 
+Or listen. The app reads any book aloud a paragraph at a time, following along on the page, in a voice chosen to suit the author, with the voice and speed yours to change.
+
 THE FOREST
 
-Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The forest works offline, like the rest of the app.
+Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. Ride the ring of groves, read the exhibits, and press books into your cart to earn achievements in bronze, silver and gold. The forest works offline, like the rest of the app.
 
 ANSWERS YOU CAN CHECK
 
@@ -84,7 +87,55 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 ## What's New (per version)
 
+### 1.50.0
+
+Build 1074 on both platforms, archived from the v1.50.0 tag and uploaded for
+iOS and Mac on 2026-11-16. The description above was revised for this version.
+
+iOS:
+
+```text
+Books read aloud. Tap play in a book, in Browse or in the Forest's reader, and The Knowledge Press reads it a paragraph at a time, following along on the page, in a voice that suits the author: British for Austen, American for Twain. Choose the voice and speed in Settings. In the Forest, the reading goes on while you drive.
+
+Also new:
+- Achievements: Wayfarer, Explorer, Reader and Curator, each in bronze, silver and gold, listed on the Press tab.
+- The Wayfarer's Wheel, a bronze map of the forest's roads on the hub plaza. Its studs grow with every grove you visit and every book you open, and it has its own camera view.
+- A night-sky splash with the opening line of a book from the library, different at each launch.
+- Twilight, a new time of day between dusk and night.
+- A drone's fly-in to the redwood, from the More menu.
+- The Forest's reader sets books as books: paragraphs, verse lines, italics and footnotes, with a text size control.
+- Photographed forest floor and redwood bark.
+- Shadows fade in smoothly as you approach a grove.
+- A tree's card shows its year and chunk count.
+- The ring roads show on the minimap, and an interrupted ride picks up where it left off.
+- Riding the ring from a grove no longer drives into trees.
+- If iOS reloads the Forest, you return where you were instead of to the start screen.
+- No white flash at launch.
+```
+
+Mac (Space key and whole-forest shadows are the Mac's own; no reload or
+launch-flash lines):
+
+```text
+Books read aloud. Click play in a book, in Browse or in the Forest's reader, and The Knowledge Press reads it a paragraph at a time, following along on the page, in a voice that suits the author: British for Austen, American for Twain. Choose the voice and speed in Settings. In the Forest, Space starts and pauses the reading, and it goes on while you drive.
+
+Also new:
+- Achievements: Wayfarer, Explorer, Reader and Curator, each in bronze, silver and gold, listed on the Press tab.
+- The Wayfarer's Wheel, a bronze map of the forest's roads on the hub plaza. Its studs grow with every grove you visit and every book you open, and it has its own camera view.
+- A night-sky splash with the opening line of a book from the library, different at each launch.
+- Twilight, a new time of day between dusk and night.
+- A drone's fly-in to the redwood, from the More menu.
+- The Forest's reader sets books as books: paragraphs, verse lines, italics and footnotes, with a text size control.
+- Photographed forest floor and redwood bark.
+- Shadows across the whole forest.
+- A tree's card shows its year and chunk count.
+- The ring roads show on the minimap, and an interrupted ride picks up where it left off.
+- Riding the ring from a grove no longer drives into trees.
+```
+
 ### 1.41.0
+
+Submitted 2026-11-11 for iOS and Mac, build 1006 on both; live 2026-11-12.
 
 iOS:
 
@@ -303,6 +354,9 @@ above, with "on your Mac" for "on your device".
 The blocks above count the 1.32.0 corpus: 261 books plus four diaries, 265
 works in all. The description is per version, so the count changes only when
 a new version's text is edited.
+
+Mac 1.41.0 went in the same way, on the same day as iOS, and 1.50.0 was
+uploaded with it.
 
 Mac 1.40.0, submitted 2026-11-08, is the first Mac version with the Forest:
 it took the description above (with THE FOREST), the Forest promotional text,
