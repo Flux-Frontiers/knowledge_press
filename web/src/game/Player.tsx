@@ -2,6 +2,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
 import { Cart, WHEEL_R } from "./Cart";
+import { wheelViewPose } from "./wheelMap";
 import { cartLoad, NEUTRAL_SPINE } from "./cartLoad";
 import { cinema, OWNED_SHOT } from "./cinema";
 import { ORBIT_LOOK, ORBIT_R, ORBIT_RATE, ORBIT_UP } from "./startOrbit";
@@ -89,7 +90,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     let draggedAt = -Infinity;
     const canLook = () => {
       const g = useGame.getState();
-      return playingRef.current && !g.paused && !g.helpOpen && !g.flight && !g.portrait && g.preferences.camera !== "god";
+      return playingRef.current && !g.paused && !g.helpOpen && !g.flight && !g.portrait && g.preferences.camera !== "god" && g.preferences.camera !== "wheel";
     };
     const end = () => {
       if (drag && drag.moved > DRAG_CLICK) draggedAt = performance.now();
@@ -179,6 +180,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       const a = sampleActions();
       let throttle = a.throttle;
       let steer = a.steer;
+      // Driving off from the Wheel's view takes the cart's own view back.
+      if (preferences.camera === "wheel" && (a.throttle || a.steer)) game.setPreferences({ camera: game.groundCamera });
       let tourBrake = false;
       const mode = useGame.getState().travelMode;
       /** Show a tour caption for a while, and drop it once it has had its time (unless replaced). */
@@ -300,6 +303,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     const v = forwardOf(sim.yaw + look.current);
     const inCart = preferences.camera === "cart";
     const godEye = preferences.camera === "god";
+    const wheelView = preferences.camera === "wheel";
     const cam = state.camera as PerspectiveCamera;
     const flight = game.flight;
     const flying = Boolean(flight && flightFrom.current);
@@ -364,6 +368,13 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       // buffer cannot tell the roads from the ground a kilometre away.
       cam.far = state.camera.position.length() + forest.worldRadius * 2;
       cam.near = GOD_NEAR;
+    } else if (wheelView) {
+      // Down on the Wayfarer's Wheel, north up; eased in from wherever the camera was.
+      const pose = wheelViewPose(forest.wayfarer, cam.fov, cam.aspect);
+      state.camera.position.lerp(camPos.set(...pose.cam), 1 - Math.exp(-3 * dt));
+      lookAt.set(...pose.look);
+      cam.far = GROUND_FAR;
+      cam.near = GROUND_NEAR;
     } else if (inCart) {
       // A standing adult's eye level (1.65 m), gazing level over the lantern, so the
       // horizon, plaques and plinths sit where they would on foot; tilt to look up.
@@ -398,7 +409,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
     // Tilt by raising or lowering the look point over its horizontal distance.
     // Not on the start screen: god's eye set up there would skip its reset on entering.
     wasGod.current = playing && godEye && !flying && !timeline;
-    if (playing && !godEye && !flying && !timeline) {
+    if (playing && !godEye && !wheelView && !flying && !timeline) {
       // On a portrait screen the level chase view is half road and cart; rest it tilted up a little.
       const rest = preferences.camera === "follow" && cam.aspect < 1 ? PORTRAIT_TILT : 0;
       lookAt.y += Math.hypot(lookAt.x - state.camera.position.x, lookAt.z - state.camera.position.z) * Math.tan(pitch.current + rest);
@@ -448,6 +459,8 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       game.selectGrove(null);
     }
 
+    // Well clear of every grove, the next one entered (the same one again too) is a new visit.
+    if (forest.groves.every((g) => Math.hypot(g.x - sim.x, g.z - sim.z) > g.radius * 1.25)) lastMarked.current = null;
     for (const grove of forest.groves) {
       if (Math.hypot(grove.x - sim.x, grove.z - sim.z) < grove.radius) {
         if (lastMarked.current !== grove.genre) {
