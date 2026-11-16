@@ -577,6 +577,8 @@ export const useGame = create<GameStore>((set, get) => ({
       ...(next === "free" ? { selectedGrove: null } : {}),
       toast,
     });
+    // Setting off from the Wheel's view: ride in the cart's own view, not watching the table.
+    if (next === "circuit" && get().preferences.camera === "wheel") get().setPreferences({ camera: get().groundCamera });
   },
   requestJump: (jump, toast) => {
     resetInput();

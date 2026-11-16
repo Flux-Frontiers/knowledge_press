@@ -68,3 +68,16 @@ test("the save counts every arrival at a grove, every ring stop, and every new o
   assert.equal(st().reads.hamlet, reads + 2, "reopening the book already open is not another reading");
   st().openReader(null);
 });
+
+test("setting off on the guided tour from the Wheel's view takes the cart's own view back", () => {
+  globalThis.window ??= { localStorage: { getItem: () => null, setItem: () => {} } };
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().setPreferences({ camera: "high" });
+  st().setPreferences({ camera: "wheel" });
+  if (st().travelMode === "circuit") st().toggleCircuit();
+  st().toggleCircuit();
+  assert.equal(st().travelMode, "circuit");
+  assert.equal(st().preferences.camera, "high");
+  st().toggleCircuit();
+});
