@@ -53,6 +53,8 @@ const SEARCH = 6;
 const CRUISE = 0.42;
 /** A corner onto the loop is rounded from this far before it, as the loop's own are (forest.ts). */
 const TURN_R = 3.5;
+/** How near a ring's radius a loop point lies to count as on it, not on a spoke or a turn onto one, m. */
+const RING_ON = 0.15;
 
 /** The route shared by the cart (Player) and the lanterns that light it (World). */
 export const tourState: { tour: Tour | null } = { tour: null };
@@ -140,10 +142,34 @@ export function planTour(forest: Pick<Forest, "ringPath" | "roadLines" | "circui
   const along = ((fwd.x - at.x) * hx + (fwd.z - at.z) * hz) / ((Math.hypot(fwd.x - at.x, fwd.z - at.z) * Math.hypot(hx, hz)) || 1);
   const dir = !pts.length && along < -0.5 ? -1 : 1;
   const loopStart = pts.length;
-  for (let k = 0; k < n; k++) {
-    const p = ring[(join + dir * k + n * n) % n]!;
-    pts.push([p.x, p.z]);
+  // Round the loop from the join, finishing the ring the cart is on before it
+  // leaves: at the end of a ring's lap with groves on it still to see, carry on
+  // round that ring rather than turn down the spoke to the other and come back.
+  // Once every grove is passed, one more turn of the loop for the way home
+  // (headHome) to follow.
+  const radii = forest.roadLines.filter((l) => l.kind === "ring").map((l) => Math.hypot(...l.pts[0]!));
+  const tier = ring.map((p) => radii.findIndex((R) => Math.abs(Math.hypot(p.x, p.z) - R) < RING_ON));
+  /** Ring point -> its ring, for each grove still to see. */
+  const left = new Map<number, number>();
+  for (const wp of forest.circuit) {
+    if (visited.includes(wp.genre)) continue;
+    const k = nearestRing(wp.x, wp.z).k;
+    left.set(k, tier[k]!);
   }
+  const step = (i: number) => (i + dir + n) % n;
+  let i = join;
+  for (let guard = 0; left.size && guard < 3 * n; guard++) {
+    pts.push([ring[i]!.x, ring[i]!.z]);
+    left.delete(i);
+    const t = tier[i]!;
+    if (t >= 0 && tier[step(i)] !== t && [...left.values()].includes(t)) {
+      // Back to the start of this ring's lap, which lies just across the junction.
+      while (tier[(i - dir + n) % n] === t) i = (i - dir + n) % n;
+    } else {
+      i = step(i);
+    }
+  }
+  for (let k = 0; k < n; k++, i = step(i)) pts.push([ring[i]!.x, ring[i]!.z]);
   // Each point heads for the next grove stop the route reaches.
   const stopAt = new Map<number, string>();
   for (const wp of forest.circuit) {

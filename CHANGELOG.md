@@ -66,6 +66,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   The game's own grass tufts and rocks stand where the game puts them; their
   placement moved from Environment.tsx into forestFloor.ts so both share it.
 
+### Fixed
+
+- **A ride finishes the ring it is on.** A ride set off, or picked up,
+  partway round a ring used to leave for the other ring and come back later
+  for the groves behind it. It now carries on round its own ring until every
+  grove there is seen, then takes the spoke to the other ring, then goes home.
+- **The Wayfarer's Wheel stands on the compass rose's paper**, 7.1 m out
+  between two wind points, instead of on a dark point where it was hard to see.
+
 ### Changed
 
 - **The forest reader sets books as books.** Prose fills the page as

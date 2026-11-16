@@ -174,3 +174,24 @@ test("a ride picked up mid-lap stops only at the groves not yet seen, then goes 
     assert.ok(Math.hypot(sim.x - f.home.x, sim.z - f.home.z) < 2, "pulled up away from home");
   }
 });
+
+test("a ride set off partway round a ring finishes that ring before the other, and never comes back to it", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const { planTour } = require(`${process.env.FOREST_TEST_BUILD}/tour.js`);
+  const f = getForest();
+  const radii = f.roadLines.filter((l) => l.kind === "ring").map((l) => Math.hypot(...l.pts[0]));
+  assert.equal(radii.length, 2, "this corpus has two rings");
+  const ringOf = (x, z) => radii.findIndex((R) => Math.abs(Math.hypot(x, z) - R) < 0.5);
+  for (const t of [0, 1]) {
+    const lap = f.ringPath.filter((p) => ringOf(p.x, p.z) === t);
+    for (const frac of [0.3, 0.6]) {
+      const p = lap[Math.floor(lap.length * frac)];
+      const tour = planTour(f, p.x, p.z, p.yaw);
+      const order = tour.stops.map((st) => ringOf(...[f.circuit.find((wp) => wp.genre === st.genre)].map((wp) => [wp.x, wp.z])[0]));
+      assert.equal(order.length, f.circuit.length);
+      // One run per ring, starting with the ring the cart is on.
+      const runs = order.filter((r, k) => k === 0 || r !== order[k - 1]);
+      assert.deepEqual(runs, [t, 1 - t], `from ring ${t} at ${frac}: ${order.join("")}`);
+    }
+  }
+});

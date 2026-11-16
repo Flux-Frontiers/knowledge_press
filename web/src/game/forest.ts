@@ -94,7 +94,13 @@ const JUNCTION_CLEAR = 12;
 export const HUB_PLAQUE_DIR = Math.atan2(4.6, -4.2);
 export const HUB_PLAQUE_DIST = 7.2;
 /** The Wayfarer's Wheel: its distance from the hub, and the radius the cart keeps off. */
-const WAYFARER_DIST = 6.2;
+const WAYFARER_DIST = 7.1;
+/**
+ * How far round from a long wind of the compass rose (compassRoseArt.ts) the Wheel stands: at
+ * WAYFARER_DIST that is clear paper between the wind's point and its short neighbor's tip, so
+ * the bronze reads against cream, not the dark points.
+ */
+const WAYFARER_SLOT = (14 * Math.PI) / 180;
 const WAYFARER_R = 0.95;
 // Home: 11.5 m out along the plaque's bearing, so the plaque stands between the
 // cart and the redwood; facing the hub (yaw convention of sim.yawToward). At 15 m
@@ -611,7 +617,10 @@ function buildForest(leafMultiplier: number): Forest {
     const b = i + 1 < bearings.length ? bearings[i + 1]! : bearings[0]! + 2 * Math.PI;
     if (b - a > gap) { gap = b - a; gapAt = a + (b - a) / 2; }
   });
-  const wayfarer = { x: Math.cos(gapAt) * WAYFARER_DIST, z: Math.sin(gapAt) * WAYFARER_DIST, r: WAYFARER_R };
+  // Then onto the rose's paper beside the nearest long wind, on the gap's side of it.
+  const wind = Math.round(gapAt / (Math.PI / 4)) * (Math.PI / 4);
+  const wheelAt = wind + (gapAt < wind ? -WAYFARER_SLOT : WAYFARER_SLOT);
+  const wayfarer = { x: Math.cos(wheelAt) * WAYFARER_DIST, z: Math.sin(wheelAt) * WAYFARER_DIST, r: WAYFARER_R };
 
   return {
     trees,
