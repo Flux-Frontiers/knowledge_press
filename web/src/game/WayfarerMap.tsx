@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { Forest } from "./forest";
 import { useGame } from "./store";
-import { wayfarerMap } from "./wheelMap";
+import { groveTally, wayfarerMap } from "./wheelMap";
 
 const INK = "#2a2a2a";
 const BRASS = "#8a6a22";
@@ -14,7 +14,9 @@ const UNSEEN = "#d8cfbd";
  */
 export function WayfarerMap({ forest }: { forest: Forest }) {
   const stops = useGame((s) => s.ring.stops);
-  const map = useMemo(() => wayfarerMap(forest, stops), [forest, stops]);
+  const groveVisits = useGame((s) => s.groveVisits);
+  const reads = useGame((s) => s.reads);
+  const map = useMemo(() => wayfarerMap(forest, stops, 90, groveTally(forest, groveVisits, reads)), [forest, stops, groveVisits, reads]);
   return (
     <figure className="mt-6">
       <svg viewBox="-104 -104 208 208" className="mx-auto block w-full max-w-sm" role="img"
@@ -37,6 +39,7 @@ export function WayfarerMap({ forest }: { forest: Forest }) {
               <span className="inline-block size-3 shrink-0 rounded-full border border-[#2a2a2a]" style={{ background: s.seen ? s.color : UNSEEN }} />
               <span className="tabular-nums">{s.n}.</span>
               <span className="truncate">{s.label}</span>
+              {s.count ? <span className="ml-auto shrink-0 tabular-nums text-xs text-[#8a6a22]" title="Visits and readings">{s.count}</span> : null}
             </li>
           ))}
         </ol>

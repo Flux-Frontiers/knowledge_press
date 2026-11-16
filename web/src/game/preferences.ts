@@ -1,8 +1,8 @@
 export type Preferences = {
   pace: "gentle" | "brisk";
   sensitivity: number;
-  /** "god" looks down on the whole forest from above the hub. */
-  camera: "follow" | "high" | "cart" | "god";
+  /** "god" looks down on the whole forest from above the hub; "wheel" down on the Wayfarer's Wheel. */
+  camera: "follow" | "high" | "cart" | "wheel" | "god";
   motion: boolean;
   /** The sun's shadows. Off by default: on an iPad mini they halved the frame rate. */
   shadows: boolean;
@@ -63,11 +63,11 @@ export type LeafDetail = "low" | "medium" | "high" | "ultra";
 export const LEAF_SCALE: Record<LeafDetail, number> = { low: 0.1, medium: 0.25, high: 0.5, ultra: 1 };
 
 /** The camera views' names, in the order the C key and the bar's button step through them. */
-export const CAMERA_NAME = { follow: "Behind the cart", high: "High view", cart: "In the cart", god: "God's eye" } as const;
+export const CAMERA_NAME = { follow: "Behind the cart", high: "High view", cart: "In the cart", wheel: "The Wayfarer's Wheel", god: "God's eye" } as const;
 
 /** The view after this one. */
 export function nextCamera(camera: Preferences["camera"]): Preferences["camera"] {
-  return ({ follow: "high", high: "cart", cart: "god", god: "follow" } as const)[camera];
+  return ({ follow: "high", high: "cart", cart: "wheel", wheel: "god", god: "follow" } as const)[camera];
 }
 
 export function readPreferences(value?: Partial<Preferences>): Preferences {
@@ -75,7 +75,7 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     pace: value?.pace === "brisk" ? "brisk" : "gentle",
     sensitivity: typeof value?.sensitivity === "number" && Number.isFinite(value.sensitivity)
       ? Math.max(0.5, Math.min(1.5, value.sensitivity)) : 1,
-    camera: value?.camera === "high" || value?.camera === "cart" || value?.camera === "god" ? value.camera : "follow",
+    camera: value?.camera === "high" || value?.camera === "cart" || value?.camera === "wheel" || value?.camera === "god" ? value.camera : "follow",
     motion: typeof value?.motion === "boolean" ? value.motion
       : !(typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches),
     // The old `detail` setting is ignored on purpose: it was saved on for everyone, so reading it would keep shadows on.

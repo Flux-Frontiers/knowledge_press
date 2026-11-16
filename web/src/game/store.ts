@@ -30,6 +30,10 @@ type SaveBlob = {
   plaques: string[];
   /** The ring: groves stopped at on the lap under way, laps done, and their seasons. */
   ring: RingProgress;
+  /** Times each grove has been arrived at (driven into, or stopped at on the ring), by genre. */
+  groveVisits: Record<string, number>;
+  /** Times each book has been opened in the reader, by slug. */
+  reads: Record<string, number>;
   /** The browser's location, rounded to 0.1 degree, once it has been given. */
   place: Place | null;
   preferences: Preferences;
@@ -44,6 +48,8 @@ function loadSave(): SaveBlob {
     grovesVisited: [],
     plaques: [],
     ring: readRing(null),
+    groveVisits: {},
+    reads: {},
     place: null,
     preferences: readPreferences(),
   };
@@ -60,6 +66,8 @@ function loadSave(): SaveBlob {
       grovesVisited: Array.isArray(parsed.grovesVisited) ? parsed.grovesVisited : [],
       plaques: Array.isArray(parsed.plaques) ? parsed.plaques.filter((p): p is string => typeof p === "string") : [],
       ring: readRing(parsed.ring),
+      groveVisits: readTally(parsed.groveVisits),
+      reads: readTally(parsed.reads),
       place: parsed.place && Number.isFinite(parsed.place.lat) && Number.isFinite(parsed.place.lon) ? parsed.place : null,
       preferences: readPreferences(parsed.preferences),
     };
@@ -68,11 +76,25 @@ function loadSave(): SaveBlob {
   }
 }
 
+/** A saved count per key, keeping only whole positive counts. */
+function readTally(v: unknown): Record<string, number> {
+  if (!v || typeof v !== "object") return {};
+  return Object.fromEntries(Object.entries(v as Record<string, unknown>)
+    .filter((e): e is [string, number] => typeof e[1] === "number" && Number.isInteger(e[1]) && e[1] > 0));
+}
+
+/** The tally with one more for `key`. */
+function bump(t: Record<string, number>, key: string): Record<string, number> {
+  return { ...t, [key]: (t[key] ?? 0) + 1 };
+}
+
 function persist(s: {
   library: string[];
   grovesVisited: string[];
   plaques: string[];
   ring: RingProgress;
+  groveVisits: Record<string, number>;
+  reads: Record<string, number>;
   place: Place | null;
   preferences: Preferences;
 }) {
@@ -83,6 +105,8 @@ function persist(s: {
       grovesVisited: s.grovesVisited,
       plaques: s.plaques,
       ring: s.ring,
+      groveVisits: s.groveVisits,
+      reads: s.reads,
       place: s.place,
       preferences: s.preferences,
     };
@@ -139,6 +163,10 @@ export type GameStore = {
   grovesVisited: string[];
   plaques: string[];
   ring: RingProgress;
+  /** Times each grove has been arrived at, by genre; grows its stud on the Wayfarer's Wheel. */
+  groveVisits: Record<string, number>;
+  /** Times each book has been opened in the reader, by slug; grows its grove's stud. */
+  reads: Record<string, number>;
   /** A level just reached, for the award card (HUD AwardCard); null once dismissed. */
   award: { title: string; tier: Tier; line: string } | null;
   setAward: (award: { title: string; tier: Tier; line: string } | null) => void;
@@ -303,7 +331,8 @@ export const useGame = create<GameStore>((set, get) => ({
   setPreferences: (patch) => {
     const preferences = readPreferences({ ...get().preferences, ...patch });
     const intoGodEye = preferences.camera === "god" && get().preferences.camera !== "god";
-    set(preferences.camera === "god" ? { preferences } : { preferences, groundCamera: preferences.camera });
+    // God's eye and the Wheel's view are not the cart's: the cart's last view is kept to come back to.
+    set(preferences.camera === "god" || preferences.camera === "wheel" ? { preferences } : { preferences, groundCamera: preferences.camera });
     if (intoGodEye) get().clearCards();
     persist(get());
   },
@@ -327,6 +356,8 @@ export const useGame = create<GameStore>((set, get) => ({
   grovesVisited: initial.grovesVisited,
   plaques: initial.plaques,
   ring: initial.ring,
+  groveVisits: initial.groveVisits,
+  reads: initial.reads,
   nearbySlug: null,
   nearbyDist: 99,
   nearbyDismissed: null,
@@ -435,10 +466,10 @@ export const useGame = create<GameStore>((set, get) => ({
     persist({ ...get(), ring });
   },
   markRingStop: (genre) => {
+    // Every stop is a visit to the grove, even one already seen this lap.
     const ring = ringStop(get().ring, genre);
-    if (ring === get().ring) return;
-    set({ ring });
-    persist({ ...get(), ring });
+    set({ ring, groveVisits: bump(get().groveVisits, genre) });
+    persist(get());
   },
   finishRing: (groves) => {
     const { ring, counted } = finishLap(get().ring, groves, get().season);
@@ -451,10 +482,9 @@ export const useGame = create<GameStore>((set, get) => ({
   setAward: (award) => set({ award }),
   markGrove: (genre) => {
     const grovesVisited = get().grovesVisited;
-    if (grovesVisited.includes(genre)) return;
-    const next = [...grovesVisited, genre];
-    set({ grovesVisited: next });
-    persist({ ...get(), grovesVisited: next });
+    const next = grovesVisited.includes(genre) ? grovesVisited : [...grovesVisited, genre];
+    set({ grovesVisited: next, groveVisits: bump(get().groveVisits, genre) });
+    persist(get());
   },
   setNearby: (nearbySlug, nearbyDist, speed, pinnedDist = Infinity) => {
     // Roads pass within 3 m of trunks, so distance alone would pop a card at
@@ -499,7 +529,15 @@ export const useGame = create<GameStore>((set, get) => ({
   openCatalog: (catalogGenre) => set({ catalogOpen: true, catalogGenre, atlasOpen: false, libraryOpen: false }),
   setCatalogOpen: (catalogOpen) => set({ catalogOpen }),
   openPlaque: (plaque) => set(plaque ? { plaque, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { plaque: null }),
-  openReader: (readingSlug) => set(readingSlug ? { readingSlug, catalogOpen: false, atlasOpen: false, libraryOpen: false } : { readingSlug: null }),
+  openReader: (readingSlug) => {
+    if (!readingSlug) {
+      set({ readingSlug: null });
+      return;
+    }
+    const reads = readingSlug === get().readingSlug ? get().reads : bump(get().reads, readingSlug);
+    set({ readingSlug, reads, catalogOpen: false, atlasOpen: false, libraryOpen: false });
+    persist(get());
+  },
   setBookReading: (bookReading) => {
     set({ bookReading });
     if (bookReading?.state === "playing") {
@@ -539,6 +577,8 @@ export const useGame = create<GameStore>((set, get) => ({
       ...(next === "free" ? { selectedGrove: null } : {}),
       toast,
     });
+    // Setting off from the Wheel's view: ride in the cart's own view, not watching the table.
+    if (next === "circuit" && get().preferences.camera === "wheel") get().setPreferences({ camera: get().groundCamera });
   },
   requestJump: (jump, toast) => {
     resetInput();
@@ -552,7 +592,7 @@ export const useGame = create<GameStore>((set, get) => ({
     });
   },
   clearJump: () => set({ jump: null }),
-  groundCamera: initial.preferences.camera === "god" ? "follow" : initial.preferences.camera,
+  groundCamera: initial.preferences.camera === "god" || initial.preferences.camera === "wheel" ? "follow" : initial.preferences.camera,
   flight: null,
   flyTo: (pose, toast, reopen) => {
     // The cards close so the flight can be watched; `reopen`'s card comes back on landing.

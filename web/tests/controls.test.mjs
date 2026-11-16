@@ -134,11 +134,11 @@ test("input reset clears held keyboard, touch axes, look and interaction edges",
   input.resetInput();
 });
 
-test("the camera steps through all four views and comes back", () => {
+test("the camera steps through all five views and comes back", () => {
   const { nextCamera, CAMERA_NAME } = require(`${process.env.FOREST_TEST_BUILD}/preferences.js`);
   const seen = ["follow"];
-  for (let i = 0; i < 4; i++) seen.push(nextCamera(seen.at(-1)));
-  assert.deepEqual(seen, ["follow", "high", "cart", "god", "follow"]);
+  for (let i = 0; i < 5; i++) seen.push(nextCamera(seen.at(-1)));
+  assert.deepEqual(seen, ["follow", "high", "cart", "wheel", "god", "follow"]);
   for (const view of seen) assert.ok(CAMERA_NAME[view]);
 });
 

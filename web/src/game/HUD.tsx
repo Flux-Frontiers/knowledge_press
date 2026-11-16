@@ -18,6 +18,7 @@ import { LiveMootPlayer, MootList, MootPlayer } from "./MootOverlay";
 import { READ_RANGE, useGame, type PlaqueText } from "./store";
 import { WayfarerMap } from "./WayfarerMap";
 import { activeEvent } from "./events";
+import { useWheelPlaque } from "./WayfarersWheel";
 import { host } from "./host";
 import { CAMERA_NAME, nextCamera } from "./preferences";
 import type { TimeMode } from "./sky";
@@ -106,6 +107,14 @@ export function HUD({ forest }: { forest: Forest }) {
   // God's eye opens on a clear view; the redwood's card waits until the cart leaves the hub.
   useEffect(() => { if (godEye) setRedwoodClosed(true); }, [godEye]);
   const atRedwood = !flying && !silent && !pinnedSlug && hubDist < 16 && !redwoodClosed;
+  // Beside the Wayfarer's Wheel, or looking down on it, its card shows in place of the redwood's;
+  // closed, it stays closed until the cart moves off.
+  const wheel = useWheelPlaque(forest);
+  const wheelDist = Math.hypot(x - forest.wayfarer.x, z - forest.wayfarer.z);
+  const [wheelClosed, setWheelClosed] = useState(false);
+  const leftWheel = wheelDist > 6 && camera !== "wheel";
+  useEffect(() => { if (leftWheel) setWheelClosed(false); }, [leftWheel]);
+  const atWheel = !flying && !silent && !pinnedSlug && (wheelDist < 3.5 || camera === "wheel") && !wheelClosed;
   const progress = questProgress({ library, grovesVisited, season });
   const nextQuest = QUESTS.find((q) => !q.done({ library, grovesVisited, season }));
   const selected = forest.groves.find((g) => g.genre === selectedGrove);
@@ -369,6 +378,27 @@ export function HUD({ forest }: { forest: Forest }) {
             <article className="rounded-lg border border-border bg-surface/94 p-3 sm:p-4" aria-live="polite">
               <p className="flex items-center gap-2 text-xs tracking-wide text-muted uppercase">On the ring</p>
               <p className="mt-1 text-sm leading-relaxed text-fg/90">{tourNote}</p>
+            </article>
+          ) : atWheel ? (
+            <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">
+              <button
+                type="button"
+                onClick={() => setWheelClosed(true)}
+                className="absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-md text-muted"
+                aria-label="Dismiss"
+              >
+                <X className="size-5" strokeWidth={1.75} />
+              </button>
+              <p className="text-xs tracking-wide text-muted uppercase">On the hub plaza</p>
+              <h2 className="font-display mt-0.5 text-xl leading-tight sm:text-2xl">{wheel.plaque.title}</h2>
+              <p className="text-sm text-muted tabular-nums">{wheel.plaque.byline}</p>
+              <p className="card-extra mt-2 hidden text-sm leading-relaxed text-fg/90 sm:block">
+                The ring in bronze: each grove's stud lights as the ring stops there, and rises with every visit and every book read.
+              </p>
+              <button type="button" onClick={() => useGame.getState().openPlaque(wheel.plaque)}
+                className="mt-3 min-h-11 rounded-md bg-primary px-4 text-sm text-primary-fg">
+                Read the plaque
+              </button>
             </article>
           ) : atRedwood ? (
             <article className="relative rounded-lg border border-border bg-surface/94 p-3 pr-12 sm:p-4 sm:pr-14">

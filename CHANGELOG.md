@@ -20,6 +20,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A view of the Wayfarer's Wheel.** The camera button (and C) gains a
+  fifth view between In the cart and God's eye: down on the Wheel at a slant,
+  north up, the table filling the screen. Driving off returns to the cart's
+  view.
+- **The Wayfarer's Wheel has a card.** Beside the table, or looking down on
+  it, a card shows its level and this ride's progress, with a button that
+  opens the full plaque and map. It takes the redwood's card's place there.
+- **The Wheel's studs grow.** Each grove's stud rises and widens a little
+  with every visit to the grove (driving in, or a stop on the ring) and every
+  opening of one of its books, up to a pin about a hand high. The studs are
+  shaded enamel pegs now, not flat glowing discs, and the plaque's key shows
+  each grove's count. The save keeps the counts.
+
 - **Achievements.** Four tracks, each bronze, silver and gold: Wayfarer
   (ride the whole ring home to the redwood; three rides; a ride in every
   season), Explorer (groves visited), Reader (books pressed) and Curator
