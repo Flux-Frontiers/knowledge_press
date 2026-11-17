@@ -46,7 +46,13 @@ export const QUESTS: Quest[] = [
   },
 ];
 
-export function questProgress(s: { library: string[]; grovesVisited: string[]; season: string }) {
-  const done = QUESTS.filter((q) => q.done(s)).length;
+/** Quests done: those already earned (saved) and those `s` meets now. */
+export function questProgress(s: { library: string[]; grovesVisited: string[]; season: string }, earned: readonly string[] = []) {
+  const done = QUESTS.filter((q) => earned.includes(q.id) || q.done(s)).length;
   return { done, total: QUESTS.length };
+}
+
+/** Quests done in `s` that are not in `seen`: the ones to announce. */
+export function freshlyDone(seen: ReadonlySet<string>, s: { library: string[]; grovesVisited: string[]; season: string }): Quest[] {
+  return QUESTS.filter((q) => !seen.has(q.id) && q.done(s));
 }

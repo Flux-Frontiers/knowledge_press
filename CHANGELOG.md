@@ -24,6 +24,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Home leaves the Wayfarer's Wheel's view and god's eye.** Home, or a jump
+  to an exhibit, from either view moved the cart but kept the camera where it
+  was. It now goes back to the cart's view it was in before; from god's eye
+  the camera dives down to it.
+- **A quest says when it is done, with fireworks.** Finishing one
+  (switching to winter for Bare wood, say) used to only drop its hint. Three
+  shells now burst in the sky ahead, and a toast names it and the count,
+  "Quest done · Bare wood · 5 of 5".
+- **A quest stays done.** Bare wood counted only while it was winter, so
+  going back to autumn took 5 of 5 back to 4 of 5. Done quests are now saved
+  and kept. Reset all settings starts them over, counting again those the
+  press and visited groves still meet.
+
+### Changed
+
+- **Reset all settings is thorough, and keeps your place in each book.** It
+  also brings back a dismissed quest hint and turns clean view and the
+  timeline off. Where each book was left is kept now, with the press and the
+  groves: it was saved among the settings and lost on a reset.
+- **The season is back in the ... menu**, stepping Spring, Summer, Autumn,
+  Winter, and is gone from the settings window, where the dialog hid what
+  changed.
+
 - **A chat saved as the app opens stays in the sidebar.** Listing the saved
   chats rewrites their index, and a listing that ran beside a save could write
   the older list last, so the chat stayed on disk but dropped off the sidebar
