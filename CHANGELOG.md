@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.51.0] - 2026-11-16
+
 ### Added
 
 - **What's new, after an update.** The first launch of a newer version on
@@ -21,6 +23,31 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   checks the published `version.json` when the tab comes back into view, at
   most every ten minutes, and offers a reload when a newer version is out.
   The app's own forest never shows it.
+
+### Changed
+
+- **The canopy follows the season.** Spring shows half the leaves the leaf
+  setting allows, summer all of them, autumn 70%, and winter is bare wood as
+  before. Spring and autumn draw fewer leaves, so they run faster too.
+- **Twice the leaves in the Mac app.** Every leaf level doubles there: Ultra
+  hangs two leaves per chunk, the second beside the first on the same twig.
+  Phones, iPads and the web forest in any browser keep their levels.
+- **Two resets: Reset settings and Start over.** Reset all settings is now
+  Reset settings and keeps everything earned, your place in each book among
+  it (that was saved with the settings and lost on a reset). It also brings
+  back a dismissed quest hint and turns clean view and the timeline off.
+  Start over, below it, erases progress on the device: the press, visited
+  groves, quests, achievements and the Wheel's studs, places in books and
+  saved moots, and lets the visitor's landing play again. Settings are kept.
+- **The season is back in the ... menu**, stepping Spring, Summer, Autumn,
+  Winter, and is gone from the settings window, where the dialog hid what
+  changed.
+
+- **A chat saved as the app opens stays in the sidebar.** Listing the saved
+  chats rewrites their index, and a listing that ran beside a save could write
+  the older list last, so the chat stayed on disk but dropped off the sidebar
+  until the next save. The store now takes one lock across reads and writes.
+  This was also the occasional App CI failure in the relaunch test.
 
 ### Fixed
 
@@ -47,31 +74,6 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **A quest stays done.** Bare wood counted only while it was winter, so
   going back to autumn took 5 of 5 back to 4 of 5. Done quests are now saved
   and kept; Start over clears them.
-
-### Changed
-
-- **The canopy follows the season.** Spring shows half the leaves the leaf
-  setting allows, summer all of them, autumn 70%, and winter is bare wood as
-  before. Spring and autumn draw fewer leaves, so they run faster too.
-- **Twice the leaves in the Mac app.** Every leaf level doubles there: Ultra
-  hangs two leaves per chunk, the second beside the first on the same twig.
-  Phones, iPads and the web forest in any browser keep their levels.
-- **Two resets: Reset settings and Start over.** Reset all settings is now
-  Reset settings and keeps everything earned, your place in each book among
-  it (that was saved with the settings and lost on a reset). It also brings
-  back a dismissed quest hint and turns clean view and the timeline off.
-  Start over, below it, erases progress on the device: the press, visited
-  groves, quests, achievements and the Wheel's studs, places in books and
-  saved moots, and lets the visitor's landing play again. Settings are kept.
-- **The season is back in the ... menu**, stepping Spring, Summer, Autumn,
-  Winter, and is gone from the settings window, where the dialog hid what
-  changed.
-
-- **A chat saved as the app opens stays in the sidebar.** Listing the saved
-  chats rewrites their index, and a listing that ran beside a save could write
-  the older list last, so the chat stayed on disk but dropped off the sidebar
-  until the next save. The store now takes one lock across reads and writes.
-  This was also the occasional App CI failure in the relaunch test.
 
 ## [1.50.0] - 2026-11-16
 
