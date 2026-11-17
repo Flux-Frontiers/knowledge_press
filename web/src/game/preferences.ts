@@ -62,6 +62,21 @@ export type LeafDetail = "low" | "medium" | "high" | "ultra";
  */
 export const LEAF_SCALE: Record<LeafDetail, number> = { low: 0.1, medium: 0.25, high: 0.5, ultra: 1 };
 
+/**
+ * The leaves a level grows here: a Mac or desktop (no coarse pointer) doubles every level, so Ultra hangs
+ * two leaves per chunk (growTree.ts); a phone or iPad keeps LEAF_SCALE.
+ */
+export function leafScaleFor(detail: LeafDetail, desktop: boolean): number {
+  return LEAF_SCALE[detail] * (desktop ? 2 : 1);
+}
+
+/** The leaf picker's labels, as `leafScaleFor` grows them. */
+export function leafLabels(desktop: boolean): Record<LeafDetail, string> {
+  return desktop
+    ? { low: "Low · 1 in 5 chunks", medium: "Medium · 1 in 2", high: "High · every chunk", ultra: "Ultra · 2 per chunk" }
+    : { low: "Low · 1 in 10 chunks", medium: "Medium · 1 in 4", high: "High · 1 in 2", ultra: "Ultra · every chunk" };
+}
+
 /** The camera views' names, in the order the C key and the bar's button step through them. */
 export const CAMERA_NAME = { cart: "In the cart", follow: "Behind the cart", high: "High view", god: "God's eye", wheel: "The Wayfarer's Wheel" } as const;
 

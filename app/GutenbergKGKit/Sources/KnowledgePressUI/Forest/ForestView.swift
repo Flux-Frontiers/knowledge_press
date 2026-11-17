@@ -213,6 +213,11 @@ final class ForestHost: NSObject {
             view.scrollView.isScrollEnabled = false
             view.scrollView.bounces = false
             view.scrollView.contentInsetAdjustmentBehavior = .never
+        #else
+            // A Mac web view paints white until the page's first frame, and
+            // underPageBackgroundColor does not cover that. AppKit has no
+            // public switch; this key is the long-standing one.
+            view.setValue(false, forKey: "drawsBackground")
         #endif
         #if DEBUG
             // Safari ▸ Develop reaches the forest in a debug build.

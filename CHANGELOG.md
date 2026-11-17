@@ -24,6 +24,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **No white flash before the forest.** The page painted white until its
+  stylesheet loaded, a Mac's web view painted white until the page's first
+  frame, and the forest faded in before it had drawn, which Safari on an
+  iPad can show as a white sheet. The page is dark from its first paint and
+  the forest fades in only once it has drawn.
 - **The cart's wheels sit on the paving.** The cart rode at the forest
   floor's height, so its wheels sank 3.5 to 6 cm into the roads, plazas and
   compass rose laid over it. It now rides on whatever is under it, easing up
@@ -45,6 +50,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **The canopy follows the season.** Spring shows half the leaves the leaf
+  setting allows, summer all of them, autumn 70%, and winter is bare wood as
+  before. Spring and autumn draw fewer leaves, so they run faster too.
+- **Twice the leaves on a Mac or desktop.** Every leaf level doubles where
+  there is a mouse or trackpad: Ultra hangs two leaves per chunk, the second
+  beside the first on the same twig. Phones and iPads keep their levels.
 - **Two resets: Reset settings and Start over.** Reset all settings is now
   Reset settings and keeps everything earned, your place in each book among
   it (that was saved with the settings and lost on a reset). It also brings

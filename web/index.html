@@ -7,6 +7,10 @@
          Safari still lets a reader pinch-zoom; the app's forest handles pinch itself. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
     <title>The Knowledge Press: The Forest</title>
+    <!-- Dark from the first paint, before the stylesheet and the start screen arrive: no white flash
+         in the app's web view or a browser. #11151e is --color-bg in styles.css. -->
+    <meta name="color-scheme" content="dark" />
+    <style>html, body { background: #11151e; }</style>
     <meta name="description" content="Explore a living forest of public-domain books, with gentle cart controls, seasonal light, and a personal reading press." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
