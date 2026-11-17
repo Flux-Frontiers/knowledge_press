@@ -1,13 +1,14 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { Group, MathUtils, PerspectiveCamera, Vector3 } from "three";
-import { Cart, WHEEL_R } from "./Cart";
+import { Cart, FRONT_WHEEL_R, WHEEL_R } from "./Cart";
 import { wheelViewPose } from "./wheelMap";
 import { cartLoad, NEUTRAL_SPINE } from "./cartLoad";
 import { cinema, OWNED_SHOT } from "./cinema";
 import { ORBIT_LOOK, ORBIT_R, ORBIT_RATE, ORBIT_UP } from "./startOrbit";
 import { EXPOSURE } from "./Environment";
 import { atGroveStop, treesNear, type Forest } from "./forest";
+import { surfaceY } from "./roads";
 import { addDragLook, resetInput, sampleActions, setDragging } from "./input";
 import { flightPose, FOLLOW_BACK, FOLLOW_UP, forestGodLimits, godPose, groundPose, resetGodView, type Vec3 } from "./godEye";
 import { clamp } from "./math";
@@ -40,8 +41,10 @@ const START_NIGHT_LIFT = 1.0;
 
 export function Player({ forest, playing }: { forest: Forest; playing: boolean }) {
   const group = useRef<Group>(null);
-  const wheelL = useRef<Group>(null);
-  const wheelR = useRef<Group>(null);
+  const rearAxle = useRef<Group>(null);
+  const frontAxle = useRef<Group>(null);
+  /** The cart's height above the floor: the paving under it (roads.ts surfaceY), eased. */
+  const lift = useRef(0);
   const poseAcc = useRef(0);
   const wasBlocked = useRef(false);
   // Camera tilt in radians, held between drives; Up/Down or the right stick.
@@ -155,6 +158,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
       if (!wasBlocked.current) resetInput();
     }
     wasBlocked.current = blocked;
+    const jumped = Boolean(jump);
     if (jump) {
       teleportSim(jump.x, jump.z, jump.yaw);
       look.current = 0;
@@ -435,13 +439,16 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
 
     const g = group.current;
     if (g) {
-      g.position.set(sim.x, sim.y, sim.z);
-      g.lookAt(sim.x + f.x, sim.y, sim.z + f.z);
+      // On the paving's top, not the floor's: eased so a curb is a few frames' rise, not a jump.
+      const ground = surfaceY(forest, sim.x, sim.z);
+      lift.current = jumped ? ground : lift.current + (ground - lift.current) * (1 - Math.exp(-12 * dt));
+      g.position.set(sim.x, sim.y + lift.current, sim.z);
+      g.lookAt(sim.x + f.x, sim.y + lift.current, sim.z + f.z);
       if (preferences.motion) g.rotateZ(-sim.steering * Math.min(Math.abs(sim.speed), 12) * 0.003);
     }
-    const spin = (sim.speed * dt) / WHEEL_R;
-    if (wheelL.current) wheelL.current.rotation.x += spin;
-    if (wheelR.current) wheelR.current.rotation.x += spin;
+    // Both pairs roll the same ground, so the small front wheels turn faster.
+    if (rearAxle.current) rearAxle.current.rotation.x += (sim.speed * dt) / WHEEL_R;
+    if (frontAxle.current) frontAxle.current.rotation.x += (sim.speed * dt) / FRONT_WHEEL_R;
 
     const near = treesNear(forest, sim.x, sim.z, 16).filter((t) => bookShown(t.book, useGame.getState().timelineYear));
     let bestSlug: string | null = null;
@@ -489,7 +496,7 @@ export function Player({ forest, playing }: { forest: Forest; playing: boolean }
 
   return (
     <group ref={group}>
-      <Cart lanternColor={lanternColor} wheelLeft={wheelL} wheelRight={wheelR} load={load} />
+      <Cart lanternColor={lanternColor} rearAxle={rearAxle} frontAxle={frontAxle} load={load} />
     </group>
   );
 }

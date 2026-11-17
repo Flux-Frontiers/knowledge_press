@@ -97,7 +97,9 @@ count plus `APP_BUILD_OFFSET`.
 ## Step 4: Regenerate release-notes.md
 
 Generate it from the promoted changelog section; never hand-edit it. It is the
-body of the GitHub Release, written at tag time.
+body of the GitHub Release, written at tag time. The apps bundle a copy,
+`app/GutenbergKGKit/Sources/KnowledgePressUI/Resources/ReleaseNotes.md`, and
+show it once after an update (WhatsNew.swift); the script writes both.
 
 ```bash
 python3 - <<'EOF'
@@ -109,6 +111,8 @@ body = re.search(rf"^## \[{re.escape(VERSION)}\] - {DATE}\n(.*?)(?=^## \[|\Z)",
 pathlib.Path("release-notes.md").write_text(
     f"# Release Notes -- v{VERSION}\n\n> Released: {DATE}\n\n{body}\n\n"
     "---\n\n_Full changelog: [CHANGELOG.md](CHANGELOG.md)_\n")
+pathlib.Path("app/GutenbergKGKit/Sources/KnowledgePressUI/Resources/ReleaseNotes.md").write_text(
+    pathlib.Path("release-notes.md").read_text())
 EOF
 head -1 release-notes.md                # must name vX.Y.Z
 ```
@@ -116,7 +120,7 @@ head -1 release-notes.md                # must name vX.Y.Z
 ## Step 5: Verify
 
 ```bash
-python3 scripts/check_version.py X.Y.Z  # all 12 sites; the release job runs the same check
+python3 scripts/check_version.py X.Y.Z  # all 13 sites; the release job runs the same check
 pre-commit run --all-files
 make ios-check mac-check                # optional: app.yml runs these after the push
 ```
@@ -143,6 +147,7 @@ git add CHANGELOG.md release-notes.md CITATION.cff README.md \
         web/package.json web/package-lock.json \
         app/ios/project.yml app/macos/project.yml \
         app/GutenbergKGKit/Sources/KnowledgePressUI/AppVersion.swift \
+        app/GutenbergKGKit/Sources/KnowledgePressUI/Resources/ReleaseNotes.md \
         .tscodekg/snapshots/
 git commit -m "chore(release): vX.Y.Z release notes"
 ```

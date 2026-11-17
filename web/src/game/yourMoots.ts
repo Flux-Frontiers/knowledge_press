@@ -1,7 +1,8 @@
 /**
  * The reader's own moots: each finished live moot, kept in this browser in the
  * same shape as a shipped moot, so it plays back with no worker. Apart from the
- * saved settings, so Reset all settings leaves them alone, as it does the press.
+ * saved settings, so Reset settings leaves them alone, as it does the press;
+ * Start over clears them.
  */
 
 import { decodeMoot, MOOT_VERSION, type Moot, type MootEntry } from "./moots";
@@ -67,4 +68,9 @@ export function yourMootEntry(moot: Moot): MootEntry {
     turns: moot.turns.length,
     date: moot.date,
   };
+}
+
+/** Start over: every saved moot gone. */
+export function clearYourMoots(): void {
+  try { window.localStorage.removeItem(KEY); } catch { /* private mode / quota */ }
 }

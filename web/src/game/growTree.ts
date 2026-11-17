@@ -610,21 +610,40 @@ export function growTree(opts: {
   // leaf is hung on the wood: its stalk on the line to the nearest node, at
   // most LEAF_REACH away, its blade pointing out along that line and lifted
   // toward the sky.
-  const frac = Math.min(1, Math.max(0, opts.leafScale ?? 1));
-  const kept: number[] = [];
-  for (let l = 0; l < nCrown; l++) if (Math.floor((l + 1) * frac) > Math.floor(l * frac)) kept.push(l);
+  // Above 1 (a desktop's doubled levels, preferences.ts leafScaleFor), every chunk keeps its leaf and an
+  // even stride of them hang a twin beside it on the same twig, up to two per chunk.
+  const scale = Math.min(2, Math.max(0, opts.leafScale ?? 1));
+  const stride = (frac: number) => {
+    const out: number[] = [];
+    for (let l = 0; l < nCrown; l++) if (Math.floor((l + 1) * frac) > Math.floor(l * frac)) out.push(l);
+    return out;
+  };
+  const kept = stride(Math.min(1, scale));
   if (!kept.length && nCrown) kept.push(0);
-  const nLeaves = kept.length;
+  const twins = new Set(stride(Math.max(0, scale - 1)));
+  const slots: [number, boolean][] = kept.map((c) => [c, false]);
+  for (const c of kept) if (twins.has(c)) slots.push([c, true]);
+  const nLeaves = slots.length;
   const allLeaves = new Float32Array(nLeaves * 3);
   const leafDirs = new Float32Array(nLeaves * 3);
   const near = nearestNodeIndex(nodes, n, Math.max(grown.step, 0.25));
-  kept.forEach((c, l) => {
+  slots.forEach(([c, twin], l) => {
     const cx = crown[c * 3]!, cy = crown[c * 3 + 1]!, cz = crown[c * 3 + 2]!;
     const k = near(cx, cy, cz);
     let vx = cx - nodes[k * 3]!, vy = cy - nodes[k * 3 + 1]!, vz = cz - nodes[k * 3 + 2]!;
     const d = Math.hypot(vx, vy, vz);
     const reach = Math.min(d, LEAF_REACH);
     if (d > 1e-6) { vx /= d; vy /= d; vz /= d; } else { vx = 0; vy = 1; vz = 0; }
+    if (twin) {
+      // The twin leans off to one side of its leaf (alternating by chunk), so the pair reads as two blades.
+      let px = -vz, pz = vx;
+      const pl = Math.hypot(px, pz) || 1;
+      const side = c % 2 ? 1 : -1;
+      px = (px / pl) * side; pz = (pz / pl) * side;
+      vx += px * 0.9; vy += 0.25; vz += pz * 0.9;
+      const tl = Math.hypot(vx, vy, vz) || 1;
+      vx /= tl; vy /= tl; vz /= tl;
+    }
     allLeaves[l * 3] = nodes[k * 3]! + vx * reach;
     allLeaves[l * 3 + 1] = nodes[k * 3 + 1]! + vy * reach;
     allLeaves[l * 3 + 2] = nodes[k * 3 + 2]! + vz * reach;

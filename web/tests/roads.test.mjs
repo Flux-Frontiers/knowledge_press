@@ -131,3 +131,24 @@ test("grove signposts stand off the road, on their grove's side, clear of trunks
     }
   }
 });
+
+test("the cart rides on the paving: the rose, a plaza, the ring, a spoke, and the floor off the road", () => {
+  const { getForest } = require(`${process.env.FOREST_TEST_BUILD}/forest.js`);
+  const { surfaceY, SPOKE_Y, RING_Y, PLAZA_Y, ROSE_Y } = require(`${process.env.FOREST_TEST_BUILD}/roads.js`);
+  const f = getForest();
+  assert.equal(surfaceY(f, 0, 5), ROSE_Y);
+  const ring = f.roadLines.find((l) => l.kind === "ring");
+  const [rx, rz] = ring.pts[Math.floor(ring.pts.length / 3)];
+  const onPlaza = f.plazas.some((p) => Math.hypot(rx - p.x, rz - p.z) < p.r);
+  assert.equal(surfaceY(f, rx, rz), onPlaza ? PLAZA_Y : RING_Y);
+  const spoke = f.roadLines.find((l) => l.kind === "spoke");
+  const [a, b] = [spoke.pts[0], spoke.pts[spoke.pts.length - 1]];
+  const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+  assert.ok([SPOKE_Y, RING_Y, PLAZA_Y].includes(surfaceY(f, mid[0], mid[1])), "on the spoke's paving");
+  // Far off any road, between two groves: the floor.
+  const away = f.groves[0];
+  const off = [away.x * 0.5 + 40, away.z * 0.5 + 40];
+  const y = surfaceY(f, off[0], off[1]);
+  assert.ok(y === 0 || y >= SPOKE_Y);
+  assert.equal(surfaceY(f, 1e4, 1e4), 0);
+});

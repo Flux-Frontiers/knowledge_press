@@ -13,13 +13,15 @@ import { getForest, treeApproach, type Forest, type TreeSite } from "./forest";
 import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
 import { requestPlace } from "./location";
-import { nextCamera, LEAF_SCALE } from "./preferences";
+import { leafScaleFor, nextCamera } from "./preferences";
+import { DOUBLE_LEAVES } from "./Environment";
 import { resetSim, teleportSim } from "./sim";
 import { clearResume, readResume, saveResume } from "./resume";
 import { OWNED_SHOT } from "./cinema";
 import { hush, unlockSpeechOnGesture } from "./speech";
 import { stopBook } from "./bookReading";
 import { readerTarget, useGame } from "./store";
+import { UpdateBanner } from "./UpdateBanner";
 
 export function ForestApp() {
   const [mounted, setMounted] = useState(false);
@@ -27,6 +29,8 @@ export function ForestApp() {
   // The start buttons wait for the forest's first frame, not just its data: the first
   // frame uploads the geometry and compiles the shaders, and that is the stall.
   const [drawn, setDrawn] = useState(false);
+  /** The forest has drawn a frame at least once; unlike `drawn`, a regrow (leaf level) does not reset it. */
+  const [firstDrawn, setFirstDrawn] = useState(false);
   useEffect(() => setDrawn(false), [forest]);
   const playing = useGame((s) => s.playing);
   const play = useGame((s) => s.play);
@@ -54,7 +58,7 @@ export function ForestApp() {
 
   // Grow in a worker, regrowing when leaf complexity changes; only the first
   // forest places the cart. Without Worker support, grow on the main thread.
-  const leafScale = useGame((s) => LEAF_SCALE[s.preferences.leaves]);
+  const leafScale = useGame((s) => leafScaleFor(s.preferences.leaves, DOUBLE_LEAVES));
   const placed = useRef(false);
   const worker = useRef<Worker | null>(null);
   const request = useRef(0);
@@ -282,8 +286,10 @@ export function ForestApp() {
       <div className="absolute inset-0 start-wash" />
       {shot ? null : <img src={nightStill ? "start/night.webp" : "start/day.webp"} alt="" className="absolute inset-0 size-full object-cover" />}
       {mounted && forest ? (
-        <div className="forest-fade-in absolute inset-0">
-          <ForestCanvas forest={forest} onDrawn={() => setDrawn(true)} />
+        // Hidden until its first frame is drawn, then faded in: Safari on an iPad can show a WebGL canvas
+        // that has not drawn yet as a white sheet, a flash between the still and the forest.
+        <div className={"absolute inset-0 " + (firstDrawn ? "forest-fade-in" : "opacity-0")}>
+          <ForestCanvas forest={forest} onDrawn={() => { setDrawn(true); setFirstDrawn(true); }} />
         </div>
       ) : null}
       {playing && forest && !shot ? (
@@ -309,6 +315,7 @@ export function ForestApp() {
         />
       )}
       {shot ? null : <About />}
+      {shot ? null : <UpdateBanner />}
     </main>
   );
 }

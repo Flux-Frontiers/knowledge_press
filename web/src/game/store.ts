@@ -1,4 +1,6 @@
 import { create } from "zustand";
+import { clearYourMoots } from "./yourMoots";
+import { clearLandingSeen } from "./events";
 import type { TimeOfDay } from "./daylight";
 import { effectiveTime, moonPhaseName, nextSunEvent, skyState, timeZonePlace, type Place, type SkyState, type TimeMode } from "./sky";
 import { seasonFor, type SeasonName } from "./seasons";
@@ -28,6 +30,8 @@ type SaveBlob = {
   grovesVisited: string[];
   /** Exhibits whose plaque has been opened to read, by exhibit id. */
   plaques: string[];
+  /** Quests done, by id; kept once done, so leaving winter does not undo Bare wood. */
+  quests: string[];
   /** The ring: groves stopped at on the lap under way, laps done, and their seasons. */
   ring: RingProgress;
   /** Times each grove has been arrived at (driven into, or stopped at on the ring), by genre. */
@@ -47,6 +51,7 @@ function loadSave(): SaveBlob {
     library: [],
     grovesVisited: [],
     plaques: [],
+    quests: [],
     ring: readRing(null),
     groveVisits: {},
     reads: {},
@@ -65,6 +70,7 @@ function loadSave(): SaveBlob {
       library: Array.isArray(parsed.library) ? parsed.library : [],
       grovesVisited: Array.isArray(parsed.grovesVisited) ? parsed.grovesVisited : [],
       plaques: Array.isArray(parsed.plaques) ? parsed.plaques.filter((p): p is string => typeof p === "string") : [],
+      quests: Array.isArray(parsed.quests) ? parsed.quests.filter((q): q is string => typeof q === "string") : [],
       ring: readRing(parsed.ring),
       groveVisits: readTally(parsed.groveVisits),
       reads: readTally(parsed.reads),
@@ -92,6 +98,7 @@ function persist(s: {
   library: string[];
   grovesVisited: string[];
   plaques: string[];
+  quests: string[];
   ring: RingProgress;
   groveVisits: Record<string, number>;
   reads: Record<string, number>;
@@ -104,6 +111,7 @@ function persist(s: {
       library: s.library,
       grovesVisited: s.grovesVisited,
       plaques: s.plaques,
+      quests: s.quests,
       ring: s.ring,
       groveVisits: s.groveVisits,
       reads: s.reads,
@@ -162,6 +170,12 @@ export type GameStore = {
   library: string[];
   grovesVisited: string[];
   plaques: string[];
+  /** Quests done, by id (quests.ts); never undone. */
+  quests: string[];
+  markQuests: (ids: string[]) => void;
+  /** Counts volleys of fireworks asked for (a quest done); FireworksSky.tsx launches one per change. */
+  fireworks: number;
+  launchFireworks: () => void;
   ring: RingProgress;
   /** Times each grove has been arrived at, by genre; grows its stud on the Wayfarer's Wheel. */
   groveVisits: Record<string, number>;
@@ -251,6 +265,8 @@ export type GameStore = {
   collect: (slug: string, title: string) => void;
   /** Take every book out of the press. */
   emptyPress: () => void;
+  /** Erase progress on this device: press, groves, quests, achievements, places in books, saved moots. */
+  startOver: () => void;
   markGrove: (genre: string) => void;
   /** :param pinnedDist: distance from the pinned tree, m; Infinity when none is pinned. */
   setNearby: (slug: string | null, dist: number, speed: number, pinnedDist?: number) => void;
@@ -339,7 +355,13 @@ export const useGame = create<GameStore>((set, get) => ({
   resetSettings: () => {
     clearTourHeard();
     seasonPicked = false;
-    set({ preferences: readPreferences(), groundCamera: "follow", season: autoSeason(get().place), timeMode: "live" });
+    // Progress (press, groves, quests, achievements, where each book was left) is Start over's, not this.
+    const preferences = readPreferences({ readingAt: get().preferences.readingAt });
+    set({
+      preferences, groundCamera: "follow", season: autoSeason(get().place), timeMode: "live",
+      // A dismissed quest hint shows again; clean view and the timeline go off.
+      questHintHidden: null, cleanView: false, cleanBeforeTimeline: false, timelineYear: null, timelinePlaying: false,
+    });
     set(readSky("live", get().place));
     persist(get());
     // The app keeps the worker address; a reset clears that too.
@@ -355,6 +377,15 @@ export const useGame = create<GameStore>((set, get) => ({
   library: initial.library,
   grovesVisited: initial.grovesVisited,
   plaques: initial.plaques,
+  quests: initial.quests,
+  fireworks: 0,
+  launchFireworks: () => set({ fireworks: get().fireworks + 1 }),
+  markQuests: (ids) => {
+    const fresh = ids.filter((id) => !get().quests.includes(id));
+    if (!fresh.length) return;
+    set({ quests: [...get().quests, ...fresh] });
+    persist(get());
+  },
   ring: initial.ring,
   groveVisits: initial.groveVisits,
   reads: initial.reads,
@@ -452,6 +483,17 @@ export const useGame = create<GameStore>((set, get) => ({
   emptyPress: () => {
     set({ library: [], lastReadSlug: null });
     persist(get());
+  },
+  startOver: () => {
+    // Everything earned on this device; the settings are Reset settings' and stay as they are.
+    set({
+      library: [], lastReadSlug: null, grovesVisited: [], plaques: [], quests: [], ring: readRing(null),
+      groveVisits: {}, reads: {}, preferences: { ...get().preferences, readingAt: {} },
+      questHintHidden: null, award: null, travelMode: "free", selectedGrove: null,
+    });
+    persist(get());
+    clearYourMoots();
+    clearLandingSeen();
   },
   markPlaque: (id) => {
     if (get().plaques.includes(id)) return;
@@ -590,6 +632,11 @@ export const useGame = create<GameStore>((set, get) => ({
       catalogOpen: false,
       toast: toast ?? null,
     });
+    // The Wheel's view and god's eye watch the table and the map, not the cart: a jump away (Home, a tree)
+    // takes the cart's view back. From god's eye the camera dives down to it, as a flight to a tree does.
+    const camera = get().preferences.camera;
+    if (camera === "wheel") get().setPreferences({ camera: get().groundCamera });
+    else if (camera === "god" && !get().flight) set({ flight: { to: get().groundCamera, reopen: null } });
   },
   clearJump: () => set({ jump: null }),
   groundCamera: initial.preferences.camera === "god" || initial.preferences.camera === "wheel" ? "follow" : initial.preferences.camera,

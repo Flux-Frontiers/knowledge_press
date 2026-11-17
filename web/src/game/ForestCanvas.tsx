@@ -6,6 +6,7 @@ import { pickTree, type Forest, type TreeSite } from "./forest";
 import { forestGodLimits, godPose, panGodView, zoomGodView } from "./godEye";
 import { GroveLabels } from "./GroveLabels";
 import { Player } from "./Player";
+import { FireworksSky } from "./FireworksSky";
 import { setScreenshotCapture } from "./screenshot";
 import { Trees } from "./Trees";
 import { World } from "./World";
@@ -63,6 +64,7 @@ export function ForestCanvas({ forest, onDrawn }: {
       <GodEyeControls forest={forest} />
       <GroveLabels forest={forest} />
       <Player forest={forest} playing={playing} />
+      <FireworksSky />
       {FLY_IN ? <FlyIn forest={forest} /> : null}
       <StartPace on={!playing} />
     </Canvas>

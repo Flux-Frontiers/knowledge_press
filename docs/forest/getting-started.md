@@ -95,6 +95,8 @@ silent mode, Moots, settings, About and Exit.
   phone the bar keeps home and Browse, and the rest move to the menu.
 - **Time of day:** in the three-dot menu. Each tap steps through live, dawn,
   day, dusk and night. See [Sky, seasons and weather](sky.md).
+- **Season:** in the three-dot menu. Each tap steps through spring, summer,
+  autumn and winter. Each visit starts in the season of the date.
 - **The minimap:** under the buttons, the roads, the groves as colored dots,
   the exhibits as gold diamonds, and you. Tap a grove to list its books. It
   is hidden in god's eye, which is already the map.
@@ -112,5 +114,5 @@ you have read, your progress round the ring and your settings are saved in
 this browser only. They do not follow you to
 another device or another browser, and a private window forgets them when it
 closes. **Empty the press** in the Press tab clears the press, and
-**Reset all settings** clears the settings; see
-[Settings](settings.md#reset-all-settings).
+**Reset settings** clears the settings, and **Start over** erases everything
+earned; see [Settings](settings.md#reset-settings).

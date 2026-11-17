@@ -15,7 +15,7 @@ opens the settings. The cart is parked while they are open. Every setting is sav
 
 | Setting | What it does |
 | --- | --- |
-| Leaf complexity | How many of each book's passages are drawn as leaves: **Low** one in ten, **Medium** one in four, **High** one in two, **Ultra** every one. Every level keeps the trees in proportion. Touch devices start at High. Changing it regrows the forest. |
+| Leaf complexity | How many of each book's passages are drawn as leaves: **Low** one in ten, **Medium** one in four, **High** one in two, **Ultra** every one. The Mac app doubles every level: **Ultra** hangs two leaves per passage. The season then shows its share: half in spring, all in summer, 70% in autumn, bare in winter. Every level keeps the trees in proportion. Touch devices start at High. Changing it regrows the forest. |
 | Shadows | The sun's and moon's shadows. Off by default; on an iPad mini, turning them off about doubled the frame rate. |
 | Undergrowth | Grass and stones on the forest floor. On by default. |
 | Show geometry and frame rate | A readout of triangles, draw calls, leaves and frames per second. |
@@ -50,17 +50,29 @@ this section shows only the token, and only when a worker is set.
 
 | Setting | What it does |
 | --- | --- |
-| Season | Spring, summer, autumn or winter. Each visit starts in the season of the date; a choice here lasts until you reload. |
 | Fog | Clear, light, normal or heavy standing haze. |
 | Random weather | Morning fog that burns off, and cloud. Off by default. See [Fog and weather](sky.md#fog-and-weather). |
 
-## Reset all settings
+## Reset settings
 
-**Reset all settings**, at the bottom, asks first, then:
+**Reset settings**, at the bottom, asks first, then:
 
 - Puts every setting above back to its default.
 - Sets the season to the date's and the clock to live.
 - Forgets the tour's welcome, so the next tour gives it in full again.
+- Shows a dismissed quest hint again, and turns clean view and the timeline
+  off.
 
-The press and the groves you have visited are kept. To empty the press, use
-**Empty the press** in the Press tab; see [The press](reading.md#the-press).
+Everything you have earned is kept: the press, the groves you have visited,
+quests, achievements, the Wheel's studs, your place in each book and your
+saved moots.
+
+## Start over
+
+**Start over**, below it, asks first, then erases everything earned on this
+device: the press, visited groves, quests, achievements and the Wheel's
+studs, your place in each book and your saved moots. The visitor's landing
+plays again during its event. Settings are kept. It cannot be undone.
+
+To empty only the press, use **Empty the press** in the Press tab; see
+[The press](reading.md#the-press).

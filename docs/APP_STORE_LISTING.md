@@ -18,8 +18,13 @@ Great books, searched offline
 
 ## Promotional text (170, changeable without a new version)
 
-Live on iOS since 2026-11-06, with 1.34.1, and on the Mac 1.40.0 version,
-submitted 2026-11-08:
+For 1.50.0 (163 characters), leading with reading aloud:
+
+```text
+Hear the classics read aloud in a voice that suits each author, or walk a 3-D forest where every tree is a book. 261 classics and four diaries, all on your device.
+```
+
+From 1.40.0 through 1.41.0 (live 2026-11-12) it was:
 
 ```text
 Walk a 3-D forest where every tree is a book, then ask it a question. 261 classics and four diaries on your device, and every answer shows its sources.
@@ -31,13 +36,17 @@ version ships, never on the live one.
 
 ## Description (4000)
 
-Per version. This text is for 1.34.1 and later: Ask about this book's
-book-only scope and the working Siri shortcut both need 1.34.1. It went in for
-iOS 1.34.1 and, unchanged, for iOS and Mac 1.40.0. Paragraphs are on one line
-each, so it pastes cleanly. The same text serves the Mac.
+Per version. This text is for 1.50.0 and later: it adds reading aloud (READ
+OR LISTEN) and achievements (THE FOREST), both new in 1.50.0, and the
+Timeline from 1.41.0. The genre list is checked against the 1.50.0 corpus
+(`core.pack`: 265 works in 20 genres, the diaries one of them). The text
+before it went in for iOS 1.34.1 and, unchanged, for iOS and Mac 1.40.0 and
+1.41.0; a 1.4x build must not use this one. Ask about this book's book-only
+scope and the working Siri shortcut both need 1.34.1. Paragraphs are on one
+line each, so it pastes cleanly. The same text serves the Mac.
 
 ```text
-The Knowledge Press is a library of 261 public-domain books and four diaries that you can search and question, entirely on your device.
+The Knowledge Press is a library of 261 public-domain books and four diaries that you can search, question and listen to, entirely on your device.
 
 Ask it anything: what Marcus Aurelius says about anger, how Darwin describes the Galapagos finches, where Pepys was on the day of the Great Fire. The app searches the whole library two ways at once, by meaning and by exact wording, and answers from the passages it found. Every answer shows its sources, and marks which passages the model actually read.
 
@@ -47,17 +56,19 @@ The books, the search index and the language model are all on the device. Nothin
 
 THE LIBRARY
 
-Twenty genres: philosophy, English, American, Russian, French, German and Spanish literature, the ancient and classical world, drama and Shakespeare, science fiction, horror, biography, letters, travel, natural history and sacred texts. Plato, Aristotle, Epictetus, Marcus Aurelius, Kant, Nietzsche, Homer, Dante, Cervantes, Austen, Dickens, Melville, Tolstoy, Dostoevsky, Twain, Poe, Shelley, Stoker, Verne, Wells, Darwin, Thoreau, Whitman, and more.
+Twenty genres: philosophy, English, American, Russian, French, German, Spanish and world literature, the ancient and classical world, drama and Shakespeare, science fiction, horror, biography, letters, diaries, travel, natural history, sacred texts, and Audel's classic electrical library. Plato, Aristotle, Epictetus, Marcus Aurelius, Kant, Nietzsche, Homer, Dante, Cervantes, Austen, Dickens, Melville, Tolstoy, Dostoevsky, Twain, Poe, Shelley, Stoker, Verne, Wells, Darwin, Thoreau, Whitman, and more.
 
 Four diaries, searchable by date: Samuel Pepys, John Evelyn (two volumes), and Boswell's journal of his tour of the Hebrides with Samuel Johnson.
 
-READ, NOT JUST SEARCH
+READ OR LISTEN
 
-Browse the library by genre, open any book, and read it chapter by chapter. The diaries open by date. Every source passage under an answer can be read in full.
+Browse the library by genre, open any book, and read it chapter by chapter, with paragraphs, verse, italics and footnotes set as in a printed book. The diaries open by date. Every source passage under an answer can be read in full.
+
+Press play and the app reads the book aloud, a paragraph at a time, highlighting each one as it goes and carrying on into the next chapter. Start from any paragraph. The voice is chosen to suit the author, British for Austen and American for Twain, and you can change the voice and speed in Settings. It uses your device's own voices, so listening works offline too.
 
 THE FOREST
 
-Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, or ask a question about that book alone. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The forest works offline, like the rest of the app.
+Every book in the library grows as a tree in a 3-D forest, one grove for each genre. Drive a cart along the roads, or take the guided tour, which stops at each grove. Open a tree to see its book, read it, listen to it, or ask a question about that book alone; a book keeps reading aloud while you drive on. Each book in Browse and each source under an answer has a Tree button that takes you to its tree. The Timeline grows the forest by date, from 1000 BC to 1931, each tree appearing in the year its book was written. Ride the ring of groves, read the exhibits, and press books into your cart to earn achievements in bronze, silver and gold. The forest works offline, like the rest of the app.
 
 ANSWERS YOU CAN CHECK
 
@@ -84,7 +95,116 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 ## What's New (per version)
 
+### 1.51.0
+
+Replaces 1.50.0, which was withdrawn from review on 2026-11-17 before it
+shipped, so this text carries 1.50.0's news as well. The description above is
+unchanged from 1.50.0.
+
+iOS:
+
+```text
+Books read aloud. Tap play in a book, in Browse or in the Forest's reader, and The Knowledge Press reads it a paragraph at a time, following along on the page, in a voice that suits the author: British for Austen, American for Twain. Choose the voice and speed in Settings. In the Forest, the reading goes on while you drive.
+
+Also new:
+- Achievements: Wayfarer, Explorer, Reader and Curator, each in bronze, silver and gold, listed on the Press tab.
+- The Wayfarer's Wheel, a bronze map of the forest's roads on the hub plaza. Its studs grow with every grove you visit and every book you open, and it has its own camera view.
+- Fireworks when you finish a quest, and finished quests stay done.
+- The forest's canopy follows the season: thinner in spring, full in summer, bare in winter.
+- A night-sky splash with the opening line of a book from the library, different at each launch.
+- Twilight, a new time of day between dusk and night.
+- A drone's fly-in to the redwood, from the More menu.
+- The Forest's reader sets books as books: paragraphs, verse lines, italics and footnotes, with a text size control.
+- Photographed forest floor and redwood bark, and the cart rolls on all four wheels.
+- Shadows fade in smoothly as you approach a grove.
+- A tree's card shows its year and chunk count.
+- The ring roads show on the minimap, and an interrupted ride picks up where it left off.
+- Riding the ring from a grove no longer drives into trees.
+- Reset settings now keeps your progress; Start over erases it.
+- After an update, the app shows what's new.
+- Home returns to the cart from any view.
+- A chat saved as the app opens no longer drops off the list.
+- If iOS reloads the Forest, you return where you were instead of to the start screen.
+- No white flash at launch.
+```
+
+Mac (twice the leaves, Space key and whole-forest shadows are the Mac's own;
+no reload or launch-flash lines):
+
+```text
+Books read aloud. Click play in a book, in Browse or in the Forest's reader, and The Knowledge Press reads it a paragraph at a time, following along on the page, in a voice that suits the author: British for Austen, American for Twain. Choose the voice and speed in Settings. In the Forest, Space starts and pauses the reading, and it goes on while you drive.
+
+Also new:
+- Achievements: Wayfarer, Explorer, Reader and Curator, each in bronze, silver and gold, listed on the Press tab.
+- The Wayfarer's Wheel, a bronze map of the forest's roads on the hub plaza. Its studs grow with every grove you visit and every book you open, and it has its own camera view.
+- Twice the leaves on the Mac, and the canopy follows the season: thinner in spring, full in summer, bare in winter.
+- Fireworks when you finish a quest, and finished quests stay done.
+- A night-sky splash with the opening line of a book from the library, different at each launch.
+- Twilight, a new time of day between dusk and night.
+- A drone's fly-in to the redwood, from the More menu.
+- The Forest's reader sets books as books: paragraphs, verse lines, italics and footnotes, with a text size control.
+- Photographed forest floor and redwood bark, and the cart rolls on all four wheels.
+- Shadows across the whole forest.
+- A tree's card shows its year and chunk count.
+- The ring roads show on the minimap, and an interrupted ride picks up where it left off.
+- Riding the ring from a grove no longer drives into trees.
+- Reset settings now keeps your progress; Start over erases it.
+- After an update, the app shows what's new.
+- Home returns to the cart from any view.
+- A chat saved as the app opens no longer drops off the list.
+```
+
+### 1.50.0
+
+Build 1074 on both platforms, archived from the v1.50.0 tag and uploaded for
+iOS and Mac on 2026-11-16. Withdrawn from review on 2026-11-17, never
+released; replaced by 1.51.0. The description above was revised for this
+version.
+
+iOS:
+
+```text
+Books read aloud. Tap play in a book, in Browse or in the Forest's reader, and The Knowledge Press reads it a paragraph at a time, following along on the page, in a voice that suits the author: British for Austen, American for Twain. Choose the voice and speed in Settings. In the Forest, the reading goes on while you drive.
+
+Also new:
+- Achievements: Wayfarer, Explorer, Reader and Curator, each in bronze, silver and gold, listed on the Press tab.
+- The Wayfarer's Wheel, a bronze map of the forest's roads on the hub plaza. Its studs grow with every grove you visit and every book you open, and it has its own camera view.
+- A night-sky splash with the opening line of a book from the library, different at each launch.
+- Twilight, a new time of day between dusk and night.
+- A drone's fly-in to the redwood, from the More menu.
+- The Forest's reader sets books as books: paragraphs, verse lines, italics and footnotes, with a text size control.
+- Photographed forest floor and redwood bark.
+- Shadows fade in smoothly as you approach a grove.
+- A tree's card shows its year and chunk count.
+- The ring roads show on the minimap, and an interrupted ride picks up where it left off.
+- Riding the ring from a grove no longer drives into trees.
+- If iOS reloads the Forest, you return where you were instead of to the start screen.
+- No white flash at launch.
+```
+
+Mac (Space key and whole-forest shadows are the Mac's own; no reload or
+launch-flash lines):
+
+```text
+Books read aloud. Click play in a book, in Browse or in the Forest's reader, and The Knowledge Press reads it a paragraph at a time, following along on the page, in a voice that suits the author: British for Austen, American for Twain. Choose the voice and speed in Settings. In the Forest, Space starts and pauses the reading, and it goes on while you drive.
+
+Also new:
+- Achievements: Wayfarer, Explorer, Reader and Curator, each in bronze, silver and gold, listed on the Press tab.
+- The Wayfarer's Wheel, a bronze map of the forest's roads on the hub plaza. Its studs grow with every grove you visit and every book you open, and it has its own camera view.
+- A night-sky splash with the opening line of a book from the library, different at each launch.
+- Twilight, a new time of day between dusk and night.
+- A drone's fly-in to the redwood, from the More menu.
+- The Forest's reader sets books as books: paragraphs, verse lines, italics and footnotes, with a text size control.
+- Photographed forest floor and redwood bark.
+- Shadows across the whole forest.
+- A tree's card shows its year and chunk count.
+- The ring roads show on the minimap, and an interrupted ride picks up where it left off.
+- Riding the ring from a grove no longer drives into trees.
+```
+
 ### 1.41.0
+
+Submitted 2026-11-11 for iOS and Mac, build 1006 on both; live 2026-11-12.
 
 iOS:
 
@@ -303,6 +423,9 @@ above, with "on your Mac" for "on your device".
 The blocks above count the 1.32.0 corpus: 261 books plus four diaries, 265
 works in all. The description is per version, so the count changes only when
 a new version's text is edited.
+
+Mac 1.41.0 went in the same way, on the same day as iOS, and 1.50.0 was
+uploaded with it.
 
 Mac 1.40.0, submitted 2026-11-08, is the first Mac version with the Forest:
 it took the description above (with THE FOREST), the Forest promotional text,

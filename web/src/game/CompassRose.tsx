@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { ROSE_Y } from "./roads";
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { drawCompassRose, ROSE_R, ROSE_TILT } from "./compassRoseArt";
 import { textureAnisotropy } from "./Environment";
@@ -6,7 +7,6 @@ import type { Forest } from "./forest";
 
 const TEXTURE_PX = 2048;
 /** Just above the plaza (0.055). */
-const ROSE_Y = 0.062;
 
 /** Clear paving between the root flare and the winds' feet, m. */
 const FLARE_MARGIN = 0.4;
