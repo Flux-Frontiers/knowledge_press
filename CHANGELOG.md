@@ -11,6 +11,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.51.1] - 2026-11-17
+
 ### Changed
 
 - **The on-device image rewrite prompt matches the worker's new one.**
