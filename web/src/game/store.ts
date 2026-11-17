@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { QUESTS } from "./quests";
+import { clearYourMoots } from "./yourMoots";
+import { clearLandingSeen } from "./events";
 import type { TimeOfDay } from "./daylight";
 import { effectiveTime, moonPhaseName, nextSunEvent, skyState, timeZonePlace, type Place, type SkyState, type TimeMode } from "./sky";
 import { seasonFor, type SeasonName } from "./seasons";
@@ -264,6 +265,8 @@ export type GameStore = {
   collect: (slug: string, title: string) => void;
   /** Take every book out of the press. */
   emptyPress: () => void;
+  /** Erase progress on this device: press, groves, quests, achievements, places in books, saved moots. */
+  startOver: () => void;
   markGrove: (genre: string) => void;
   /** :param pinnedDist: distance from the pinned tree, m; Infinity when none is pinned. */
   setNearby: (slug: string | null, dist: number, speed: number, pinnedDist?: number) => void;
@@ -352,14 +355,10 @@ export const useGame = create<GameStore>((set, get) => ({
   resetSettings: () => {
     clearTourHeard();
     seasonPicked = false;
-    const season = autoSeason(get().place);
-    // Quests start over, recounted from the press and groves kept: Bare wood goes until the next winter.
-    // Recounted here rather than cleared, so the HUD does not fire a volley for each one still met.
-    const quests = QUESTS.filter((q) => q.done({ library: get().library, grovesVisited: get().grovesVisited, season })).map((q) => q.id);
-    // Where each book was left is progress, like the press, not a setting: it is kept.
+    // Progress (press, groves, quests, achievements, where each book was left) is Start over's, not this.
     const preferences = readPreferences({ readingAt: get().preferences.readingAt });
     set({
-      preferences, groundCamera: "follow", season, timeMode: "live", quests,
+      preferences, groundCamera: "follow", season: autoSeason(get().place), timeMode: "live",
       // A dismissed quest hint shows again; clean view and the timeline go off.
       questHintHidden: null, cleanView: false, cleanBeforeTimeline: false, timelineYear: null, timelinePlaying: false,
     });
@@ -484,6 +483,17 @@ export const useGame = create<GameStore>((set, get) => ({
   emptyPress: () => {
     set({ library: [], lastReadSlug: null });
     persist(get());
+  },
+  startOver: () => {
+    // Everything earned on this device; the settings are Reset settings' and stay as they are.
+    set({
+      library: [], lastReadSlug: null, grovesVisited: [], plaques: [], quests: [], ring: readRing(null),
+      groveVisits: {}, reads: {}, preferences: { ...get().preferences, readingAt: {} },
+      questHintHidden: null, award: null, travelMode: "free", selectedGrove: null,
+    });
+    persist(get());
+    clearYourMoots();
+    clearLandingSeen();
   },
   markPlaque: (id) => {
     if (get().plaques.includes(id)) return;

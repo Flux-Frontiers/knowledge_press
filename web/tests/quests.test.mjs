@@ -33,22 +33,7 @@ test("done quests are saved and survive a reload", () => {
   assert.deepEqual(require(path).useGame.getState().quests, ["winter", "hamlet"]);
 });
 
-test("reset all settings starts the quests over from what the press still meets", () => {
-  let save = null;
-  globalThis.window = { localStorage: { getItem: () => save, setItem: (_, v) => { save = v; } } };
-  const path = `${process.env.FOREST_TEST_BUILD}/store.js`;
-  delete require.cache[require.resolve(path)];
-  const { useGame } = require(path);
-  useGame.setState({ library: ["hamlet"] });
-  useGame.getState().markQuests(["hamlet", "winter"]);
-  useGame.getState().resetSettings();
-  const kept = useGame.getState().quests;
-  assert.ok(kept.includes("hamlet"), "met by the press");
-  assert.equal(kept.includes("winter"), useGame.getState().season === "winter");
-  assert.deepEqual(JSON.parse(save).quests, kept);
-});
-
-test("reset all settings puts every setting back and keeps progress", () => {
+test("reset settings puts every setting back and keeps all progress", () => {
   let save = null;
   globalThis.window = { localStorage: { getItem: () => save, setItem: (_, v) => { save = v; }, removeItem: () => {} } };
   const path = `${process.env.FOREST_TEST_BUILD}/store.js`;
@@ -57,6 +42,7 @@ test("reset all settings puts every setting back and keeps progress", () => {
   const st = () => useGame.getState();
   const fresh = st().preferences;
   useGame.setState({ library: ["hamlet"], grovesVisited: ["drama"] });
+  st().markQuests(["hamlet", "winter"]);
   st().setPreferences({ pace: "brisk", fog: "heavy", silent: true, camera: "god", readingAt: { hamlet: [3, 12] }, mootWorker: "https://w.example" });
   st().setSeason("winter");
   st().setTimeMode("night");
@@ -73,7 +59,30 @@ test("reset all settings puts every setting back and keeps progress", () => {
   assert.equal(st().timelineYear, null);
   assert.deepEqual(st().library, ["hamlet"]);
   assert.deepEqual(st().grovesVisited, ["drama"]);
+  assert.deepEqual(st().quests, ["hamlet", "winter"]);
   const saved = JSON.parse(save);
   assert.equal(saved.preferences.pace, "gentle");
   assert.deepEqual(saved.library, ["hamlet"]);
+});
+
+test("start over erases progress, saved moots and the landing flag, and keeps settings", () => {
+  const store = { "kpf-your-moots-v1": "[]", "kp.event.visitor.seen": "1" };
+  globalThis.window = { localStorage: {
+    getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = v; }, removeItem: (k) => { delete store[k]; },
+  } };
+  const path = `${process.env.FOREST_TEST_BUILD}/store.js`;
+  delete require.cache[require.resolve(path)];
+  const { useGame } = require(path);
+  const st = () => useGame.getState();
+  useGame.setState({ library: ["hamlet"], grovesVisited: ["drama"], plaques: ["wayfarer"], groveVisits: { drama: 3 }, reads: { hamlet: 2 } });
+  st().markQuests(["hamlet"]);
+  st().setPreferences({ fog: "heavy", readingAt: { hamlet: [3, 12] } });
+  st().startOver();
+  assert.deepEqual([st().library, st().grovesVisited, st().plaques, st().quests], [[], [], [], []]);
+  assert.deepEqual([st().groveVisits, st().reads, st().preferences.readingAt], [{}, {}, {}]);
+  assert.equal(st().preferences.fog, "heavy");
+  assert.equal(store["kpf-your-moots-v1"], undefined);
+  assert.equal(store["kp.event.visitor.seen"], undefined);
+  const saved = JSON.parse(store["kpf-library-v1"]);
+  assert.deepEqual([saved.library, saved.quests, saved.preferences.fog], [[], [], "heavy"]);
 });

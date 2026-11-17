@@ -21,7 +21,7 @@ import {
 } from "three";
 import { cinema, UFO_CAM } from "./cinema";
 import { artTree, dieOrder, grownFraction, litDieCount, powerLevel } from "./artTree";
-import { activeEvent, stage } from "./events";
+import { activeEvent, landingSeen, markLandingSeen, stage } from "./events";
 import type { Exhibit } from "./exhibits";
 import { treeApproach, type Forest } from "./forest";
 import { reflectionMap } from "./FlameOfKnowledge";
@@ -72,14 +72,6 @@ const WELL_H = 1.6;
 /** Seconds into the landing: null until it starts. Kept for the session, so it plays once. */
 let landingT: number | null = null;
 let sighed = false;
-/** Once the landing has been watched to the end on this device, later visits find it already down, the tree grown. */
-const SEEN_KEY = "kp.event.visitor.seen";
-function landingSeen(): boolean {
-  try { return window.localStorage.getItem(SEEN_KEY) === "1"; } catch { return false; }
-}
-function markLandingSeen() {
-  try { window.localStorage.setItem(SEEN_KEY, "1"); } catch { /* private mode: it plays again next time */ }
-}
 /** The camera is the landing's (cinema weight past half), and whether clean view was turned on for it. */
 let holding = false;
 let cleanedForShot = false;

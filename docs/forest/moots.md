@@ -55,8 +55,8 @@ short. Closing the moot ends it on the worker. If a turn fails, choose
 
 A moot that reaches its last turn is saved on this device under **Your moots**,
 and plays back with no worker or model. A moot you close early is not saved.
-Saved moots stay in this browser or app, and **Reset all settings** leaves them
-alone. To remove one, choose its trash button.
+Saved moots stay in this browser or app. **Reset settings** leaves them alone;
+**Start over** clears them. To remove one, choose its trash button.
 
 Which forest you use matters:
 

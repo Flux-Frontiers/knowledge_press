@@ -34,3 +34,19 @@ export function activeEvent(now: Date, search: string, events: ForestEvent[] = E
   const day = localDay(now);
   return events.find((e) => e.start <= day && day <= e.end)?.id ?? null;
 }
+
+/** Once the visitor's landing has been watched to the end on this device, later visits find it already down. */
+const LANDING_SEEN_KEY = "kp.event.visitor.seen";
+
+export function landingSeen(): boolean {
+  try { return window.localStorage.getItem(LANDING_SEEN_KEY) === "1"; } catch { return false; }
+}
+
+export function markLandingSeen(): void {
+  try { window.localStorage.setItem(LANDING_SEEN_KEY, "1"); } catch { /* private mode: it plays again next time */ }
+}
+
+/** Start over: the landing plays again on the next visit during the event. */
+export function clearLandingSeen(): void {
+  try { window.localStorage.removeItem(LANDING_SEEN_KEY); } catch { /* private mode / quota */ }
+}

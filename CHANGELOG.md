@@ -34,15 +34,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   "Quest done · Bare wood · 5 of 5".
 - **A quest stays done.** Bare wood counted only while it was winter, so
   going back to autumn took 5 of 5 back to 4 of 5. Done quests are now saved
-  and kept. Reset all settings starts them over, counting again those the
-  press and visited groves still meet.
+  and kept; Start over clears them.
 
 ### Changed
 
-- **Reset all settings is thorough, and keeps your place in each book.** It
-  also brings back a dismissed quest hint and turns clean view and the
-  timeline off. Where each book was left is kept now, with the press and the
-  groves: it was saved among the settings and lost on a reset.
+- **Two resets: Reset settings and Start over.** Reset all settings is now
+  Reset settings and keeps everything earned, your place in each book among
+  it (that was saved with the settings and lost on a reset). It also brings
+  back a dismissed quest hint and turns clean view and the timeline off.
+  Start over, below it, erases progress on the device: the press, visited
+  groves, quests, achievements and the Wheel's studs, places in books and
+  saved moots, and lets the visitor's landing play again. Settings are kept.
 - **The season is back in the ... menu**, stepping Spring, Summer, Autumn,
   Winter, and is gone from the settings window, where the dialog hid what
   changed.

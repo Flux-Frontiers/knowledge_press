@@ -106,8 +106,9 @@ The press is the list of books you have read. ++l++, or the **Press** tab under
 the press holds. Each entry opens the book or jumps to its tree.
 
 A book stays in the press until you empty it: **Empty the press**, at the
-bottom of the Press tab, asks first, then takes every book out. The quests
-that count books start over. Reset all settings leaves the press alone. The count is saved in this
+bottom of the Press tab, asks first, then takes every book out. Quests already
+done stay done. Reset settings leaves the press alone; Start over empties it
+with the rest of your progress. The count is saved in this
 browser; see [Where your progress lives](getting-started.md#where-your-progress-lives).
 
 ## Quests
@@ -122,7 +123,10 @@ Five hints appear as you drive, each a small thing to do in the forest:
 | Bare wood | You have switched the season to winter. |
 | Across the press | You have visited four genre groves. |
 
-A hint can be dismissed. Silent mode hides them. They are for your own
+Each quest done sets off fireworks over the forest, with a note naming it.
+A quest stays done once done: switching back from winter keeps Bare wood, and
+only **Start over** (in Settings) clears them. A hint can be dismissed.
+Silent mode hides them. They are for your own
 amusement; nothing is locked behind them.
 
 ## Achievements
