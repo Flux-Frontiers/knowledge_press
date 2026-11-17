@@ -13,6 +13,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- **Ride the ring sits level with the search bar.** On a Mac or a desktop
+  browser at least 768 px wide, the button now lines up with the search bar
+  along the bottom edge, at the same 44 px height as the other HUD buttons,
+  instead of floating small above the bottom row. Narrower windows, and
+  god's eye with the timeline open, keep it higher so it clears the search
+  bar and the timeline panel.
 - **The web forest loads its libraries as separate files.** three.js and
   the other libraries (React, react-three-fiber, zustand, lucide) now build
   into their own chunks, beside the forest's own code, so a release that

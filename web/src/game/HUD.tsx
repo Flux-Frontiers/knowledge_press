@@ -511,12 +511,15 @@ export function HUD({ forest }: { forest: Forest }) {
           ) : null}
         </div>
 
-        <div className={"season-dock pointer-events-auto absolute right-3 hidden flex-col gap-1 sm:flex " + (godEye && timelineYear !== null ? "bottom-[7.5rem]" : "bottom-24")}>
+        {/* From md up, level with the search bar (both bottom-9, both 44px tall).
+            Narrower, the centred search bar would reach it, so it sits above, and
+            in god's eye with the timeline open it clears the timeline panel. */}
+        <div className={"season-dock pointer-events-auto absolute right-3 hidden flex-col gap-1 sm:flex " + (godEye && timelineYear !== null ? "bottom-[7.5rem]" : "bottom-24 md:bottom-9")}>
           <button
             type="button"
             onClick={() => { toggleCircuit(); (document.activeElement as HTMLElement | null)?.blur(); }}
             className={
-              "rounded-sm px-2 py-1 text-xs " +
+              "min-h-11 rounded-md px-4 text-sm " +
               (travelMode === "circuit" ? "bg-primary text-primary-fg" : "border border-border bg-surface text-muted")
             }
           >
