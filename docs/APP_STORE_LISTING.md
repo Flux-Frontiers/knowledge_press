@@ -95,10 +95,71 @@ classics,books,library,philosophy,literature,offline,reader,search,shakespeare,p
 
 ## What's New (per version)
 
+### 1.51.0
+
+Replaces 1.50.0, which was withdrawn from review on 2026-11-17 before it
+shipped, so this text carries 1.50.0's news as well. The description above is
+unchanged from 1.50.0.
+
+iOS:
+
+```text
+Books read aloud. Tap play in a book, in Browse or in the Forest's reader, and The Knowledge Press reads it a paragraph at a time, following along on the page, in a voice that suits the author: British for Austen, American for Twain. Choose the voice and speed in Settings. In the Forest, the reading goes on while you drive.
+
+Also new:
+- Achievements: Wayfarer, Explorer, Reader and Curator, each in bronze, silver and gold, listed on the Press tab.
+- The Wayfarer's Wheel, a bronze map of the forest's roads on the hub plaza. Its studs grow with every grove you visit and every book you open, and it has its own camera view.
+- Fireworks when you finish a quest, and finished quests stay done.
+- The forest's canopy follows the season: thinner in spring, full in summer, bare in winter.
+- A night-sky splash with the opening line of a book from the library, different at each launch.
+- Twilight, a new time of day between dusk and night.
+- A drone's fly-in to the redwood, from the More menu.
+- The Forest's reader sets books as books: paragraphs, verse lines, italics and footnotes, with a text size control.
+- Photographed forest floor and redwood bark, and the cart rolls on all four wheels.
+- Shadows fade in smoothly as you approach a grove.
+- A tree's card shows its year and chunk count.
+- The ring roads show on the minimap, and an interrupted ride picks up where it left off.
+- Riding the ring from a grove no longer drives into trees.
+- Reset settings now keeps your progress; Start over erases it.
+- After an update, the app shows what's new.
+- Home returns to the cart from any view.
+- A chat saved as the app opens no longer drops off the list.
+- If iOS reloads the Forest, you return where you were instead of to the start screen.
+- No white flash at launch.
+```
+
+Mac (twice the leaves, Space key and whole-forest shadows are the Mac's own;
+no reload or launch-flash lines):
+
+```text
+Books read aloud. Click play in a book, in Browse or in the Forest's reader, and The Knowledge Press reads it a paragraph at a time, following along on the page, in a voice that suits the author: British for Austen, American for Twain. Choose the voice and speed in Settings. In the Forest, Space starts and pauses the reading, and it goes on while you drive.
+
+Also new:
+- Achievements: Wayfarer, Explorer, Reader and Curator, each in bronze, silver and gold, listed on the Press tab.
+- The Wayfarer's Wheel, a bronze map of the forest's roads on the hub plaza. Its studs grow with every grove you visit and every book you open, and it has its own camera view.
+- Twice the leaves on the Mac, and the canopy follows the season: thinner in spring, full in summer, bare in winter.
+- Fireworks when you finish a quest, and finished quests stay done.
+- A night-sky splash with the opening line of a book from the library, different at each launch.
+- Twilight, a new time of day between dusk and night.
+- A drone's fly-in to the redwood, from the More menu.
+- The Forest's reader sets books as books: paragraphs, verse lines, italics and footnotes, with a text size control.
+- Photographed forest floor and redwood bark, and the cart rolls on all four wheels.
+- Shadows across the whole forest.
+- A tree's card shows its year and chunk count.
+- The ring roads show on the minimap, and an interrupted ride picks up where it left off.
+- Riding the ring from a grove no longer drives into trees.
+- Reset settings now keeps your progress; Start over erases it.
+- After an update, the app shows what's new.
+- Home returns to the cart from any view.
+- A chat saved as the app opens no longer drops off the list.
+```
+
 ### 1.50.0
 
 Build 1074 on both platforms, archived from the v1.50.0 tag and uploaded for
-iOS and Mac on 2026-11-16. The description above was revised for this version.
+iOS and Mac on 2026-11-16. Withdrawn from review on 2026-11-17, never
+released; replaced by 1.51.0. The description above was revised for this
+version.
 
 iOS:
 
