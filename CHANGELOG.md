@@ -53,9 +53,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **The canopy follows the season.** Spring shows half the leaves the leaf
   setting allows, summer all of them, autumn 70%, and winter is bare wood as
   before. Spring and autumn draw fewer leaves, so they run faster too.
-- **Twice the leaves on a Mac or desktop.** Every leaf level doubles where
-  there is a mouse or trackpad: Ultra hangs two leaves per chunk, the second
-  beside the first on the same twig. Phones and iPads keep their levels.
+- **Twice the leaves in the Mac app.** Every leaf level doubles there: Ultra
+  hangs two leaves per chunk, the second beside the first on the same twig.
+  Phones, iPads and the web forest in any browser keep their levels.
 - **Two resets: Reset settings and Start over.** Reset all settings is now
   Reset settings and keeps everything earned, your place in each book among
   it (that was saved with the settings and lost on a reset). It also brings

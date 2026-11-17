@@ -14,7 +14,7 @@ import { GROW_VERSION } from "./growTree";
 import { bindInput, isInputTarget } from "./input";
 import { requestPlace } from "./location";
 import { leafScaleFor, nextCamera } from "./preferences";
-import { COARSE_POINTER } from "./Environment";
+import { DOUBLE_LEAVES } from "./Environment";
 import { resetSim, teleportSim } from "./sim";
 import { clearResume, readResume, saveResume } from "./resume";
 import { OWNED_SHOT } from "./cinema";
@@ -58,7 +58,7 @@ export function ForestApp() {
 
   // Grow in a worker, regrowing when leaf complexity changes; only the first
   // forest places the cart. Without Worker support, grow on the main thread.
-  const leafScale = useGame((s) => leafScaleFor(s.preferences.leaves, !COARSE_POINTER));
+  const leafScale = useGame((s) => leafScaleFor(s.preferences.leaves, DOUBLE_LEAVES));
   const placed = useRef(false);
   const worker = useRef<Worker | null>(null);
   const request = useRef(0);

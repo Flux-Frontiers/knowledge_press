@@ -63,8 +63,8 @@ export type LeafDetail = "low" | "medium" | "high" | "ultra";
 export const LEAF_SCALE: Record<LeafDetail, number> = { low: 0.1, medium: 0.25, high: 0.5, ultra: 1 };
 
 /**
- * The leaves a level grows here: a Mac or desktop (no coarse pointer) doubles every level, so Ultra hangs
- * two leaves per chunk (growTree.ts); a phone or iPad keeps LEAF_SCALE.
+ * The leaves a level grows here: the Mac app (Environment.tsx DOUBLE_LEAVES) doubles every level, so Ultra
+ * hangs two leaves per chunk (growTree.ts); an iPad, a phone and every browser keep LEAF_SCALE.
  */
 export function leafScaleFor(detail: LeafDetail, desktop: boolean): number {
   return LEAF_SCALE[detail] * (desktop ? 2 : 1);

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { COARSE_POINTER } from "./Environment";
+import { DOUBLE_LEAVES } from "./Environment";
 import { leafLabels } from "./preferences";
 import { host } from "./host";
 import { canSpeak, mootVoiceNames, onVoicesChanged, unlockSpeech } from "./speech";
@@ -60,7 +60,7 @@ export function PauseOverlay() {
         </label>
         <label className="flex items-center justify-between gap-4">Leaf complexity
           <select value={prefs.leaves} onChange={(e) => setPreferences({ leaves: e.target.value as typeof prefs.leaves })} className="rounded-md border border-border bg-bg p-2">
-            {(["low", "medium", "high", "ultra"] as const).map((level) => <option key={level} value={level}>{leafLabels(!COARSE_POINTER)[level]}</option>)}
+            {(["low", "medium", "high", "ultra"] as const).map((level) => <option key={level} value={level}>{leafLabels(DOUBLE_LEAVES)[level]}</option>)}
           </select>
         </label>
         <label className="flex items-center justify-between gap-4">Read each grove aloud on the ring
