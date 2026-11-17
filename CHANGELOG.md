@@ -11,6 +11,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The on-device image rewrite prompt matches the worker's new one.**
+  `SynthesisPrompt.imageRewriteInstructions` mirrors kgmodule-utils'
+  `_IMAGE_REWRITE_SYSTEM`, which now asks for an accurate scene: the end of
+  the moment, a person turned into something shown only as what they became,
+  the narrator in the scene, everyone clothed, and no lettering.
+
 ## [1.51.0] - 2026-11-17
 
 ### Added
