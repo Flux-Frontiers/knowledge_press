@@ -303,3 +303,21 @@ test("far groves draw a prefix of their leaves, thinned by distance", () => {
   let prev = 1;
   for (let d = 0; d < 600; d += 5) { const f = leafFraction(d, 60, 0.15); assert.ok(f <= prev && f >= 0.15); prev = f; }
 });
+
+test("a desktop's doubled levels: Ultra hangs two leaves per chunk, High one, near their own twig", () => {
+  const { growTree } = require(`${process.env.FOREST_TEST_BUILD}/growTree.js`);
+  const { leafScaleFor } = require(`${process.env.FOREST_TEST_BUILD}/preferences.js`);
+  const { BOOKS } = require(`${process.env.FOREST_TEST_BUILD}/catalog.js`);
+  assert.equal(leafScaleFor("ultra", true), 2);
+  assert.equal(leafScaleFor("ultra", false), 1);
+  assert.equal(leafScaleFor("low", true), 0.2);
+  const b = BOOKS.find((x) => x.chunks > 500);
+  const one = growTree({ slug: b.slug, genre: b.genre, nChunks: b.chunks, leafScale: 1 });
+  const two = growTree({ slug: b.slug, genre: b.genre, nChunks: b.chunks, leafScale: 2 });
+  const half = growTree({ slug: b.slug, genre: b.genre, nChunks: b.chunks, leafScale: 1.5 });
+  assert.equal(two.nLeaves, 2 * one.nLeaves);
+  assert.ok(Math.abs(half.nLeaves - 1.5 * one.nLeaves) <= 1);
+  // The first nLeaves are the same leaves as at 1; the twins follow.
+  assert.deepEqual(Array.from(two.leafPoints.slice(0, 30)), Array.from(one.leafPoints.slice(0, 30)));
+  for (let i = one.nLeaves; i < two.nLeaves; i++) assert.ok(Number.isFinite(two.leafPoints[i * 3 + 1]));
+});

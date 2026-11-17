@@ -8,6 +8,7 @@ import { starBuffers } from "./stars";
 import { fogMix, overcast, weather } from "./weather";
 import { shadowCenter, shadowStale, snapToTexels, type ShadowState } from "./shadowCache";
 import { fadeShadowChunk } from "./shadowFade";
+import { host } from "./host";
 import { cinema, OWNED_SHOT } from "./cinema";
 import { floorLitter, rockGeometry, tuftGeometry } from "./forestFloor";
 import type { SeasonName } from "./seasons";
@@ -246,6 +247,11 @@ type StarUniforms = ReturnType<typeof starUniformSet>;
 
 /** Tablets and phones: fewer pixels and a smaller shadow map keep the frame rate up. */
 export const COARSE_POINTER = typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches;
+/**
+ * Twice the leaves at every level (preferences.ts leafScaleFor): the Mac app only, a known GPU. A desktop
+ * browser could be any machine, so the web keeps the touch levels everywhere.
+ */
+export const DOUBLE_LEAVES = !COARSE_POINTER && host.available;
 /** Phones: a touch screen under 640px on its short side. */
 export const PHONE = COARSE_POINTER && Math.min(screen.width, screen.height) < 640;
 

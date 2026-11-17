@@ -6,6 +6,7 @@ export type Season = {
   name: SeasonName;
   label: string;
   foliage: string[];
+  /** Share of the leaf setting's leaves the season shows: half in spring, all in summer, 0.7 in autumn. */
   density: number;
   wood: string;
   sky: string;
@@ -21,7 +22,7 @@ export const SEASONS: Record<SeasonName, Season> = {
     name: "spring",
     label: "Spring",
     foliage: ["#A8E063", "#7FD14B", "#C6F08A", "#F4D4E0", "#E8E3B0"],
-    density: 1,
+    density: 0.5,
     wood: "#6B4A2E",
     sky: "#1a2a40",
     fog: "#1c2c42",
@@ -47,7 +48,7 @@ export const SEASONS: Record<SeasonName, Season> = {
     name: "autumn",
     label: "Autumn",
     foliage: ["#E8A33D", "#D95F30", "#B3341F", "#F0C75E", "#8C6A3F", "#6B8F3A"],
-    density: 0.85,
+    density: 0.7,
     wood: "#5C3D24",
     sky: "#2a1a2e",
     fog: "#2a1a28",
