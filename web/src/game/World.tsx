@@ -11,7 +11,7 @@ import { FOG_SCALE } from "./preferences";
 const GOD_EYE_FOG = 0.1;
 import type { Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, groveByGenre, type Forest } from "./forest";
-import { disc, fillets, ribbon, RING_W, SPOKE_W, SPUR_W, type FlatMesh } from "./roads";
+import { disc, fillets, PLAZA_Y, ribbon, RING_W, RING_Y, SPOKE_W, SPOKE_Y, SPUR_W, type FlatMesh } from "./roads";
 import { CompassRose } from "./CompassRose";
 import { CorpusRedwood } from "./CorpusRedwood";
 import { Cart } from "./Cart";
@@ -185,13 +185,13 @@ function Roads({ forest, circuit }: { forest: Forest; circuit: boolean }) {
     const spokes: FlatMesh = { pos: [], uv: [], index: [] };
     const ring: FlatMesh = { pos: [], uv: [], index: [] };
     for (const line of forest.roadLines) {
-      if (line.kind === "spoke") ribbon(line, SPOKE_W, 0.035, spokes);
-      else if (line.kind === "spur") ribbon(line, SPUR_W, 0.035, spokes);
-      else ribbon(line, RING_W, 0.045, ring);
+      if (line.kind === "spoke") ribbon(line, SPOKE_W, SPOKE_Y, spokes);
+      else if (line.kind === "spur") ribbon(line, SPUR_W, SPOKE_Y, spokes);
+      else ribbon(line, RING_W, RING_Y, ring);
     }
     // Curbs rounded where a spoke meets a ring, at the ring's level: they touch neither road's strip.
-    for (const j of forest.junctions) fillets(j, 0.045, ring);
-    for (const p of forest.plazas) disc(p.x, p.z, p.r, 0.055, ring);
+    for (const j of forest.junctions) fillets(j, RING_Y, ring);
+    for (const p of forest.plazas) disc(p.x, p.z, p.r, PLAZA_Y, ring);
     return { spokes: flatGeometry(spokes), ring: flatGeometry(ring) };
   }, [forest]);
   const materials = useMemo(() => {

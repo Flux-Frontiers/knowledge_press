@@ -13,6 +13,8 @@ export const CART_SIZE = { length: 1.9, width: 1.2, height: 1.5 };
 
 /** The rear wheels' radius, m: the spin rate in Player.tsx divides by it. */
 export const WHEEL_R = 0.42;
+/** The front wheels' radius, m: they turn faster than the rear for the same ground. */
+export const FRONT_WHEEL_R = 0.24;
 
 const OAK = "#8a5a36";
 const OAK_DARK = "#5e3b22";
@@ -46,13 +48,25 @@ const Wheel = forwardRef<Group, { r: number; spokes: number; position: [number, 
   },
 );
 
+/** An iron axle along x, hub to hub. */
+function Axle({ half }: { half: number }) {
+  return (
+    <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
+      <cylinderGeometry args={[0.03, 0.03, 2 * half, 8]} />
+      <meshStandardMaterial color={IRON} metalness={0.5} roughness={0.5} />
+    </mesh>
+  );
+}
+
 type CartProps = {
   /** The lantern's glass. Lit brighter at night by the caller. */
   lanternColor?: string;
   /** Cast light from the lantern; the gallery's parked cart does without. */
   light?: boolean;
-  wheelLeft?: React.Ref<Group>;
-  wheelRight?: React.Ref<Group>;
+  /** The rear wheels and their axle, turned together about x as the cart rolls. */
+  rearAxle?: React.Ref<Group>;
+  /** The front wheels and their axle. */
+  frontAxle?: React.Ref<Group>;
   /**
    * The pressed books to carry, from cartLoad. Omitted, the cart carries the
    * fixed cargo the gallery's parked cart shows.
@@ -102,7 +116,7 @@ function CartCargo({ load }: { load: readonly CartBook[] }) {
   );
 }
 
-export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelRight, load }: CartProps) {
+export function Cart({ lanternColor = "#f3e6c2", light = true, rearAxle, frontAxle, load }: CartProps) {
   const aim = useMemo(() => new Object3D(), []);
   // A row of books standing in the bed, heights and widths varied by position.
   const books = useMemo(() => Array.from({ length: 9 }, (_, k) => ({
@@ -205,11 +219,18 @@ export function Cart({ lanternColor = "#f3e6c2", light = true, wheelLeft, wheelR
         ) : null}
       </group>
 
-      {/* Two tall spoked wheels carry it; two small ones steer at the front. */}
-      <Wheel ref={wheelLeft} r={WHEEL_R} spokes={6} position={[-0.63, WHEEL_R, -0.3]} />
-      <Wheel ref={wheelRight} r={WHEEL_R} spokes={6} position={[0.63, WHEEL_R, -0.3]} />
-      <Wheel r={0.24} spokes={4} position={[-0.6, 0.24, 0.62]} />
-      <Wheel r={0.24} spokes={4} position={[0.6, 0.24, 0.62]} />
+      {/* Two tall spoked wheels carry it; two small ones steer at the front. Each pair
+          turns on an iron axle, the three as one group. */}
+      <group ref={rearAxle} position={[0, WHEEL_R, -0.3]}>
+        <Axle half={0.63} />
+        <Wheel r={WHEEL_R} spokes={6} position={[-0.63, 0, 0]} />
+        <Wheel r={WHEEL_R} spokes={6} position={[0.63, 0, 0]} />
+      </group>
+      <group ref={frontAxle} position={[0, FRONT_WHEEL_R, 0.62]}>
+        <Axle half={0.6} />
+        <Wheel r={FRONT_WHEEL_R} spokes={4} position={[-0.6, 0, 0]} />
+        <Wheel r={FRONT_WHEEL_R} spokes={4} position={[0.6, 0, 0]} />
+      </group>
     </group>
   );
 }

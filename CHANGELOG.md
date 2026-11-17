@@ -24,6 +24,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **The cart's wheels sit on the paving.** The cart rode at the forest
+  floor's height, so its wheels sank 3.5 to 6 cm into the roads, plazas and
+  compass rose laid over it. It now rides on whatever is under it, easing up
+  a curb over a few frames.
+- **The cart's front wheels turn, on axles.** Only the rear wheels spun; the
+  small front pair stood still as the cart rolled. Each pair now turns on an
+  iron axle, the front faster for its smaller wheels.
 - **Home leaves the Wayfarer's Wheel's view and god's eye.** Home, or a jump
   to an exhibit, from either view moved the cart but kept the camera where it
   was. It now goes back to the cart's view it was in before; from god's eye

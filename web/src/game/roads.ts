@@ -1,4 +1,5 @@
-import type { RoadLine } from "./forest";
+import { ROSE_R } from "./compassRoseArt";
+import type { Forest, RoadLine } from "./forest";
 
 export type FlatMesh = { pos: number[]; uv: number[]; index: number[] };
 
@@ -47,6 +48,47 @@ export const SPOKE_W = 2.8;
 export const SPUR_W = 2.4;
 /** The curb radius where a spoke meets a ring, m. */
 export const FILLET_R = 2;
+
+/**
+ * Paving heights, m, lowest first so each join is covered by the next layer:
+ * spokes and spurs, the ring and its fillets, plazas, and the compass rose
+ * inlaid in the hub plaza.
+ */
+export const SPOKE_Y = 0.035;
+export const RING_Y = 0.045;
+export const PLAZA_Y = 0.055;
+export const ROSE_Y = 0.062;
+
+/** Distance from (x, z) to a road's centreline. */
+function lineDistance(x: number, z: number, line: RoadLine): number {
+  const { pts, closed } = line;
+  let best = Infinity;
+  const n = pts.length;
+  for (let i = 0; i < (closed ? n : n - 1); i++) {
+    const [ax, az] = pts[i]!, [bx, bz] = pts[(i + 1) % n]!;
+    const dx = bx - ax, dz = bz - az;
+    const len2 = dx * dx + dz * dz;
+    const t = len2 > 0 ? Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / len2)) : 0;
+    best = Math.min(best, Math.hypot(x - ax - t * dx, z - az - t * dz));
+  }
+  return best;
+}
+
+/**
+ * The top of whatever is under (x, z): the paving's height, or 0 on the forest floor.
+ * The cart rides on it, so its wheels sit on the bricks instead of in them.
+ */
+export function surfaceY(forest: Pick<Forest, "roadLines" | "plazas" | "junctions">, x: number, z: number): number {
+  if (Math.hypot(x, z) < ROSE_R) return ROSE_Y;
+  if (forest.plazas.some((p) => Math.hypot(x - p.x, z - p.z) < p.r)) return PLAZA_Y;
+  let y = 0;
+  for (const line of forest.roadLines) {
+    const w = line.kind === "ring" ? RING_W : line.kind === "spoke" ? SPOKE_W : SPUR_W;
+    if (lineDistance(x, z, line) < w / 2) y = Math.max(y, line.kind === "ring" ? RING_Y : SPOKE_Y);
+  }
+  if (y < RING_Y && forest.junctions.some((j: Junction) => onFillet(x, z, j))) y = RING_Y;
+  return y;
+}
 
 /**
  * Where a spoke crosses a ring: the crossing point, the spoke's bearing `a`
