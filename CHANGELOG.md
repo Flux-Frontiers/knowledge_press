@@ -11,6 +11,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The web forest loads its libraries as separate files.** three.js and
+  the other libraries (React, react-three-fiber, zustand, lucide) now build
+  into their own chunks, beside the forest's own code, so a release that
+  changes only the forest leaves them cached for a returning visitor. The
+  forest's own code is 630 kB (221 kB gzipped); it was one 1.78 MB file. The
+  build no longer warns about chunk size: the limit is 1000 kB, since
+  three.js alone is about 790 kB.
+
 ## [1.51.1] - 2026-11-17
 
 ### Changed
