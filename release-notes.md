@@ -1,6 +1,6 @@
 # Release Notes -- v1.51.0
 
-> Released: 2026-11-16
+> Released: 2026-11-17
 
 ### Added
 
@@ -32,14 +32,13 @@
   Winter, and is gone from the settings window, where the dialog hid what
   changed.
 
+### Fixed
+
 - **A chat saved as the app opens stays in the sidebar.** Listing the saved
   chats rewrites their index, and a listing that ran beside a save could write
   the older list last, so the chat stayed on disk but dropped off the sidebar
   until the next save. The store now takes one lock across reads and writes.
   This was also the occasional App CI failure in the relaunch test.
-
-### Fixed
-
 - **No white flash before the forest.** The page painted white until its
   stylesheet loaded, a Mac's web view painted white until the page's first
   frame, and the forest faded in before it had drawn, which Safari on an
