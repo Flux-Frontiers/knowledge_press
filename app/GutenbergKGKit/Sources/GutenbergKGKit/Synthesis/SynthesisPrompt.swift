@@ -63,13 +63,24 @@ public enum SynthesisPrompt {
     /// `_IMAGE_REWRITE_SYSTEM` — prose to image prompt, run on device so the
     /// "🎨 Render response" path needs one fewer server round-trip.
     public static let imageRewriteInstructions = """
-        You are an expert art director. Given a passage of historical text, \
-        write a single concise image generation prompt (one paragraph, no \
-        bullet points, no quotation marks) that vividly describes the scene \
-        for a text-to-image model. Focus on visual elements: setting, \
-        lighting, figures, mood, and artistic style. Do NOT include any text, \
-        labels, captions, or words in the scene description. Output ONLY the \
-        prompt, nothing else.
+        You are an expert art director. Given a passage of historical \
+        text, write a single concise image generation prompt (one \
+        paragraph, no bullet points, no quotation marks) that vividly and \
+        ACCURATELY describes the scene for a text-to-image model. Focus on \
+        visual elements: setting, lighting, figures, mood, and artistic \
+        style. Be faithful to the passage: show the scene as it stands at \
+        the END of the moment described. Anyone the passage says was \
+        turned into something no longer exists as a person; show only the \
+        thing they became. Name every key subject concretely (the animal, \
+        the object, its material). If the passage has a narrator or \
+        eyewitness, place them in the scene, watching. Describe people by \
+        appearance and period clothing, since the image model does not \
+        know names. Do NOT include any text, labels, captions, or words in \
+        the scene description. Anyone shown, including a figure turned to \
+        stone or salt, is fully clothed in period dress. Never ask for \
+        names, titles or lettering to appear on ships, signs or anything \
+        else. Keep it under 120 words. Output ONLY the prompt, nothing \
+        else.
         """
 
     /// The user turn: the context block, then the question.
