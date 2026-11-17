@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { host } from "./host";
-import { SEASON_ORDER, SEASONS, type SeasonName } from "./seasons";
 import { canSpeak, mootVoiceNames, onVoicesChanged, unlockSpeech } from "./speech";
 import { USER_GUIDE_URL } from "./links";
 import { useGame } from "./store";
@@ -12,9 +11,8 @@ export function PauseOverlay() {
   const prefs = useGame((s) => s.preferences);
   const hostWorker = useGame((s) => s.hostWorker);
   const setPreferences = useGame((s) => s.setPreferences);
-  const season = useGame((s) => s.season);
-  const setSeason = useGame((s) => s.setSeason);
   const resetSettings = useGame((s) => s.resetSettings);
+  const startOver = useGame((s) => s.startOver);
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -95,11 +93,6 @@ export function PauseOverlay() {
       </div>
       <h3 className="mb-3 text-xs tracking-[0.2em] text-primary uppercase">Environment</h3>
       <div className="mb-5 grid gap-4 text-sm">
-        <label className="flex items-center justify-between gap-4">Season
-          <select value={season} onChange={(e) => setSeason(e.target.value as SeasonName)} className="rounded-md border border-border bg-bg p-2">
-            {SEASON_ORDER.map((name) => <option key={name} value={name}>{SEASONS[name].label}</option>)}
-          </select>
-        </label>
         <label className="flex items-center justify-between gap-4">Fog
           <select value={prefs.fog} onChange={(e) => setPreferences({ fog: e.target.value as typeof prefs.fog })} className="rounded-md border border-border bg-bg p-2">
             <option value="clear">Clear</option><option value="light">Light</option>
@@ -139,8 +132,12 @@ export function PauseOverlay() {
         <a href={USER_GUIDE_URL} target="_blank" rel="noopener" className="text-primary underline">Read the user guide</a>
       </p>
       <button type="button" className="mt-3 min-h-11 w-full rounded-md border border-border text-muted"
-        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome and the worker address? Your press and visited groves are kept.")) resetSettings(); }}>
-        Reset all settings
+        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome and the worker address? Your press, groves, quests, achievements and place in each book are kept.")) resetSettings(); }}>
+        Reset settings
+      </button>
+      <button type="button" className="mt-3 min-h-11 w-full rounded-md border border-border text-red-400"
+        onClick={() => { if (window.confirm("Start over? This erases everything earned on this device: your press, visited groves, quests, achievements, the Wheel's studs, your place in each book and your saved moots. Settings are kept. This cannot be undone.")) startOver(); }}>
+        Start over
       </button>
       <button type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>
     </dialog>

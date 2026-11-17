@@ -14,7 +14,7 @@ export type HostEvent =
   | { kind: "tree"; slug: string } // a tree's card opened
   | { kind: "pressed"; slug: string } // a book read into the press (E at a tree)
   | { kind: "ask"; slug: string } // the card's Ask about this book
-  | { kind: "resetSettings" }; // Reset all settings: the host clears what it keeps for the forest
+  | { kind: "resetSettings" }; // Reset settings: the host clears what it keeps for the forest
 
 /** What the host asks of the forest. */
 export type HostCommand =

@@ -124,3 +124,23 @@ test("the tour started from god's eye dives to the cart first", () => {
   st().toggleCircuit();
   assert.equal(st().flight, null);
 });
+
+test("a jump from the Wheel's view or god's eye (Home, a tree) takes the cart's own view back", () => {
+  globalThis.window = { localStorage: { getItem: () => null, setItem: () => {} } };
+  const { useGame } = require(`${process.env.FOREST_TEST_BUILD}/store.js`);
+  const st = () => useGame.getState();
+  st().setPreferences({ camera: "high" });
+  st().setPreferences({ camera: "wheel" });
+  st().requestJump({ x: 0, z: 0, yaw: 0 }, "Home · the corpus redwood");
+  assert.equal(st().preferences.camera, "high");
+  // From god's eye the camera dives down to the cart's view.
+  st().setPreferences({ camera: "god" });
+  st().requestJump({ x: 0, z: 0, yaw: 0 }, "Home · the corpus redwood");
+  assert.deepEqual(st().flight, { to: "high", reopen: null });
+  st().endFlight();
+  assert.equal(st().preferences.camera, "high");
+  // A flight to a tree keeps its own landing view and card.
+  st().setPreferences({ camera: "god" });
+  st().flyTo({ x: 0, z: 0, yaw: 0 }, undefined, "hamlet");
+  assert.deepEqual(st().flight, { to: "follow", reopen: "hamlet" });
+});

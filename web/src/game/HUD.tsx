@@ -1,5 +1,5 @@
-import { Bell, BellOff, BookOpen, Camera, Check, Clapperboard, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, MoonStar, Pause, Play, Settings2, Search, Sun, Sunrise, Sunset, Square, X, Video } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Bell, BellOff, BookOpen, Leaf, Camera, Check, Clapperboard, Clock, Compass, Ellipsis, Eye, EyeOff, History, House, Info, Library, LogOut, MapPin, MessagesSquare, Moon, MoonStar, Pause, Play, Settings2, Search, Sun, Sunrise, Sunset, Square, X, Video } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { goToShot, OWNED_SHOT } from "./cinema";
 import { COARSE_POINTER } from "./Environment";
 import { useCorpusTree } from "./CorpusRedwood";
@@ -7,10 +7,10 @@ import { exhibitApproach, type Exhibit } from "./exhibits";
 import { bookMatchesQuery, groveApproach, searchTrees, treeApproach, type Forest, type Grove, type TreeSite } from "./forest";
 import { GenreGlyph } from "./GenreGlyph";
 import { SPECIES, speciesFor } from "./species";
-import { QUESTS, questProgress } from "./quests";
+import { freshlyDone, QUESTS, questProgress } from "./quests";
 import { AchievementsList, AwardCard, useAwards } from "./AwardCard";
 import { saveScreenshot } from "./screenshot";
-import { SEASONS } from "./seasons";
+import { SEASON_ORDER, SEASONS } from "./seasons";
 import { wrapAngle, yawToward } from "./sim";
 import { ReaderPanel } from "./Reader";
 import { stopBook, toggleBook } from "./bookReading";
@@ -35,6 +35,7 @@ export function HUD({ forest }: { forest: Forest }) {
   const clock = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const timeLabel = timeMode === "live" ? clock(new Date()) : TIME_NAME[timeMode];
   const toggleTimeOfDay = useGame((s) => s.toggleTimeOfDay);
+  const setSeason = useGame((s) => s.setSeason);
   const query = useGame((s) => s.query);
   const setQuery = useGame((s) => s.setQuery);
   const searchPick = useGame((s) => s.searchPick);
@@ -115,8 +116,27 @@ export function HUD({ forest }: { forest: Forest }) {
   const leftWheel = wheelDist > 6 && camera !== "wheel";
   useEffect(() => { if (leftWheel) setWheelClosed(false); }, [leftWheel]);
   const atWheel = !flying && !silent && !pinnedSlug && (wheelDist < 3.5 || camera === "wheel") && !wheelClosed;
-  const progress = questProgress({ library, grovesVisited, season });
-  const nextQuest = QUESTS.find((q) => !q.done({ library, grovesVisited, season }));
+  // A quest stays done once done (saved), so going back to autumn after Bare wood keeps 5 of 5.
+  const quests = useGame((s) => s.quests);
+  const markQuests = useGame((s) => s.markQuests);
+  const setToast = useGame((s) => s.setToast);
+  const progress = questProgress({ library, grovesVisited, season }, quests);
+  const nextQuest = QUESTS.find((q) => !quests.includes(q.id) && !q.done({ library, grovesVisited, season }));
+  // A quest just done gets a toast and fireworks. What a save already meets on arriving is marked without them.
+  const questsArrived = useRef(false);
+  useEffect(() => {
+    const state = { library, grovesVisited, season };
+    const fresh = freshlyDone(new Set(quests), state);
+    const announce = questsArrived.current;
+    questsArrived.current = true;
+    if (!fresh.length) return;
+    markQuests(fresh.map((q) => q.id));
+    if (announce) {
+      const { done, total } = questProgress(state, quests);
+      setToast(`Quest done · ${fresh[fresh.length - 1].title} · ${done} of ${total}`);
+      useGame.getState().launchFireworks();
+    }
+  }, [library, grovesVisited, season, quests, markQuests, setToast]);
   const selected = forest.groves.find((g) => g.genre === selectedGrove);
 
   // Sorted from where the cart was when the query changed; re-sorting every pose tick would reshuffle the list under the pointer.
@@ -230,6 +250,8 @@ export function HUD({ forest }: { forest: Forest }) {
                       useGame.getState().setTimeline(timelineYear === null ? timelineStops(forest.trees.map((t) => t.book))[0]?.year ?? null : null, timelineYear === null);
                     }} />
                   <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
+                  <MenuItem icon={<Leaf className="size-4" strokeWidth={1.75} />} label={`Season · ${SEASONS[season].label.toLowerCase()}`}
+                    onClick={() => setSeason(SEASON_ORDER[(SEASON_ORDER.indexOf(season) + 1) % SEASON_ORDER.length]!)} />
                   <MenuItem phoneOnly icon={<Video className="size-4" strokeWidth={1.75} />} label={`Camera · ${CAMERA_NAME[camera]}`} onClick={stepCamera} />
                   <MenuItem icon={silent ? <BellOff className="size-4" strokeWidth={1.75} /> : <Bell className="size-4" strokeWidth={1.75} />}
                     label={silent ? "Silent · no pop-up cards" : "Pop-up cards on"} onClick={() => setPreferences({ silent: !silent })} />

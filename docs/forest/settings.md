@@ -50,17 +50,29 @@ this section shows only the token, and only when a worker is set.
 
 | Setting | What it does |
 | --- | --- |
-| Season | Spring, summer, autumn or winter. Each visit starts in the season of the date; a choice here lasts until you reload. |
 | Fog | Clear, light, normal or heavy standing haze. |
 | Random weather | Morning fog that burns off, and cloud. Off by default. See [Fog and weather](sky.md#fog-and-weather). |
 
-## Reset all settings
+## Reset settings
 
-**Reset all settings**, at the bottom, asks first, then:
+**Reset settings**, at the bottom, asks first, then:
 
 - Puts every setting above back to its default.
 - Sets the season to the date's and the clock to live.
 - Forgets the tour's welcome, so the next tour gives it in full again.
+- Shows a dismissed quest hint again, and turns clean view and the timeline
+  off.
 
-The press and the groves you have visited are kept. To empty the press, use
-**Empty the press** in the Press tab; see [The press](reading.md#the-press).
+Everything you have earned is kept: the press, the groves you have visited,
+quests, achievements, the Wheel's studs, your place in each book and your
+saved moots.
+
+## Start over
+
+**Start over**, below it, asks first, then erases everything earned on this
+device: the press, visited groves, quests, achievements and the Wheel's
+studs, your place in each book and your saved moots. The visitor's landing
+plays again during its event. Settings are kept. It cannot be undone.
+
+To empty only the press, use **Empty the press** in the Press tab; see
+[The press](reading.md#the-press).
