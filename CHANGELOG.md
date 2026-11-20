@@ -11,6 +11,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Night lighting in the forest.** After dusk the Corpus Redwood is
+  floodlit to its top, trunk and crown, brightest at the root flare, and
+  its light cuts through part of the night fog so it reads from across the
+  forest. The book tree nearest the cart, within about 32 m, fades on in
+  warm light as you ride up to it (fully lit within 16 m) and fades off as
+  you leave; another tree takes over only when it is clearly nearer. Both
+  are glows in the existing shaders, not added lights, so the frame costs
+  about the same. Tree portraits (`?shot=`) also take `time=night`.
+
 ### Changed
 
 - **Ride the ring sits level with the search bar.** On a Mac or a desktop
