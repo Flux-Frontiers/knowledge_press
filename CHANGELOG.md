@@ -26,6 +26,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   forest's own code is 630 kB (221 kB gzipped); it was one 1.78 MB file. The
   build no longer warns about chunk size: the limit is 1000 kB, since
   three.js alone is about 790 kB.
+- **Catalog refreshed for four books whose chapters were fixed.**
+  gutenberg_kg #278 turned plain-text chapter lines into headings in *At the
+  Earth's Core*, *The Great God Pan*, *The Food of the Gods* and *Second
+  Treatise of Government*, and the corpus was rebuilt. Their chunk counts
+  move by one to four (*At the Earth's Core* 646 to 650) and two excerpts
+  change. The web books (`web/public/books`, not tracked) were re-exported
+  the same day.
 
 ### Fixed
 
