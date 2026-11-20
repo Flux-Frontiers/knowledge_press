@@ -176,7 +176,7 @@ export function ForestApp() {
     st.setPreferences({ camera: "follow", fog: "light", weather: false, motion: false });
     st.setSeason("summer");
     const time = new URLSearchParams(window.location.search).get("time");
-    st.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" ? time : "day");
+    st.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day");
     resetSim(forest);
     aim(first);
     play();
