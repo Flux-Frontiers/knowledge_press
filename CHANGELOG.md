@@ -27,6 +27,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   build no longer warns about chunk size: the limit is 1000 kB, since
   three.js alone is about 790 kB.
 
+### Fixed
+
+- **Firs and pines keep their needles.** The season set every tree's leaf
+  colours and how many leaves show, so in autumn the conifers turned orange
+  and gold and lost 30 percent of their needles, and in winter all but 10
+  percent, which left the Science Fiction, Natural History, Ancient Classical
+  and Sacred Texts groves looking dead. Species now carry an `evergreen` flag
+  (fir and pine); evergreens draw every needle in a dark green that is fresher
+  in spring and frosted in winter, as the Corpus Redwood already did.
+- **The fir's lowest limbs no longer lie on the ground.** Its clear bole was
+  10 percent of the tree and its leaves sat below their section tips, so the
+  lowest, widest tier grew a long limb that sagged to the grass and, carrying
+  the tips around it, grew nearly as thick as the trunk. The fir now clears 16
+  percent of its height and lifts its sprays slightly. The exhibits, which keep
+  clear of crowns, stay exactly where they were.
+
 ## [1.51.1] - 2026-11-17
 
 ### Changed

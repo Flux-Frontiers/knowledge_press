@@ -86,6 +86,8 @@ export type Species = {
   leaf: LeafShape;
   /** HSL offset applied to the season's foliage colours. */
   foliageShift: [h: number, s: number, l: number];
+  /** Conifers keep their needles: the season's evergreen colours and every leaf, all year. */
+  evergreen?: boolean;
   habit: Habit;
 };
 
@@ -151,10 +153,13 @@ export const SPECIES: Species[] = [
     habit: { envelope: "ellipsoid", whorl: 1, droop: 0.08, leader: 0.15, width: 1.15, clearBole: 0.28, spread: 1, lift: 1, tropism: 0.14, influence: 12, step: 1, jitter: 0.14, pipeExp: 2.2 },
   },
   {
-    // Fir: a narrow cone from near the ground, flat sprays, a fast-tapering stem.
+    // Fir: a narrow cone above a short clear bole, flat sprays, a fast-tapering stem.
+    // clearBole 0.16 and a small positive lift keep the lowest, widest tier off the
+    // ground: at 0.1 and -0.3 its long limbs sagged onto the grass and, carrying the
+    // tips around them, grew nearly as thick as the trunk.
     name: "fir", common: "Silver fir", latin: "Abies alba",
-    barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12],
-    habit: { envelope: "cone", whorl: 1, droop: 0.05, leader: 0.92, width: 0.95, clearBole: 0.1, spread: 0.7, lift: -0.3, tropism: 0.3, influence: 12, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
+    barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12], evergreen: true,
+    habit: { envelope: "cone", whorl: 1, droop: 0.05, leader: 0.92, width: 0.95, clearBole: 0.16, spread: 0.7, lift: 0.2, tropism: 0.3, influence: 12, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
   },
   {
     // London plane: a long clean bole under a tall egg-shaped crown of long, rising limbs.
@@ -171,7 +176,7 @@ export const SPECIES: Species[] = [
   {
     // Stone pine: a tall bare stem under a flat-topped parasol of tufts.
     name: "pine", common: "Stone pine", latin: "Pinus pinea",
-    barkAspect: 1, leaf: { shape: "outline", half: PINE_HALF, smooth: false }, foliageShift: [0.04, -0.08, -0.08],
+    barkAspect: 1, leaf: { shape: "outline", half: PINE_HALF, smooth: false }, foliageShift: [0.04, -0.08, -0.08], evergreen: true,
     habit: { envelope: "umbrella", whorl: 1, droop: 0, leader: 0.45, width: 1.45, clearBole: 0.5, spread: 1.1, lift: 0.4, tropism: 0.12, influence: 14, step: 1.1, jitter: 0.12, pipeExp: 2.2 },
   },
   {
