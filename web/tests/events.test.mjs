@@ -27,11 +27,10 @@ test("the landing field keeps its own glade and leaves the other exhibits where 
   assert.ok(e, "landing field placed");
   const { PAD_R } = require(`${build}/visitorScript.js`);
   assert.equal(e.obstacle, PAD_R, "the pad drawn is the pad the cart stops at");
-  // Positions with the field left out; placement is greedy, and the field is last. Re-pinned when
-  // the fir's habit changed (fix/evergreen-firs): exhibits keep clear of crowns, so they move with them.
+  // Positions with the field left out (develop at #140); placement is greedy, and the field is last.
   const before = {
-    mysterium: [24.572, 36.196], flame: [-74.098, -107.196], helix: [-77.294, 63.469], darrieus: [74.311, -66.637],
-    savonius: [98.186, 19.031], dna: [-19.648, 128.014], mast: [-95.791, -30.114], sundial: [0.566, -130.112],
+    mysterium: [24.889, 36.257], flame: [-73.581, -107.828], helix: [-77.038, 64.138], darrieus: [74.616, -66.639],
+    savonius: [98.42, 19.023], dna: [-16.842, 128.644], mast: [-96.292, -29.267], sundial: [23.135, -96.919],
   };
   for (const [id, [x, z]] of Object.entries(before)) {
     const x2 = f.exhibits.find((v) => v.id === id);

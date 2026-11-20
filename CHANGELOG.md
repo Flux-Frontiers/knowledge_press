@@ -39,10 +39,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **The fir's lowest limbs no longer lie on the ground.** Its clear bole was
   10 percent of the tree and its leaves sat below their section tips, so the
   lowest, widest tier grew a long limb that sagged to the grass and, carrying
-  the tips around it, grew nearly as thick as the trunk. The fir now clears a
-  quarter of its height and lifts its sprays slightly. Exhibits keep clear of
-  crowns, so their placement shifts with the firs: most by under a metre, the
-  DNA helix by about 3 m and the sundial by about 40 m.
+  the tips around it, grew nearly as thick as the trunk. The fir now clears 16
+  percent of its height and lifts its sprays slightly. The exhibits, which keep
+  clear of crowns, stay exactly where they were.
 
 ## [1.51.1] - 2026-11-17
 

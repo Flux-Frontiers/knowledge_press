@@ -154,12 +154,12 @@ export const SPECIES: Species[] = [
   },
   {
     // Fir: a narrow cone above a short clear bole, flat sprays, a fast-tapering stem.
-    // clearBole 0.25 and a small positive lift keep the lowest, widest tier off the
+    // clearBole 0.16 and a small positive lift keep the lowest, widest tier off the
     // ground: at 0.1 and -0.3 its long limbs sagged onto the grass and, carrying the
     // tips around them, grew nearly as thick as the trunk.
     name: "fir", common: "Silver fir", latin: "Abies alba",
     barkAspect: 1, leaf: { shape: "outline", half: FIR_HALF, smooth: false }, foliageShift: [0.05, -0.12, -0.12], evergreen: true,
-    habit: { envelope: "cone", whorl: 1, droop: 0.05, leader: 0.92, width: 0.95, clearBole: 0.25, spread: 0.7, lift: 0.2, tropism: 0.3, influence: 12, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
+    habit: { envelope: "cone", whorl: 1, droop: 0.05, leader: 0.92, width: 0.95, clearBole: 0.16, spread: 0.7, lift: 0.2, tropism: 0.3, influence: 12, step: 0.8, jitter: 0.08, pipeExp: 2.6 },
   },
   {
     // London plane: a long clean bole under a tall egg-shaped crown of long, rising limbs.
