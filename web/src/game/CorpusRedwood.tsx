@@ -114,7 +114,7 @@ export function CorpusRedwood({ forest, season }: { forest: Forest; season: Seas
   const sprayMat = useMemo(() => new MeshStandardMaterial({ map: sprayMap, alphaTest: 0.5, side: DoubleSide, roughness: 0.85 }), [sprayMap]);
   // Floodlit at night like a monument (Uplights.tsx): trunk and crown, brightest at the root
   // flare and still lit at the top, the reach following the tree's height through the timeline.
-  useUplitMaterials(useMemo(() => [barkMat, sprayMat], [barkMat, sprayMat]), "#fff0dc", 1.4, c.height * REDWOOD_REACH, 0.6);
+  useUplitMaterials(useMemo(() => [barkMat, sprayMat], [barkMat, sprayMat]), "#fff0dc", 0.8, c.height * REDWOOD_REACH, 0.5);
   const sprayDepth = useMemo(() => new MeshDepthMaterial({ depthPacking: RGBADepthPacking, map: sprayMap, alphaTest: 0.5, side: DoubleSide }), [sprayMap]);
   useEffect(() => () => bark.dispose(), [bark]);
   useEffect(() => () => {

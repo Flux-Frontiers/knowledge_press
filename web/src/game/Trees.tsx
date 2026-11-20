@@ -36,6 +36,8 @@ const treeLight = {
 /** The rider lights the nearest tree within this many metres of its trunk, fully within TREE_LIGHT_FULL. */
 const TREE_LIGHT_REACH = 32;
 const TREE_LIGHT_FULL = 16;
+/** The lit tree's glow at full: a fraction of its own colour added, so it reads in the dark without washing out. */
+const TREE_LIGHT_STRENGTH = 0.5;
 /** How fast the lamps fade, in full swings per second. */
 const TREE_LIGHT_RATE = 1.2;
 /** `?treelight=pool` lights a pool round the rider instead of the nearest tree, to compare. */
@@ -55,7 +57,7 @@ function addTreeLight(shader: WebGLProgramParametersWithUniforms, world: string)
     + shader.fragmentShader.replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
       float treeLightAcross = 1.0 - smoothstep(treeLightAt.z * 0.85, treeLightAt.z * 1.35, length(vTreeLightWorld.xz - treeLightAt.xy));
       float treeLightUp = 0.3 + 0.7 * exp(-max(vTreeLightWorld.y, 0.0) / (treeLightAt.w * 0.9));
-      totalEmissiveRadiance += treeLightColor * treeLightAmount * treeLightAcross * treeLightUp * diffuseColor.rgb;`);
+      totalEmissiveRadiance += treeLightColor * treeLightAmount * ${TREE_LIGHT_STRENGTH.toFixed(3)} * treeLightAcross * treeLightUp * diffuseColor.rgb;`);
 }
 
 /** Collapses the vertices of trees whose year has not come (bark, and its shadow); the bark also takes the tree light. */
