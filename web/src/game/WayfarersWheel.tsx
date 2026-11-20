@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { BoxGeometry, BufferGeometry, Color, CylinderGeometry, InstancedMesh, LatheGeometry, MeshStandardMaterial, Object3D, TorusGeometry, Vector2 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { TIER_COLOR, TIER_NAME, tracks, type Tier } from "./achievements";
+import { TIER_COLOR, TIER_NAME, type Tier } from "./achievements";
+import { useTracks } from "./AwardCard";
 import type { Forest } from "./forest";
 import { useGame, type PlaqueText } from "./store";
 import { groveTally, STUD_H, studSize, WHEEL_TABLE_R, WHEEL_TOP_Y } from "./wheelMap";
@@ -45,11 +46,7 @@ const bronze = () => new MeshStandardMaterial({ color: "#7a5a32", metalness: 0.7
 /** The Wheel's Wayfarer level and its plaque, as the table's tap and the card beside it (HUD) open it. */
 export function useWheelPlaque(forest: Forest): { tier: Tier; plaque: PlaqueText } {
   const ring = useGame((s) => s.ring);
-  const library = useGame((s) => s.library);
-  const grovesVisited = useGame((s) => s.grovesVisited);
-  const plaques = useGame((s) => s.plaques);
-  const tier = tracks({ library, grovesVisited, plaques, ring },
-    { books: forest.trees.length, groves: forest.groves.length, exhibits: forest.exhibits.length })[0]!.tier;
+  const tier = useTracks(forest)[0]!.tier;
   const n = forest.circuit.length;
   const byline = `${TIER_NAME[tier] || "Not yet ridden"} · ${ring.stops.length} of ${n} groves this ride · ${ring.laps} ${ring.laps === 1 ? "ride" : "rides"} home`;
   return { tier, plaque: { title: "The Wayfarer's Wheel", byline, body: BODY, figure: "wayfarer" } };

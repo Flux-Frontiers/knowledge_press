@@ -13,6 +13,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Three new achievement tracks.** Night Owl (press or read 1, 5 and 15
+  books at night), Botanist (press books from 3, 6 and every kind of tree
+  in the forest) and Moot-goer (watch 1, 2 and 5 moots) join Wayfarer,
+  Explorer, Reader and Curator on the Press tab, each in bronze, silver
+  and gold. Night Owl and Moot-goer start counting with this version;
+  Botanist counts the books already in your press. Start over clears them.
 - **Night lighting in the forest.** After dusk the Corpus Redwood is
   floodlit to its top, trunk and crown, brightest at the root flare, and
   its light cuts through part of the night fog so it reads from across the
