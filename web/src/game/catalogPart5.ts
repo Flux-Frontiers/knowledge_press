@@ -281,7 +281,7 @@ export const BOOKS_PART5: Book[] = [
     author: "John Locke",
     genre: "philosophy",
     genreLabel: "Philosophy",
-    chunks: 669,
+    chunks: 667,
     excerpt: "And if he also bartered away plums, that would have rotted in a week, for nuts that would last good for his eating a whole year, he did no injury; he wasted not the common stock; destroyed no part of the portion of goods that belonged to others, so long as nothing perished…",
     tags: ["philosophy"],
     year: 1689,

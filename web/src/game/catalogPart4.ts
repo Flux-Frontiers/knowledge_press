@@ -281,7 +281,7 @@ export const BOOKS_PART4: Book[] = [
     author: "Arthur Machen",
     genre: "horror",
     genreLabel: "Horror",
-    chunks: 289,
+    chunks: 291,
     excerpt: "Thinking, however, that it would be better for the child to have playmates of her own age, he advertised in several local papers for a good home in a comfortable farmhouse for a girl of twelve, and this advertisement was answered by Mr. R., a well-to-do farmer in the…",
     tags: ["horror"],
     year: 1894,

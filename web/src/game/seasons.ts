@@ -6,6 +6,8 @@ export type Season = {
   name: SeasonName;
   label: string;
   foliage: string[];
+  /** Needle colours for evergreen species: dark green all year, fresher in spring, frosted in winter. */
+  evergreen: string[];
   /** Share of the leaf setting's leaves the season shows: half in spring, all in summer, 0.7 in autumn. */
   density: number;
   wood: string;
@@ -22,6 +24,7 @@ export const SEASONS: Record<SeasonName, Season> = {
     name: "spring",
     label: "Spring",
     foliage: ["#A8E063", "#7FD14B", "#C6F08A", "#F4D4E0", "#E8E3B0"],
+    evergreen: ["#3F6A3A", "#4D7A42", "#37603A", "#5A8A4A"],
     density: 0.5,
     wood: "#6B4A2E",
     sky: "#1a2a40",
@@ -35,6 +38,7 @@ export const SEASONS: Record<SeasonName, Season> = {
     name: "summer",
     label: "Summer",
     foliage: ["#90EE90", "#5FBF5F", "#77DD77", "#3E9B4F"],
+    evergreen: ["#2F5A34", "#3A6A3C", "#2A5030", "#46753F"],
     density: 1,
     wood: "#6B4A2E",
     sky: "#16213e",
@@ -48,6 +52,7 @@ export const SEASONS: Record<SeasonName, Season> = {
     name: "autumn",
     label: "Autumn",
     foliage: ["#E8A33D", "#D95F30", "#B3341F", "#F0C75E", "#8C6A3F", "#6B8F3A"],
+    evergreen: ["#33532F", "#3D5C34", "#2E4A2C", "#48653A"],
     density: 0.7,
     wood: "#5C3D24",
     sky: "#2a1a2e",
@@ -61,6 +66,7 @@ export const SEASONS: Record<SeasonName, Season> = {
     name: "winter",
     label: "Winter",
     foliage: ["#8C7A5E", "#A89880", "#D7E3EA"],
+    evergreen: ["#3E5648", "#4A5D52", "#5B6E64", "#C9D6DC"],
     density: 0.1,
     wood: "#7A6A58",
     sky: "#101725",

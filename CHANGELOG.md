@@ -11,6 +11,45 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Ride the ring sits level with the search bar.** On a Mac or a desktop
+  browser at least 768 px wide, the button now lines up with the search bar
+  along the bottom edge, at the same 44 px height as the other HUD buttons,
+  instead of floating small above the bottom row. Narrower windows, and
+  god's eye with the timeline open, keep it higher so it clears the search
+  bar and the timeline panel.
+- **The web forest loads its libraries as separate files.** three.js and
+  the other libraries (React, react-three-fiber, zustand, lucide) now build
+  into their own chunks, beside the forest's own code, so a release that
+  changes only the forest leaves them cached for a returning visitor. The
+  forest's own code is 630 kB (221 kB gzipped); it was one 1.78 MB file. The
+  build no longer warns about chunk size: the limit is 1000 kB, since
+  three.js alone is about 790 kB.
+- **Catalog refreshed for four books whose chapters were fixed.**
+  gutenberg_kg #278 turned plain-text chapter lines into headings in *At the
+  Earth's Core*, *The Great God Pan*, *The Food of the Gods* and *Second
+  Treatise of Government*, and the corpus was rebuilt. Their chunk counts
+  move by one to four (*At the Earth's Core* 646 to 650) and two excerpts
+  change. The web books (`web/public/books`, not tracked) were re-exported
+  the same day.
+
+### Fixed
+
+- **Firs and pines keep their needles.** The season set every tree's leaf
+  colours and how many leaves show, so in autumn the conifers turned orange
+  and gold and lost 30 percent of their needles, and in winter all but 10
+  percent, which left the Science Fiction, Natural History, Ancient Classical
+  and Sacred Texts groves looking dead. Species now carry an `evergreen` flag
+  (fir and pine); evergreens draw every needle in a dark green that is fresher
+  in spring and frosted in winter, as the Corpus Redwood already did.
+- **The fir's lowest limbs no longer lie on the ground.** Its clear bole was
+  10 percent of the tree and its leaves sat below their section tips, so the
+  lowest, widest tier grew a long limb that sagged to the grass and, carrying
+  the tips around it, grew nearly as thick as the trunk. The fir now clears 16
+  percent of its height and lifts its sprays slightly. The exhibits, which keep
+  clear of crowns, stay exactly where they were.
+
 ## [1.51.1] - 2026-11-17
 
 ### Changed

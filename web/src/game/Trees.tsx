@@ -271,15 +271,22 @@ export function Trees({
     forest.chunks.forEach((chunk, ci) => {
       const mesh = leafRefs.current[ci];
       if (!mesh) return;
-      const [dh, ds, dl] = SPECIES[chunk.species]!.foliageShift;
-      const foliage = palette.foliage.map((hex) => new Color(hex).offsetHSL(dh, ds, dl));
+      const species = SPECIES[chunk.species]!;
+      const [dh, ds, dl] = species.foliageShift;
+      // Conifers keep their needles through the year: evergreen colours, every leaf drawn.
+      // The needle palette is already the conifer's own, so the species shift (tuned for
+      // the season's broadleaf colours, and darkening) is not applied to it.
+      const foliage = species.evergreen
+        ? palette.evergreen.map((hex) => new Color(hex))
+        : palette.foliage.map((hex) => new Color(hex).offsetHSL(dh, ds, dl));
+      const density = species.evergreen ? 1 : palette.density;
       const order = orders[ci]!;
       let last = -1;
       for (let n = 0; n < chunk.leafCount; n++) {
         const i = chunk.leafStart + order[n]!;
         const treeI = treeIndex[i]!;
         const dim = match && !match.has(treeI);
-        const visible = keepLeaf(i, palette.density) && !dim;
+        const visible = keepLeaf(i, density) && !dim;
         dummy.position.set(pos[i * 3]!, pos[i * 3 + 1]!, pos[i * 3 + 2]!);
         const s = visible ? 1 : match && dim && only === null ? 0.15 : 0;
         if (s > 0) last = n;
