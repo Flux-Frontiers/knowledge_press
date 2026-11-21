@@ -13,6 +13,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **A Flux-Frontiers fleet mark.** The Forest logo's book tree inside its
+  two ring roads, redrawn in the fleet's Art Techno style, with the tagline
+  GENRES . BOOKS . PASSAGES. It names the project wherever the fleet's
+  other marks appear; the app icon, the press seal and the README's lockup
+  are unchanged. `scripts/build_logo.py` draws the mark, a 64 px icon and a
+  banner as SVG under `assets/` and writes the PNGs.
+
 - **Night lighting in the forest.** After dusk the Corpus Redwood is
   floodlit to its top, trunk and crown, brightest at the root flare, and
   its light cuts through part of the night fog so it reads from across the

@@ -96,6 +96,15 @@ running text, write "The Knowledge Press" in whatever face the text uses.
 - Use the GutenbergKG graph mark (the "G" at a hub) for The Knowledge Press.
   That was GutenbergKG's brand, and the seal replaced it.
 
+## The fleet mark
+
+The press is also one of the Flux-Frontiers fleet, whose members each carry a
+mark in the fleet's Art Techno style. Its fleet mark is the Forest logo's book
+tree redrawn in that style: `assets/knowledgepress_logo.svg`,
+`assets/knowledgepress_icon.svg` and `assets/knowledgepress_banner.svg`, with
+PNGs beside them, all written by `scripts/build_logo.py`. Use it only where the
+other fleet marks appear; the seal stays the press's mark everywhere else.
+
 ## Rebuilding
 
 `build.py` traces the KP and the name from `fonts/Merriweather-Bold.ttf`
