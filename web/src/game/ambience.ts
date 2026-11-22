@@ -17,7 +17,7 @@ export type Bed = "crickets" | "frogs" | "dawn" | "birds" | "wind";
 /** Each bed's file and its level at full weight. */
 const BEDS: Record<Bed, { file: string; level: number }> = {
   crickets: { file: "crickets.m4a", level: 1 },
-  frogs: { file: "frogs.m4a", level: 0.7 },
+  frogs: { file: "frogs.m4a", level: 0.5 },
   dawn: { file: "dawn.m4a", level: 1 },
   birds: { file: "birds.m4a", level: 0.9 },
   wind: { file: "wind.m4a", level: 0.7 },
