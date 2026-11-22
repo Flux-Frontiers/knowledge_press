@@ -20,7 +20,7 @@ const BEDS: Record<Bed, { file: string; level: number }> = {
   frogs: { file: "frogs.m4a", level: 0.5 },
   dawn: { file: "dawn.m4a", level: 1 },
   birds: { file: "birds.m4a", level: 0.5 },
-  wind: { file: "wind.m4a", level: 0.5 },
+  wind: { file: "wind.m4a", level: 0.4 },
 };
 
 /** Calls now and then: mean seconds between them, and when (night or day). */
