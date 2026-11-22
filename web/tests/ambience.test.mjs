@@ -42,3 +42,10 @@ test("owls call at night, woodpeckers on days outside winter", () => {
   assert.deepEqual(callsNow(1, "summer"), { owl: false, woodpecker: true });
   assert.deepEqual(callsNow(1, "winter"), { owl: false, woodpecker: false });
 });
+
+test("with wind and cart motion off, the wind is silent and nothing else changes", () => {
+  const on = ambienceMix(0, 0, "winter");
+  const off = ambienceMix(0, 0, "winter", false);
+  assert.equal(off.wind, 0);
+  assert.deepEqual({ ...off, wind: on.wind }, on);
+});
