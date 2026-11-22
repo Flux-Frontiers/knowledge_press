@@ -20,13 +20,13 @@ const BEDS: Record<Bed, { file: string; level: number }> = {
   frogs: { file: "frogs.m4a", level: 0.5 },
   dawn: { file: "dawn.m4a", level: 1 },
   birds: { file: "birds.m4a", level: 0.9 },
-  wind: { file: "wind.m4a", level: 0.7 },
+  wind: { file: "wind.m4a", level: 0.5 },
 };
 
 /** Calls now and then: mean seconds between them, and when (night or day). */
 const CALLS = {
   owl: { files: ["owl-1.m4a", "owl-2.m4a", "owl-3.m4a", "owl-4.m4a"], every: 45, level: 0.8 },
-  woodpecker: { files: ["woodpecker-1.m4a", "woodpecker-2.m4a", "woodpecker-3.m4a"], every: 70, level: 0.7 },
+  woodpecker: { files: ["woodpecker-1.m4a", "woodpecker-2.m4a", "woodpecker-3.m4a"], every: 70, level: 0.3 },
 };
 
 /** Seconds two passes of a loop overlap. */
@@ -43,8 +43,9 @@ const smooth = (a: number, b: number, x: number) => {
  * :param daylight: The sky's daylight, 0 at night, 1 in full day.
  * :param morning: How much this is a morning sky, 0 to 1.
  * :param season: The forest's season.
+ * :param wind: Whether the wind blows (the Wind & gentle cart motion setting).
  */
-export function ambienceMix(daylight: number, morning: number, season: SeasonName): Record<Bed, number> {
+export function ambienceMix(daylight: number, morning: number, season: SeasonName, wind = true): Record<Bed, number> {
   const night = 1 - smooth(0.15, 0.55, daylight);
   const day = smooth(0.3, 0.8, daylight);
   const winter = season === "winter";
@@ -56,7 +57,7 @@ export function ambienceMix(daylight: number, morning: number, season: SeasonNam
     frogs: night * (season === "spring" || season === "summer" ? 1 : 0),
     dawn: chorus * birdy,
     birds: day * birdy * (1 - 0.6 * chorus),
-    wind: winter ? 0.3 : 0.15,
+    wind: !wind ? 0 : winter ? 0.3 : 0.15,
   };
 }
 
@@ -159,15 +160,16 @@ function call(l: Live, kind: keyof typeof CALLS) {
  * :param season: The forest's season.
  * :param duck: Lower everything, as while a voice is reading.
  * :param dt: Seconds since the last call, for the calls' odds.
+ * :param wind: Whether the wind blows; still trees are silent ones.
  */
-export function stepAmbience(volume: number, daylight: number, morning: number, season: SeasonName, duck: boolean, dt: number) {
+export function stepAmbience(volume: number, daylight: number, morning: number, season: SeasonName, duck: boolean, dt: number, wind = true) {
   const l = volume > 0.001 ? start() : live;
   if (!l) return;
   const t = l.ctx.currentTime;
   // The loops are mastered at -23 LUFS; the slider's middle plays them at about that, its top 6 dB up.
   l.master.gain.setTargetAtTime(2 * volume * (duck ? 0.35 : 1), t, 0.6);
   if (volume <= 0.001) return;
-  const mix = ambienceMix(daylight, morning, season);
+  const mix = ambienceMix(daylight, morning, season, wind);
   for (const name of Object.keys(BEDS) as Bed[]) {
     const bed = l.beds[name];
     const want = mix[name] * BEDS[name].level;

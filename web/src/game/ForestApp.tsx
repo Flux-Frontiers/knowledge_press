@@ -53,7 +53,7 @@ export function ForestApp() {
       const s = useGame.getState();
       const on = s.playing && !s.preferences.silent && document.visibilityState === "visible";
       const duck = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
-      stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000);
+      stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000, s.preferences.motion);
       last = now;
     }, 1000);
     return () => window.clearInterval(id);

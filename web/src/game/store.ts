@@ -386,8 +386,9 @@ export const useGame = create<GameStore>((set, get) => ({
   resetSettings: () => {
     clearTourHeard();
     seasonPicked = false;
-    // Progress (press, groves, quests, achievements, where each book was left) is Start over's, not this.
-    const preferences = readPreferences({ readingAt: get().preferences.readingAt });
+    // Progress (press, groves, quests, achievements, where each book was left, bookmarks) is Start over's, not this.
+    const { readingAt, bookmarks } = get().preferences;
+    const preferences = readPreferences({ readingAt, bookmarks });
     set({
       preferences, groundCamera: "follow", season: autoSeason(get().place), timeMode: "live",
       // A dismissed quest hint shows again; clean view and the timeline go off.
@@ -521,7 +522,7 @@ export const useGame = create<GameStore>((set, get) => ({
     // Everything earned on this device; the settings are Reset settings' and stay as they are.
     set({
       library: [], lastReadSlug: null, grovesVisited: [], plaques: [], quests: [], ring: readRing(null),
-      nightBooks: [], moots: [], groveVisits: {}, reads: {}, preferences: { ...get().preferences, readingAt: {} },
+      nightBooks: [], moots: [], groveVisits: {}, reads: {}, preferences: { ...get().preferences, readingAt: {}, bookmarks: {} },
       questHintHidden: null, award: null, travelMode: "free", selectedGrove: null,
     });
     persist(get());
