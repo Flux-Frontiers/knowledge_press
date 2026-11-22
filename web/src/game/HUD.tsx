@@ -169,7 +169,8 @@ export function HUD({ forest }: { forest: Forest }) {
               {" · "}
               {timeLabel}
               {travelMode === "circuit" ? " · ring" : ""}
-              {progress.done ? ` · ${progress.done}/${progress.total}` : ""}
+              {progress.done === progress.total ? " · quests complete"
+                : progress.done ? ` · ${progress.done}/${progress.total} quests` : ""}
             </p>
             {stats ? (
               <p className="mt-1 font-mono text-[11px] text-faint tabular-nums">
