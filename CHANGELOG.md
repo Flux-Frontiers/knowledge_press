@@ -13,6 +13,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Forest sounds.** Recorded nature loops follow the sky and the season:
+  crickets and frogs come up at dusk, a dawn chorus with the sunrise,
+  birdsong by day, and wind under it all. Winter nights are wind and owls,
+  and an owl or a woodpecker calls now and then from somewhere in the
+  trees. Everything quiets while a voice reads aloud and stops while the
+  forest is hidden or in silent mode. A Forest sounds slider in Settings, under Environment,
+  sets the volume or turns them off. The recordings are CC0, from Freesound;
+  `web/public/sounds/CREDITS.md` lists each one.
+
 - **A Flux-Frontiers fleet mark.** The Forest logo's book tree inside its
   two ring roads, redrawn in the fleet's Art Techno style, with the tagline
   GENRES . BOOKS . PASSAGES. It names the project wherever the fleet's

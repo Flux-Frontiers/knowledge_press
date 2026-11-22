@@ -104,6 +104,10 @@ export function PauseOverlay() {
           <span>Random weather<span className="block text-xs text-muted">Morning fog that burns off, and cloud{prefs.weather ? ` · now ${weatherName(weather).toLowerCase()}` : ""}</span></span>
           <input type="checkbox" checked={prefs.weather} onChange={(e) => setPreferences({ weather: e.target.checked })} />
         </label>
+        <label className="grid gap-2">
+          <span>Forest sounds · {prefs.sounds > 0 ? `${Math.round(prefs.sounds * 100)}%` : "off"}<span className="block text-xs text-muted">Crickets and frogs at night, birdsong by day, wind; off in silent mode</span></span>
+          <input type="range" min="0" max="1" step="0.05" value={prefs.sounds} onChange={(e) => setPreferences({ sounds: Number(e.target.value) })} />
+        </label>
       </div>
       {/* In the app the worker is set in the app's own Settings; with none, there is nothing to set here. */}
       {host.available && !hostWorker.trim() ? null : (<>
