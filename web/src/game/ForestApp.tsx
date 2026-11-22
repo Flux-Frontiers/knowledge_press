@@ -44,13 +44,14 @@ export function ForestApp() {
     const id = window.setInterval(() => useGame.getState().tickSky(), 5000);
     return () => window.clearInterval(id);
   }, []);
-  // The forest's sounds follow the sky and season; quieter under a voice, silent while hidden or before Enter.
+  // The forest's sounds follow the sky and season; quieter under a voice, off while hidden,
+  // before Enter, and in silent mode, as the visitor's hum is.
   useEffect(() => {
     let last = performance.now();
     const id = window.setInterval(() => {
       const now = performance.now();
       const s = useGame.getState();
-      const on = s.playing && document.visibilityState === "visible";
+      const on = s.playing && !s.preferences.silent && document.visibilityState === "visible";
       const duck = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
       stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000);
       last = now;

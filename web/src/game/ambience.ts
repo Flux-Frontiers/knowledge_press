@@ -178,6 +178,11 @@ export function stepAmbience(volume: number, daylight: number, morning: number, 
         void load(l.ctx, BEDS[name].file).then((b) => { bed.buffer = b; });
       }
       keepPlaying(l, name);
+    } else if (bed.next + CROSSFADE < t) {
+      // Out of season or out of hours and its last pass is over: a decoded minute is
+      // about 10 MB, so let it go; it loads again, or retries a failed load, when wanted.
+      bed.buffer = null;
+      bed.loading = false;
     }
   }
   const can = callsNow(daylight, season);

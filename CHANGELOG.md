@@ -18,7 +18,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   birdsong by day, and wind under it all. Winter nights are wind and owls,
   and an owl or a woodpecker calls now and then from somewhere in the
   trees. Everything quiets while a voice reads aloud and stops while the
-  forest is hidden. A Forest sounds slider in Settings, under Environment,
+  forest is hidden or in silent mode. A Forest sounds slider in Settings, under Environment,
   sets the volume or turns them off. The recordings are CC0, from Freesound;
   `web/public/sounds/CREDITS.md` lists each one.
 
