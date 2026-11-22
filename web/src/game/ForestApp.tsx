@@ -267,7 +267,11 @@ export function ForestApp() {
       if (st.paused || st.readingSlug || st.mootsOpen || st.mootId || isInputTarget(e.target)) return;
       if (e.code === "KeyL") st.toggleLibrary();
       if (e.code === "KeyG") st.toggleAtlas();
-      if (e.code === "KeyB") st.toggleCatalog();
+      if (e.code === "KeyB") {
+        // Browse focuses its search field, which would otherwise take the "b" itself.
+        e.preventDefault();
+        st.toggleCatalog();
+      }
       if (e.code === "KeyQ") st.toggleCircuit();
       if (e.code === "KeyC") st.setPreferences({ camera: nextCamera(st.preferences.camera) });
       // Not with a modifier: Cmd+R and Ctrl+R reload the page.
