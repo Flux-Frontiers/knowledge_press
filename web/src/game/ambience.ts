@@ -26,7 +26,7 @@ const BEDS: Record<Bed, { file: string; level: number }> = {
 /** Calls now and then: mean seconds between them, and when (night or day). */
 const CALLS = {
   owl: { files: ["owl-1.m4a", "owl-2.m4a", "owl-3.m4a", "owl-4.m4a"], every: 45, level: 0.8 },
-  woodpecker: { files: ["woodpecker-1.m4a", "woodpecker-2.m4a", "woodpecker-3.m4a"], every: 70, level: 0.7 },
+  woodpecker: { files: ["woodpecker-1.m4a", "woodpecker-2.m4a", "woodpecker-3.m4a"], every: 70, level: 0.3 },
 };
 
 /** Seconds two passes of a loop overlap. */
