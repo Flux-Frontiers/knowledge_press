@@ -476,6 +476,29 @@ public final class AppModel {
 
     func resetSynthesisTuning() { synthesisTuning = .default }
 
+    /// Where each book was left and the reader's bookmarks in it. Data, not
+    /// a setting: ``resetAllSettings()`` leaves it alone.
+    var readingMarks: ReadingMarks {
+        get { storedReadingMarks }
+        set {
+            storedReadingMarks = newValue
+            if let data = try? JSONEncoder().encode(newValue) {
+                AppModel.defaults.set(data, forKey: AppModel.readingMarksKey)
+            }
+        }
+    }
+
+    private var storedReadingMarks: ReadingMarks = AppModel.initialReadingMarks()
+
+    static let readingMarksKey = "readingMarks"
+
+    static func initialReadingMarks() -> ReadingMarks {
+        guard let data = defaults.data(forKey: readingMarksKey),
+            let marks = try? JSONDecoder().decode(ReadingMarks.self, from: data)
+        else { return ReadingMarks() }
+        return marks
+    }
+
     /// Whether everything ``resetAllSettings()`` touches is already where it
     /// shipped, so its button can disable itself.
     var settingsAreDefault: Bool {

@@ -52,11 +52,52 @@ export function ReaderPanel({ book }: { book: Book }) {
   const shown = Math.min(index, list.length - 1);
   const blocks = useMemo(() => blocksOf(list, shown), [list, shown]);
 
+  /** Whether this opening of the book has been put back where it was left. */
+  const restored = useRef(false);
+  /** The place last written, as "chapter:block", so a scroll writes only when it moves on. */
+  const savedAt = useRef("");
+  const frame = useRef(0);
+
   useEffect(() => {
     if (!current) return;
     lastChapter.set(book.slug, index);
+    const saved = useGame.getState().preferences.readingAt[book.slug];
+    if (!restored.current) {
+      restored.current = true;
+      if (saved && saved[0] === shown && saved[1] > 0) {
+        savedAt.current = `${saved[0]}:${saved[1]}`;
+        page.current?.querySelector(`[data-block="${saved[1]}"]`)?.scrollIntoView({ block: "start" });
+        return;
+      }
+    }
     page.current?.scrollTo({ top: 0 });
   }, [book.slug, current, index]);
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+
+  /** Remember the block at the top of the page, so the book opens there next time. */
+  const onScroll = () => {
+    if (frame.current || !restored.current) return;
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0;
+      const pane = page.current;
+      const { bookReading, preferences, setPreferences } = useGame.getState();
+      // A reading keeps its own place, the spoken block, which the page trails.
+      if (!pane || (bookReading?.slug === book.slug && bookReading.state === "playing")) return;
+      const top = pane.getBoundingClientRect().top;
+      let block = 0;
+      for (const el of pane.querySelectorAll<HTMLElement>("[data-block]")) {
+        if (el.getBoundingClientRect().bottom > top + 1) {
+          block = Number(el.dataset.block);
+          break;
+        }
+      }
+      const at = `${shown}:${block}`;
+      if (at === savedAt.current) return;
+      savedAt.current = at;
+      setPreferences({ readingAt: { ...preferences.readingAt, [book.slug]: [shown, block] } });
+    });
+  };
 
   const failure = chapters.state === "error" ? chapters.message : null;
 
@@ -187,7 +228,7 @@ export function ReaderPanel({ book }: { book: Book }) {
           </label>
         ) : null}
 
-        <div ref={page} className="min-h-0 flex-1 overflow-auto px-5 py-5 sm:px-10">
+        <div ref={page} onScroll={onScroll} className="min-h-0 flex-1 overflow-auto px-5 py-5 sm:px-10">
           {failure ? (
             <div className="grid gap-3 text-sm leading-relaxed text-muted">
               <p className="text-fg">The book could not be fetched: {failure}.</p>

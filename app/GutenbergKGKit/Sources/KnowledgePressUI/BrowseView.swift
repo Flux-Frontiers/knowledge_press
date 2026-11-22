@@ -161,9 +161,9 @@ struct BrowseView: View {
         case .chapters(let genre, let book, let title):
             ChapterListView(
                 genre: genre, book: book, title: title, browser: browser, loadError: $loadError)
-        case .reader(let genre, let book, let sectionId):
+        case .reader(let genre, let book, let sectionId, let block):
             ChapterReaderView(
-                genre: genre, book: book, sectionId: sectionId, browser: browser,
+                genre: genre, book: book, sectionId: sectionId, startBlock: block, browser: browser,
                 loadError: $loadError)
         }
     }
@@ -173,7 +173,8 @@ struct BrowseView: View {
 enum BrowseStep: Hashable {
     case books(String)
     case chapters(genre: String, book: String, title: String)
-    case reader(genre: String, book: String, sectionId: String)
+    /// `block` opens the chapter at that block, as a bookmark or Continue does.
+    case reader(genre: String, book: String, sectionId: String, block: Int? = nil)
 }
 
 private struct BookListView: View {
@@ -211,6 +212,7 @@ private struct BookListView: View {
 }
 
 private struct ChapterListView: View {
+    @Environment(AppModel.self) private var model
     let genre: String
     let book: String
     let title: String
@@ -229,10 +231,70 @@ private struct ChapterListView: View {
         return grouped.keys.sorted().map { ($0, grouped[$0] ?? []) }
     }
 
+    private var key: String { ReadingMarks.key(genre: genre, book: book) }
+
+    /// Continue and the bookmarks, above the chapters; nothing until the
+    /// chapters load, so a place in a chapter the book lost is never offered.
+    @ViewBuilder
+    private var places: some View {
+        let ids = chapters.map(\.id)
+        if let last = model.readingMarks.lastPlace(key, in: ids) {
+            Section {
+                NavigationLink(
+                    value: BrowseStep.reader(
+                        genre: genre, book: book, sectionId: last.sectionId, block: last.block)
+                ) {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Continue reading")
+                            Text(last.chapterTitle).font(.caption).foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: "book")
+                    }
+                }
+            }
+        }
+        let marks = model.readingMarks.bookmarks(key, in: ids)
+        if !marks.isEmpty {
+            Section("Bookmarks") {
+                ForEach(marks) { mark in
+                    NavigationLink(
+                        value: BrowseStep.reader(
+                            genre: genre, book: book, sectionId: mark.sectionId, block: mark.block)
+                    ) {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(mark.chapterTitle)
+                                if !mark.excerpt.isEmpty {
+                                    Text(mark.excerpt)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
+                                }
+                            }
+                        } icon: {
+                            Image(systemName: "bookmark.fill")
+                        }
+                    }
+                    .contextMenu {
+                        Button("Remove Bookmark", systemImage: "trash", role: .destructive) {
+                            model.readingMarks.remove(key, id: mark.id)
+                        }
+                    }
+                }
+                .onDelete { offsets in
+                    for i in offsets { model.readingMarks.remove(key, id: marks[i].id) }
+                }
+            }
+        }
+    }
+
     var body: some View {
         Group {
             if let byYear {
                 List {
+                    places
                     ForEach(byYear, id: \.year) { group in
                         Section(group.year) {
                             ForEach(group.entries) { chapter in
@@ -247,11 +309,16 @@ private struct ChapterListView: View {
                     }
                 }
             } else {
-                List(chapters) { chapter in
-                    NavigationLink(
-                        value: BrowseStep.reader(genre: genre, book: book, sectionId: chapter.id)
-                    ) {
-                        Text(chapter.title ?? chapter.id)
+                List {
+                    places
+                    Section {
+                        ForEach(chapters) { chapter in
+                            NavigationLink(
+                                value: BrowseStep.reader(genre: genre, book: book, sectionId: chapter.id)
+                            ) {
+                                Text(chapter.title ?? chapter.id)
+                            }
+                        }
                     }
                 }
             }
@@ -271,6 +338,9 @@ private struct ChapterReaderView: View {
     let genre: String
     let book: String
     @State var sectionId: String
+    /// The block to open the first chapter at; when nil, where the book was
+    /// left if this is that chapter.
+    let startBlock: Int?
     let browser: any CorpusBrowser
     @Binding var loadError: String?
     @State private var content: ChapterContent?
@@ -281,6 +351,21 @@ private struct ChapterReaderView: View {
 
     /// The chapter cut into blocks once, when it loads, not on every highlight.
     @State private var blocks: [ChapterBlocks.Block] = []
+
+    /// The block at the top of the page; -1 is the chapter heading.
+    @State private var topBlock: Int?
+    /// The chapter `content` holds, which trails `sectionId` while the next one loads.
+    @State private var loadedId: String?
+    /// A block to scroll to once the chapter is laid out.
+    @State private var restoreTo: Int?
+    /// Whether the page's position is the reader's to save: not until a
+    /// restore has landed, or the top of the page would overwrite the place.
+    @State private var tracking = false
+    /// The start block, or the place the book was left, is applied once.
+    @State private var started = false
+
+    private var key: String { ReadingMarks.key(genre: genre, book: book) }
+    private var here: Int { max(0, topBlock ?? 0) }
 
     /// The block being read aloud, or -1.
     private var readingBlock: Int {
@@ -294,7 +379,7 @@ private struct ChapterReaderView: View {
                     if let content {
                         Text(content.title ?? "")
                             .font(.title2.bold())
-                            .id("top")
+                            .id(-1)
                         ForEach(Array(blocks.enumerated()), id: \.offset) { index, block in
                             BlockText(block: block)
                                 .padding(.horizontal, 6)
@@ -316,6 +401,7 @@ private struct ChapterReaderView: View {
                         ProgressView().padding(.top, 40)
                     }
                 }
+                .scrollTargetLayout()
                 .textSelection(.enabled)
                 .padding()
                 .frame(maxWidth: 700, alignment: .leading)
@@ -324,7 +410,23 @@ private struct ChapterReaderView: View {
                 guard block >= 0, model.reading.state == .playing else { return }
                 withAnimation { proxy.scrollTo(block, anchor: .center) }
             }
-            .onChange(of: sectionId) { _, _ in proxy.scrollTo("top", anchor: .top) }
+            .scrollPosition(id: $topBlock, anchor: .top)
+            .onChange(of: sectionId) { _, _ in
+                tracking = false
+                proxy.scrollTo(-1, anchor: .top)
+            }
+            .task(id: restoreTo) {
+                guard let block = restoreTo else { return }
+                // Let the loaded chapter lay out before scrolling into it.
+                try? await Task.sleep(for: .milliseconds(80))
+                proxy.scrollTo(block, anchor: .top)
+                restoreTo = nil
+                leave(at: block)
+                tracking = true
+            }
+            .onChange(of: topBlock) { _, _ in
+                if tracking, loadedId == sectionId { leave(at: here) }
+            }
         }
         .navigationTitle(content?.title ?? "Chapter")
         // The chapter heading is already the first thing in the body; a
@@ -333,6 +435,16 @@ private struct ChapterReaderView: View {
             .navigationBarTitleDisplayMode(.inline)
         #endif
         .toolbar {
+            if content != nil {
+                ToolbarItem(placement: .primaryAction) {
+                    let marked = model.readingMarks.isMarked(key, sectionId: sectionId, block: here)
+                    Button(action: toggleBookmark) {
+                        Label(
+                            marked ? "Remove Bookmark" : "Bookmark",
+                            systemImage: marked ? "bookmark.fill" : "bookmark")
+                    }
+                }
+            }
             if blocks.contains(where: { !$0.spoken.isEmpty }) {
                 ToolbarItem(placement: .primaryAction) {
                     Button(action: toggleReading) {
@@ -347,6 +459,25 @@ private struct ChapterReaderView: View {
         .task { authorVoice = await browser.authorVoice(genre: genre, book: book) }
         // Leaving the chapter for the list, another tab or another book stops the voice.
         .onDisappear { model.reading.stop() }
+    }
+
+    /// Remember the place: this chapter, this block.
+    private func leave(at block: Int) {
+        model.readingMarks.leave(key, at: ReadingMark(
+            sectionId: sectionId, block: block, chapterTitle: content?.title ?? sectionId))
+    }
+
+    /// Bookmark the block at the top of the page, or take its bookmark away.
+    private func toggleBookmark() {
+        let block = here
+        if let mark = model.readingMarks.saved[key]?.first(where: { $0.sectionId == sectionId && $0.block == block }) {
+            model.readingMarks.remove(key, id: mark.id)
+            return
+        }
+        let text = blocks.indices.contains(block) ? blocks[block].runs.map(\.text).joined() : ""
+        model.readingMarks.add(key, ReadingMark(
+            sectionId: sectionId, block: block, chapterTitle: content?.title ?? sectionId,
+            excerpt: ReadingMarks.excerpt(text)))
     }
 
     private func toggleReading() {
@@ -399,7 +530,20 @@ private struct ChapterReaderView: View {
             let loaded = try await browser.chapter(genre: genre, book: book, sectionId: sectionId)
             blocks = ChapterBlocks.blocks(loaded.text, title: loaded.title ?? "")
             content = loaded
+            loadedId = sectionId
             loadError = nil
+            var start: Int?
+            if !started {
+                started = true
+                let last = model.readingMarks.last[key]
+                start = startBlock ?? (last?.sectionId == sectionId ? last?.block : nil)
+            }
+            if let start, start > 0, !blocks.isEmpty {
+                restoreTo = min(start, blocks.count - 1)
+            } else {
+                leave(at: 0)
+                tracking = true
+            }
             if goOn {
                 goOn = false
                 read(from: 0)

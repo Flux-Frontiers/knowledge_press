@@ -22,6 +22,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   sets the volume or turns them off. The recordings are CC0, from Freesound;
   `web/public/sounds/CREDITS.md` lists each one.
 
+- **Bookmarks and Continue reading.** A book's chapter list opens with
+  Continue reading, which goes back to the chapter and paragraph you left,
+  and a Bookmarks section. The bookmark button in the reader marks the
+  paragraph at the top of the page, or unmarks it; swipe or right-click a
+  bookmark to remove it. Reopening the chapter you left also opens at your
+  place. The forest's reader now remembers the paragraph you scrolled to,
+  not only the one a voice was reading. Kept on this device only.
+
 - **A Flux-Frontiers fleet mark.** The Forest logo's book tree inside its
   two ring roads, redrawn in the fleet's Art Techno style, with the tagline
   GENRES . BOOKS . PASSAGES. It names the project wherever the fleet's
