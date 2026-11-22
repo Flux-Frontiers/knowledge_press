@@ -177,6 +177,12 @@ export type GameStore = {
   /** Night or day as the sky now looks, derived from `sky`: what the lamps and glows switch on. */
   timeOfDay: TimeOfDay;
   timeMode: TimeMode;
+  /**
+   * A preset's clock: the sky shows `at` when the preset was picked (`since`, real
+   * time) and runs on from there at real speed. Null in live mode and for a pinned
+   * preset (the shots, which want the same sky every frame).
+   */
+  timeFrom: { at: number; since: number } | null;
   place: Place | null;
   sky: SkyState;
   /** In live mode, the next sunrise or sunset. */
@@ -272,8 +278,11 @@ export type GameStore = {
   /** `?shot=`: a fixed camera on one tree, with no game on screen (portrait.ts). */
   portrait: Portrait | null;
   setPortrait: (portrait: Portrait | null) => void;
-  /** Hold the sky at a mode, without stepping through the others. */
-  setTimeMode: (mode: TimeMode) => void;
+  /**
+   * Go to a mode's moment, without stepping through the others. Time runs on from
+   * it unless `pinned`.
+   */
+  setTimeMode: (mode: TimeMode, pinned?: boolean) => void;
   toggleCleanView: () => void;
   travelMode: TravelMode;
   /** The grove the tour is pulled up at (its caption shows), or null. */
@@ -356,9 +365,10 @@ const autoSeason = (place: Place | null) => seasonFor(new Date(), place ?? timeZ
 let seasonPicked = false;
 
 /** What the sky shows: the moment the mode picks, the sun and moon there, and what the HUD says of them. */
-function readSky(mode: TimeMode, place: Place | null, now = new Date()) {
+function readSky(mode: TimeMode, place: Place | null, from: GameStore["timeFrom"] = null, now = new Date()) {
   const where = place ?? timeZonePlace(now);
-  const sky = skyState(effectiveTime(mode, now, where), where);
+  const at = mode === "live" ? now : from ? new Date(from.at + now.valueOf() - from.since) : effectiveTime(mode, now, where);
+  const sky = skyState(at, where);
   return {
     sky,
     timeOfDay: (sky.daylight < 0.3 ? "night" : "day") as TimeOfDay,
@@ -390,7 +400,7 @@ export const useGame = create<GameStore>((set, get) => ({
     const { readingAt, bookmarks } = get().preferences;
     const preferences = readPreferences({ readingAt, bookmarks });
     set({
-      preferences, groundCamera: "follow", season: autoSeason(get().place), timeMode: "live",
+      preferences, groundCamera: "follow", season: autoSeason(get().place), timeMode: "live", timeFrom: null,
       // A dismissed quest hint shows again; clean view and the timeline go off.
       questHintHidden: null, cleanView: false, cleanBeforeTimeline: false, timelineYear: null, timelinePlaying: false,
     });
@@ -402,6 +412,7 @@ export const useGame = create<GameStore>((set, get) => ({
   paused: false,
   season: autoSeason(initial.place),
   timeMode: "live",
+  timeFrom: null,
   place: initial.place,
   ...readSky("live", initial.place),
   query: "",
@@ -465,7 +476,12 @@ export const useGame = create<GameStore>((set, get) => ({
   setHostWorker: (url) => set({ hostWorker: url }),
   portrait: null,
   setPortrait: (portrait) => set({ portrait }),
-  setTimeMode: (timeMode) => set({ timeMode, ...readSky(timeMode, get().place) }),
+  setTimeMode: (timeMode, pinned = false) => {
+    const now = new Date();
+    const where = get().place ?? timeZonePlace(now);
+    const timeFrom = timeMode === "live" || pinned ? null : { at: effectiveTime(timeMode, now, where).valueOf(), since: now.valueOf() };
+    set({ timeMode, timeFrom, ...readSky(timeMode, get().place, timeFrom, now) });
+  },
   toggleCleanView: () => set({ cleanView: !get().cleanView }),
   travelMode: "free",
   tourStop: null,
@@ -491,14 +507,11 @@ export const useGame = create<GameStore>((set, get) => ({
     seasonPicked = true;
     set({ season });
   },
-  toggleTimeOfDay: () => {
-    const timeMode = TIME_CYCLE[get().timeMode];
-    set({ timeMode, ...readSky(timeMode, get().place) });
-  },
-  tickSky: () => set(readSky(get().timeMode, get().place)),
+  toggleTimeOfDay: () => get().setTimeMode(TIME_CYCLE[get().timeMode]),
+  tickSky: () => set(readSky(get().timeMode, get().place, get().timeFrom)),
   setPlace: (place) => {
     // A place in the other hemisphere turns the season half a year, unless one was picked.
-    set({ place, ...(seasonPicked ? {} : { season: autoSeason(place) }), ...readSky(get().timeMode, place) });
+    set({ place, ...(seasonPicked ? {} : { season: autoSeason(place) }), ...readSky(get().timeMode, place, get().timeFrom) });
     persist(get());
   },
   setQuery: (query) => set({ query, searchPick: null }),

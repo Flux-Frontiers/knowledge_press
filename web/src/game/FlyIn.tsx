@@ -23,7 +23,7 @@ export function FlyIn({ forest }: { forest: Forest }) {
     if (!FLY_IN) return;
     const time = new URLSearchParams(window.location.search).get("time");
     const g = useGame.getState();
-    g.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day");
+    g.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day", true);
     // The forest at its best for the shot: every leaf, shadows, the undergrowth, the least fog
     // and no weather blowing through, with the leaves moving in the wind. Saved, as any setting is.
     g.setPreferences({ leaves: "ultra", shadows: true, undergrowth: true, fog: "clear", weather: false, motion: true });

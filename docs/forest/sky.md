@@ -8,7 +8,7 @@ phone, **Time of day** in the three-dot menu) to step through them.
 | Mode | The sky |
 | --- | --- |
 | Live | Your own time. The sun is where it is now for your place, the moon shows its current phase, and the clock names the next sunrise or sunset. |
-| Dawn, Day, Dusk, Night | Held at that hour. |
+| Dawn, Day, Dusk, Twilight, Night | Starts at that hour today, then runs on at real speed: pick Dusk and the forest goes dark over the next hour. The clock shows the forest's time. |
 
 At night the stars come out, the lantern lights the road, and lamps light the
 redwood and the exhibits from their feet. Each visit starts on Live; a mode

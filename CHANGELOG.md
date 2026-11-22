@@ -13,6 +13,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Time presets run on.** Dawn, Day, Dusk, Twilight and Night now start
+  the sky at that hour and let it run at real speed, so picking Dusk brings
+  the dark on over the next hour. The clock shows the forest's time. The
+  fly-in, the UFO cam and the tree portraits still hold their hour.
+
+- **Dusk sounds like dusk.** As the sun goes down the day birds settle and
+  the crickets and frogs start while it is still light, instead of the
+  full daytime mix until dark.
+
 - **Forest sounds.** Recorded nature loops follow the sky and the season:
   crickets and frogs come up at dusk, a dawn chorus with the sunrise,
   birdsong by day with a lull around midday, and wind under it all. Winter nights are wind and owls,

@@ -770,7 +770,7 @@ export function LandingField({ exhibit, forest }: { exhibit: Exhibit; forest: Fo
   useEffect(() => {
     if (!UFO_CAM) return;
     const time = new URLSearchParams(window.location.search).get("time");
-    useGame.getState().setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day");
+    useGame.getState().setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day", true);
   }, []);
   // Local +x runs from the pad toward the road, where the rider stands to watch.
   const face = Math.atan2(-(exhibit.roadZ - exhibit.z), exhibit.roadX - exhibit.x);

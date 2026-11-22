@@ -280,6 +280,11 @@ export type SkyState = {
    * two of darkness until it is well up. Fog is likeliest then (weather.ts).
    */
   morning: number;
+  /**
+   * 0 to 1, how much this is an evening sky: the sun going down, from about 25
+   * degrees up until well into twilight. The birds settle and the insects start.
+   */
+  evening: number;
   /** `equatorialToWorld` for this moment: where the fixed stars stand. */
   starMatrix: number[];
   /** `solarLongitude` for this moment, degrees: which meteor showers are on. */
@@ -303,6 +308,7 @@ export function skyState(at: Date, place: Place): SkyState {
   const daylight = smoothstep(-8 * RAD, 8 * RAD, alt);
   const rising = sunPosition(new Date(at.valueOf() + STEP), place).altitude > alt;
   const morning = rising ? smoothstep(-20 * RAD, -6 * RAD, alt) * (1 - smoothstep(12 * RAD, 35 * RAD, alt)) : 0;
+  const evening = rising ? 0 : smoothstep(-14 * RAD, -4 * RAD, alt) * (1 - smoothstep(10 * RAD, 25 * RAD, alt));
   const warmth = smoothstep(-6 * RAD, 0, alt) * (1 - smoothstep(2 * RAD, 14 * RAD, alt));
   // Whichever gives more light is the light, so twilight hands over without a jump.
   const sunI = 2.4 * smoothstep(-4 * RAD, 6 * RAD, alt);
@@ -322,5 +328,5 @@ export function skyState(at: Date, place: Place): SkyState {
     const n = Math.hypot(0.3, 1, 0.2);
     light = { dir: [0.3 / n, 1 / n, 0.2 / n], color: "#7f93b8", intensity: starI, shadow: 0 };
   }
-  return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, morning, starMatrix: equatorialToWorld(at, place), solarLon: solarLongitude(at), time: at.valueOf(), light };
+  return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, morning, evening, starMatrix: equatorialToWorld(at, place), solarLon: solarLongitude(at), time: at.valueOf(), light };
 }

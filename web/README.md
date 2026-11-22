@@ -99,7 +99,8 @@ read the wood.
 **Time of day** has five modes; tap the clock in the HUD to step through them.
 The default, **Live**, sets the sky from your own clock: the sun where it is
 now for your time zone, the next sunrise or sunset, and the moon's current
-phase. **Dawn**, **Day**, **Dusk** and **Night** hold the sky at that hour.
+phase. **Dawn**, **Day**, **Dusk** and **Night** start the sky at that hour and
+run on from there at real speed.
 At night the stars and the lantern carry the scene. The choice is remembered
 between visits, like the season.
 
