@@ -13,6 +13,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Eight more quests.** A full cart, Three tragedies, Lovecraft country,
+  Barsoom, Extraordinary voyages, A Russian winter, Founding papers and
+  Every grove join the first five, for thirteen. A forest that showed
+  "quests complete" now shows 5/13; the five already done stay done.
+
+- **Fifty-eight more lines for the launch splash**, for 78 in all: opening
+  lines from Treasure Island to the Tao Te Ching, plus a few famous lines
+  from further in, such as Yorick. Each is word for word from the corpus
+  edition.
+
 - **Time presets run on.** Dawn, Day, Dusk, Twilight and Night now start
   the sky at that hour and let it run at real speed, so picking Dusk brings
   the dark on over the next hour. The clock shows the forest's time. The

@@ -113,7 +113,7 @@ browser; see [Where your progress lives](getting-started.md#where-your-progress-
 
 ## Quests
 
-Five hints appear as you drive, each a small thing to do in the forest:
+Thirteen hints appear as you drive, one at a time, each a small thing to do in the forest:
 
 | Quest | Done when |
 | --- | --- |
@@ -122,6 +122,14 @@ Five hints appear as you drive, each a small thing to do in the forest:
 | The Dane | Your press holds *Hamlet*. |
 | Bare wood | You have switched the season to winter. |
 | Across the press | You have visited four genre groves. |
+| A full cart | Your press holds ten books. |
+| Three tragedies | Your press holds *Hamlet*, *Macbeth*, and *Romeo and Juliet*. |
+| Lovecraft country | Your press holds three of Lovecraft's tales. |
+| Barsoom | Your press holds *A Princess of Mars*, *The Gods of Mars* and *The Warlord of Mars*. |
+| Extraordinary voyages | Your press holds three of Jules Verne's novels. |
+| A Russian winter | You have switched to winter with a Russian novel in your press. |
+| Founding papers | Your press holds *The Federalist Papers*, *Common Sense* and the *Second Treatise of Government*. |
+| Every grove | You have visited every genre grove. |
 
 Each quest done sets off fireworks over the forest, with a note naming it.
 A quest stays done once done: switching back from winter keeps Bare wood, and
