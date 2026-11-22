@@ -20,7 +20,7 @@ import { clearResume, readResume, saveResume } from "./resume";
 import { OWNED_SHOT } from "./cinema";
 import { hush, unlockSpeechOnGesture } from "./speech";
 import { stopBook } from "./bookReading";
-import { stepAmbience } from "./ambience";
+import { solarHour, stepAmbience } from "./ambience";
 import { readerTarget, useGame } from "./store";
 import { UpdateBanner } from "./UpdateBanner";
 
@@ -53,7 +53,8 @@ export function ForestApp() {
       const s = useGame.getState();
       const on = s.playing && !s.preferences.silent && document.visibilityState === "visible";
       const duck = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
-      stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000, s.preferences.motion);
+      stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000, s.preferences.motion,
+        solarHour(s.sky.time, s.place?.lon ?? null));
       last = now;
     }, 1000);
     return () => window.clearInterval(id);
@@ -266,7 +267,11 @@ export function ForestApp() {
       if (st.paused || st.readingSlug || st.mootsOpen || st.mootId || isInputTarget(e.target)) return;
       if (e.code === "KeyL") st.toggleLibrary();
       if (e.code === "KeyG") st.toggleAtlas();
-      if (e.code === "KeyB") st.toggleCatalog();
+      if (e.code === "KeyB") {
+        // Browse focuses its search field, which would otherwise take the "b" itself.
+        e.preventDefault();
+        st.toggleCatalog();
+      }
       if (e.code === "KeyQ") st.toggleCircuit();
       if (e.code === "KeyC") st.setPreferences({ camera: nextCamera(st.preferences.camera) });
       // Not with a modifier: Cmd+R and Ctrl+R reload the page.

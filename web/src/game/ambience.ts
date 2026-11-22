@@ -19,7 +19,7 @@ const BEDS: Record<Bed, { file: string; level: number }> = {
   crickets: { file: "crickets.m4a", level: 1 },
   frogs: { file: "frogs.m4a", level: 0.5 },
   dawn: { file: "dawn.m4a", level: 1 },
-  birds: { file: "birds.m4a", level: 0.9 },
+  birds: { file: "birds.m4a", level: 0.5 },
   wind: { file: "wind.m4a", level: 0.5 },
 };
 
@@ -44,21 +44,38 @@ const smooth = (a: number, b: number, x: number) => {
  * :param morning: How much this is a morning sky, 0 to 1.
  * :param season: The forest's season.
  * :param wind: Whether the wind blows (the Wind & gentle cart motion setting).
+ * :param hour: Local solar time, 0 to 24; birds go quiet around midday.
  */
-export function ambienceMix(daylight: number, morning: number, season: SeasonName, wind = true): Record<Bed, number> {
+export function ambienceMix(daylight: number, morning: number, season: SeasonName, wind = true, hour = 9): Record<Bed, number> {
   const night = 1 - smooth(0.15, 0.55, daylight);
   const day = smooth(0.3, 0.8, daylight);
   const winter = season === "winter";
   const warm = season === "summer" ? 1 : season === "spring" ? 0.8 : season === "autumn" ? 0.7 : 0;
   const birdy = season === "spring" ? 1 : season === "summer" ? 0.85 : season === "autumn" ? 0.5 : 0.2;
   const chorus = morning * smooth(0.05, 0.4, daylight);
+  // The midday lull: quieter from about 11 to 3, back for the afternoon and evening.
+  const lull = smooth(10, 12, hour) * (1 - smooth(14, 16, hour));
   return {
     crickets: night * warm,
     frogs: night * (season === "spring" || season === "summer" ? 1 : 0),
     dawn: chorus * birdy,
-    birds: day * birdy * (1 - 0.6 * chorus),
+    birds: day * birdy * (1 - 0.6 * chorus) * (1 - 0.6 * lull),
     wind: !wind ? 0 : winter ? 0.3 : 0.15,
   };
+}
+
+/**
+ * Local solar time in hours: the sun's clock at the forest's place, or the
+ * device's clock when the place is not known.
+ *
+ * :param time: The sky's time, ms since the epoch.
+ * :param lon: The place's longitude in degrees east, or null.
+ */
+export function solarHour(time: number, lon: number | null): number {
+  const d = new Date(time);
+  if (lon === null) return d.getHours() + d.getMinutes() / 60;
+  const h = d.getUTCHours() + d.getUTCMinutes() / 60 + lon / 15;
+  return ((h % 24) + 24) % 24;
 }
 
 /** Which calls can sound now: owls at night, woodpeckers on warm days. */
@@ -161,15 +178,16 @@ function call(l: Live, kind: keyof typeof CALLS) {
  * :param duck: Lower everything, as while a voice is reading.
  * :param dt: Seconds since the last call, for the calls' odds.
  * :param wind: Whether the wind blows; still trees are silent ones.
+ * :param hour: Local solar time, 0 to 24.
  */
-export function stepAmbience(volume: number, daylight: number, morning: number, season: SeasonName, duck: boolean, dt: number, wind = true) {
+export function stepAmbience(volume: number, daylight: number, morning: number, season: SeasonName, duck: boolean, dt: number, wind = true, hour = 9) {
   const l = volume > 0.001 ? start() : live;
   if (!l) return;
   const t = l.ctx.currentTime;
   // The loops are mastered at -23 LUFS; the slider's middle plays them at about that, its top 6 dB up.
   l.master.gain.setTargetAtTime(2 * volume * (duck ? 0.35 : 1), t, 0.6);
   if (volume <= 0.001) return;
-  const mix = ambienceMix(daylight, morning, season, wind);
+  const mix = ambienceMix(daylight, morning, season, wind, hour);
   for (const name of Object.keys(BEDS) as Bed[]) {
     const bed = l.beds[name];
     const want = mix[name] * BEDS[name].level;
