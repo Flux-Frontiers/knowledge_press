@@ -18,7 +18,7 @@ test("winter nights have no insects or frogs, and the wind is up", () => {
   const m = ambienceMix(0, 0, "winter");
   assert.equal(m.crickets, 0);
   assert.equal(m.frogs, 0);
-  assert.equal(m.wind, 1);
+  assert.ok(m.wind > ambienceMix(0, 0, "summer").wind);
 });
 
 test("the dawn chorus comes with a morning sky and gives way to day birds", () => {

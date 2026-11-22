@@ -56,7 +56,7 @@ export function ambienceMix(daylight: number, morning: number, season: SeasonNam
     frogs: night * (season === "spring" || season === "summer" ? 1 : 0),
     dawn: chorus * birdy,
     birds: day * birdy * (1 - 0.6 * chorus),
-    wind: winter ? 1 : 0.35,
+    wind: winter ? 0.3 : 0.15,
   };
 }
 
