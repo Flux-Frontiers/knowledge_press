@@ -20,6 +20,7 @@ import { clearResume, readResume, saveResume } from "./resume";
 import { OWNED_SHOT } from "./cinema";
 import { hush, unlockSpeechOnGesture } from "./speech";
 import { stopBook } from "./bookReading";
+import { stepAmbience } from "./ambience";
 import { readerTarget, useGame } from "./store";
 import { UpdateBanner } from "./UpdateBanner";
 
@@ -41,6 +42,19 @@ export function ForestApp() {
   // The sky follows the clock: sun and moon move a few hundredths of a degree between ticks.
   useEffect(() => {
     const id = window.setInterval(() => useGame.getState().tickSky(), 5000);
+    return () => window.clearInterval(id);
+  }, []);
+  // The forest's sounds follow the sky and season; quieter under a voice, silent while hidden or before Enter.
+  useEffect(() => {
+    let last = performance.now();
+    const id = window.setInterval(() => {
+      const now = performance.now();
+      const s = useGame.getState();
+      const on = s.playing && document.visibilityState === "visible";
+      const duck = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
+      stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000);
+      last = now;
+    }, 1000);
     return () => window.clearInterval(id);
   }, []);
   useEffect(() => {

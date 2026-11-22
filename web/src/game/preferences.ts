@@ -14,6 +14,8 @@ export type Preferences = {
   stats: boolean;
   /** Silent mode: no cards pop up on their own (nearby book, redwood, quest hints). */
   silent: boolean;
+  /** Forest sounds' volume, 0 (off) to 1: night insects, birdsong, wind (ambience.ts). */
+  sounds: number;
   /** Fog density; see FOG_SCALE. */
   fog: FogLevel;
   /** Random weather: morning fogs that burn off, up to pea soup, and drifting cloud (weather.ts). */
@@ -101,6 +103,8 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
       : typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches ? "high" : "medium",
     stats: value?.stats === true,
     silent: value?.silent === true,
+    sounds: typeof value?.sounds === "number" && Number.isFinite(value.sounds)
+      ? Math.max(0, Math.min(1, value.sounds)) : 0.5,
     fog: value?.fog && value.fog in FOG_SCALE ? value.fog : "normal",
     weather: value?.weather === true,
     narrate: value?.narrate === true,

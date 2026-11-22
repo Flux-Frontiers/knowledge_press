@@ -172,6 +172,7 @@ public final class ForestServer: Sendable {
         case "ttf": return "font/ttf"
         case "wasm": return "application/wasm"
         case "mp3": return "audio/mpeg"
+        case "m4a": return "audio/mp4"
         case "ogg": return "audio/ogg"
         case "wav": return "audio/wav"
         default: return "application/octet-stream"

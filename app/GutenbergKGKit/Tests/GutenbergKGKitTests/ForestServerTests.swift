@@ -85,6 +85,7 @@ struct ForestServerStaticTests {
         #expect(ForestServer.mediaType(forExtension: "CSS") == "text/css")
         #expect(ForestServer.mediaType(forExtension: "webp") == "image/webp")
         #expect(ForestServer.mediaType(forExtension: "wasm") == "application/wasm")
+        #expect(ForestServer.mediaType(forExtension: "m4a") == "audio/mp4")
         #expect(ForestServer.mediaType(forExtension: "xyz") == "application/octet-stream")
     }
 }
