@@ -54,7 +54,7 @@ export function ForestApp() {
       const on = s.playing && !s.preferences.silent && document.visibilityState === "visible";
       const duck = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
       stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000, s.preferences.motion,
-        solarHour(s.sky.time, s.place?.lon ?? null));
+        solarHour(s.sky.time, s.place?.lon ?? null), s.sky.evening);
       last = now;
     }, 1000);
     return () => window.clearInterval(id);
@@ -192,7 +192,7 @@ export function ForestApp() {
     st.setPreferences({ camera: "follow", fog: "light", weather: false, motion: false });
     st.setSeason("summer");
     const time = new URLSearchParams(window.location.search).get("time");
-    st.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day");
+    st.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day", true);
     resetSim(forest);
     aim(first);
     play();

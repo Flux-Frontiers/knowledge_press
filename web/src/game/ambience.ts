@@ -45,9 +45,11 @@ const smooth = (a: number, b: number, x: number) => {
  * :param season: The forest's season.
  * :param wind: Whether the wind blows (the Wind & gentle cart motion setting).
  * :param hour: Local solar time, 0 to 24; birds go quiet around midday.
+ * :param evening: How much this is an evening sky, 0 to 1.
  */
-export function ambienceMix(daylight: number, morning: number, season: SeasonName, wind = true, hour = 9): Record<Bed, number> {
-  const night = 1 - smooth(0.15, 0.55, daylight);
+export function ambienceMix(daylight: number, morning: number, season: SeasonName, wind = true, hour = 9, evening = 0): Record<Bed, number> {
+  // Dusk: the insects and frogs start while the sun is still up, and the birds settle.
+  const night = Math.max(1 - smooth(0.15, 0.55, daylight), 0.6 * evening);
   const day = smooth(0.3, 0.8, daylight);
   const winter = season === "winter";
   const warm = season === "summer" ? 1 : season === "spring" ? 0.8 : season === "autumn" ? 0.7 : 0;
@@ -59,7 +61,7 @@ export function ambienceMix(daylight: number, morning: number, season: SeasonNam
     crickets: night * warm,
     frogs: night * (season === "spring" || season === "summer" ? 1 : 0),
     dawn: chorus * birdy,
-    birds: day * birdy * (1 - 0.6 * chorus) * (1 - 0.6 * lull),
+    birds: day * birdy * (1 - 0.6 * chorus) * (1 - 0.6 * lull) * (1 - 0.7 * evening),
     wind: !wind ? 0 : winter ? 0.3 : 0.15,
   };
 }
@@ -179,15 +181,16 @@ function call(l: Live, kind: keyof typeof CALLS) {
  * :param dt: Seconds since the last call, for the calls' odds.
  * :param wind: Whether the wind blows; still trees are silent ones.
  * :param hour: Local solar time, 0 to 24.
+ * :param evening: How much this is an evening sky.
  */
-export function stepAmbience(volume: number, daylight: number, morning: number, season: SeasonName, duck: boolean, dt: number, wind = true, hour = 9) {
+export function stepAmbience(volume: number, daylight: number, morning: number, season: SeasonName, duck: boolean, dt: number, wind = true, hour = 9, evening = 0) {
   const l = volume > 0.001 ? start() : live;
   if (!l) return;
   const t = l.ctx.currentTime;
   // The loops are mastered at -23 LUFS; the slider's middle plays them at about that, its top 6 dB up.
   l.master.gain.setTargetAtTime(2 * volume * (duck ? 0.35 : 1), t, 0.6);
   if (volume <= 0.001) return;
-  const mix = ambienceMix(daylight, morning, season, wind, hour);
+  const mix = ambienceMix(daylight, morning, season, wind, hour, evening);
   for (const name of Object.keys(BEDS) as Bed[]) {
     const bed = l.beds[name];
     const want = mix[name] * BEDS[name].level;

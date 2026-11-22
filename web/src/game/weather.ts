@@ -9,7 +9,7 @@ import { clamp, mulberry32 } from "./math";
  * thick: mist, fog or pea soup. Inside a fog slot the fog builds, holds and
  * then burns off, so it ends in a few minutes instead of the hours the real
  * sun would take. Fog is far likelier in the morning (`morning`, from sky.ts),
- * and the sky's own time is what decides that, so pinning the sky to dawn
+ * and the sky's own time is what decides that, so starting the sky at dawn
  * gives the best chance of a foggy start.
  */
 
