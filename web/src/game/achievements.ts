@@ -1,5 +1,5 @@
 /**
- * Achievements: four tracks, each with bronze, silver and gold. Pure, so the
+ * Achievements: seven tracks, each with bronze, silver and gold. Pure, so the
  * HUD, the Wayfarer's Wheel on the hub plaza (WayfarersWheel.tsx) and the
  * tests read the same levels from the same saved progress.
  */
@@ -22,13 +22,19 @@ export type Progress = {
   grovesVisited: string[];
   plaques: string[];
   ring: RingProgress;
+  /** Books pressed or opened to read while it was night in the forest, by slug. */
+  nightBooks: string[];
+  /** Moots watched: saved ones by id, live ones by a fresh id each. */
+  moots: string[];
+  /** Kinds of tree among the books pressed. */
+  speciesPressed: number;
 };
 
 /** The forest's totals, for the "all of them" levels. */
-export type Totals = { books: number; groves: number; exhibits: number };
+export type Totals = { books: number; groves: number; exhibits: number; species: number };
 
 export type Track = {
-  id: "ring" | "explorer" | "reader" | "curator";
+  id: "ring" | "explorer" | "reader" | "curator" | "night" | "botanist" | "moots";
   title: string;
   /** What each level asks, bronze to gold. */
   steps: [string, string, string];
@@ -58,11 +64,20 @@ export function tracks(p: Progress, t: Totals): Track[] {
   const ex = tierOf(p.grovesVisited.length, explorer);
   const rd = tierOf(p.library.length, reader);
   const cu = tierOf(p.plaques.length, curator);
+  const night: [number, number, number] = [1, 5, 15];
+  const botanist: [number, number, number] = [Math.min(3, t.species), Math.min(6, t.species), t.species];
+  const moots: [number, number, number] = [1, 2, 5];
+  const nt = tierOf(p.nightBooks.length, night);
+  const bo = tierOf(p.speciesPressed, botanist);
+  const mo = tierOf(p.moots.length, moots);
   return [
     { id: "ring", title: "Wayfarer", steps: ["Ride the whole ring home to the redwood", "Ride it three times", "Ride it in every season"], tier: ringTier, next: ringNext },
     { id: "explorer", title: "Explorer", steps: [`Visit ${explorer[0]} groves`, `Visit ${explorer[1]} groves`, `Visit all ${explorer[2]} groves`], tier: ex, next: nextOf(p.grovesVisited.length, explorer, ex, "groves") },
     { id: "reader", title: "Reader", steps: [`Press ${reader[0]} books`, `Press ${reader[1]} books`, `Press all ${reader[2]} books`], tier: rd, next: nextOf(p.library.length, reader, rd, "books") },
     { id: "curator", title: "Curator", steps: [`Read ${curator[0]} exhibit plaques`, `Read ${curator[1]} plaques`, `Read all ${curator[2]} plaques`], tier: cu, next: nextOf(p.plaques.length, curator, cu, "plaques") },
+    { id: "night", title: "Night Owl", steps: ["Press or read a book at night", `Press or read ${night[1]} books at night`, `Press or read ${night[2]} books at night`], tier: nt, next: nextOf(p.nightBooks.length, night, nt, "books") },
+    { id: "botanist", title: "Botanist", steps: [`Press books from ${botanist[0]} kinds of tree`, `Press books from ${botanist[1]} kinds of tree`, `Press books from all ${botanist[2]} kinds of tree`], tier: bo, next: nextOf(p.speciesPressed, botanist, bo, "kinds") },
+    { id: "moots", title: "Moot-goer", steps: ["Watch a moot", `Watch ${moots[1]} moots`, `Watch ${moots[2]} moots`], tier: mo, next: nextOf(p.moots.length, moots, mo, "moots") },
   ];
 }
 

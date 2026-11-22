@@ -34,6 +34,10 @@ type SaveBlob = {
   quests: string[];
   /** The ring: groves stopped at on the lap under way, laps done, and their seasons. */
   ring: RingProgress;
+  /** Books pressed or opened to read at night, by slug: Night Owl progress. */
+  nightBooks: string[];
+  /** Moots watched, by id (a live one gets a fresh id): Moot-goer progress. */
+  moots: string[];
   /** Times each grove has been arrived at (driven into, or stopped at on the ring), by genre. */
   groveVisits: Record<string, number>;
   /** Times each book has been opened in the reader, by slug. */
@@ -53,6 +57,8 @@ function loadSave(): SaveBlob {
     plaques: [],
     quests: [],
     ring: readRing(null),
+    nightBooks: [],
+    moots: [],
     groveVisits: {},
     reads: {},
     place: null,
@@ -72,6 +78,8 @@ function loadSave(): SaveBlob {
       plaques: Array.isArray(parsed.plaques) ? parsed.plaques.filter((p): p is string => typeof p === "string") : [],
       quests: Array.isArray(parsed.quests) ? parsed.quests.filter((q): q is string => typeof q === "string") : [],
       ring: readRing(parsed.ring),
+      nightBooks: strings(parsed.nightBooks),
+      moots: strings(parsed.moots),
       groveVisits: readTally(parsed.groveVisits),
       reads: readTally(parsed.reads),
       place: parsed.place && Number.isFinite(parsed.place.lat) && Number.isFinite(parsed.place.lon) ? parsed.place : null,
@@ -82,11 +90,26 @@ function loadSave(): SaveBlob {
   }
 }
 
+/** A saved list of distinct strings, dropping anything else. */
+function strings(v: unknown): string[] {
+  return Array.isArray(v) ? [...new Set(v.filter((x): x is string => typeof x === "string"))] : [];
+}
+
 /** A saved count per key, keeping only whole positive counts. */
 function readTally(v: unknown): Record<string, number> {
   if (!v || typeof v !== "object") return {};
   return Object.fromEntries(Object.entries(v as Record<string, unknown>)
     .filter((e): e is [string, number] => typeof e[1] === "number" && Number.isInteger(e[1]) && e[1] > 0));
+}
+
+/** The night books with `slug` added if it is night in the forest now. */
+function atNight(s: { timeOfDay: TimeOfDay; nightBooks: string[] }, slug: string): string[] {
+  return s.timeOfDay === "night" && !s.nightBooks.includes(slug) ? [...s.nightBooks, slug] : s.nightBooks;
+}
+
+/** A moot watched, added to the saved list once. */
+function watched(moots: string[], id: string): string[] {
+  return moots.includes(id) ? moots : [...moots, id];
 }
 
 /** The tally with one more for `key`. */
@@ -100,6 +123,8 @@ function persist(s: {
   plaques: string[];
   quests: string[];
   ring: RingProgress;
+  nightBooks: string[];
+  moots: string[];
   groveVisits: Record<string, number>;
   reads: Record<string, number>;
   place: Place | null;
@@ -113,6 +138,8 @@ function persist(s: {
       plaques: s.plaques,
       quests: s.quests,
       ring: s.ring,
+      nightBooks: s.nightBooks,
+      moots: s.moots,
       groveVisits: s.groveVisits,
       reads: s.reads,
       place: s.place,
@@ -177,6 +204,10 @@ export type GameStore = {
   fireworks: number;
   launchFireworks: () => void;
   ring: RingProgress;
+  /** Books pressed or opened to read at night, by slug: Night Owl progress. */
+  nightBooks: string[];
+  /** Moots watched, by id (a live one gets a fresh id): Moot-goer progress. */
+  moots: string[];
   /** Times each grove has been arrived at, by genre; grows its stud on the Wayfarer's Wheel. */
   groveVisits: Record<string, number>;
   /** Times each book has been opened in the reader, by slug; grows its grove's stud. */
@@ -387,6 +418,8 @@ export const useGame = create<GameStore>((set, get) => ({
     persist(get());
   },
   ring: initial.ring,
+  nightBooks: initial.nightBooks,
+  moots: initial.moots,
   groveVisits: initial.groveVisits,
   reads: initial.reads,
   nearbySlug: null,
@@ -476,8 +509,8 @@ export const useGame = create<GameStore>((set, get) => ({
       return;
     }
     const library = [...lib, slug];
-    set({ library, lastReadSlug: slug, toast: `Pressed · ${title}` });
-    persist({ ...get(), library });
+    set({ library, nightBooks: atNight(get(), slug), lastReadSlug: slug, toast: `Pressed · ${title}` });
+    persist(get());
     host.post({ kind: "pressed", slug });
   },
   emptyPress: () => {
@@ -488,7 +521,7 @@ export const useGame = create<GameStore>((set, get) => ({
     // Everything earned on this device; the settings are Reset settings' and stay as they are.
     set({
       library: [], lastReadSlug: null, grovesVisited: [], plaques: [], quests: [], ring: readRing(null),
-      groveVisits: {}, reads: {}, preferences: { ...get().preferences, readingAt: {} },
+      nightBooks: [], moots: [], groveVisits: {}, reads: {}, preferences: { ...get().preferences, readingAt: {} },
       questHintHidden: null, award: null, travelMode: "free", selectedGrove: null,
     });
     persist(get());
@@ -577,7 +610,7 @@ export const useGame = create<GameStore>((set, get) => ({
       return;
     }
     const reads = readingSlug === get().readingSlug ? get().reads : bump(get().reads, readingSlug);
-    set({ readingSlug, reads, catalogOpen: false, atlasOpen: false, libraryOpen: false });
+    set({ readingSlug, reads, nightBooks: atNight(get(), readingSlug), catalogOpen: false, atlasOpen: false, libraryOpen: false });
     persist(get());
   },
   setBookReading: (bookReading) => {
@@ -592,11 +625,14 @@ export const useGame = create<GameStore>((set, get) => ({
   playMoot: (mootId) => {
     if (mootId) interruptReading();
     else if (get().mootId) window.setTimeout(resumeInterrupted, BOOK_RESUME_MS);
-    set(mootId ? { mootId, liveMoot: null, mootsOpen: false } : { mootId: null, liveMoot: null, mootSpeaker: null });
+    set(mootId ? { mootId, liveMoot: null, mootsOpen: false, moots: watched(get().moots, mootId) } : { mootId: null, liveMoot: null, mootSpeaker: null });
+    if (mootId) persist(get());
   },
   holdMoot: (liveMoot) => {
     interruptReading();
-    set({ liveMoot, mootId: `live-${++liveMoots}`, mootsOpen: false });
+    // A live moot is new each time, so it counts once under its own id; `live-<n>` restarts every visit.
+    set({ liveMoot, mootId: `live-${++liveMoots}`, mootsOpen: false, moots: watched(get().moots, `live:${Date.now()}`) });
+    persist(get());
   },
   setMootSpeaker: (mootSpeaker) => set({ mootSpeaker }),
   // Leaving the ring drops the grove it was pointing at, so the lantern trail goes with it.
