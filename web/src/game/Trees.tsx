@@ -255,7 +255,7 @@ export function Trees({
   }, [barkMats]);
   // The lit tree and how far up its lamps are; a new tree waits for the old one's lamps to go out.
   const lit = useRef({ tree: -1, amount: 0 });
-  useFrame(({ camera, scene }, delta) => {
+  useFrame(({ camera }, delta) => {
     const s = useGame.getState();
     const night = nightLamps(s.sky.daylight);
     const step = Math.min(delta, 0.1) * TREE_LIGHT_RATE;
@@ -301,10 +301,9 @@ export function Trees({
     // A portrait shows its tree whatever the timeline's year.
     timelineYear.value = s.portrait === null && s.timelineYear !== null ? s.timelineYear : TIMELINE_OFF;
     if (s.preferences.motion && !s.paused) wind.value += Math.min(delta, 0.1);
-    // Hide groves the fog has swallowed (exp2 fog is 99.9% opaque at 2.6 / density);
-    // hidden chunks also drop out of the shadow pass.
-    const density = scene.fog && "density" in scene.fog ? (scene.fog.density as number) : 0;
-    const cutoff = density > 0 ? 2.6 / density : Infinity;
+    // Every grove is drawn, however thick the fog. Hiding the ones the fog had swallowed
+    // made them pop in as it thinned or the cart came near, since a fogged grove still
+    // stands out against the sky; the leaf thinning by distance keeps the cost down.
     // God's eye sees every grove from far above: thinning by count alone would bare the
     // whole forest, so there it draws fewer, larger leaves instead, eased in from the
     // ground's thinning by height so a dive to the cart lands without a change (godLeafBlend).
@@ -316,7 +315,7 @@ export function Trees({
       if (!g) return;
       const subject = s.portrait ? forest.trees[s.portrait.tree]!.chunk : null;
       const dist = Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius;
-      g.visible = subject !== null ? i === subject : dist < cutoff;
+      g.visible = subject === null || i === subject;
       const mesh = leafRefs.current[i];
       const full = kept.current[i] ?? c.leafCount;
       const above = camera.position.y - CROWN_HEIGHT;

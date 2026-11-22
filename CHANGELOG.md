@@ -89,6 +89,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **No more groves popping in through the fog.** The forest no longer hides
+  the groves the fog has swallowed. They still showed as shapes against the
+  sky, so they popped in as the fog thinned or the cart came near; now
+  every grove is always drawn, on the Mac, iPad and iPhone alike.
+
 - **Firs and pines keep their needles.** The season set every tree's leaf
   colours and how many leaves show, so in autumn the conifers turned orange
   and gold and lost 30 percent of their needles, and in winter all but 10
