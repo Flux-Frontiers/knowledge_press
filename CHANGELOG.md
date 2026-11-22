@@ -15,7 +15,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - **Forest sounds.** Recorded nature loops follow the sky and the season:
   crickets and frogs come up at dusk, a dawn chorus with the sunrise,
-  birdsong by day, and wind under it all. Winter nights are wind and owls,
+  birdsong by day with a lull around midday, and wind under it all. Winter nights are wind and owls,
   and an owl or a woodpecker calls now and then from somewhere in the
   trees. Everything quiets while a voice reads aloud and stops while the
   forest is hidden or in silent mode, and the wind is silent while Wind &

@@ -20,7 +20,7 @@ import { clearResume, readResume, saveResume } from "./resume";
 import { OWNED_SHOT } from "./cinema";
 import { hush, unlockSpeechOnGesture } from "./speech";
 import { stopBook } from "./bookReading";
-import { stepAmbience } from "./ambience";
+import { solarHour, stepAmbience } from "./ambience";
 import { readerTarget, useGame } from "./store";
 import { UpdateBanner } from "./UpdateBanner";
 
@@ -53,7 +53,8 @@ export function ForestApp() {
       const s = useGame.getState();
       const on = s.playing && !s.preferences.silent && document.visibilityState === "visible";
       const duck = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
-      stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000, s.preferences.motion);
+      stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000, s.preferences.motion,
+        solarHour(s.sky.time, s.place?.lon ?? null));
       last = now;
     }, 1000);
     return () => window.clearInterval(id);

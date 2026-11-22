@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
-const { ambienceMix, callsNow } = require(`${process.env.FOREST_TEST_BUILD}/ambience.js`);
+const { ambienceMix, callsNow, solarHour } = require(`${process.env.FOREST_TEST_BUILD}/ambience.js`);
 
 test("summer nights are crickets and frogs, summer days are birds", () => {
   const night = ambienceMix(0, 0, "summer");
@@ -48,4 +48,18 @@ test("with wind and cart motion off, the wind is silent and nothing else changes
   const off = ambienceMix(0, 0, "winter", false);
   assert.equal(off.wind, 0);
   assert.deepEqual({ ...off, wind: on.wind }, on);
+});
+
+test("birds go quiet around midday and come back for the afternoon", () => {
+  const at = (h) => ambienceMix(1, 0, "spring", true, h).birds;
+  assert.ok(at(13) < 0.5 * at(9));
+  assert.ok(at(17) > 0.95 * at(9));
+  assert.equal(ambienceMix(1, 0, "spring", true, 13).dawn, ambienceMix(1, 0, "spring", true, 9).dawn);
+});
+
+test("solar time follows the longitude, a day around", () => {
+  const noonUtc = Date.UTC(2026, 5, 21, 12, 0);
+  assert.equal(solarHour(noonUtc, 0), 12);
+  assert.equal(solarHour(noonUtc, -120), 4);
+  assert.equal(solarHour(noonUtc, 180), 0);
 });
