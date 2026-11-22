@@ -16,17 +16,17 @@ export type Bed = "crickets" | "frogs" | "dawn" | "birds" | "wind";
 
 /** Each bed's file and its level at full weight. */
 const BEDS: Record<Bed, { file: string; level: number }> = {
-  crickets: { file: "crickets.m4a", level: 0.55 },
-  frogs: { file: "frogs.m4a", level: 0.35 },
-  dawn: { file: "dawn.m4a", level: 0.6 },
-  birds: { file: "birds.m4a", level: 0.55 },
-  wind: { file: "wind.m4a", level: 0.4 },
+  crickets: { file: "crickets.m4a", level: 1 },
+  frogs: { file: "frogs.m4a", level: 0.7 },
+  dawn: { file: "dawn.m4a", level: 1 },
+  birds: { file: "birds.m4a", level: 0.9 },
+  wind: { file: "wind.m4a", level: 0.7 },
 };
 
 /** Calls now and then: mean seconds between them, and when (night or day). */
 const CALLS = {
-  owl: { files: ["owl-1.m4a", "owl-2.m4a", "owl-3.m4a", "owl-4.m4a"], every: 45, level: 0.5 },
-  woodpecker: { files: ["woodpecker-1.m4a", "woodpecker-2.m4a", "woodpecker-3.m4a"], every: 70, level: 0.4 },
+  owl: { files: ["owl-1.m4a", "owl-2.m4a", "owl-3.m4a", "owl-4.m4a"], every: 45, level: 0.8 },
+  woodpecker: { files: ["woodpecker-1.m4a", "woodpecker-2.m4a", "woodpecker-3.m4a"], every: 70, level: 0.7 },
 };
 
 /** Seconds two passes of a loop overlap. */
@@ -48,7 +48,7 @@ export function ambienceMix(daylight: number, morning: number, season: SeasonNam
   const night = 1 - smooth(0.15, 0.55, daylight);
   const day = smooth(0.3, 0.8, daylight);
   const winter = season === "winter";
-  const warm = season === "summer" ? 1 : season === "spring" ? 0.8 : season === "autumn" ? 0.55 : 0;
+  const warm = season === "summer" ? 1 : season === "spring" ? 0.8 : season === "autumn" ? 0.7 : 0;
   const birdy = season === "spring" ? 1 : season === "summer" ? 0.85 : season === "autumn" ? 0.5 : 0.2;
   const chorus = morning * smooth(0.05, 0.4, daylight);
   return {
@@ -164,7 +164,8 @@ export function stepAmbience(volume: number, daylight: number, morning: number, 
   const l = volume > 0.001 ? start() : live;
   if (!l) return;
   const t = l.ctx.currentTime;
-  l.master.gain.setTargetAtTime(volume * (duck ? 0.35 : 1), t, 0.6);
+  // The loops are mastered at -23 LUFS; the slider's middle plays them at about that, its top 6 dB up.
+  l.master.gain.setTargetAtTime(2 * volume * (duck ? 0.35 : 1), t, 0.6);
   if (volume <= 0.001) return;
   const mix = ambienceMix(daylight, morning, season);
   for (const name of Object.keys(BEDS) as Bed[]) {
