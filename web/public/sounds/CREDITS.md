@@ -9,7 +9,7 @@ seamless ends.
 
 | File | Source | Recordist | Cut |
 | --- | --- | --- | --- |
-| crickets.m4a | [Crickets At Night - Raw sound](https://freesound.org/s/522299/) | Defelozedd94 | 110-170 s, two high-passes at 1.8 kHz (the recording has strong wind rumble), +20 dB in place of loudnorm |
+| crickets.m4a | [Northern California Crickets](https://freesound.org/s/704381/) | ellie.vanderlip | 0-58 s, two high-passes at 1.5 kHz (wind rumble under the crickets) |
 | frogs.m4a | [WILDTRACK Swamp at night in Minnesota USA](https://freesound.org/s/181364/) | chris_dagorne | 170-230 s, high-pass 120 Hz |
 | dawn.m4a | [Bird ambience. Coniferous forest dawn chorus.](https://freesound.org/s/745273/) | SamsterBirdies | 280-340 s, high-pass 150 Hz |
 | birds.m4a | [sfx_amb_forest_spring_afternoon-01.wav](https://freesound.org/s/385280/) | bajko | 30-90 s, high-pass 100 Hz |
