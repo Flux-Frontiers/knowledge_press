@@ -76,9 +76,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- **The quest count reads plainly.** The top bar says "3/5 quests" while
-  quests remain and "quests complete" once all five are done, instead of a
-  bare "5/5" that read like the fifth quest of five.
+- **The quest count reads plainly.** The top bar says "3/13 quests" while
+  quests remain and "quests complete" once every quest is done, instead of
+  a bare count such as "5/5", which read like the fifth quest of five.
 
 - **Ride the ring sits level with the search bar.** On a Mac or a desktop
   browser at least 768 px wide, the button now lines up with the search bar

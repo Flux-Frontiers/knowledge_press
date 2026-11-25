@@ -28,6 +28,24 @@ title and the position (for example 3 / 24) are shown, with **Previous** and
 **Next** buttons at the bottom. A very long chapter is split into parts,
 labelled "Part 1 of 4" and so on.
 
+## Continue reading and bookmarks
+
+The app remembers the chapter and paragraph where you left each book. The
+book's chapter list then opens with **Continue reading**, which names that
+chapter and goes back to the paragraph. Opening the chapter from the list
+also opens at your place.
+
+The bookmark button in the reader's toolbar marks the paragraph at the top
+of the page. Press it again on a marked page to take the bookmark away.
+
+A book's bookmarks are listed under **Bookmarks** in its chapter list, below
+Continue reading. Each shows its chapter and the paragraph's first words;
+tap one to go there. To remove one, swipe it, or right-click it on a Mac and
+choose **Remove Bookmark**.
+
+Places and bookmarks are kept on this device only. These are the Browse
+reader's own; the forest's reader keeps a separate set.
+
 ## Listen to a chapter
 
 The play button in the toolbar reads the chapter aloud. The paragraph being

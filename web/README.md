@@ -162,6 +162,7 @@ daylight.ts    daytime overrides on the season palette
 Environment.tsx  sky, sun, moon, stars and the shadow-casting light
 meteors.ts, MeteorSky.tsx   meteor showers: rates, radiants and trails
 Uplights.tsx   night floodlighting for the redwood and the exhibits
+ambience.ts, audio.ts   the forest sounds: loops from public/sounds/ mixed by sky and season
 sim.ts         cart pose, throttle, steer, trunk collision, teleport
 input.ts       keyboard, gamepad and touch actions
 Player.tsx     lantern cart + cameras (behind, high, in the cart, god's eye)
@@ -172,6 +173,7 @@ World.tsx      ground, roads, lantern trail, fog, plinth
 Signposts.tsx  grove signposts and exhibit plaques
 HUD.tsx        plaque, minimap jump, atlas, book list, lantern query, press, tour caption
 Reader.tsx     a book's chapters, previous / next
+bookmarks.ts   the reader's bookmarks, kept with the preferences
 chapterBlocks.ts  a chapter as paragraphs (the app's reflow, ported) with italics and footnotes
 bookText.ts    fetches books/<slug>.json, once per book
 host.ts        the app bridge: events out, goto / home in; a no-op on the web

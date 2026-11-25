@@ -11,8 +11,12 @@ phone, **Time of day** in the three-dot menu) to step through them.
 | Dawn, Day, Dusk, Twilight, Night | Starts at that hour today, then runs on at real speed: pick Dusk and the forest goes dark over the next hour. The clock shows the forest's time. |
 
 At night the stars come out, the lantern lights the road, and lamps light the
-redwood and the exhibits from their feet. Each visit starts on Live; a mode
-you pick lasts until you reload.
+exhibits from their feet. The redwood is floodlit to its top, trunk and
+crown, brightest at the root flare, and shows through the night fog from
+across the forest. The book tree nearest the cart fades on in warm light as
+you ride up to it, from about 32 m and fully lit within 16 m, and fades off
+as you leave. Each visit starts on Live; a mode you pick lasts until you
+reload.
 
 ### Where the sky is placed
 
@@ -108,7 +112,32 @@ equator. Pick another under **Environment** in settings.
 | Autumn | Turned leaves, the canopy thinning |
 | Winter | No leaves. The wood is the point: every limb and its thickness |
 
+Firs and pines are evergreen: they keep every needle all year, in a dark
+green that is fresher in spring and frosted in winter, as the redwood does.
+
 A season you pick lasts until you reload.
+
+## Sounds
+
+Recorded sounds of the outdoors follow the sky and the season.
+
+| When | What you hear |
+| --- | --- |
+| Dawn | A dawn chorus, as the sun comes up. |
+| Day | Birdsong, quieter around midday, and now and then a woodpecker. |
+| Dusk | The birds settle, and the crickets and frogs start while it is still light. |
+| Night | Crickets, with frogs in spring and summer, and now and then an owl. |
+| Winter | Few birds by day and no woodpecker. The nights are wind and owls, with no crickets or frogs. |
+
+Wind runs under all of it. It is silent while **Wind and gentle cart
+motion** is off.
+
+The sounds quiet while a voice reads aloud, and stop while the forest is
+hidden or in **Silent mode**. **Forest sounds**, under **Environment** in
+[settings](settings.md#environment), sets the volume or turns them off.
+
+The recordings are CC0, from Freesound. `web/public/sounds/CREDITS.md` in
+the repository lists each one.
 
 ## Fog and weather
 
