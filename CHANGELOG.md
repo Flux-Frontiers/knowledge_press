@@ -103,6 +103,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- **Dawn, Day and Dusk no longer depend on the device's time zone.** The
+  presets looked for sunrise and sunset in the device's calendar day. Where
+  the device's zone and the forest's place were several hours apart, that
+  day could hold no sunset, and Dusk showed noon. They now search the
+  place's own solar day, as do Twilight and Night. With the zone and the
+  place in agreement the presets move by a few minutes at most.
+
 - **No more groves popping in through the fog.** The forest no longer hides
   the groves the fog has swallowed. They still showed as shapes against the
   sky, so they popped in as the fog thinned or the cart came near; now
