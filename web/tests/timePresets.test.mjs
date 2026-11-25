@@ -43,6 +43,27 @@ test("the evening sky is the sun going down, not coming up", () => {
   assert.equal(noon.evening, 0);
 });
 
+test("dawn, day and dusk are the place's, whatever the device's time zone", () => {
+  const { effectiveTime, skyState } = require(`${process.env.FOREST_TEST_BUILD}/sky.js`);
+  const zone = process.env.TZ;
+  try {
+    // New York's July sunset is after midnight UTC, and its sunrise before midnight in Auckland.
+    for (const tz of ["UTC", "America/New_York", "Asia/Tokyo", "Pacific/Auckland", "Pacific/Honolulu"]) {
+      process.env.TZ = tz;
+      const now = new Date(2026, 6, 15, 12);
+      const dawn = skyState(effectiveTime("dawn", now, NYC), NYC);
+      const noon = skyState(effectiveTime("day", now, NYC), NYC);
+      const dusk = skyState(effectiveTime("dusk", now, NYC), NYC);
+      assert.ok(dawn.morning > 0.9 && dawn.evening === 0, `${tz}: dawn morning ${dawn.morning}`);
+      assert.ok(dusk.evening > 0.9 && dusk.morning === 0, `${tz}: dusk evening ${dusk.evening}`);
+      assert.ok(noon.daylight === 1 && noon.time > dawn.time && noon.time < dusk.time, `${tz}: noon between them`);
+      assert.ok(dusk.time - dawn.time < 24 * 3600000, `${tz}: one day`);
+    }
+  } finally {
+    if (zone === undefined) delete process.env.TZ; else process.env.TZ = zone;
+  }
+});
+
 test("dusk sounds like dusk: insects starting, birds settling", () => {
   const { effectiveTime, skyState } = require(`${process.env.FOREST_TEST_BUILD}/sky.js`);
   delete globalThis.window; // The store test's stand-in has no events for the audio unlock.

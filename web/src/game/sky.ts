@@ -162,8 +162,14 @@ export function timeZonePlace(now: Date): Place {
 
 const STEP = 10 * 60000;
 
-function localMidnight(now: Date): number {
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).valueOf();
+/**
+ * Midnight by the sun at the place, on the device's date. The day that starts
+ * here holds one sunrise and one sunset whatever the device's time zone; the
+ * device's own midnight can fall at the place's dusk and leave the day with
+ * no sunset in it.
+ */
+function localMidnight(now: Date, place: Place): number {
+  return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - place.lon * 4 * 60000;
 }
 
 /** Sun altitude for dawn and dusk: near the peak of the glow, and high enough for faint long shadows. */
@@ -179,7 +185,7 @@ export function effectiveTime(mode: TimeMode, now: Date, place: Place): Date {
   if (mode === "live") return now;
   if (mode === "twilight") return twilightTime(now, place) ?? effectiveTime("night", now, place);
   if (mode === "day" || mode === "dawn" || mode === "dusk") {
-    const start = localMidnight(now);
+    const start = localMidnight(now, place);
     let best = start, bestAlt = -Infinity;
     let rise = -1, set = -1;
     let prev = sunPosition(new Date(start), place).altitude - LOW_SUN;
@@ -198,7 +204,7 @@ export function effectiveTime(mode: TimeMode, now: Date, place: Place): Date {
     if (mode === "dusk" && set >= 0) return new Date(set);
     return new Date(best);
   }
-  const start = localMidnight(now) + DAY_MS / 2;
+  const start = localMidnight(now, place) + DAY_MS / 2;
   let darkest = start, darkestAlt = Infinity;
   let moonlit = -1, moonAlt = 5 * RAD;
   for (let t = start; t < start + DAY_MS; t += STEP) {
@@ -225,7 +231,7 @@ const TWILIGHT_SUN = -4 * RAD;
  * the sun never crosses it (polar summer and winter).
  */
 function twilightTime(now: Date, place: Place): Date | null {
-  const start = localMidnight(now) + DAY_MS / 2;
+  const start = localMidnight(now, place) + DAY_MS / 2;
   const found: number[] = [];
   let prev = sunPosition(new Date(start), place).altitude - TWILIGHT_SUN;
   for (let t = start + STEP; t < start + DAY_MS; t += STEP) {
