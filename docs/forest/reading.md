@@ -47,7 +47,20 @@ tree within reach.
 - The two **A** buttons beside the close button make the text smaller or
   larger, in four steps. The size is saved for later visits.
 - ++esc++, the close button, or a tap outside the page closes the reader. It
-  remembers the chapter you were at for the rest of the visit.
+  remembers the chapter and the paragraph you scrolled to, so the book opens
+  there next time, on this visit or a later one.
+
+### Bookmarks
+
+The bookmark button at the top of the reader marks the paragraph at the top
+of the page. Press it again on a marked page to take the bookmark away.
+
+Once a book has a bookmark, a **Bookmarks** menu appears under the chapter
+menu. Each entry names its chapter and the paragraph's first words; pick one
+to go there.
+
+Bookmarks and your place in each book are saved in this browser. **Reset
+settings** keeps them; **Start over** erases them.
 
 ## Listen to the book
 

@@ -9,13 +9,13 @@ opens the settings. The cart is parked while they are open. Every setting is sav
 | --- | --- |
 | Driving pace | **Gentle exploration** or **Brisk driving**: how fast the cart goes. |
 | Look sensitivity | How far a push on the arrows or the stick turns the view. |
-| Wind and gentle cart motion | The leaves move in the wind and the cart sways. Off by default when your system asks for reduced motion. |
+| Wind and gentle cart motion | The leaves move in the wind and the cart sways. Off by default when your system asks for reduced motion. While it is off, the wind in the [forest sounds](sky.md#sounds) is silent too. |
 
 ## Detail and performance
 
 | Setting | What it does |
 | --- | --- |
-| Leaf complexity | How many of each book's passages are drawn as leaves: **Low** one in ten, **Medium** one in four, **High** one in two, **Ultra** every one. The Mac app doubles every level: **Ultra** hangs two leaves per passage. The season then shows its share: half in spring, all in summer, 70% in autumn, bare in winter. Every level keeps the trees in proportion. Touch devices start at High. Changing it regrows the forest. |
+| Leaf complexity | How many of each book's passages are drawn as leaves: **Low** one in ten, **Medium** one in four, **High** one in two, **Ultra** every one. The Mac app doubles every level: **Ultra** hangs two leaves per passage. The season then shows its share: half in spring, all in summer, 70% in autumn, bare in winter. Firs and pines are evergreen and show every needle in every season. Every level keeps the trees in proportion. Touch devices start at High. Changing it regrows the forest. |
 | Shadows | The sun's and moon's shadows. Off by default; on an iPad mini, turning them off about doubled the frame rate. |
 | Undergrowth | Grass and stones on the forest floor. On by default. |
 | Show geometry and frame rate | A readout of triangles, draw calls, leaves and frames per second. |
@@ -29,7 +29,7 @@ opens the settings. The cart is parked while they are open. Every setting is sav
 | First tree's voice, second tree's voice | Shown while **Read moots aloud** is on. **Automatic** picks a voice for each author; or pick one of this browser's English voices. A choice this browser lacks is marked *(not here)*. |
 | Reading voice | The voice that reads a book aloud in the reader. **Automatic** picks a voice for each book's author; or pick one of this browser's English voices for every book. A choice this browser lacks is marked *(not here)*. |
 | Reading speed | How fast a book is read aloud, from 0.80× to 1.30×. Default 0.95×. |
-| Silent mode | No cards, hints or captions appear on their own. ++e++, ++r++ and clicking a tree still work. |
+| Silent mode | No cards, hints or captions appear on their own, and the forest sounds stop. ++e++, ++r++ and clicking a tree still work. |
 
 Voices come from your device. Better ones can be downloaded in Settings >
 Accessibility > Spoken Content > Voices on an iPhone or iPad, and in System
@@ -52,6 +52,7 @@ this section shows only the token, and only when a worker is set.
 | --- | --- |
 | Fog | Clear, light, normal or heavy standing haze. |
 | Random weather | Morning fog that burns off, and cloud. Off by default. See [Fog and weather](sky.md#fog-and-weather). |
+| Forest sounds | A volume slider for the recorded sounds of the forest, from off to 100%. Starts at 50%. See [Sounds](sky.md#sounds). |
 
 ## Reset settings
 
@@ -64,14 +65,15 @@ this section shows only the token, and only when a worker is set.
   off.
 
 Everything you have earned is kept: the press, the groves you have visited,
-quests, achievements, the Wheel's studs, your place in each book and your
-saved moots.
+quests, achievements, the Wheel's studs, your place and bookmarks in each
+book and your saved moots.
 
 ## Start over
 
 **Start over**, below it, asks first, then erases everything earned on this
 device: the press, visited groves, quests, achievements and the Wheel's
-studs, your place in each book and your saved moots. The visitor's landing
+studs, your place and bookmarks in each book and your saved moots. The
+visitor's landing
 plays again during its event. Settings are kept. It cannot be undone.
 
 To empty only the press, use **Empty the press** in the Press tab; see
