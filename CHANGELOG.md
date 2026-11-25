@@ -11,6 +11,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.60.0] - 2026-11-25
+
+1.60 marks forest sounds and bookmarks; there are no 1.52-1.59 releases.
+
 ### Added
 
 - **Eight more quests.** A full cart, Three tragedies, Lovecraft country,
