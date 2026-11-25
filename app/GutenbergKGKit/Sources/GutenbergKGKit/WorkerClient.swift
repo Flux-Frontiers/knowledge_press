@@ -117,7 +117,7 @@ public actor WorkerClient {
     ///
     /// `timeout` defaults far past `post`'s usual 60s: the worker's own
     /// `ImageSynthesizer` allows the mflux-serve backend up to 300s
-    /// (`kg_utils.synthesis._image`), and real generation is already 16s
+    /// (imagewright's client), and real generation is already 16s
     /// with the GPU otherwise idle — a corpus rebuild or any other load
     /// sharing the same MPS device pushes it well past 60s, which timed out
     /// live rather than just in theory. 240s leaves headroom under the
