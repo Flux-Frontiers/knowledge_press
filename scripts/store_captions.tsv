@@ -1,6 +1,7 @@
 # Store screenshot captions: slot<TAB>caption. One caption per slot, the same
 # on every device. Raw captures are screenshots/raw/<device>/<slot>-<name>.png
-# with device iphone, ipad or mac; see docs/APP_STORE_LISTING.md, Screenshots.
+# with device iphone, ipad or mac; see kgrag_priv
+# docs/KNOWLEDGE_PRESS_APP_STORE_LISTING.md, Screenshots.
 # Kept here because screenshots/ is git-ignored.
 01	Ask the classics. Every answer shows its sources.
 02	Walk a forest where every tree is a book.
