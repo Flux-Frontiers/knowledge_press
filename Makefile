@@ -189,7 +189,8 @@ icons:
 # (device iphone, ipad or mac) with scripts/store_captions.tsv, at the exact
 # store size, opaque, into screenshots/store/<version>/ with a contact sheet
 # per device. The shot list and how to capture each one are in
-# docs/APP_STORE_LISTING.md under Screenshots. macOS only (AppKit).
+# kgrag_priv docs/KNOWLEDGE_PRESS_APP_STORE_LISTING.md under Screenshots.
+# macOS only (AppKit).
 # ---------------------------------------------------------------------------
 
 STORE_VERSION = $(shell sed -n 's/^version: "\(.*\)"/\1/p' CITATION.cff)

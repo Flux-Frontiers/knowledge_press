@@ -78,5 +78,4 @@ nav:
       - Troubleshooting: app/troubleshooting.md
   - Reference:
       - Inside the app: APP_INTERNALS.md
-      - App Store listing: APP_STORE_LISTING.md
       - Book text: BOOK_TEXT.md

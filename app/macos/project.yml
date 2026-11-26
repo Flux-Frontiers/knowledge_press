@@ -82,7 +82,7 @@ targets:
         ITSAppUsesNonExemptEncryption: false
         LSMinimumSystemVersion: "26.0"
         # Required on the Mac App Store: an upload without it is rejected at
-        # validation. Books, matching docs/APP_STORE_LISTING.md.
+        # validation. Books, matching the store listing (kgrag_priv).
         LSApplicationCategoryType: public.app-category.books
         NSHumanReadableCopyright: "© 2026 Eric G. Suchanek, PhD. Elastic-2.0."
         # The forest (the Forest tab) asks for a location for true sunrise and
