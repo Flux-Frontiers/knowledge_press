@@ -6,6 +6,16 @@
 
 ### Added
 
+- **The Spirit of Gutenberg**, a new exhibit: an Art Techno statue of the
+  printer lifting one piece of type like a rising sun, its face a grid of
+  pixels, 8.5 m tall like the Flame of Knowledge, floodlit to the top at
+  night. It joins the timeline at 1455, the year of his Bible. The mesh is
+  `web/public/models/spirit_of_gutenberg.glb` (40k triangles, WebP
+  textures, meshopt-compressed geometry, 864 KB). It takes a glade of its
+  own, so no other exhibit moves. Its plaque counts toward Curator, so a
+  forest that had every plaque read drops from gold to silver until this
+  one is read.
+
 - **Eight more quests.** A full cart, Three tragedies, Lovecraft country,
   Barsoom, Extraordinary voyages, A Russian winter, Founding papers and
   Every grove join the first five, for thirteen. A forest that showed

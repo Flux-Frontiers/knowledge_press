@@ -11,6 +11,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.60.0] - 2026-11-25
+
+1.60 marks forest sounds and bookmarks; there are no 1.52-1.59 releases.
+
 ### Added
 
 - **The Spirit of Gutenberg**, a new exhibit: an Art Techno statue of the
@@ -18,15 +22,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   pixels, 8.5 m tall like the Flame of Knowledge, floodlit to the top at
   night. It joins the timeline at 1455, the year of his Bible. The mesh is
   `web/public/models/spirit_of_gutenberg.glb` (40k triangles, WebP
-  textures, meshopt-compressed geometry, 864 KB). It takes a glade of its own, so no other exhibit moves. Its
-  plaque counts toward Curator, so a forest that had every plaque read
-  drops from gold to silver until this one is read.
-
-## [1.60.0] - 2026-11-25
-
-1.60 marks forest sounds and bookmarks; there are no 1.52-1.59 releases.
-
-### Added
+  textures, meshopt-compressed geometry, 864 KB). It takes a glade of its
+  own, so no other exhibit moves. Its plaque counts toward Curator, so a
+  forest that had every plaque read drops from gold to silver until this
+  one is read.
 
 - **Eight more quests.** A full cart, Three tragedies, Lovecraft country,
   Barsoom, Extraordinary voyages, A Russian winter, Founding papers and
