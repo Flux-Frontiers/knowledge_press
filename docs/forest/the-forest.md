@@ -68,7 +68,7 @@ forest's north, the same north the sun, the stars and the sundial use.
 
 ## Exhibits
 
-Eight exhibits stand in roadside glades on short spurs off the rings. They
+Nine exhibits stand in roadside glades on short spurs off the rings. They
 are gold diamonds on the minimap and entries in the atlas.
 
 | Exhibit | What it is |
@@ -79,6 +79,7 @@ are gold diamonds on the minimap and entries in the atlas.
 | Double Helix | B-DNA, right-handed, on a spike |
 | Weather Mast | An instrument mast that reads the forest's wind |
 | Armillary Sundial | A brass ring dial built for 39° N. Its rod points at the celestial pole, and the rod's shadow on the hour ring tells local solar time |
+| Spirit of Gutenberg | An Art Techno statue of the printer, lifting one piece of type like a rising sun |
 
 Each exhibit has a plaque standing between the piece and the road. Tap the
 plaque to read it at reading size; it does not open on its own.
