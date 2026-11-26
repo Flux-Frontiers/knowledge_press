@@ -13,41 +13,56 @@ import { useGame } from "./store";
 
 /** How far the lamps are up: off by day, fading in through dusk, full once the sky is dark. */
 export function useNightLamps(): number {
-  const daylight = useGame((s) => s.sky.daylight);
+  return nightLamps(useGame((s) => s.sky.daylight));
+}
+
+/** useNightLamps for a given daylight, for frame loops that read the store directly. */
+export function nightLamps(daylight: number): number {
   return Math.min(1, Math.max(0, (0.6 - daylight) / 0.45));
 }
 
 /**
  * Uplight these materials: their glow is their own colour times `color`, at
- * `strength` on the ground, falling to 1/e every `falloff` metres up.
+ * `strength` on the ground, falling to 1/e every `falloff` metres up. With
+ * `throughFog`, that fraction of the fog is lifted off them once the lamps are
+ * on, so a floodlit landmark still reads from across the forest.
  */
-export function useUplitMaterials(materials: MeshStandardMaterial[], color: string, strength: number, falloff: number) {
+export function useUplitMaterials(materials: MeshStandardMaterial[], color: string, strength: number, falloff: number, throughFog = 0) {
   const night = useNightLamps();
   const lamp = useMemo(() => ({ value: 0 }), []);
+  // Stable like `lamp`, so a reach that follows the redwood's height through the timeline never recompiles.
+  const reach = useMemo(() => ({ value: falloff }), []);
+  const clear = useMemo(() => ({ value: 0 }), []);
   useEffect(() => {
     const tint = { value: new Color(color) };
-    const reach = { value: falloff };
     for (const m of materials) {
       m.onBeforeCompile = (shader) => {
         // Uniform objects are handed over by reference, so changing `lamp.value` later reaches the shader.
         shader.uniforms.uplight = lamp;
         shader.uniforms.uplightColor = tint;
         shader.uniforms.uplightFalloff = reach;
+        shader.uniforms.uplightFog = clear;
         shader.vertexShader = "varying float vUplightY;\n" + shader.vertexShader.replace(
           "#include <begin_vertex>",
-          "#include <begin_vertex>\n  vUplightY = (modelMatrix * vec4(transformed, 1.0)).y;",
+          // Instanced meshes (the redwood's sprays) place each card by instanceMatrix before modelMatrix.
+          "#include <begin_vertex>\n  vec4 uplightAt = vec4(transformed, 1.0);\n#ifdef USE_INSTANCING\n  uplightAt = instanceMatrix * uplightAt;\n#endif\n  vUplightY = (modelMatrix * uplightAt).y;",
         );
-        shader.fragmentShader = "uniform float uplight; uniform vec3 uplightColor; uniform float uplightFalloff; varying float vUplightY;\n" +
+        shader.fragmentShader = "uniform float uplight; uniform vec3 uplightColor; uniform float uplightFalloff; uniform float uplightFog; varying float vUplightY;\n" +
           shader.fragmentShader.replace(
             "#include <emissivemap_fragment>",
             "#include <emissivemap_fragment>\n  totalEmissiveRadiance += uplightColor * uplight * exp(-max(vUplightY, 0.0) / uplightFalloff) * diffuseColor.rgb;",
+          ).replace(
+            "#include <fog_fragment>",
+            "vec3 uplightUnfogged = gl_FragColor.rgb;\n#include <fog_fragment>\n  gl_FragColor.rgb = mix(gl_FragColor.rgb, uplightUnfogged, uplightFog);",
           );
       };
-      m.customProgramCacheKey = () => "uplight-v1";
+      m.customProgramCacheKey = () => "uplight-v3";
       m.needsUpdate = true;
     }
-  }, [materials, color, falloff, lamp]);
+  }, [materials, color, lamp, reach, clear]);
   lamp.value = night * strength;
+  reach.value = falloff;
+  clear.value = night * throughFog;
 }
 
 function usePoolTexture() {

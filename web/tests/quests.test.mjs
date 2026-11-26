@@ -86,3 +86,29 @@ test("start over erases progress, saved moots and the landing flag, and keeps se
   const saved = JSON.parse(store["kpf-library-v1"]);
   assert.deepEqual([saved.library, saved.quests, saved.preferences.fog], [[], [], "heavy"]);
 });
+
+test("the new quests check their books, groves and season", () => {
+  const { QUESTS } = require(`${process.env.FOREST_TEST_BUILD}/quests.js`);
+  const { BOOKS } = require(`${process.env.FOREST_TEST_BUILD}/catalog.js`);
+  const q = (id) => QUESTS.find((x) => x.id === id);
+  const s = (library, extra = {}) => ({ library, grovesVisited: [], season: "autumn", ...extra });
+  // Every slug a quest names is in the catalog, so none is impossible.
+  const slugs = new Set(BOOKS.map((b) => b.slug));
+  for (const id of ["hamlet", "macbeth", "romeo_and_juliet", "a_princess_of_mars", "the_gods_of_mars", "the_warlord_of_mars",
+    "the_federalist_papers", "common_sense", "second_treatise_of_government"]) assert.ok(slugs.has(id), id);
+  assert.ok(!q("tragedies").done(s(["hamlet", "macbeth"])));
+  assert.ok(q("tragedies").done(s(["hamlet", "macbeth", "romeo_and_juliet"])));
+  assert.ok(q("ten").done(s(BOOKS.slice(0, 10).map((b) => b.slug))));
+  const verne = BOOKS.filter((b) => b.author === "Jules Verne").map((b) => b.slug);
+  const lovecraft = BOOKS.filter((b) => b.author === "H. P. Lovecraft").map((b) => b.slug);
+  assert.ok(verne.length >= 3 && lovecraft.length >= 3);
+  assert.ok(q("verne").done(s(verne.slice(0, 3))) && !q("verne").done(s(verne.slice(0, 2))));
+  assert.ok(q("lovecraft").done(s(lovecraft.slice(0, 3))));
+  const russian = BOOKS.find((b) => b.genre === "russian-literature").slug;
+  assert.ok(!q("russian-winter").done(s([russian])));
+  assert.ok(q("russian-winter").done(s([russian], { season: "winter" })));
+  const genres = [...new Set(BOOKS.map((b) => b.genre))];
+  assert.ok(!q("every-grove").done(s([], { grovesVisited: genres.slice(1) })));
+  assert.ok(q("every-grove").done(s([], { grovesVisited: genres })));
+  assert.equal(QUESTS.length, 13);
+});

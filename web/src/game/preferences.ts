@@ -14,6 +14,8 @@ export type Preferences = {
   stats: boolean;
   /** Silent mode: no cards pop up on their own (nearby book, redwood, quest hints). */
   silent: boolean;
+  /** Forest sounds' volume, 0 (off) to 1: night insects, birdsong, wind (ambience.ts). */
+  sounds: number;
   /** Fog density; see FOG_SCALE. */
   fog: FogLevel;
   /** Random weather: morning fogs that burn off, up to pea soup, and drifting cloud (weather.ts). */
@@ -32,6 +34,8 @@ export type Preferences = {
   readRate: number;
   /** Where each book was left, by slug: chapter index and block index. */
   readingAt: Record<string, [number, number]>;
+  /** Each book's bookmarks, by slug: chapter and block pairs in reading order (bookmarks.ts). */
+  bookmarks: Record<string, [number, number][]>;
   /** The GutenbergKG worker that holds live moots (liveMoots.ts); "" for none, the default. */
   mootWorker: string;
   /** The worker's MOOT_TOKEN, when it sets one; "" otherwise. */
@@ -101,6 +105,8 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
       : typeof matchMedia === "function" && matchMedia("(pointer: coarse)").matches ? "high" : "medium",
     stats: value?.stats === true,
     silent: value?.silent === true,
+    sounds: typeof value?.sounds === "number" && Number.isFinite(value.sounds)
+      ? Math.max(0, Math.min(1, value.sounds)) : 0.5,
     fog: value?.fog && value.fog in FOG_SCALE ? value.fog : "normal",
     weather: value?.weather === true,
     narrate: value?.narrate === true,
@@ -113,9 +119,23 @@ export function readPreferences(value?: Partial<Preferences>): Preferences {
     readRate: typeof value?.readRate === "number" && Number.isFinite(value.readRate)
       ? Math.max(0.8, Math.min(1.3, value.readRate)) : 0.95,
     readingAt: readingAt(value?.readingAt),
+    bookmarks: bookmarks(value?.bookmarks),
     mootWorker: typeof value?.mootWorker === "string" && value.mootWorker.trim() ? value.mootWorker.trim() : "",
     mootToken: typeof value?.mootToken === "string" ? value.mootToken : "",
   };
+}
+
+/** Saved bookmarks, each a list of whole-number pairs; anything else is dropped. */
+function bookmarks(value: unknown): Record<string, [number, number][]> {
+  const out: Record<string, [number, number][]> = {};
+  if (!value || typeof value !== "object") return out;
+  for (const [slug, marks] of Object.entries(value)) {
+    if (!Array.isArray(marks)) continue;
+    const kept = marks.filter((at): at is [number, number] =>
+      Array.isArray(at) && at.length === 2 && at.every((n) => Number.isInteger(n) && n >= 0));
+    if (kept.length) out[slug] = kept.map(([c, b]) => [c, b]);
+  }
+  return out;
 }
 
 /** Saved reading positions, each a pair of whole numbers; anything else is dropped. */

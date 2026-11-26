@@ -46,9 +46,12 @@ export const EXHIBITS: ExhibitSpec[] = [
   // Eratosthenes' armillary sphere, about 255 BC.
   { id: "sundial", label: "Armillary Sundial", obstacle: 2.4, treeClearance: 8, year: -255 },
   // The landing field (LandingField.tsx): a raised pad 15 m across that a 17 m craft
-  // stands on, open sky above it for the descent. Permanent; in-app events stage on it (events.ts). Keep it
-  // last: placement is greedy in this order, so the pieces above keep their glades.
+  // stands on, open sky above it for the descent. Permanent; in-app events stage on it (events.ts). Place it
+  // after the pieces above: placement is greedy in this order, so they keep their glades.
   { id: "landing", label: "The Landing Field", obstacle: 7.5, treeClearance: 16 },
+  // The Spirit of Gutenberg (SpiritOfGutenberg.tsx): an Art Techno statue as tall as the flame,
+  // dated to his Bible. Added after the field, so it takes a glade the others left and none of them moves.
+  { id: "gutenberg", label: "Spirit of Gutenberg", obstacle: 3.0, treeClearance: 10, year: 1455 },
 ];
 
 /** Keep exhibits out from under the redwood's crown and apart from one another. */

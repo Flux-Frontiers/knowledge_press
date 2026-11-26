@@ -162,8 +162,14 @@ export function timeZonePlace(now: Date): Place {
 
 const STEP = 10 * 60000;
 
-function localMidnight(now: Date): number {
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).valueOf();
+/**
+ * Midnight by the sun at the place, on the device's date. The day that starts
+ * here holds one sunrise and one sunset whatever the device's time zone; the
+ * device's own midnight can fall at the place's dusk and leave the day with
+ * no sunset in it.
+ */
+function localMidnight(now: Date, place: Place): number {
+  return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - place.lon * 4 * 60000;
 }
 
 /** Sun altitude for dawn and dusk: near the peak of the glow, and high enough for faint long shadows. */
@@ -179,7 +185,7 @@ export function effectiveTime(mode: TimeMode, now: Date, place: Place): Date {
   if (mode === "live") return now;
   if (mode === "twilight") return twilightTime(now, place) ?? effectiveTime("night", now, place);
   if (mode === "day" || mode === "dawn" || mode === "dusk") {
-    const start = localMidnight(now);
+    const start = localMidnight(now, place);
     let best = start, bestAlt = -Infinity;
     let rise = -1, set = -1;
     let prev = sunPosition(new Date(start), place).altitude - LOW_SUN;
@@ -198,7 +204,7 @@ export function effectiveTime(mode: TimeMode, now: Date, place: Place): Date {
     if (mode === "dusk" && set >= 0) return new Date(set);
     return new Date(best);
   }
-  const start = localMidnight(now) + DAY_MS / 2;
+  const start = localMidnight(now, place) + DAY_MS / 2;
   let darkest = start, darkestAlt = Infinity;
   let moonlit = -1, moonAlt = 5 * RAD;
   for (let t = start; t < start + DAY_MS; t += STEP) {
@@ -225,7 +231,7 @@ const TWILIGHT_SUN = -4 * RAD;
  * the sun never crosses it (polar summer and winter).
  */
 function twilightTime(now: Date, place: Place): Date | null {
-  const start = localMidnight(now) + DAY_MS / 2;
+  const start = localMidnight(now, place) + DAY_MS / 2;
   const found: number[] = [];
   let prev = sunPosition(new Date(start), place).altitude - TWILIGHT_SUN;
   for (let t = start + STEP; t < start + DAY_MS; t += STEP) {
@@ -280,6 +286,11 @@ export type SkyState = {
    * two of darkness until it is well up. Fog is likeliest then (weather.ts).
    */
   morning: number;
+  /**
+   * 0 to 1, how much this is an evening sky: the sun going down, from about 25
+   * degrees up until well into twilight. The birds settle and the insects start.
+   */
+  evening: number;
   /** `equatorialToWorld` for this moment: where the fixed stars stand. */
   starMatrix: number[];
   /** `solarLongitude` for this moment, degrees: which meteor showers are on. */
@@ -303,6 +314,7 @@ export function skyState(at: Date, place: Place): SkyState {
   const daylight = smoothstep(-8 * RAD, 8 * RAD, alt);
   const rising = sunPosition(new Date(at.valueOf() + STEP), place).altitude > alt;
   const morning = rising ? smoothstep(-20 * RAD, -6 * RAD, alt) * (1 - smoothstep(12 * RAD, 35 * RAD, alt)) : 0;
+  const evening = rising ? 0 : smoothstep(-14 * RAD, -4 * RAD, alt) * (1 - smoothstep(10 * RAD, 25 * RAD, alt));
   const warmth = smoothstep(-6 * RAD, 0, alt) * (1 - smoothstep(2 * RAD, 14 * RAD, alt));
   // Whichever gives more light is the light, so twilight hands over without a jump.
   const sunI = 2.4 * smoothstep(-4 * RAD, 6 * RAD, alt);
@@ -322,5 +334,5 @@ export function skyState(at: Date, place: Place): SkyState {
     const n = Math.hypot(0.3, 1, 0.2);
     light = { dir: [0.3 / n, 1 / n, 0.2 / n], color: "#7f93b8", intensity: starI, shadow: 0 };
   }
-  return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, morning, starMatrix: equatorialToWorld(at, place), solarLon: solarLongitude(at), time: at.valueOf(), light };
+  return { daylight, warmth, sunDir, moonDir, moonFraction: fraction, moonPhase: phase, morning, evening, starMatrix: equatorialToWorld(at, place), solarLon: solarLongitude(at), time: at.valueOf(), light };
 }

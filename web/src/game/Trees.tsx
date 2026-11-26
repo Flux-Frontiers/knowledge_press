@@ -1,14 +1,17 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, InstancedBufferAttribute, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, RepeatWrapping, RGBADepthPacking, Shape, ShapeGeometry, SRGBColorSpace, TextureLoader, Vector2 } from "three";
+import { BufferAttribute, BufferGeometry, Color, DoubleSide, Group, InstancedBufferAttribute, InstancedMesh, MeshDepthMaterial, MeshStandardMaterial, Object3D, RepeatWrapping, RGBADepthPacking, Shape, ShapeGeometry, SRGBColorSpace, TextureLoader, Vector2, Vector4, type WebGLProgramParametersWithUniforms } from "three";
 import { COARSE_POINTER, textureAnisotropy } from "./Environment";
 import { useGame } from "./store";
 import type { Forest } from "./forest";
-import { bookMatchesQuery } from "./forest";
+import { bookMatchesQuery, treesNear } from "./forest";
 import { godLeafBlend, leafFraction, leafHash, leafOrder } from "./leafLod";
 import { SEASONS, type SeasonName } from "./seasons";
+import { treeExtent } from "./portrait";
+import { sim } from "./sim";
 import { leafOutline, SPECIES, type LeafShape, type Species } from "./species";
 import { bookShown, TIMELINE_OFF } from "./timeline";
+import { nightLamps } from "./Uplights";
 
 const dummy = new Object3D();
 const color = new Color();
@@ -19,12 +22,51 @@ const timelineYear = { value: TIMELINE_OFF };
 /** The year an undated book's vertices carry: before any timeline stop, so it always stands. */
 const UNDATED = -1e6;
 
-/** Collapses the vertices of trees whose year has not come (bark, and its shadow). */
-function gateByYear(material: MeshStandardMaterial | MeshDepthMaterial, key: string) {
+/**
+ * The tree lit at night as the rider comes near it (Trees' frame loop): its trunk's x and z,
+ * the crown's reach and the tree's height in `at`, and how far up its lamps are in `amount`.
+ * Like the redwood's uplights (Uplights.tsx) it is a glow in the shader, not a three.js light,
+ * which would be shaded on every fragment of the forest.
+ */
+const treeLight = {
+  at: { value: new Vector4(0, 0, 1, 1) },
+  amount: { value: 0 },
+  color: { value: new Color("#ffe2c0") },
+};
+/** The rider lights the nearest tree within this many metres of its trunk, fully within TREE_LIGHT_FULL. */
+const TREE_LIGHT_REACH = 32;
+const TREE_LIGHT_FULL = 16;
+/** The lit tree's glow at full: a fraction of its own colour added, so it reads in the dark without washing out. */
+const TREE_LIGHT_STRENGTH = 0.5;
+/** How fast the lamps fade, in full swings per second. */
+const TREE_LIGHT_RATE = 1.2;
+/** `?treelight=pool` lights a pool round the rider instead of the nearest tree, to compare. */
+const TREE_LIGHT_POOL = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("treelight") === "pool";
+
+/**
+ * Adds the tree light to a colour shader: a warm glow in the surface's own colour, across the
+ * lit tree's crown and fading from the ground up. `world` is the GLSL for the vertex's world position.
+ */
+function addTreeLight(shader: WebGLProgramParametersWithUniforms, world: string) {
+  shader.uniforms.treeLightAt = treeLight.at;
+  shader.uniforms.treeLightAmount = treeLight.amount;
+  shader.uniforms.treeLightColor = treeLight.color;
+  shader.vertexShader = "varying vec3 vTreeLightWorld;\n" + shader.vertexShader.replace(
+    "#include <project_vertex>", `vTreeLightWorld = ${world};\n#include <project_vertex>`);
+  shader.fragmentShader = "uniform vec4 treeLightAt; uniform float treeLightAmount; uniform vec3 treeLightColor; varying vec3 vTreeLightWorld;\n"
+    + shader.fragmentShader.replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>
+      float treeLightAcross = 1.0 - smoothstep(treeLightAt.z * 0.85, treeLightAt.z * 1.35, length(vTreeLightWorld.xz - treeLightAt.xy));
+      float treeLightUp = 0.3 + 0.7 * exp(-max(vTreeLightWorld.y, 0.0) / (treeLightAt.w * 0.9));
+      totalEmissiveRadiance += treeLightColor * treeLightAmount * ${TREE_LIGHT_STRENGTH.toFixed(3)} * treeLightAcross * treeLightUp * diffuseColor.rgb;`);
+}
+
+/** Collapses the vertices of trees whose year has not come (bark, and its shadow); the bark also takes the tree light. */
+function gateByYear(material: MeshStandardMaterial | MeshDepthMaterial, key: string, lit = false) {
   material.onBeforeCompile = (shader) => {
     shader.uniforms.timelineYear = timelineYear;
     shader.vertexShader = "attribute float bookYear; uniform float timelineYear;\n" + shader.vertexShader.replace(
       "#include <begin_vertex>", "#include <begin_vertex>\n          transformed *= step(bookYear, timelineYear);");
+    if (lit) addTreeLight(shader, "(modelMatrix * vec4(transformed, 1.0)).xyz");
   };
   material.customProgramCacheKey = () => key;
 }
@@ -46,7 +88,7 @@ function barkMaterial(species: Species) {
     vertexColors: true,
     metalness: 0,
   });
-  gateByYear(material, "forest-bark-year-v1");
+  gateByYear(material, "forest-bark-year-v2", true);
   return material;
 }
 
@@ -106,6 +148,8 @@ export function Trees({
           + "attribute float bookYear; uniform float timelineYear;\n" + shader.vertexShader;
         // God's eye draws fewer leaves, each enlarged about its stalk (leafLod.ts godLeafBlend).
         shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n          float shown = step(bookYear, timelineYear);\n          transformed *= leafScale * shown;");
+        // Leaves replace project_vertex below, so the tree light's world position is set here, from the instance.
+        if (material === leaf) addTreeLight(shader, "(modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz");
         // Three's project_vertex, with the wind added in world space after the
         // instance matrix: in leaf space a flap along the face normal would be
         // scaled down by the blade's thin z.
@@ -130,7 +174,7 @@ export function Trees({
           gl_Position = projectionMatrix * mvPosition;
         `);
       };
-      material.customProgramCacheKey = () => "forest-leaf-wind-v5";
+      material.customProgramCacheKey = () => (material === leaf ? "forest-leaf-wind-lit-v6" : "forest-leaf-wind-v5");
     }
     return { leaf, depth, leafScale };
   }), [forest, wind, windStrength]);
@@ -209,16 +253,57 @@ export function Trees({
       m.dispose();
     }
   }, [barkMats]);
-  useFrame(({ camera, scene }, delta) => {
+  // The lit tree and how far up its lamps are; a new tree waits for the old one's lamps to go out.
+  const lit = useRef({ tree: -1, amount: 0 });
+  useFrame(({ camera }, delta) => {
     const s = useGame.getState();
+    const night = nightLamps(s.sky.daylight);
+    const step = Math.min(delta, 0.1) * TREE_LIGHT_RATE;
+    if (TREE_LIGHT_POOL) {
+      treeLight.at.value.set(sim.x, sim.z, 12, 14);
+      treeLight.amount.value = night;
+    } else {
+      // A portrait lights its own tree; otherwise the nearest standing tree within reach of the rider.
+      let want = -1;
+      let near = 0;
+      if (s.portrait !== null) {
+        want = s.portrait.tree;
+        near = 1;
+      } else if (night > 0) {
+        let best = Infinity;
+        for (const t of treesNear(forest, sim.x, sim.z, TREE_LIGHT_REACH)) {
+          if (!bookShown(t.book, s.timelineYear)) continue;
+          const d = Math.hypot(t.x - sim.x, t.z - sim.z);
+          if (d < best) { best = d; want = forest.trees.indexOf(t); }
+        }
+        // Keep the lit tree unless another is clearly nearer, so riding between two does not flicker.
+        const cur = forest.trees[lit.current.tree];
+        if (cur && want !== lit.current.tree) {
+          const dc = Math.hypot(cur.x - sim.x, cur.z - sim.z);
+          if (dc < TREE_LIGHT_REACH && dc < best + 2) { want = lit.current.tree; best = dc; }
+        }
+        if (want >= 0) near = 1 - Math.min(1, Math.max(0, (best - TREE_LIGHT_FULL) / (TREE_LIGHT_REACH - TREE_LIGHT_FULL)));
+      }
+      const l = lit.current;
+      if (want !== l.tree && (l.amount <= 0.01 || s.portrait !== null)) {
+        l.tree = want;
+        if (want >= 0) {
+          const t = forest.trees[want]!;
+          const e = treeExtent(forest.chunks[t.chunk]!.bark.pos, t.woodStart, t.woodCount, t.x, t.z);
+          treeLight.at.value.set(t.x, t.z, Math.max(e.radius * 1.1, t.trunkRadius * 4), Math.max(e.maxY, 1));
+        }
+      }
+      const target = want === l.tree && want >= 0 ? night * near : 0;
+      l.amount = s.portrait !== null ? target : l.amount + Math.max(-step, Math.min(step, target - l.amount));
+      treeLight.amount.value = l.amount;
+    }
     windStrength.value = s.preferences.motion ? 1 : 0;
     // A portrait shows its tree whatever the timeline's year.
     timelineYear.value = s.portrait === null && s.timelineYear !== null ? s.timelineYear : TIMELINE_OFF;
     if (s.preferences.motion && !s.paused) wind.value += Math.min(delta, 0.1);
-    // Hide groves the fog has swallowed (exp2 fog is 99.9% opaque at 2.6 / density);
-    // hidden chunks also drop out of the shadow pass.
-    const density = scene.fog && "density" in scene.fog ? (scene.fog.density as number) : 0;
-    const cutoff = density > 0 ? 2.6 / density : Infinity;
+    // Every grove is drawn, however thick the fog. Hiding the ones the fog had swallowed
+    // made them pop in as it thinned or the cart came near, since a fogged grove still
+    // stands out against the sky; the leaf thinning by distance keeps the cost down.
     // God's eye sees every grove from far above: thinning by count alone would bare the
     // whole forest, so there it draws fewer, larger leaves instead, eased in from the
     // ground's thinning by height so a dive to the cart lands without a change (godLeafBlend).
@@ -230,7 +315,7 @@ export function Trees({
       if (!g) return;
       const subject = s.portrait ? forest.trees[s.portrait.tree]!.chunk : null;
       const dist = Math.hypot(c.x - camera.position.x, c.z - camera.position.z) - c.radius;
-      g.visible = subject !== null ? i === subject : dist < cutoff;
+      g.visible = subject === null || i === subject;
       const mesh = leafRefs.current[i];
       const full = kept.current[i] ?? c.leafCount;
       const above = camera.position.y - CROWN_HEIGHT;

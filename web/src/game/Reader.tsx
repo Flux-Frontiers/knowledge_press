@@ -1,4 +1,4 @@
-import { AArrowDown, AArrowUp, ChevronLeft, ChevronRight, Pause, Play, Square, X } from "lucide-react";
+import { AArrowDown, AArrowUp, Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Pause, Play, Square, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Book } from "./catalog";
 import { useGame } from "./store";
@@ -7,6 +7,7 @@ import { blockLines, type Block, type Run } from "./chapterBlocks";
 import { READING_SIZES, type ReadingSize } from "./preferences";
 import { canSpeak, type ReadingState } from "./speech";
 import { blocksOf, readBook, stopBook, toggleBook } from "./bookReading";
+import { excerpt, isMarked, toggleMark } from "./bookmarks";
 
 const SIZES = Object.keys(READING_SIZES) as ReadingSize[];
 
@@ -52,11 +53,93 @@ export function ReaderPanel({ book }: { book: Book }) {
   const shown = Math.min(index, list.length - 1);
   const blocks = useMemo(() => blocksOf(list, shown), [list, shown]);
 
+  /** Whether this opening of the book has been put back where it was left. */
+  const restored = useRef(false);
+  /** The place last written, as "chapter:block", so a scroll writes only when it moves on. */
+  const savedAt = useRef("");
+  const frame = useRef(0);
+  /** The block at the top of the page, which the bookmark button marks. */
+  const [top, setTop] = useState(0);
+  /** A block to open the next chapter at, when a bookmark turns to it. */
+  const jumpTo = useRef<number | null>(null);
+
   useEffect(() => {
     if (!current) return;
     lastChapter.set(book.slug, index);
+    const saved = useGame.getState().preferences.readingAt[book.slug];
+    if (!restored.current) {
+      restored.current = true;
+      if (saved && saved[0] === shown && saved[1] > 0) {
+        savedAt.current = `${saved[0]}:${saved[1]}`;
+        showBlock(saved[1]);
+        return;
+      }
+    }
+    if (jumpTo.current !== null) {
+      showBlock(jumpTo.current);
+      jumpTo.current = null;
+      return;
+    }
+    setTop(0);
     page.current?.scrollTo({ top: 0 });
   }, [book.slug, current, index]);
+
+  useEffect(() => () => cancelAnimationFrame(frame.current), []);
+
+  /** Put a block at the top of the page. */
+  function showBlock(block: number) {
+    setTop(block);
+    page.current?.querySelector(`[data-block="${block}"]`)?.scrollIntoView({ block: "start" });
+  }
+
+  // ---- Bookmarks (bookmarks.ts), in reading order, for chapters the book still has.
+  const allMarks = useGame((s) => s.preferences.bookmarks[book.slug]);
+  const marks = useMemo(() => (allMarks ?? []).filter(([c]) => c < list.length), [allMarks, list.length]);
+  const marked = isMarked(marks, shown, top);
+  const markLabels = useMemo(
+    () => marks.map(([c, b]) => `${list[c]?.title ?? ""} · ${excerpt(blocksOf(list, c)[b])}`),
+    [marks, list],
+  );
+  const toggleBookmark = () => {
+    const { preferences, setPreferences } = useGame.getState();
+    const next = toggleMark(preferences.bookmarks[book.slug] ?? [], shown, top);
+    const { [book.slug]: _, ...rest } = preferences.bookmarks;
+    setPreferences({ bookmarks: next.length ? { ...rest, [book.slug]: next } : rest });
+  };
+  const goToMark = (i: number) => {
+    const [chapter, block] = marks[i];
+    if (chapter === shown) showBlock(block);
+    else {
+      jumpTo.current = block;
+      turnTo(chapter);
+    }
+  };
+
+  /** Remember the block at the top of the page, so the book opens there next time. */
+  const onScroll = () => {
+    if (frame.current || !restored.current) return;
+    frame.current = requestAnimationFrame(() => {
+      frame.current = 0;
+      const pane = page.current;
+      const { bookReading, preferences, setPreferences } = useGame.getState();
+      if (!pane) return;
+      const top = pane.getBoundingClientRect().top;
+      let block = 0;
+      // A reading keeps its own place, the spoken block, which the page trails; it is not saved below.
+      for (const el of pane.querySelectorAll<HTMLElement>("[data-block]")) {
+        if (el.getBoundingClientRect().bottom > top + 1) {
+          block = Number(el.dataset.block);
+          break;
+        }
+      }
+      setTop(block);
+      if (bookReading?.slug === book.slug && bookReading.state === "playing") return;
+      const at = `${shown}:${block}`;
+      if (at === savedAt.current) return;
+      savedAt.current = at;
+      setPreferences({ readingAt: { ...preferences.readingAt, [book.slug]: [shown, block] } });
+    });
+  };
 
   const failure = chapters.state === "error" ? chapters.message : null;
 
@@ -156,6 +239,15 @@ export function ReaderPanel({ book }: { book: Book }) {
                   : <Play className="size-5" strokeWidth={1.75} />}
               </button>
             ) : null}
+            {current ? (
+              <button type="button" onClick={toggleBookmark} aria-pressed={marked}
+                className="grid size-11 place-items-center rounded-md text-primary"
+                aria-label={marked ? "Remove bookmark" : "Bookmark this page"}>
+                {marked
+                  ? <BookmarkCheck className="size-5" strokeWidth={1.75} />
+                  : <Bookmark className="size-5" strokeWidth={1.75} />}
+              </button>
+            ) : null}
             {mine ? (
               <button type="button" onClick={stopBook}
                 className="grid size-11 place-items-center rounded-md text-primary" aria-label="Stop reading">
@@ -187,7 +279,18 @@ export function ReaderPanel({ book }: { book: Book }) {
           </label>
         ) : null}
 
-        <div ref={page} className="min-h-0 flex-1 overflow-auto px-5 py-5 sm:px-10">
+        {marks.length ? (
+          <label className="flex items-center gap-3 border-b border-border px-4 py-2 text-sm text-muted sm:px-6">
+            Bookmarks
+            <select value="" onChange={(e) => { if (e.target.value) goToMark(Number(e.target.value)); }}
+              className="min-w-0 flex-1 truncate rounded-md border border-border bg-bg p-2 text-fg">
+              <option value="">Go to a bookmark ({marks.length})</option>
+              {markLabels.map((label, i) => <option key={i} value={i}>{label}</option>)}
+            </select>
+          </label>
+        ) : null}
+
+        <div ref={page} onScroll={onScroll} className="min-h-0 flex-1 overflow-auto px-5 py-5 sm:px-10">
           {failure ? (
             <div className="grid gap-3 text-sm leading-relaxed text-muted">
               <p className="text-fg">The book could not be fetched: {failure}.</p>

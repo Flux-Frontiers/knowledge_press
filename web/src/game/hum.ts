@@ -1,28 +1,18 @@
 /**
  * The visiting craft's sound, made with WebAudio, no files: a low detuned
  * drone with a slow tremolo, and a breath of filtered noise when the iris
- * opens. WebKit only lets audio start inside a user gesture, so the context is
- * created and resumed on the first press or key in the forest.
+ * opens. The context is audio.ts's, started by the first press or key.
  */
+
+import { audioContext } from "./audio";
 
 type Hum = { ctx: AudioContext; out: GainNode };
 let hum: Hum | null = null;
-let ctx: AudioContext | null = null;
-
-if (typeof window !== "undefined") {
-  const unlock = () => {
-    try {
-      ctx ??= new AudioContext();
-      void ctx.resume();
-    } catch { /* no WebAudio: the landing plays silent */ }
-  };
-  window.addEventListener("pointerdown", unlock, { capture: true });
-  window.addEventListener("keydown", unlock, { capture: true });
-}
 
 function start(): Hum | null {
   if (hum) return hum;
-  if (!ctx || ctx.state !== "running") return null;
+  const ctx = audioContext();
+  if (!ctx) return null;
   const out = ctx.createGain();
   out.gain.value = 0;
   const low = ctx.createBiquadFilter();

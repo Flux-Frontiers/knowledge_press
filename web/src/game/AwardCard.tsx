@@ -14,14 +14,22 @@ function awardLine(t: Track, tier: Tier): string {
   return `${t.steps[tier - 1]}: done.`;
 }
 
-function useTracks(forest: Forest): Track[] {
+/** Every track's level from the saved progress; the Wayfarer is first. */
+export function useTracks(forest: Forest): Track[] {
   const library = useGame((s) => s.library);
   const grovesVisited = useGame((s) => s.grovesVisited);
   const plaques = useGame((s) => s.plaques);
   const ring = useGame((s) => s.ring);
-  return useMemo(() => tracks({ library, grovesVisited, plaques, ring },
-    { books: forest.trees.length, groves: forest.groves.length, exhibits: forest.exhibits.length }),
-  [library, grovesVisited, plaques, ring, forest]);
+  const nightBooks = useGame((s) => s.nightBooks);
+  const moots = useGame((s) => s.moots);
+  const speciesAll = useMemo(() => new Set(forest.trees.map((t) => t.species)).size, [forest]);
+  const speciesPressed = useMemo(() => {
+    const pressed = new Set(library);
+    return new Set(forest.trees.filter((t) => pressed.has(t.book.slug)).map((t) => t.species)).size;
+  }, [library, forest]);
+  return useMemo(() => tracks({ library, grovesVisited, plaques, ring, nightBooks, moots, speciesPressed },
+    { books: forest.trees.length, groves: forest.groves.length, exhibits: forest.exhibits.length, species: speciesAll }),
+  [library, grovesVisited, plaques, ring, nightBooks, moots, speciesPressed, speciesAll, forest]);
 }
 
 /** Watches progress and raises the award card when a level is reached; not for levels already held on arrival. */

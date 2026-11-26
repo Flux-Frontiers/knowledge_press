@@ -104,6 +104,10 @@ export function PauseOverlay() {
           <span>Random weather<span className="block text-xs text-muted">Morning fog that burns off, and cloud{prefs.weather ? ` · now ${weatherName(weather).toLowerCase()}` : ""}</span></span>
           <input type="checkbox" checked={prefs.weather} onChange={(e) => setPreferences({ weather: e.target.checked })} />
         </label>
+        <label className="grid gap-2">
+          <span>Forest sounds · {prefs.sounds > 0 ? `${Math.round(prefs.sounds * 100)}%` : "off"}<span className="block text-xs text-muted">Crickets and frogs at night, birdsong by day, wind; off in silent mode</span></span>
+          <input type="range" min="0" max="1" step="0.05" value={prefs.sounds} onChange={(e) => setPreferences({ sounds: Number(e.target.value) })} />
+        </label>
       </div>
       {/* In the app the worker is set in the app's own Settings; with none, there is nothing to set here. */}
       {host.available && !hostWorker.trim() ? null : (<>
@@ -133,11 +137,11 @@ export function PauseOverlay() {
         <a href={USER_GUIDE_URL} target="_blank" rel="noopener" className="text-primary underline">Read the user guide</a>
       </p>
       <button type="button" className="mt-3 min-h-11 w-full rounded-md border border-border text-muted"
-        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome and the worker address? Your press, groves, quests, achievements and place in each book are kept.")) resetSettings(); }}>
+        onClick={() => { if (window.confirm("Reset every setting on this device, including the tour welcome and the worker address? Your press, groves, quests, achievements, place in each book and bookmarks are kept.")) resetSettings(); }}>
         Reset settings
       </button>
       <button type="button" className="mt-3 min-h-11 w-full rounded-md border border-border text-red-400"
-        onClick={() => { if (window.confirm("Start over? This erases everything earned on this device: your press, visited groves, quests, achievements, the Wheel's studs, your place in each book and your saved moots. Settings are kept. This cannot be undone.")) startOver(); }}>
+        onClick={() => { if (window.confirm("Start over? This erases everything earned on this device: your press, visited groves, quests, achievements, the Wheel's studs, your place and bookmarks in each book, and your saved moots. Settings are kept. This cannot be undone.")) startOver(); }}>
         Start over
       </button>
       <button type="button" className="mt-5 min-h-11 w-full rounded-md bg-primary text-primary-fg" onClick={resume}>Back to the forest</button>

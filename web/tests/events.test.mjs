@@ -27,7 +27,8 @@ test("the landing field keeps its own glade and leaves the other exhibits where 
   assert.ok(e, "landing field placed");
   const { PAD_R } = require(`${build}/visitorScript.js`);
   assert.equal(e.obstacle, PAD_R, "the pad drawn is the pad the cart stops at");
-  // Positions with the field left out (develop at #140); placement is greedy, and the field is last.
+  // Positions with the field left out (develop at #140); placement is greedy, and the field comes
+  // after these. The Spirit of Gutenberg, added after the field, leaves the field where it was.
   const before = {
     mysterium: [24.889, 36.257], flame: [-73.581, -107.828], helix: [-77.038, 64.138], darrieus: [74.616, -66.639],
     savonius: [98.42, 19.023], dna: [-16.842, 128.644], mast: [-96.292, -29.267], sundial: [23.135, -96.919],
@@ -36,6 +37,8 @@ test("the landing field keeps its own glade and leaves the other exhibits where 
     const x2 = f.exhibits.find((v) => v.id === id);
     assert.ok(Math.abs(x2.x - x) < 1e-3 && Math.abs(x2.z - z) < 1e-3, `${id} moved`);
   }
+  assert.ok(Math.abs(e.x - -38.294) < 1e-3 && Math.abs(e.z - 7.784) < 1e-3, "landing moved");
+  assert.ok(f.exhibits.some((v) => v.id === "gutenberg"), "gutenberg placed");
 });
 
 test("visitor: the craft comes in above every crown and the redwood, and drops only where no leaf reaches", () => {

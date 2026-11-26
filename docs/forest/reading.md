@@ -47,7 +47,20 @@ tree within reach.
 - The two **A** buttons beside the close button make the text smaller or
   larger, in four steps. The size is saved for later visits.
 - ++esc++, the close button, or a tap outside the page closes the reader. It
-  remembers the chapter you were at for the rest of the visit.
+  remembers the chapter and the paragraph you scrolled to, so the book opens
+  there next time, on this visit or a later one.
+
+### Bookmarks
+
+The bookmark button at the top of the reader marks the paragraph at the top
+of the page. Press it again on a marked page to take the bookmark away.
+
+Once a book has a bookmark, a **Bookmarks** menu appears under the chapter
+menu. Each entry names its chapter and the paragraph's first words; pick one
+to go there.
+
+Bookmarks and your place in each book are saved in this browser. **Reset
+settings** keeps them; **Start over** erases them.
 
 ## Listen to the book
 
@@ -113,7 +126,7 @@ browser; see [Where your progress lives](getting-started.md#where-your-progress-
 
 ## Quests
 
-Five hints appear as you drive, each a small thing to do in the forest:
+Thirteen hints appear as you drive, one at a time, each a small thing to do in the forest:
 
 | Quest | Done when |
 | --- | --- |
@@ -122,6 +135,14 @@ Five hints appear as you drive, each a small thing to do in the forest:
 | The Dane | Your press holds *Hamlet*. |
 | Bare wood | You have switched the season to winter. |
 | Across the press | You have visited four genre groves. |
+| A full cart | Your press holds ten books. |
+| Three tragedies | Your press holds *Hamlet*, *Macbeth*, and *Romeo and Juliet*. |
+| Lovecraft country | Your press holds three of Lovecraft's tales. |
+| Barsoom | Your press holds *A Princess of Mars*, *The Gods of Mars* and *The Warlord of Mars*. |
+| Extraordinary voyages | Your press holds three of Jules Verne's novels. |
+| A Russian winter | You have switched to winter with a Russian novel in your press. |
+| Founding papers | Your press holds *The Federalist Papers*, *Common Sense* and the *Second Treatise of Government*. |
+| Every grove | You have visited every genre grove. |
 
 Each quest done sets off fireworks over the forest, with a note naming it.
 A quest stays done once done: switching back from winter keeps Bare wood, and
@@ -131,7 +152,7 @@ amusement; nothing is locked behind them.
 
 ## Achievements
 
-Four tracks each have a bronze, silver and gold level. The **Press** tab under
+Seven tracks each have a bronze, silver and gold level. The **Press** tab under
 **Browse** lists them, with what the next level asks and how far along you
 are. A card shows when you reach a level; with **Read each grove aloud on the
 ring** on, it is said aloud too.
@@ -142,9 +163,19 @@ ring** on, it is said aloud too.
 | Explorer | Visit 4 groves | Visit 10 groves | Visit every grove |
 | Reader | Press 3 books | Press 25 books | Press every book |
 | Curator | Read 3 exhibit plaques | Read 6 plaques | Read every exhibit's plaque |
+| Night Owl | Press or read a book at night | 5 books at night | 15 books at night |
+| Botanist | Press books from 3 kinds of tree | From 6 kinds | From every kind of tree in the forest |
+| Moot-goer | Watch a moot | Watch 2 moots | Watch 5 moots |
 
 A ride counts for Wayfarer once the tour has stopped at every grove and
 brought the cart home, even across rides broken off and reloads.
+
+Night Owl counts each book once, pressed or opened in the reader while it is
+night in the forest, whether the live clock says so or you set the time to
+Night. Botanist counts the kinds of tree among the books in your press; each
+genre grows one kind. Moot-goer counts each saved moot once and every live
+moot you hold; the forest ships with two saved moots, so gold needs live
+moots from a worker or moots of your own.
 
 ### The Wayfarer's Wheel
 

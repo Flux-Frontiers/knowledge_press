@@ -31,9 +31,11 @@ export function HUD({ forest }: { forest: Forest }) {
   const season = useGame((s) => s.season);
   const timeMode = useGame((s) => s.timeMode);
   // The sky ticks every few seconds; subscribing re-renders the clock with it.
-  useGame((s) => s.sky);
+  const skyTime = useGame((s) => s.sky.time);
+  const running = useGame((s) => s.timeFrom !== null);
   const clock = (d: Date) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-  const timeLabel = timeMode === "live" ? clock(new Date()) : TIME_NAME[timeMode];
+  // A preset runs on from its moment, so it shows the forest's clock, not the device's.
+  const timeLabel = timeMode === "live" ? clock(new Date()) : running ? clock(new Date(skyTime)) : TIME_NAME[timeMode];
   const toggleTimeOfDay = useGame((s) => s.toggleTimeOfDay);
   const setSeason = useGame((s) => s.setSeason);
   const query = useGame((s) => s.query);
@@ -167,7 +169,8 @@ export function HUD({ forest }: { forest: Forest }) {
               {" · "}
               {timeLabel}
               {travelMode === "circuit" ? " · ring" : ""}
-              {progress.done ? ` · ${progress.done}/${progress.total}` : ""}
+              {progress.done === progress.total ? " · quests complete"
+                : progress.done ? ` · ${progress.done}/${progress.total} quests` : ""}
             </p>
             {stats ? (
               <p className="mt-1 font-mono text-[11px] text-faint tabular-nums">
@@ -249,7 +252,7 @@ export function HUD({ forest }: { forest: Forest }) {
                       setMenuOpen(false);
                       useGame.getState().setTimeline(timelineYear === null ? timelineStops(forest.trees.map((t) => t.book))[0]?.year ?? null : null, timelineYear === null);
                     }} />
-                  <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : TIME_NAME[timeMode].toLowerCase()}`} onClick={toggleTimeOfDay} />
+                  <MenuItem icon={<TimeIcon mode={timeMode} />} label={`Time of day · ${timeMode === "live" ? "live" : `from ${TIME_NAME[timeMode].toLowerCase()}`}`} onClick={toggleTimeOfDay} />
                   <MenuItem icon={<Leaf className="size-4" strokeWidth={1.75} />} label={`Season · ${SEASONS[season].label.toLowerCase()}`}
                     onClick={() => setSeason(SEASON_ORDER[(SEASON_ORDER.indexOf(season) + 1) % SEASON_ORDER.length]!)} />
                   <MenuItem phoneOnly icon={<Video className="size-4" strokeWidth={1.75} />} label={`Camera · ${CAMERA_NAME[camera]}`} onClick={stepCamera} />

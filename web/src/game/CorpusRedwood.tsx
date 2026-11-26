@@ -23,6 +23,9 @@ const FOLIAGE: Record<SeasonName, string> = {
 // the trunk and REDWOOD_BARK.aspect times that up it, so repeat it to show its true size.
 const METASEQUOIA_M = 1.94;
 
+/** The floodlight's 1/e reach as a fraction of the redwood's height: the top keeps about half the base's glow. */
+const REDWOOD_REACH = 1.4;
+
 function redwoodBark() {
   const loader = new TextureLoader();
   const load = (map: string, srgb = false) => {
@@ -105,12 +108,13 @@ export function CorpusRedwood({ forest, season }: { forest: Forest; season: Seas
     return g;
   }, [c]);
   const barkMat = useMemo(redwoodBark, []);
-  // Floodlit from lamps round the root flare at night (Uplights.tsx), fading up the trunk.
-  useUplitMaterials(useMemo(() => [barkMat], [barkMat]), "#ffe2c0", 1.0, 8);
   // A unit card in the ground plane: x along the spray, z across it.
   const spray = useMemo(() => new PlaneGeometry(1, 1).rotateX(-Math.PI / 2), []);
   const sprayMap = useMemo(sprayTexture, []);
   const sprayMat = useMemo(() => new MeshStandardMaterial({ map: sprayMap, alphaTest: 0.5, side: DoubleSide, roughness: 0.85 }), [sprayMap]);
+  // Floodlit at night like a monument (Uplights.tsx): trunk and crown, brightest at the root
+  // flare and still lit at the top, the reach following the tree's height through the timeline.
+  useUplitMaterials(useMemo(() => [barkMat, sprayMat], [barkMat, sprayMat]), "#fff0dc", 0.8, c.height * REDWOOD_REACH, 0.5);
   const sprayDepth = useMemo(() => new MeshDepthMaterial({ depthPacking: RGBADepthPacking, map: sprayMap, alphaTest: 0.5, side: DoubleSide }), [sprayMap]);
   useEffect(() => () => bark.dispose(), [bark]);
   useEffect(() => () => {

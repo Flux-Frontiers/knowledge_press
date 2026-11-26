@@ -20,6 +20,7 @@ import { clearResume, readResume, saveResume } from "./resume";
 import { OWNED_SHOT } from "./cinema";
 import { hush, unlockSpeechOnGesture } from "./speech";
 import { stopBook } from "./bookReading";
+import { solarHour, stepAmbience } from "./ambience";
 import { readerTarget, useGame } from "./store";
 import { UpdateBanner } from "./UpdateBanner";
 
@@ -41,6 +42,21 @@ export function ForestApp() {
   // The sky follows the clock: sun and moon move a few hundredths of a degree between ticks.
   useEffect(() => {
     const id = window.setInterval(() => useGame.getState().tickSky(), 5000);
+    return () => window.clearInterval(id);
+  }, []);
+  // The forest's sounds follow the sky and season; quieter under a voice, off while hidden,
+  // before Enter, and in silent mode, as the visitor's hum is.
+  useEffect(() => {
+    let last = performance.now();
+    const id = window.setInterval(() => {
+      const now = performance.now();
+      const s = useGame.getState();
+      const on = s.playing && !s.preferences.silent && document.visibilityState === "visible";
+      const duck = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
+      stepAmbience(on ? s.preferences.sounds : 0, s.sky.daylight, s.sky.morning, s.season, duck, (now - last) / 1000, s.preferences.motion,
+        solarHour(s.sky.time, s.place?.lon ?? null), s.sky.evening);
+      last = now;
+    }, 1000);
     return () => window.clearInterval(id);
   }, []);
   useEffect(() => {
@@ -176,7 +192,7 @@ export function ForestApp() {
     st.setPreferences({ camera: "follow", fog: "light", weather: false, motion: false });
     st.setSeason("summer");
     const time = new URLSearchParams(window.location.search).get("time");
-    st.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" ? time : "day");
+    st.setTimeMode(time === "dawn" || time === "dusk" || time === "twilight" || time === "night" ? time : "day", true);
     resetSim(forest);
     aim(first);
     play();
@@ -251,7 +267,11 @@ export function ForestApp() {
       if (st.paused || st.readingSlug || st.mootsOpen || st.mootId || isInputTarget(e.target)) return;
       if (e.code === "KeyL") st.toggleLibrary();
       if (e.code === "KeyG") st.toggleAtlas();
-      if (e.code === "KeyB") st.toggleCatalog();
+      if (e.code === "KeyB") {
+        // Browse focuses its search field, which would otherwise take the "b" itself.
+        e.preventDefault();
+        st.toggleCatalog();
+      }
       if (e.code === "KeyQ") st.toggleCircuit();
       if (e.code === "KeyC") st.setPreferences({ camera: nextCamera(st.preferences.camera) });
       // Not with a modifier: Cmd+R and Ctrl+R reload the page.
