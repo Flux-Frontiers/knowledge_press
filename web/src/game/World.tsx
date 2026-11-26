@@ -19,6 +19,7 @@ import { FlameOfKnowledge } from "./FlameOfKnowledge";
 import { GroveMarks } from "./GroveMarks";
 import { Mysterium } from "./Mysterium";
 import { Signposts } from "./Signposts";
+import { SpiritOfGutenberg } from "./SpiritOfGutenberg";
 import { LandingField } from "./LandingField";
 import { Sundial } from "./Sundial";
 import { SEASONS, type SeasonName } from "./seasons";
@@ -42,6 +43,7 @@ const EXHIBIT_VIEWS: Record<string, ComponentType<{ exhibit: Exhibit; forest: Fo
   dna: DnaSculpture,
   mast: WeatherMast,
   sundial: Sundial,
+  gutenberg: SpiritOfGutenberg,
   landing: LandingField,
 };
 const TRAIL_N = 20;
